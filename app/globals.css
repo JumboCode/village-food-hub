@@ -32,6 +32,24 @@ Button {
   border-radius: 10px;
   height: 50px; 
   width: 250px;
-  font-style: oblique;
+  /* font-style: oblique; */
   font-size: 20px;
+  position: absolute;
+  top: 35%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  animation: colors 5s infinite;
+}
+
+p {
+  text-align: center;
+}
+
+@keyframes colors {
+  0%, 100% {
+      background-color: #83C5BE;
+  }
+  50% {
+      background-color: #c7f9cc;
+  }
 }
