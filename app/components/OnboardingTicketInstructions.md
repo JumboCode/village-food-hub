@@ -4,7 +4,7 @@ Once downloaded you can preview this MarkDown file using the new button that sho
 
 # **Your First Ticket: A Full Stack Button**
 
-Hello developers\! Your PM and TL have tasked you with an important mission: to create a button that retrieves the current weather. This tutorial ticket will reinforce concepts that you learned in the Jumbo Code Workshop B on React, and introduce you to the concept of APIs. You can refer back to the workshop reference sheets [here](https://jumbocode.ben.page/reference), or read through the official React quick-start [tutorial](https://react.dev/learn), if you need help.
+Hello developers\! Your PM and TL have tasked you with an important mission: to create a button that retrieves the current weather. This tutorial ticket will reinforce concepts that you learned in the Jumbo Code Workshop B on React, and introduce you to the concept of APIs. You can refer back to the workshop reference sheets [here](https://jumbocode.ben.page/reference), or read through the official React quick-start [tutorial](n), if you need help.
 
 ## 🎯 **Your Ticket**
 
