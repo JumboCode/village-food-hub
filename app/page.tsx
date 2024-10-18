@@ -1,9 +1,11 @@
-import Image from "next/image";
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex justify-center items-center h-screen">
-      <h1 className="text-4xl">Village Food Hub!</h1>
+    <div className="flex flex-col justify-center items-center h-screen">
+      <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded">
+        Login
+      </Link>
     </div>
   );
 }
