@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// For Ticket #8: Edit the schema below!
 model playing_with_neon {
   id    Int    @id @default(autoincrement())
   name  String
