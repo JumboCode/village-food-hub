@@ -25,8 +25,14 @@ Takeaways:
 
 *Do
   - make git commits locally often! saving your work consistently with git will tremendously help if there are any issues/conflicts with code down the road. 
+  - For creating a NEW branch,
+    ```git
+    git checkout dev
+    git pull
+    git checkout -b [your_branch_name]
   - If you have just begun a coding session after a few days, run the following git commands:
-      ```git
+    ```git
+    git checkout dev
     git pull  
     git checkout [curr_branch]
     git merge dev
