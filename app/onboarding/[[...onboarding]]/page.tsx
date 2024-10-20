@@ -11,7 +11,6 @@ export default function OnboardingLandingPage() {
         Zoya & Ella
       </Link>
       <Link href="/onboarding/AmandaAlexPage" className="text-blue-500 hover:underline">
-        {/* note: zoya & ella's styling trickled down to this one */}
         Amanda & Alex 
       </Link>
       <Link href="/onboarding/VanessaTanishaPage" className="text-blue-500 hover:underline">
