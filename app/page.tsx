@@ -7,10 +7,6 @@ export default function Home() {
       <div>
         <h1 className="text-4xl">Village Food Hub!</h1>
       </div>
-
-      
     </div>
-
-    
   );
 }
