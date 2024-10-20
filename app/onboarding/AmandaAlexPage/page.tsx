@@ -3,7 +3,7 @@ import AmandaAlexButton from '../../components/onboarding-buttons/AmandaAlexButt
 export default function Home() {
   return (
     <div className="flex justify-center items-center h-screen">
-      <AmandaAlexButton label="BUTTON!"/>
+      <AmandaAlexButton label="Check Weather"/>
     </div>
   );
 }
