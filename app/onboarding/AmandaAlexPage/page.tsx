@@ -1,9 +1,9 @@
-import Button from '../../components/onboarding-buttons/ZoyaEllaButton';
+import AmandaAlexButton from '../../components/onboarding-buttons/AmandaAlexButton';
 
 export default function Home() {
   return (
     <div className="flex justify-center items-center h-screen">
-      <Button label={"Check Weather"}/>
+      <AmandaAlexButton label="BUTTON!"/>
     </div>
   );
 }

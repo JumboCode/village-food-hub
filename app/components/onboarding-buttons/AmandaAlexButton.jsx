@@ -3,7 +3,7 @@
 import { useState } from "react"; // just now
 
 
-export default function Button({ label }) {
+export default function AmandaAlexButton({ label }) {
   const [weatherData, setWeatherData] = useState([]);
   const [temperatureData, setTemperatureData] = useState([]);
   const [degrees, setDegrees] = useState("");

@@ -7,8 +7,11 @@ export default function OnboardingLandingPage() {
       <Link href="/onboarding/EmilyDanielPage" className="text-blue-500 hover:underline">
         Emily & Daniel
       </Link>
-      <Link href="/onboarding/ZoyaEllaButton" className="text-blue-500 hover:underline">
+      <Link href="/onboarding/ZoyaEllaPage" className="text-blue-500 hover:underline">
         Zoya & Ella
+      </Link>
+      <Link href="/onboarding/AmandaAlexPage" className="text-blue-500 hover:underline">
+        Amanda & Alex
       </Link>
     </div>
   );

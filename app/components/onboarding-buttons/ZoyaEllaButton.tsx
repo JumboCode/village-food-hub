@@ -1,7 +1,7 @@
 "use client" 
 import { useState } from "react";
 
-export default function Button({ label }) {
+export default function ZoyaEllaButton({ label }) {
   const [weather, setWeather] = useState("");
   const [temp, setTemp] = useState(""); 
 
