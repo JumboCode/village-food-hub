@@ -1,4 +1,4 @@
-import Button from '../src/components/Button';
+import Button from '../../components/onboarding-buttons/VanessaTanishaButton';
 
 export default function Home() {
   return (
