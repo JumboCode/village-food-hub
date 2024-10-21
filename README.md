@@ -15,7 +15,6 @@ Testing:
 
 Takeaways:
 
-
 ## Git Do's and Don'ts
 *DON'T 
   - UNDER NO CIRCUMSTANCES mess with the branch named "main" => your default should be the dev branch
