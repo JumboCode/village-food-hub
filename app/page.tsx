@@ -10,8 +10,10 @@ import TheButton from "./components/TheButton";
 export default function Home() {
 
   return (
-    <>
-    <TheButton label="Click for weather"/>
-    </>
-  )
+    <div className="flex justify-center items-center h-screen">
+      <div>
+        <h1 className="text-4xl">Village Food Hub!</h1>
+      </div>
+    </div>
+  );
 }

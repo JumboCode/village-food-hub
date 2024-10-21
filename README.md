@@ -1,20 +1,19 @@
 # Welcome to Village Food Hub!
 
-*Title: Sofia and Charlie's Weather Button
+## PR Description Template
+*Title: Brief description
 
-Names: Sofia and Charlie
+Names:
 
-Date: 10/20/24
+Date:
 
-How long did this ticket take you? 2 hours
+How long did this ticket take you?
 
-Description: A button that displays the weather when clicked.
+Description:
 
 Testing:
 
 Takeaways:
-
-
 
 ## Git Do's and Don'ts
 *DON'T 
