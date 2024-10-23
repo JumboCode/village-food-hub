@@ -9,13 +9,11 @@ export default function Button({ label }) {
     console.log("Sending you the Weather Report");
     fetch('https://api.weather.gov/gridpoints/BOX/69,92/forecast')
         .then(response => response.json())
-        // .then (data => console.log(data.properties.periods[0].shortForecast, data.properties.periods[0].temperature)); 
-        .then (data => setWeather("Forecast: " + data.properties.periods[0].shortForecast ));
+        .then (data => setWeather("Forecast: " + data.properties.periods[0].shortForecast));
 
     fetch('https://api.weather.gov/gridpoints/BOX/69,92/forecast')
-      .then(response => response.json())
-      // .then (data => console.log(data.properties.periods[0].shortForecast, data.properties.periods[0].temperature)); 
-      .then (data => setTemp("Temperature: " + data.properties.periods[0].temperature + " degrees Farenheit"));
+        .then(response => response.json())
+        .then (data => setTemp("Temperature: " + data.properties.periods[0].temperature + " degrees Farenheit"));
 
     // Button.style.display = none;
     
