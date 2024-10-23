@@ -13,3 +13,5 @@ model playing_with_neon {
   name  String
   value Float? @db.Real
 }
+
+// For Ticket #9: Add a new model below!
