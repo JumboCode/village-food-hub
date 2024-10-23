@@ -1,7 +1,7 @@
 # Welcome to Village Food Hub!
 
 ## PR Description Template (Please don't edit this! Copy-paste the template into the PR Description)
-*Title: Brief description
+Title: Brief description
 
 Names:
 
@@ -11,7 +11,7 @@ How long did this ticket take you?
 
 Description:
 
-Testing:
+Testing (before and after screenshots):
 
 Takeaways:
 
