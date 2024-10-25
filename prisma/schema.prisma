@@ -15,3 +15,10 @@ model playing_with_neon {
 }
 
 // For Ticket #9: Add a new model below!
+model inventory {
+    itemName String @id
+    categoryName String
+    quantity Int
+    units String
+    lastUpdated DateTime
+}
