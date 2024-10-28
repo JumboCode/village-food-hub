@@ -79,6 +79,21 @@ Takeaways:
     ``` 
       - For example, say I am a frontend developer working on ticket #45 whose title is "creating profile page", my branch will be named `frontend/45-creating-profile-page`
 
+
+# Using Flowbite?
+To convert HTML to TypeScript (specifically JSX/TSX for React), you need to follow these steps:
+
+1. Change `class` to `className`:
+   1. In JSX/TSX, the `class` attribute is replaced with `className`.
+2. Use `htmlFor` Instead of `for`:
+   1. In JSX/TSX, the `for` attribute in `<label>` tags is replaced with `htmlFor`.
+3. Self-Closing Tags:
+   1. Ensure that self-closing tags like `<input />` are properly formatted.
+4. Ensure Proper Syntax:
+   1. Make sure the JSX/TSX syntax is correct, including proper nesting and closing of tags.
+
+
+
 ## Web App Info
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
