@@ -3,17 +3,17 @@
 ## PR Description Template (Please don't edit this! Copy-paste the template into the PR Description)
 Title: Brief description
 
-Names:
+Names: Ella, Charlie
 
 Date:
 
-How long did this ticket take you?
+How long did this ticket take you? ~ 2 hours
 
-Description:
+Description: Added schema and CRUD functions for inventory.
 
 Testing (before and after screenshots):
 
-Takeaways:
+Takeaways: Learned how to use prisma CRUD functions.
 
 
 ## Git Do's and Don'ts

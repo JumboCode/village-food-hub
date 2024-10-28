@@ -1,9 +1,8 @@
 // route file for inventory
 
 // set prisma client ??
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
-
+const { PrismaClient } = require ('@prisma/client');
+const prisma = new PrismaClient();
 
 async function Create(data : {
   itemName     : string,
@@ -59,3 +58,5 @@ async function Delete(deleteItem : string) {
     },
   })
 }
+
+module.exports = { Create, Read, Update, Delete };
