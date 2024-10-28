@@ -24,23 +24,30 @@ Takeaways:
   - don't be afraid if you have made a git mistake!! ultimately, the whole purpose of git is to save our work consistently to prevent disasters, so more likely than not, any git mistakes can be fixed! reach out to Jiyoon if this does happen and she will help!
 
 *Do
+  - Git cheat sheet: https://education.github.com/git-cheat-sheet-education.pdf
   - make git commits locally often! saving your work consistently with git will tremendously help if there are any issues/conflicts with code down the road. 
   - For creating a NEW branch,
     ```git
     git checkout dev
     git pull
     git checkout -b [your_branch_name]
+    npm install
   - If you have just begun a coding session after a few days, run the following git commands:
     ```git
     git checkout dev
     git pull  
     git checkout [curr_branch]
     git merge dev
+    npm install
     ```
   - If you see on github that the current branch you're on is behind the dev branch:
+    (if you have unsaved changes, first commit your changes or stash them)
     ```git
+    git checkout dev
+    git pull
     git checkout [curr_branch]
     git merge dev
+    npm install
     ```
     This will merge everything from the dev branch onto your current branch. 
   - If you have just finished editing a few files, and would only like to set a SINGLE file to the stage:

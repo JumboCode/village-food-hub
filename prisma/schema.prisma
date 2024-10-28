@@ -16,3 +16,5 @@ model demographics {
   address       String
   lastVisitDate DateTime
 }
+
+// For Ticket #9: Add a new model below!
