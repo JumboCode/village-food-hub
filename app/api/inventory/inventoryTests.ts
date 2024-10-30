@@ -9,7 +9,13 @@ async function main() {
   }
 
   //test 2: create "carrots" entry and make sure all fields are correct
-  response = await CRUD.Create({ itemName: "carrots", categoryName: "fruit", quantity: 3, units: "pounds", lastUpdated: new Date(2024, 10, 27)});
+  response = await CRUD.Create({ 
+                     itemName: "carrots", 
+                     categoryName: "fruit", 
+                     quantity: 3, 
+                     units: "pounds", 
+                     lastUpdated: new Date(2024, 10, 27)})
+                     
   console.log(response);
   if (response.itemName !== "carrots") {
     throw new Error("itemName not carrots");
@@ -34,7 +40,13 @@ async function main() {
   }
 
   //test 3: update "carrots" entry and make sure all fields are correct
-  response = await CRUD.Update({ itemName: "carrots", categoryName: "vegetable", quantity: 3, units: "pounds", lastUpdated: new Date(2024, 10, 27)})
+  response = await CRUD.Update({
+                     itemName: "carrots", 
+                     categoryName: "vegetable", 
+                     quantity: 3, 
+                     units: "pounds", 
+                     lastUpdated: new Date(2024, 10, 27)})
+
   if (response.itemName !== "carrots") {
     throw new Error("itemName not carrots");
   }
@@ -58,7 +70,13 @@ async function main() {
   }
 
   //test 4: create "apples" entry and make sure all fields are correct
-  response = await CRUD.Create({ itemName: "apples", categoryName: "fruit", quantity: 3, units: "pounds", lastUpdated: new Date(2024, 10, 29)})
+  response = await CRUD.Create({ 
+                     itemName: "apples", 
+                     categoryName: "fruit", 
+                     quantity: 3, 
+                     units: "pounds", 
+                     lastUpdated: new Date(2024, 10, 29)})
+
   if (response.itemName !== "apples") {
     throw new Error("itemName not apples");
   }
@@ -97,11 +115,10 @@ async function main() {
 main()
   .catch(e => {
     console.error(e);
-    //process.exit(1);
   })
   .finally(async () => {
     await CRUD.Delete("carrots");
     await CRUD.Delete("apples");
   });
 
-// run the script by doing: ts-node testConnection.ts
+// run the script by doing: ts-node app/api/inventory/inventoryTests.ts from root directory
