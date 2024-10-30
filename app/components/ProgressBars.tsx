@@ -1,13 +1,27 @@
-// This is where you will implement the progress bars (there are 5 total)
 
-// Write your code here
-"use client"
 
-import React from 'react';
+const ProgressBar = ({ progress }) => {
+  const container = {
+    height: '20px',
+    width: '100%',
+    backgroundColor: '#e0e0df',
+    borderRadius: '10px',
+    overflow: 'hidden',
+  };
 
-const ProgressBar = ({ value, max }) => {
-    return (
-        <progress value={value} max={max} style={{ width: '100%' }} />
-    );
+  const fill = {
+    height: '100%',
+    width: `${progress}%`,
+    backgroundColor:'#90a955' ,
+  };
+
+  return (
+    <div style={container}>
+      <div style={fill}>
+      </div>
+    </div>
+  );
 };
+
+
 export default ProgressBar;
