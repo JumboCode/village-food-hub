@@ -1,20 +1,77 @@
 // your route file for demographics
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } require ('@prisma/client');
 const prisma = new PrismaClient();
 
-//ussing this ffor typescript to describe structure of 'data' object
-type DemographicData = {
-    phoneNumber: string;
-    takeCount: number;
-    donateCount: number;
-    name: string;
-    householdSize: number;
-    address: string;
-    lastVisitDate: Date;
+//CREATE
+async function createDemographic(data : {
+    phoneNumber : string,
+    takeCount: number,
+    donateCount: number,
+    name: string,
+    householdSize: number,
+    address: string,
+    lastVisitDate: Date
+}) {
+    return await prisma.demographics.create(
+        {   data: 
+            {
+                phoneNumber : data.phoneNumber,
+                takeCount: data.takeCount,
+                donateCount: data.donateCount,
+                name: data.name,
+                householdSize: data.householdSize,
+                address: data.address,
+                lastVisitDate: data.lastVisitDate            
+            }
+        }
+    )
+}
+//READ
+async function getDemographic() {
+    const demographics = await prisma.demographics.findMany();
+    return demographics;
 }
 
+//UPDATE
+async function updateDemographic(data : {
+    phoneNumber: string,
+    takeCount: number,
+    donateCount: number,
+    name: string,
+    householdSize: number,
+    address: string,
+    lastVisitDate: Date
+}) {
+    return await prisma.demographics.update({
+        where: {
+            phoneNumber: data.phoneNumber,
+        }, data:
+            {
+                takeCount: data.takeCount,
+                donateCount: data.donateCount,
+                name: data.name,
+                householdSize: data.householdSize,
+                address: data.address,
+                lastVisitDate: data.lastVisitDate     
+            },
+    })
+}
+
+//DELETE
+async function deleteDemographic(phoneNumber: string) {
+return await prisma.demographics.delete({
+    where: {
+        phoneNumber: phoneNumber,
+    },
+  })
+}
+
+//export the functions
+module.exports = {createDemographic, getDemographic, updateDemographic, deleteDemographic};
+
+/* OLD CRUD FUNCTIONS:
 //CREATE (POST) creates a demographic entry
-export async function createDemographic(req, res) { //data is the info we store
+async function createDemographic(req, res) { //data is the info we store
     //tries to create new demographic entry in database
     const data: DemographicData = req.body;
     try {
@@ -31,7 +88,7 @@ export async function createDemographic(req, res) { //data is the info we store
 }
 
 //READ(get) retrieves demographics 
-export async function getDemographic(req, res) {
+async function getDemographic(req, res) {
     try {
         //gets all the records using findMany
         const demographics = await prisma.demographics.findMany();  
@@ -45,7 +102,7 @@ export async function getDemographic(req, res) {
 }
 
 //UPDATE (PUT) changes informatoin about a demographic entry
-export async function updateDemographic(phoneNumber, data: DemographicData) {
+async function updateDemographic(phoneNumber, data: DemographicData) {
     //takes phoneNumber to identify which entry, data: new values for entry
     try {
         const updatedEntry = await prisma.demographics.update({
@@ -60,7 +117,7 @@ export async function updateDemographic(phoneNumber, data: DemographicData) {
 }
 
 //DELETE (DELETE) removes a demographic entry
-export async function deleteDemographic(req, res) {
+async function deleteDemographic(req, res) {
     const phoneNumber = req.params.phoneNumber; 
 
     try {
@@ -76,3 +133,6 @@ export async function deleteDemographic(req, res) {
         return res.status(400).json({ error: "Error deleting demographic entry." });
     }
 }
+
+module.exports = {createDemographic, getDemographic, updateDemographic, deleteDemographic};
+*/
