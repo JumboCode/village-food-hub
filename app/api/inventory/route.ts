@@ -1,6 +1,4 @@
 // route file for inventory
-
-// set prisma client ??
 const { PrismaClient } = require ('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -14,11 +12,7 @@ async function Create(data : {
   return await prisma.inventory.create(
     { data: 
       { 
-        itemName: data.itemName, 
-        categoryName: data.categoryName,  
-        quantity: data.quantity, 
-        units: data.units, 
-        lastUpdated: data.lastUpdated
+        ...data
       }
     }
   )
@@ -37,15 +31,13 @@ async function Update(data : {
   units        : string, 
   lastUpdated  : Date
 }) {
+  const { itemName, ...newData } = data;
   return await prisma.inventory.update({
     where : {
       itemName : data.itemName
     }, data: 
       { 
-        categoryName: data.categoryName,  
-        quantity: data.quantity, 
-        units: data.units, 
-        lastUpdated: data.lastUpdated
+        ...newData
       }
   })
 }

@@ -5,15 +5,16 @@ Title: Brief description
 
 Names: Ella, Charlie
 
-Date:
+Date: 10/29/2024
 
 How long did this ticket take you? ~ 2 hours
 
 Description: Added schema and CRUD functions for inventory.
 
 Testing (before and after screenshots):
+- We tested all 4 CRUD functions, see inventoryTests.ts for specifics
 
-Takeaways: Learned how to use prisma CRUD functions.
+Takeaways: Learned how to use prisma CRUD functions. Learned a cool shortcut for setting object data fields.
 
 
 ## Git Do's and Don'ts
