@@ -9,13 +9,9 @@ async function Create(data : {
   units        : string, 
   lastUpdated  : Date
 }) {
-  return await prisma.inventory.create(
-    { data: 
-      { 
-        ...data
-      }
-    }
-  )
+  return await prisma.inventory.create({ 
+    data: { ...data }
+  })
 }
 
 
@@ -35,10 +31,7 @@ async function Update(data : {
   return await prisma.inventory.update({
     where : {
       itemName : data.itemName
-    }, data: 
-      { 
-        ...newData
-      }
+    }, data: { ...newData }
   })
 }
 
