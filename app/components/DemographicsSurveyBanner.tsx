@@ -1,7 +1,3 @@
-    // This is where you will implement the green banner (demographics survey banner)
-// which will be displayed on the top of the page for the user to take the survey.
-
-// Write your code here
 import React from 'react';
 import Image from 'next/image'
 import whiteOutlineLogo from '../images/headerLogo.png'
@@ -33,8 +29,6 @@ export default function Banner() {
       fontWeight: '700',
     };
     
-    
-  
     return ( 
       <div style={myStyles} className="banner">
         <div style={imageStyles}>
@@ -51,10 +45,3 @@ export default function Banner() {
       </div>
     );
 }
-  
-    
-// textAlign: 'center',
-// marginTop: '2rem',
-// color: 'white',
-// backgroundColor: '#24593D',
-// height: '135px',
