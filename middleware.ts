@@ -1,11 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/']);
+// TODO: Once Clerk components are integrated, please update below later with proper public API routes
+// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your middleware
 
+// const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/', '/welcome-page(.*)']);
+
+// TODO: later uncomment the below code
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
-  }
+  // if (!isPublicRoute(request)) {
+  //   await auth.protect();
+  // }
 });
 
 export const config = {
