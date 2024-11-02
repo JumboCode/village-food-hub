@@ -10,8 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        'dark-green': "#24593D",
+        'red': "#EB2B0C",
+        'light-green': "#7EB672",
+        'purple': "#3851BC",
+      },
+      fontFamily: {
+        serif: ["'Crimson Text'", "serif"],
       },
     },
   },
