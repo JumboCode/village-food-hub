@@ -7,9 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// For Ticket #8: Edit the schema below!
-model playing_with_neon {
-  id    Int    @id @default(autoincrement())
-  name  String
-  value Float? @db.Real
+model demographics {
+  phoneNumber   String   @id
+  takeCount     Int
+  donateCount   Int
+  name          String
+  householdSize Int
+  address       String
+  lastVisitDate DateTime
+}
+
+model inventory {
+  itemName     String   @id
+  categoryName String
+  quantity     Int
+  units        String
+  lastUpdated  DateTime
 }
