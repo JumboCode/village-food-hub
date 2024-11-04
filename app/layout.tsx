@@ -4,8 +4,8 @@ import './globals.css';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Your App Title',
-  description: 'Your app description',
+  title: 'Village Food Hub',
+  description: 'Village Food Hub is a nonprofit organization founded to strengthen our community food system and make it more equitable by increasing access to healthy and nutritious food, while also reducing waste and promoting environmental sustainability.',
 };
 
 export default function RootLayout({
