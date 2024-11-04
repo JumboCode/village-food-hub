@@ -1,24 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Quicksand&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --dark-green: #24593D;
+  --red: #EB2B0C;
+  --light-green: #7EB672;
+  --purple: #3851BC;
+  --font-family: 'Crimson Text', serif;
+  --text-color: #000000;
 }
 
 body {
-  color: var(--foreground);
+  color: var(--text-color);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
 }
+
+.crimson-bold {
+  font-weight: 700;
+}
+
+.crimson-semibold {
+  font-weight: 600;
+}
+
+.crimson-regular {
+  font-weight: 400;
+}
+
 
 @layer utilities {
   .text-balance {

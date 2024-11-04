@@ -1,7 +1,7 @@
 # Welcome to Village Food Hub!
 
 ## PR Description Template (Please don't edit this! Copy-paste the template into the PR Description)
-*Title: Brief description
+Title: Brief description
 
 Names:
 
@@ -11,10 +11,8 @@ How long did this ticket take you?
 
 Description:
 
-Testing:
-
-Takeaways:
-
+Testing (before and after screenshots):
+Takeaways: 
 
 ## Git Do's and Don'ts
 *DON'T 
@@ -24,23 +22,30 @@ Takeaways:
   - don't be afraid if you have made a git mistake!! ultimately, the whole purpose of git is to save our work consistently to prevent disasters, so more likely than not, any git mistakes can be fixed! reach out to Jiyoon if this does happen and she will help!
 
 *Do
+  - Git cheat sheet: https://education.github.com/git-cheat-sheet-education.pdf
   - make git commits locally often! saving your work consistently with git will tremendously help if there are any issues/conflicts with code down the road. 
   - For creating a NEW branch,
     ```git
     git checkout dev
     git pull
     git checkout -b [your_branch_name]
+    npm install
   - If you have just begun a coding session after a few days, run the following git commands:
     ```git
     git checkout dev
     git pull  
     git checkout [curr_branch]
     git merge dev
+    npm install
     ```
   - If you see on github that the current branch you're on is behind the dev branch:
+    (if you have unsaved changes, first commit your changes or stash them)
     ```git
+    git checkout dev
+    git pull
     git checkout [curr_branch]
     git merge dev
+    npm install
     ```
     This will merge everything from the dev branch onto your current branch. 
   - If you have just finished editing a few files, and would only like to set a SINGLE file to the stage:
@@ -71,6 +76,21 @@ Takeaways:
     [frontend or backend]/[ticket#]-ticket-title
     ``` 
       - For example, say I am a frontend developer working on ticket #45 whose title is "creating profile page", my branch will be named `frontend/45-creating-profile-page`
+
+
+# Using Flowbite?
+To convert HTML to TypeScript (specifically JSX/TSX for React), you need to follow these steps:
+
+1. Change `class` to `className`:
+   1. In JSX/TSX, the `class` attribute is replaced with `className`.
+2. Use `htmlFor` Instead of `for`:
+   1. In JSX/TSX, the `for` attribute in `<label>` tags is replaced with `htmlFor`.
+3. Self-Closing Tags:
+   1. Ensure that self-closing tags like `<input />` are properly formatted.
+4. Ensure Proper Syntax:
+   1. Make sure the JSX/TSX syntax is correct, including proper nesting and closing of tags.
+
+
 
 ## Web App Info
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
