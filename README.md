@@ -12,9 +12,7 @@ How long did this ticket take you?
 Description:
 
 Testing (before and after screenshots):
-
-Takeaways:
-
+Takeaways: 
 
 ## Git Do's and Don'ts
 *DON'T 
