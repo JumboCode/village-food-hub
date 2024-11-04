@@ -1,4 +1,4 @@
-// run test using 'tsx testDemographicsCrud.ts'
+// run test using 'tsx inventoryTests.ts'
 
 import CRUD from './route';
 
