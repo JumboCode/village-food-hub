@@ -15,6 +15,7 @@ const config: Config = {
         'banner-green': "#24593D",
         'dark-red': "#C31C01",
         'red': "#EB2B0C",
+        'dark-purple': "#293b8b",
         'purple': "#3851BC",
         'gray': "#828282",
       },
