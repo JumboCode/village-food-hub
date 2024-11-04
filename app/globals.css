@@ -6,10 +6,17 @@
 
 :root {
   --background: #ffffff;
-  --dark-green: #24593D;
-  --red: #EB2B0C;
+
+  /* colors */
   --light-green: #7EB672;
+  --dark-green: #507c0c;
+  --banner-green: #24593D;
+  --red: #EB2B0C;
+  --dark-red: #C31C01;
   --purple: #3851BC;
+  --gray: #828282;
+
+  /* text */
   --font-family: 'Crimson Text', serif;
   --text-color: #000000;
 }

@@ -10,10 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'dark-green': "#24593D",
-        'red': "#EB2B0C",
         'light-green': "#7EB672",
+        'dark-green': "#507c0c",
+        'banner-green': "#24593D",
+        'dark-red': "#C31C01",
+        'red': "#EB2B0C",
         'purple': "#3851BC",
+        'gray': "#828282",
       },
       fontFamily: {
         serif: ["'Crimson Text'", "serif"],
