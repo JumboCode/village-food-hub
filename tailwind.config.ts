@@ -18,6 +18,9 @@ const config: Config = {
       fontFamily: {
         serif: ["'Crimson Text'", "serif"],
       },
+      fontFamily: {
+        crimson: ['"Crimson Text"', 'serif'],
+      },
     },
   },
   plugins: [
