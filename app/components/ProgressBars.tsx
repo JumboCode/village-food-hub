@@ -1,24 +1,12 @@
 const ProgressBar = ({ progress }) => {
-  const container = {
-    height: '10px',
-    width: '80%',
-    backgroundColor: '#e0e0df',
-    overflow: 'hidden',
-  };
-
-  const fill = {
-    height: '100%',
-    width: `${progress}%`,
-    backgroundColor:'#65a30cff' ,
-  };
-
   return (
-    <div style={container}>
-      <div style={fill}>
-      </div>
+    <div className="h-2.5 w-4/5 bg-gray-300 overflow-hidden">
+      <div
+        className="h-full bg-lime-600"
+        style={{ width: `${progress}%` }}
+      ></div>
     </div>
   );
 };
-
 
 export default ProgressBar;
