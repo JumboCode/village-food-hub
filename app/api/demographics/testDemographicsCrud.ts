@@ -1,9 +1,9 @@
 //testing file for Demographics CRUD functions
 //run npx prisma generate, npx prisma migrate dev & prisma db pull
-//run testing file using 'npx ts-node testDemographicsCrud.ts'
+//run testing file using 'tsx testDemographicsCrud.ts'
 
 //importing the CRUD functions
-const CRUD = require("./route.ts");
+import CRUD from './route';
 
 async function main(){
     

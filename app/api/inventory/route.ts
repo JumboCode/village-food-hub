@@ -1,5 +1,6 @@
 // route file for inventory
-const { PrismaClient } = require ('@prisma/client');
+// const { PrismaClient } = require ('@prisma/client');
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
 async function createInventoryItem(data : {
@@ -30,7 +31,7 @@ async function updateInventoryItem(data : {
   const { itemName, ...newData } = data;
   return await prisma.inventory.update({
     where : {
-      itemName : data.itemName
+      itemName : itemName
     }, data: { ...newData }
   })
 }

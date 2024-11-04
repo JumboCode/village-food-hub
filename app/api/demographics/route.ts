@@ -1,5 +1,6 @@
 // your route file for demographics
-const { PrismaClient } = require ('@prisma/client');
+// const { PrismaClient } = require ('@prisma/client');
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 
 //CREATE
@@ -67,6 +68,10 @@ return await prisma.demographics.delete({
 }
 
 //export the functions
-module.exports = {createDemographic, getDemographic, updateDemographic, 
-deleteDemographic};
+export default {
+    createDemographic,
+    getDemographic,
+    updateDemographic,
+    deleteDemographic
+};
 

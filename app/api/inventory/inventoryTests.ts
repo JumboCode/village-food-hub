@@ -1,5 +1,7 @@
+// run test using 'tsx testDemographicsCrud.ts'
 
-const CRUD = require("./route.ts");
+import CRUD from './route';
+
 async function main() {
   //test 1: read empty database
   let response = await CRUD.getInventoryItems();
