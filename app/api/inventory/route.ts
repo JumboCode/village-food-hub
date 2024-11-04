@@ -2,7 +2,7 @@
 const { PrismaClient } = require ('@prisma/client');
 const prisma = new PrismaClient();
 
-async function Create(data : {
+async function createInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -15,12 +15,12 @@ async function Create(data : {
 }
 
 
-async function Read() {
+async function getInventoryItems() {
   return await prisma.inventory.findMany()
 }
 
 
-async function Update(data : {
+async function updateInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -36,7 +36,7 @@ async function Update(data : {
 }
 
 
-async function Delete(deleteItem : string) {
+async function deleteInventoryItem(deleteItem : string) {
   return await prisma.inventory.delete({
     where : {
       itemName : deleteItem
@@ -44,4 +44,4 @@ async function Delete(deleteItem : string) {
   })
 }
 
-module.exports = { Create, Read, Update, Delete };
+module.exports = { createInventoryItem, getInventoryItems, updateInventoryItem, deleteInventoryItem };

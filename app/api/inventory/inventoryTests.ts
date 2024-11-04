@@ -2,14 +2,14 @@
 const CRUD = require("./route.ts");
 async function main() {
   //test 1: read empty database
-  let response = await CRUD.Read();
+  let response = await CRUD.getInventoryItems();
   console.log(response);
   if (response.length != 0) {
     throw new Error("length not 0");
   }
 
   //test 2: create "carrots" entry and make sure all fields are correct
-  response = await CRUD.Create({ 
+  response = await CRUD.createInventoryItem({ 
                      itemName: "carrots", 
                      categoryName: "fruit", 
                      quantity: 3, 
@@ -33,14 +33,14 @@ async function main() {
     throw new Error("Date not October 27th");
   }
   //check number of entries
-  response = await CRUD.Read();
+  response = await CRUD.getInventoryItems();
   console.log(response);
   if (response.length != 1) {
     throw new Error("length not 1");
   }
 
   //test 3: update "carrots" entry and make sure all fields are correct
-  response = await CRUD.Update({
+  response = await CRUD.updateInventoryItem({
                      itemName: "carrots", 
                      categoryName: "vegetable", 
                      quantity: 3, 
@@ -63,14 +63,14 @@ async function main() {
     throw new Error("Date not October 27th");
   }
   //make sure number of entries stays 1
-  response = await CRUD.Read();
+  response = await CRUD.getInventoryItems();
   console.log(response);
   if (response.length != 1) {
     throw new Error("length not 1");
   }
 
   //test 4: create "apples" entry and make sure all fields are correct
-  response = await CRUD.Create({ 
+  response = await CRUD.createInventoryItem({ 
                      itemName: "apples", 
                      categoryName: "fruit", 
                      quantity: 3, 
@@ -93,16 +93,16 @@ async function main() {
     throw new Error("Date not October 29th");
   }
   //check number of entries is 2
-  response = await CRUD.Read();
+  response = await CRUD.getInventoryItems();
   console.log(response);
   if (response.length != 2) {
     throw new Error("length not 2");
   }
 
   //test 5: delete both entries and make sure database is empty
-  await CRUD.Delete("carrots");
-  await CRUD.Delete("apples");
-  response = await CRUD.Read();
+  await CRUD.deleteInventoryItem("carrots");
+  await CRUD.deleteInventoryItem("apples");
+  response = await CRUD.getInventoryItems();
   console.log(response);
   if (response.length != 0) {
     throw new Error("length not 0");
@@ -117,8 +117,8 @@ main()
     console.error(e);
   })
   .finally(async () => {
-    await CRUD.Delete("carrots");
-    await CRUD.Delete("apples");
+    await CRUD.deleteInventoryItem("carrots");
+    await CRUD.deleteInventoryItem("apples");
   });
 
 // run the script by doing: ts-node app/api/inventory/inventoryTests.ts from root directory

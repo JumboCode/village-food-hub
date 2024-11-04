@@ -3,19 +3,16 @@
 ## PR Description Template (Please don't edit this! Copy-paste the template into the PR Description)
 Title: Brief description
 
-Names: Ella, Charlie
+Names:
 
-Date: 10/29/2024
+Date:
 
-How long did this ticket take you? ~ 2 hours
+How long did this ticket take you?
 
-Description: Added schema and CRUD functions for inventory.
+Description:
 
 Testing (before and after screenshots):
-- We tested all 4 CRUD functions, see inventoryTests.ts for specifics
-
-Takeaways: Learned how to use prisma CRUD functions. Learned a cool shortcut for setting object data fields.
-
+Takeaways: 
 
 ## Git Do's and Don'ts
 *DON'T 
