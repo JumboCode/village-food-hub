@@ -5,7 +5,7 @@ import whiteOutlineLogo from '../images/headerLogo.png';
 export default function Banner() {
     return ( 
       <>
-        <div className="relative w-full h-[150px] bg-[#24593D] flex items-center justify-center">
+        <div className="relative w-full h-[150px] bg-[#24593D] flex items-center justify-center shadow-2xl">
           <div className="absolute left-0 bottom-0 mr-5">
               <Image
                   src={whiteOutlineLogo}
