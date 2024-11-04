@@ -18,6 +18,19 @@ body {
   font-family: var(--font-family);
 }
 
+.crimson-bold {
+  font-weight: 700;
+}
+
+.crimson-semibold {
+  font-weight: 600;
+}
+
+.crimson-regular {
+  font-weight: 400;
+}
+
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

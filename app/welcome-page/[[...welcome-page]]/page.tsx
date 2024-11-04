@@ -12,7 +12,7 @@ const WelcomePage: React.FC = () => {
     <div className="flex flex-col justify-center items-center h-screen bg-[#24593D] text-white">
 
         {/* banner at top of screen */}
-        <div className="h-1/4 w-full text-center content-center text-6xl">
+        <div className="h-1/4 w-full text-center content-center text-8xl crimson-bold">
             Welcome to Village Food Hub!
         </div>
 
@@ -33,16 +33,18 @@ const WelcomePage: React.FC = () => {
 
                 {/* the box that contains the text and VFH logo */}
                 <div className="flex w-full justify-center items-center">
-                    <div className="flex h-3/4 w-2/5 text-black text-center absolute bg-white text-4xl">
+                    <div className="flex h-3/4 w-2/5 text-black text-center absolute bg-white text-[2.5rem]">
 
                     
                         {/* the text prompting the user to fill out the survey */}
-                        <div className="box-content p-10 pt-20">
+                        <div className="box-content p-8 pt-14">
 
                             {/* the bolded, black text */}
                             <span className="font-bold">
                                 Please fill out this quick demographic survey
                             </span>
+
+                            <br/>
 
                             {/* the bolded, green text */}
                             &nbsp;
@@ -72,14 +74,14 @@ const WelcomePage: React.FC = () => {
 
 
             {/* the right column of the screen */}
-            <div className="flex bg-white justify-center p-10 pt-10 w-full">
+            <div className="flex bg-white justify-center p-10 pt-14 w-full">
 
                 {/* the text that prompts the user to chose how to complete the survey */}
-                <div className="relative text-center text-black text-4xl">
+                <div className="relative text-center text-black text-4xl crimson-bold">
                     Scan or Click to Complete the Demographic Survey
                 </div>
 
-                {/* the QR code that links to thee demographic survey */}
+                {/* the QR code that links to the demographic survey */}
                 <div className="flex absolute m-[50px] top-1/3">
                     <Image
                         src={qrCode}
@@ -91,7 +93,7 @@ const WelcomePage: React.FC = () => {
 
                 {/* the button to start a demographic survey */}
                 <div className="absolute bottom-0 align-bottom pb-20">
-                    <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5">
+                    <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8">
                         Start Demographics Survey →
                     </button>
                 </div>
