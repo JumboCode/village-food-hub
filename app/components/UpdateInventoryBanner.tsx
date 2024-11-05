@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import whiteOutlineLogo from '../images/headerLogo.png';
 
-export default function DemographicsSurveyBanner() {
+export default function UpdateInventoryBanner() {
     return ( 
       <>
         <div className="relative w-full h-[150px] bg-banner-green flex items-center justify-center shadow-2xl">
@@ -15,7 +15,7 @@ export default function DemographicsSurveyBanner() {
               />
           </div>
           <div className="text-center">
-            <h1 className="text-[64px] font-crimson font-bold text-white">Demographic Survey</h1>
+            <h1 className="text-[64px] font-crimson font-bold text-white">Update Inventory</h1>
           </div>
         </div>
       </>
