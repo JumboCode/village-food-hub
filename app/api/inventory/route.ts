@@ -1,6 +1,7 @@
 // route file for inventory
 // const { PrismaClient } = require ('@prisma/client');
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
 async function createInventoryItem(data : {
