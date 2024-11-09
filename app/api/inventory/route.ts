@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
-async function createInventoryItem(data : {
+export async function createInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -17,12 +17,12 @@ async function createInventoryItem(data : {
 }
 
 
-async function getInventoryItems() {
+export async function getInventoryItems() {
   return await prisma.inventory.findMany()
 }
 
 
-async function updateInventoryItem(data : {
+export async function updateInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -38,7 +38,7 @@ async function updateInventoryItem(data : {
 }
 
 
-async function deleteInventoryItem(deleteItem : string) {
+export async function deleteInventoryItem(deleteItem : string) {
   return await prisma.inventory.delete({
     where : {
       itemName : deleteItem
@@ -46,4 +46,68 @@ async function deleteInventoryItem(deleteItem : string) {
   })
 }
 
-module.exports = { createInventoryItem, getInventoryItems, updateInventoryItem, deleteInventoryItem };
+
+//export { createInventoryItem, getInventoryItems, updateInventoryItem, deleteInventoryItem };
+
+export async function POST(req: NextRequest) {
+    try {
+      const body = await req.json();
+      if (body.lastUpdated && typeof body.lastUpdated === 'string') {
+        body.lastUpdated = new Date(body.lastUpdated);
+      }
+      const result = await createInventoryItem({
+        itemName     : body.itemName,
+        categoryName : body.categoryName,
+        quantity     : body.quantity, 
+        units        : body.units,
+        lastUpdated  : body.lastUpdated,
+      });
+      console.log(result);
+      return NextResponse.json({ message: 'Successfully Created', status: 201, data: result })
+    } catch(error) {
+      return NextResponse.json({ message: 'Unexpected Error', status: 500 })
+    }
+
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const result = await getInventoryItems()
+    return NextResponse.json({ message: 'OK', status: 200, data: result })
+  } catch(error) {
+    return NextResponse.json({ message: 'Unexpected Error', status: 500 })
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    if (body.lastUpdated && typeof body.lastUpdated === 'string') {
+      body.lastUpdated = new Date(body.lastUpdated);
+    }
+    const result = await updateInventoryItem({
+        itemName     : body.itemName,
+        categoryName : body.categoryName,
+        quantity     : body.quantity, 
+        units        : body.units,
+        lastUpdated  : body.lastUpdated,
+      });
+      console.log(result);
+      return NextResponse.json({ message: 'OK', status: 200, data: result })
+    } catch(error) {
+        return NextResponse.json({ message: 'Unexpected Error', status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const body = await req.json();
+        console.log(body);
+        const result = await deleteInventoryItem(body.deleteItem);
+        return NextResponse.json({ message: 'OK', status: 200})
+    } catch(error) {
+        return NextResponse.json({ message: 'Unexpected Error', status: 500 })
+    }
+}
+
+
