@@ -1,6 +1,7 @@
 // your route file for demographics
 // const { PrismaClient } = require ('@prisma/client');
 import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
 // Charlie added for ticket 21
@@ -79,62 +80,111 @@ export default {
 };
 
 
-// charlie added for ticket 21
 // POST
-// export async function POST(req: NextRequest) {
-//     try {
-//         // get request body
-//         // const body = await req.json();
+export async function POST(req: NextRequest) {
+    try {
+        const record = await req.json();
+        if (!validDemographic(record)) {
+            return NextResponse.json({ 
+                response : "Invalid data format", 
+                status : 400 
+            })
+        }
+
+        record["lastVisitDate"] = new Date()
         
-//         // check all fields were filled came through... is date made here??
-        
-//         // return result
-//     } catch (error) {
-//         // catch and return error
-//     }
-// }
+        let response = createDemographic(record)
+        return NextResponse.json(response, {status : 201})
+
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({status : 500})
+    }
+}
 
 // GET
-// export async function GET() {
-//     try {
-//         // call get and return
-//     } catch (error) {
-//         // catch error
-//     }
-// }
+export async function GET() {
+    try {
+        let items = await getDemographic()
+        return NextResponse.json(items, {status : 200})
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({status : 500})
+    }
+}
 
 // PUT
-// export async function PUT(
-//     req: NextRequest,
-//     context: { params: { phoneNumber: string } }
-// ) {
-//     try {
-//         // make sure there is a phone number
+export async function PUT(
+    req: NextRequest,
+    context: { params: { phoneNumber: string } }
+) {
+    try {
 
-//         // do we require everything or just one field??
-//         // get update data from req body
-//         // const body = await req.json()
-        
-//         // do we update date on every PUT??
+        if (!context.params.phoneNumber) {
+            return NextResponse.json({ 
+                response: "Missing phone number",
+                status: 400 
+            });
+        }
 
-//         // update
-//         // respond 200 on success
-//     } catch (error) {
-//         // catch error and responsd
-//     }
-// }
+        const record = await req.json();
+        if (!validDemographic(record)) {
+            return NextResponse.json({ 
+                response : "Invalid data format", 
+                status : 400 
+            })
+        }
+
+        record["lastVisitDate"] = new Date()
+
+        const items = updateDemographic(record)
+        return NextResponse.json(items, {status : 200})
+
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({status : 500})
+    }
+}
 
 // DELETE 
-// export async function DELETE(
-//     req: NextRequest,
-//     context: { params: { phoneNumber: string } }
-// ) {
-//     try {
-//         // make sure there was a phone number
+export async function DELETE(
+    context: { params: { phoneNumber: string } }
+) {
+    try {
+        if (!context.params.phoneNumber) {
+            return NextResponse.json({ 
+                response: "Missing phone number",
+                status: 400 
+            });
+        }
+        
+        let items = await deleteDemographic(context.params.phoneNumber)
+        return NextResponse.json(items, {status : 200}) // return data??
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({status : 500})
+    }
+}
 
-//         // delete based on number
-//         // respond 200 on success
-//     } catch (error) {
-//         // catch error and responsd
-//     }
-// }
+async function validDemographic(record) {
+    if ("lastVisitDate" in record) {
+        delete record["lastVisitDate"]
+    }
+
+    const fields = new Set<string>(["phoneNumber", "takeCount", "donateCount", 
+                                   "name", "householdSize", "address"])
+    
+    if (record.keys().array.length == fields.size) {
+        return false;
+    }
+
+    record.keys().array.forEach( (field: string) => {
+        if (fields.has(field)) {
+            fields.delete(field)
+        } else {
+            return false
+        }
+    });
+    
+    return true;
+}
