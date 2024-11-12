@@ -166,25 +166,32 @@ export async function DELETE(
     }
 }
 
-async function validDemographic(record) {
-    if ("lastVisitDate" in record) {
-        delete record["lastVisitDate"]
-    }
+async function validDemographic(record : any) {
 
-    const fields = new Set<string>(["phoneNumber", "takeCount", "donateCount", 
-                                   "name", "householdSize", "address"])
-    
-    if (record.keys().array.length == fields.size) {
-        return false;
-    }
-
-    record.keys().array.forEach( (field: string) => {
-        if (fields.has(field)) {
-            fields.delete(field)
-        } else {
-            return false
+    try {
+        if ("lastVisitDate" in record) {
+            delete record["lastVisitDate"]
         }
-    });
-    
-    return true;
+
+        const fields = new Set<string>(["phoneNumber", "takeCount", "donateCount", 
+                                    "name", "householdSize", "address"])
+        
+        if (record.keys().array.length == fields.size) {
+            return false;
+        }
+
+        record.keys().array.forEach( (field: string) => {
+            if (fields.has(field)) {
+                fields.delete(field)
+            } else {
+                return false
+            }
+        });
+        
+        return true;
+        
+    } catch (error) {
+        console.log(error)
+        return false
+    }
 }
