@@ -1,11 +1,11 @@
 // your route file for demographics
-// const { PrismaClient } = require ('@prisma/client');
+// const { PrismaClient } = require ('@prisma/client')
 import { PrismaClient } from '@prisma/client'
-import { NextRequest, NextResponse } from 'next/server';
-const prisma = new PrismaClient();
+import { NextRequest, NextResponse } from 'next/server'
+const prisma = new PrismaClient()
 
 // Charlie added for ticket 21
-// import { NextRequest, NextResponse } from 'next/server';
+// import { NextRequest, NextResponse } from 'next/server'
 
 //CREATE
 async function createDemographic(data: {
@@ -83,22 +83,23 @@ export default {
 // POST
 export async function POST(req: NextRequest) {
     try {
-        const record = await req.json();
+        const record = await req.json()
         if (!validDemographic(record)) {
-            return NextResponse.json({ 
-                response : "Invalid data format", 
-                status : 400 
-            })
+            return NextResponse.json(
+                { response : "Invalid data format" }, 
+                { status : 400 })
         }
 
         record["lastVisitDate"] = new Date()
         
-        let response = createDemographic(record)
+        let response = await createDemographic(record)
         return NextResponse.json(response, {status : 201})
 
     } catch (error) {
         console.log(error)
-        return NextResponse.json({status : 500})
+        return NextResponse.json(
+            { response : "Failed to create record" }, 
+            { status : 500 })
     }
 }
 
@@ -106,10 +107,13 @@ export async function POST(req: NextRequest) {
 export async function GET() {
     try {
         let items = await getDemographic()
-        return NextResponse.json(items, {status : 200})
+        return NextResponse.json(items, { status : 200 })
     } catch (error) {
         console.log(error)
-        return NextResponse.json({status : 500})
+        return NextResponse.json(
+            { response : "Failed to get records" }, 
+            { status : 500 }
+        )
     }
 }
 
@@ -118,31 +122,37 @@ export async function PUT(
     req: NextRequest,
     context: { params: { phoneNumber: string } }
 ) {
+    
+    let phoneNumber
     try {
-
-        if (!context.params.phoneNumber) {
-            return NextResponse.json({ 
-                response: "Missing phone number",
-                status: 400 
-            });
-        }
-
-        const record = await req.json();
+        phoneNumber = context.params.phoneNumber
+    } catch (error) {
+        return NextResponse.json( 
+            { response: "Missing phone number" },
+            { status: 400 }
+        )
+    }
+    
+    try {
+        const record = await req.json()
         if (!validDemographic(record)) {
-            return NextResponse.json({ 
-                response : "Invalid data format", 
-                status : 400 
-            })
+            return NextResponse.json(
+                { response : "Invalid data format" }, 
+                { status : 400 }
+            )
         }
 
         record["lastVisitDate"] = new Date()
 
-        const items = updateDemographic(record)
-        return NextResponse.json(items, {status : 200})
+        const items = await updateDemographic(record)
+        return NextResponse.json(items, { status : 200 })
 
     } catch (error) {
         console.log(error)
-        return NextResponse.json({status : 500})
+        return NextResponse.json(
+            { response : "Failed to update entry" },
+            { status : 500 }
+        )
     }
 }
 
@@ -150,19 +160,25 @@ export async function PUT(
 export async function DELETE(
     context: { params: { phoneNumber: string } }
 ) {
+    let phoneNumber
     try {
-        if (!context.params.phoneNumber) {
-            return NextResponse.json({ 
-                response: "Missing phone number",
-                status: 400 
-            });
-        }
-        
-        let items = await deleteDemographic(context.params.phoneNumber)
+        phoneNumber = context.params.phoneNumber
+    } catch (error) {
+        return NextResponse.json( 
+            { response: "Missing phone number" },
+            { status: 400 }
+        )
+    }
+
+    try { 
+        let items = await deleteDemographic(phoneNumber)
         return NextResponse.json(items, {status : 200}) // return data??
     } catch (error) {
         console.log(error)
-        return NextResponse.json({status : 500})
+        return NextResponse.json( 
+            { response : "Failed to delete record" },
+            { status : 500 }
+        )
     }
 }
 
@@ -176,19 +192,16 @@ async function validDemographic(record : any) {
         const fields = new Set<string>(["phoneNumber", "takeCount", "donateCount", 
                                     "name", "householdSize", "address"])
         
-        if (record.keys().array.length == fields.size) {
-            return false;
-        }
+        let keys = Object.keys(record)
+        if (keys.length !== fields.size) return false
 
-        record.keys().array.forEach( (field: string) => {
-            if (fields.has(field)) {
-                fields.delete(field)
-            } else {
-                return false
-            }
-        });
+
+        keys.forEach( (field: string) => {
+            if (!fields.has(field)) return false
+            fields.delete(field)
+        })
         
-        return true;
+        return true
         
     } catch (error) {
         console.log(error)
