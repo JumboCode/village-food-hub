@@ -123,6 +123,8 @@ export async function PUT(
     context: { params: { phoneNumber: string } }
 ) {
     
+    // We're checking for phone number but never using it because we expect the whole record ??
+    // why does PUT require a phone number in addition to the entire data
     let phoneNumber
     try {
         phoneNumber = context.params.phoneNumber
@@ -158,11 +160,11 @@ export async function PUT(
 
 // DELETE 
 export async function DELETE(
-    context: { params: { phoneNumber: string } }
+    context: { params: { phoneNumber : string } }
 ) {
-    let phoneNumber
+    let phoneNum 
     try {
-        phoneNumber = context.params.phoneNumber
+        phoneNum = context.params.phoneNumber
     } catch (error) {
         return NextResponse.json( 
             { response: "Missing phone number" },
@@ -171,7 +173,7 @@ export async function DELETE(
     }
 
     try { 
-        let items = await deleteDemographic(phoneNumber)
+        const items = await deleteDemographic(phoneNum)
         return NextResponse.json(items, {status : 200}) // return data??
     } catch (error) {
         console.log(error)
