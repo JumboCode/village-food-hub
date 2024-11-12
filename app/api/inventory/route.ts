@@ -56,21 +56,16 @@ export async function POST(req: NextRequest) {
         body.lastUpdated = new Date(body.lastUpdated);
       }
       const result = await createInventoryItem({
-        itemName     : body.itemName,
-        categoryName : body.categoryName,
-        quantity     : body.quantity, 
-        units        : body.units,
-        lastUpdated  : body.lastUpdated,
+        ...body,
       });
       console.log(result);
       return NextResponse.json({ message: 'Successfully Created', status: 201, data: result })
     } catch(error) {
       return NextResponse.json({ message: 'Unexpected Error', status: 500 })
     }
-
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const result = await getInventoryItems()
     return NextResponse.json({ message: 'OK', status: 200, data: result })
@@ -86,11 +81,7 @@ export async function PUT(req: NextRequest) {
       body.lastUpdated = new Date(body.lastUpdated);
     }
     const result = await updateInventoryItem({
-        itemName     : body.itemName,
-        categoryName : body.categoryName,
-        quantity     : body.quantity, 
-        units        : body.units,
-        lastUpdated  : body.lastUpdated,
+        ...body,
       });
       console.log(result);
       return NextResponse.json({ message: 'OK', status: 200, data: result })
