@@ -47,8 +47,6 @@ export async function deleteInventoryItem(deleteItem : string) {
 }
 
 
-//export { createInventoryItem, getInventoryItems, updateInventoryItem, deleteInventoryItem };
-
 export async function POST(req: NextRequest) {
     try {
       const body = await req.json();
