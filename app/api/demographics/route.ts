@@ -82,17 +82,23 @@ export default {
 
 // POST
 export async function POST(req: NextRequest) {
-    try {
-        const record = await req.json()
-        if (!validDemographic(record)) {
-            return NextResponse.json(
-                { response : "Invalid data format" }, 
-                { status : 400 })
-        }
 
-        record["lastVisitDate"] = new Date()
-        
-        let response = await createDemographic(record)
+    let record
+    try {
+        record = await req.formData()
+        if (!validDemographic(record)) {
+            throw new Error("Invalid data format")
+        }
+    } catch (error) {
+        return NextResponse.json(
+            { response : "Invalid data format" }, 
+            { status : 400 }
+        )
+    }
+
+    try {     
+        let recordObj = formDataToObject(record)
+        let response = await createDemographic(recordObj)
         return NextResponse.json(response, {status : 201})
 
     } catch (error) {
@@ -103,6 +109,7 @@ export async function POST(req: NextRequest) {
     }
 }
 
+// what should we do for empty should getDemographic throw an error
 // GET
 export async function GET() {
     try {
@@ -120,33 +127,24 @@ export async function GET() {
 // PUT
 export async function PUT(
     req: NextRequest,
-    context: { params: { phoneNumber: string } }
-) {
-    
-    // We're checking for phone number but never using it because we expect the whole record ??
-    // why does PUT require a phone number in addition to the entire data
-    let phoneNumber
+) {    
+    let record
     try {
-        phoneNumber = context.params.phoneNumber
+        record = await req.formData()
+        if (!validDemographic(record)) {
+            throw new Error("Invalid data format")
+        }
     } catch (error) {
-        return NextResponse.json( 
-            { response: "Missing phone number" },
-            { status: 400 }
+        return NextResponse.json(
+            { response : "Invalid data format" }, 
+            { status : 400 }
         )
     }
-    
+
     try {
-        const record = await req.json()
-        if (!validDemographic(record)) {
-            return NextResponse.json(
-                { response : "Invalid data format" }, 
-                { status : 400 }
-            )
-        }
+        const recordObj = formDataToObject(record)
 
-        record["lastVisitDate"] = new Date()
-
-        const items = await updateDemographic(record)
+        const items = await updateDemographic(recordObj)
         return NextResponse.json(items, { status : 200 })
 
     } catch (error) {
@@ -160,11 +158,12 @@ export async function PUT(
 
 // DELETE 
 export async function DELETE(
-    context: { params: { phoneNumber : string } }
+    req: NextRequest
 ) {
-    let phoneNum 
     try {
-        phoneNum = context.params.phoneNumber
+        const data = await req.formData()
+        var phoneNum: string | null = data.get("phoneNumber") as string | null;
+        if (!phoneNum) throw new Error("Missing phone number")
     } catch (error) {
         return NextResponse.json( 
             { response: "Missing phone number" },
@@ -210,3 +209,15 @@ async function validDemographic(record : any) {
         return false
     }
 }
+
+function formDataToObject(formData: FormData) {
+    return {
+      phoneNumber: formData.get("phoneNumber") as string,
+      takeCount: Number(formData.get("takeCount")),
+      donateCount: Number(formData.get("donateCount")),
+      name: formData.get("name") as string,
+      householdSize: Number(formData.get("householdSize")),
+      address: formData.get("address") as string,
+      lastVisitDate: new Date()
+    };
+  }
