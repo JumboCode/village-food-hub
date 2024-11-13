@@ -64,3 +64,33 @@ export function ButtonCancel() {
         </div>
     );
 }
+
+export function ButtonRemove() {
+    return (
+        <div>
+            <button className="w-[175px] bg-red hover:bg-dark-red text-white font-serif py-2 px-8 rounded-full">
+                { "REMOVE" }
+            </button>
+        </div>
+    );
+}
+
+export function ButtonAdd() {
+    return (
+        <div>
+            <button className="w-[175px] bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full">
+                { "ADD" }
+            </button>
+        </div>
+    );
+}
+
+export function ButtonEdit() {
+    return (
+        <div>
+            <button className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full">
+            <FontAwesomeIcon className='pl-2' icon={faArrowLeft} /> { "EDIT" }
+            </button>
+        </div>
+    );
+}
