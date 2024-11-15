@@ -68,7 +68,7 @@ return await prisma.demographics.delete({
 }
 
 //export the functions
-export default {
+module.exports = {
     createDemographic,
     getDemographic,
     updateDemographic,
