@@ -1,11 +1,7 @@
-// your route file for demographics
-// const { PrismaClient } = require ('@prisma/client')
 import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
-// Charlie added for ticket 21
-// import { NextRequest, NextResponse } from 'next/server'
 
 //CREATE
 async function createDemographic(data: {
@@ -111,7 +107,6 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// what should we do for empty should getDemographic throw an error
 // GET
 export async function GET() {
     try {
@@ -176,7 +171,7 @@ export async function DELETE(
 
     try { 
         const item = await deleteDemographic(data.phoneNumber)
-        return NextResponse.json(item, {status : 200}) // return data??
+        return NextResponse.json(item, {status : 200})
     } catch (error) {
         console.log(error)
         return NextResponse.json( 
@@ -197,7 +192,6 @@ function validDemographic(record : any) {
                                     "name", "householdSize", "address"])
         
         let keys = Object.keys(record)
-        //console.log("keys: " + keys.length + " & fields: " + fields.size)
         if (keys.length !== fields.size) return false
 
         let fieldsMatch = true
