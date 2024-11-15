@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     let record
     try {
-        record = await req.formData()
+        record = await req.json()
         if (!validDemographic(record)) {
             throw new Error("Invalid data format")
         }
@@ -97,8 +97,10 @@ export async function POST(req: NextRequest) {
     }
 
     try {     
-        let recordObj = formDataToObject(record)
-        let response = await createDemographic(recordObj)
+        record.lastVisitDate = new Date()
+        let response = await createDemographic({
+            ...record
+        });
         return NextResponse.json(response, {status : 201})
 
     } catch (error) {
@@ -130,7 +132,7 @@ export async function PUT(
 ) {    
     let record
     try {
-        record = await req.formData()
+        record = await req.json()
         if (!validDemographic(record)) {
             throw new Error("Invalid data format")
         }
@@ -142,10 +144,11 @@ export async function PUT(
     }
 
     try {
-        const recordObj = formDataToObject(record)
-
-        const items = await updateDemographic(recordObj)
-        return NextResponse.json(items, { status : 200 })
+        record.lastVisitDate = new Date()
+        let item = await updateDemographic({
+            ...record
+        });
+        return NextResponse.json(item, { status : 200 })
 
     } catch (error) {
         console.log(error)
@@ -160,10 +163,10 @@ export async function PUT(
 export async function DELETE(
     req: NextRequest
 ) {
+    let data
     try {
-        const data = await req.formData()
-        var phoneNum: string | null = data.get("phoneNumber") as string | null;
-        if (!phoneNum) throw new Error("Missing phone number")
+        data = await req.json()
+        if (!("phoneNumber" in data)) throw new Error("Missing phone number")
     } catch (error) {
         return NextResponse.json( 
             { response: "Missing phone number" },
@@ -172,8 +175,8 @@ export async function DELETE(
     }
 
     try { 
-        const items = await deleteDemographic(phoneNum)
-        return NextResponse.json(items, {status : 200}) // return data??
+        const item = await deleteDemographic(data.phoneNumber)
+        return NextResponse.json(item, {status : 200}) // return data??
     } catch (error) {
         console.log(error)
         return NextResponse.json( 
@@ -183,7 +186,7 @@ export async function DELETE(
     }
 }
 
-async function validDemographic(record : any) {
+function validDemographic(record : any) {
 
     try {
         if ("lastVisitDate" in record) {
@@ -194,30 +197,19 @@ async function validDemographic(record : any) {
                                     "name", "householdSize", "address"])
         
         let keys = Object.keys(record)
+        //console.log("keys: " + keys.length + " & fields: " + fields.size)
         if (keys.length !== fields.size) return false
 
-
+        let fieldsMatch = true
         keys.forEach( (field: string) => {
-            if (!fields.has(field)) return false
+            if (!fields.has(field)) fieldsMatch = false
             fields.delete(field)
         })
         
-        return true
+        return fieldsMatch
         
     } catch (error) {
         console.log(error)
         return false
     }
 }
-
-function formDataToObject(formData: FormData) {
-    return {
-      phoneNumber: formData.get("phoneNumber") as string,
-      takeCount: Number(formData.get("takeCount")),
-      donateCount: Number(formData.get("donateCount")),
-      name: formData.get("name") as string,
-      householdSize: Number(formData.get("householdSize")),
-      address: formData.get("address") as string,
-      lastVisitDate: new Date()
-    };
-  }
