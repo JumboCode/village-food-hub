@@ -19,5 +19,5 @@ CREATE TABLE "inventory" (
     "units" TEXT NOT NULL,
     "lastUpdated" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "inventory_pkey" PRIMARY KEY ("itemName")
+    CONSTRAINT "inventory_pkey" PRIMARY KEY ("itemName","units")
 );

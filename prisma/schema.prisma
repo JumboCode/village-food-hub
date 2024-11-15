@@ -18,9 +18,11 @@ model demographics {
 }
 
 model inventory {
-  itemName     String   @id
+  itemName     String
   categoryName String
   quantity     Int
   units        String
   lastUpdated  DateTime
+
+  @@id([itemName, units]) 
 }
