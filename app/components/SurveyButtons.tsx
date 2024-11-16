@@ -1,96 +1,95 @@
-"use client"
+'use client'
 
-// needed for special characters
+// Importing icons
 import { faArrowLeft, faArrowRight, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export function ButtonExit() {
-    return (
-        <div>
-            <button className="bg-red hover:bg-dark-red text-white font-serif 
-            py-3 px-6 rounded-full text-[20px]">{ "EXIT" } <FontAwesomeIcon className='pl-1' icon={faX} />
-            </button>
-        </div>
-    );
+// ButtonExit component with proper props
+interface ButtonProps {
+  onClick?: () => void; // onClick is optional for some buttons
+  disabled?: boolean;   // disabled is optional
 }
 
-export function ButtonExitAnyway() {
-    return (
-        <div>
-            <button className="bg-red hover:bg-dark-red text-white font-serif py-3 px-6 rounded-full text-[20px]">
-                { "EXIT ANYWAY" } <FontAwesomeIcon className='pl-1' icon={faX} />
-            </button>
-        </div>
-    );
+export function ButtonExit({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-red hover:bg-dark-red text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick} // Handle onClick
+        disabled={disabled} // Handle disabled state
+      >
+        { "EXIT" } <FontAwesomeIcon className='pl-3' icon={faX} />
+      </button>
+    </div>
+  );
 }
 
-export function ButtonNext() {
-    return (
-        <div>
-            <button
-                className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-6 rounded-full text-[20px]">
-                { "NEXT" } <FontAwesomeIcon className='pl-1' icon={faArrowRight} />
-            </button>
-        </div>
-    );
+export function ButtonExitAnyway({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-red hover:bg-dark-red text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick} // Handle onClick
+        disabled={disabled} // Handle disabled state
+      >
+        { "EXIT ANYWAY" } <FontAwesomeIcon className='pl-3' icon={faX} />
+      </button>
+    </div>
+  );
 }
 
-export function ButtonSubmit() {
-    return (
-        <div>
-            <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-6 rounded-full text-[20px]">
-                { "SUBMIT" } <FontAwesomeIcon className='pl-1' icon={faArrowRight} />
-            </button>
-        </div>
-    );
+export function ButtonNext({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button
+        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick} // Handle onClick
+        disabled={disabled} // Handle disabled state
+      >
+        { "NEXT" } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
+      </button>
+    </div>
+  );
 }
 
-export function ButtonBack() {
-    return (
-        <div>
-            <button className="bg-transparent text-gray hover:text-black font-serif py-3 px-6 rounded-full text-[20px]">
-            <FontAwesomeIcon className='pl-1' icon={faArrowLeft} /> { "BACK" }
-            </button>
-        </div>
-    );
+export function ButtonSubmit({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick} // Handle onClick
+        disabled={disabled} // Handle disabled state
+      >
+        { "SUBMIT" } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
+      </button>
+    </div>
+  );
 }
 
-export function ButtonCancel() {
-    return (
-        <div>
-            <button className="bg-transparent text-gray hover:text-black font-serif py-3 px-6 rounded-full text-[20px]">
-                { "CANCEL" }
-            </button>
-        </div>
-    );
+export function ButtonBack({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-transparent text-gray hover:text-black font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick} // Handle onClick
+        disabled={disabled} // Handle disabled state
+      >
+        <FontAwesomeIcon className='pr-3' icon={faArrowLeft} /> { "BACK" }
+      </button>
+    </div>
+  );
 }
 
-export function ButtonRemove() {
-    return (
-        <div>
-            <button className="w-[175px] bg-red hover:bg-dark-red text-white font-serif py-2 px-8 rounded-full">
-                { "REMOVE" }
-            </button>
-        </div>
-    );
-}
-
-export function ButtonAdd() {
-    return (
-        <div>
-            <button className="w-[175px] bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full">
-                { "ADD" }
-            </button>
-        </div>
-    );
-}
-
-export function ButtonEdit() {
-    return (
-        <div>
-            <button className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full">
-            <FontAwesomeIcon className='pl-2' icon={faArrowLeft} /> { "EDIT" }
-            </button>
-        </div>
-    );
+export function ButtonCancel({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-transparent text-gray hover:text-black font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        { "CANCEL" }
+      </button>
+    </div>
+  );
 }
