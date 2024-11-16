@@ -17,6 +17,7 @@ const config: Config = {
         'red': "#EB2B0C",
         'dark-purple': "#293b8b",
         'purple': "#3851BC",
+        'light-gray': "#E1E1E1",
         'gray': "#828282",
       },
       fontFamily: {
