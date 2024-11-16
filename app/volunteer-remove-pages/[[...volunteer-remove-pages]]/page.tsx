@@ -1,10 +1,9 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
-import VolunteerRemoveDetailsModule from '@app/components/volunteer-pages-modules/VolunteerRemoveDetailsModule';
-import VolunteerRemoveConfirmModule from '@app/components/volunteer-pages-modules/VolunteerRemoveConfirmModule';
-import { ButtonExit, ButtonBack, ButtonNext } from '@app/components/SurveyButtons';
+import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
+import { NameDropdown } from '@app/components/Dropdowns';
 
 type Step = 'details' | 'confirm';
 
@@ -25,7 +24,7 @@ const VolunteerRemovePages: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Imported Banner */}
+      {/* Banner */}
       <UpdateInventoryBanner />
 
       {/* Back and Exit buttons */}
@@ -34,9 +33,8 @@ const VolunteerRemovePages: React.FC = () => {
         <ButtonExit />
       </div>
 
-      {/* Page content (Remove Details or Remove Confirm) */}
+      {/* Page Content */}
       <div className="flex justify-center w-full h-full">
-        {/* Conditional rendering based on currentStep */}
         {currentStep === 'details' && (
           <div className="w-4/5 h-4/5">
             <VolunteerRemoveDetailsModule />
@@ -55,6 +53,54 @@ const VolunteerRemovePages: React.FC = () => {
           <ButtonNext onClick={handleNext} />
         </div>
       )}
+    </div>
+  );
+};
+
+// Subcomponents
+
+const VolunteerRemoveDetailsModule: React.FC = () => {
+  return (
+    <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
+      <p className="justify-self-center text-[36px] font-bold">What are you removing?</p>
+      <div className="font-bold text-[20px] py-4">
+        <p className="mb-2">Category Name</p>
+        <NameDropdown />
+      </div>
+      <div className="font-bold text-[20px]">
+        <p className="mb-2">Item Name</p>
+        <NameDropdown />
+      </div>
+      <div className="flex flex-row w-full justify-between">
+        <div className="font-bold text-[20px] pt-6">
+          <p className="mb-2">Quantity</p>
+          <input
+            type="text"
+            placeholder=""
+            className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
+          />
+        </div>
+        <div className="font-bold text-[20px] pt-6">
+          <p className="mb-2">Units</p>
+          <NameDropdown />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VolunteerRemoveConfirmModule: React.FC = () => {
+  return (
+    <div>
+      <div className="text-black crimson-bold flex text-4xl content-center justify-center text-center">
+        This action will:
+      </div>
+      <div className="text-gray crimson-regular pt-10 flex text-4xl content-center justify-center text-center">
+        Remove [quantity] [units] of [itemName].
+      </div>
+      <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
+        <ButtonSubmit />
+      </div>
     </div>
   );
 };
