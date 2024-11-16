@@ -1,6 +1,6 @@
 // imports
-import { ButtonAdd, ButtonRemove } from "../../components/SurveyButtons";
-import UpdateInventoryBanner from "../../components/UpdateInventoryBanner";
+import { ButtonAdd, ButtonRemove } from "@app/components/SurveyButtons";
+import UpdateInventoryBanner from "@app/components/UpdateInventoryBanner";
 
 const LandingPage: React.FC = () => {
     

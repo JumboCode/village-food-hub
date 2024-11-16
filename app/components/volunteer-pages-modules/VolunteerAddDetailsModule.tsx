@@ -1,6 +1,4 @@
 import React from "react";
-import Banner from "@app/components/UpdateInventoryBanner";
-import { ButtonBack, ButtonExit, ButtonNext } from "@app/components/SurveyButtons";
 import { NameDropdown } from "@app/components/Dropdowns";
 
 const VolunteerAddDetails: React.FC = () => {

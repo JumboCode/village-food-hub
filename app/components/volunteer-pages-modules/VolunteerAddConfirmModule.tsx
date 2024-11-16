@@ -1,6 +1,5 @@
 import React from "react";
-import { ButtonExit, ButtonSubmit, ButtonEdit } from "@app/components/SurveyButtons";
-import UpdateInventoryBanner from "@app/components/Dropdowns";
+import { ButtonSubmit } from "@app/components/SurveyButtons";
 
 const AddConfirmPageModule: React.FC = () => {
   return (

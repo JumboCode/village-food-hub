@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
-export async function createInventoryItem(data : {
+async function createInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -16,12 +16,12 @@ export async function createInventoryItem(data : {
 }
 
 
-export async function getInventoryItems() {
+async function getInventoryItems() {
   return await prisma.inventory.findMany()
 }
 
 
-export async function updateInventoryItem(data : {
+async function updateInventoryItem(data : {
   itemName     : string,
   categoryName : string,
   quantity     : number, 
@@ -40,7 +40,7 @@ export async function updateInventoryItem(data : {
 }
 
 
-export async function deleteInventoryItem(data: {
+async function deleteInventoryItem(data: {
   itemName : string,
   units    : string
 }) {
@@ -55,7 +55,6 @@ export async function deleteInventoryItem(data: {
     }
   });
 }
-
 
 export async function POST(req: NextRequest) {
     try {
@@ -130,7 +129,7 @@ export async function DELETE(req: NextRequest) {
 
     const result = await deleteInventoryItem({ itemName, units });
 
-    return NextResponse.json({ message: 'OK', status: 200 });
+    return NextResponse.json({ message: 'OK', status: 200, result });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: 'Unexpected Error', status: 500 });

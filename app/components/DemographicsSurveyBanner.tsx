@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import whiteOutlineLogo from '../images/headerLogo.png';
+import whiteOutlineLogo from '@app/images/headerLogo.png';
 
 export default function DemographicsSurveyBanner() {
     return ( 
