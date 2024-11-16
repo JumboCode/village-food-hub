@@ -7,6 +7,14 @@ import { NameDropdown } from '@app/components/Dropdowns';
 
 type Step = 'details' | 'confirm';
 
+interface Inventory {
+  categoryName: string;
+  itemName: string;
+  quantity: number;
+  units: string;
+  lastUpdated: Date;
+}
+
 const VolunteerRemovePages: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>('details');
 
