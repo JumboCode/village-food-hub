@@ -6,7 +6,7 @@ const VolunteerRemoveDetails: React.FC = () => {
     <div>
       {/* Form Contents */}
       <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
-        <p className="justify-self-center text-[36px] font-bold">What are you Removing?</p>
+        <p className="justify-self-center text-[36px] font-bold">What are you removing?</p>
         <div className="font-bold text-[20px] py-4">
           {/* Category Name Dropdown */}
           <p className="mb-2">Category Name</p>
