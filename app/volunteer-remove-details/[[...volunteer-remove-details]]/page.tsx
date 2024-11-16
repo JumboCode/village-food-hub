@@ -1,13 +1,17 @@
 // imports all outside components
+"use client"
 import Banner from "../../components/UpdateInventoryBanner"
-import { ButtonBack, ButtonExit, ButtonNext } from "../../components/SurveyButtons"
+import { ButtonBack, ButtonExit, ButtonNext, ButtonExitAnyway } from "../../components/SurveyButtons"
 import { NameDropdown } from "../../components/Dropdowns";
-import React from 'react'
+import ExitModal from "../../components/ExitModal";
+import React, { useState } from 'react'
 
 
 // This function returns the page that allows Volunteers to input data on the
 // contents they are removing from the inventory
 const VolunteerRemoveDetails: React.FC = () => {
+
+    const [showModal, setShowModal] = useState(false);
     return (
         <div>
             <Banner/>
@@ -16,7 +20,10 @@ const VolunteerRemoveDetails: React.FC = () => {
                 <div className= "flex flex-2">
                     <ButtonBack/>
                 </div>
-                <ButtonExit/>
+                <div className = "">
+                    <button onClick={() => setShowModal(true)}> TEST </button>
+                    {showModal && <ExitModal />}
+                </div>
             </div>
             {/* Form Contents */}
             

@@ -3,16 +3,43 @@
 // needed for special characters
 import { faArrowLeft, faArrowRight, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { FC } from "react";
 
 export function ButtonExit() {
+    const handleClick = () => {
+        window.location.href = '../../unsaved-thank-you';
+    };
+    
     return (
         <div>
-            <button className="bg-red hover:bg-dark-red text-white font-serif 
-            py-2 px-8 rounded-full text-[30px]">{ "EXIT" } <FontAwesomeIcon className='pl-2' icon={faX} />
+            <button 
+                onClick={handleClick} 
+                className="bg-red hover:bg-dark-red text-white font-serif 
+                    py-2 px-8 rounded-full text-[30px]">
+                { "EXIT" } 
+                <FontAwesomeIcon className='pl-2' icon={faX} />
             </button>
         </div>
     );
-  }
+}
+
+export function ButtonExit_ExitModal() {
+    const handleClick = () => {
+        window.location.href = '../../volunteer-unsaved';
+    };
+    
+    return (
+        <div>
+            <button 
+                onClick={handleClick} 
+                className="bg-red hover:bg-dark-red text-white font-serif 
+                    py-2 px-8 rounded-full text-[30px]">
+                { "EXIT" } 
+                <FontAwesomeIcon className='pl-2' icon={faX} />
+            </button>
+        </div>
+    );
+}
 
 export function ButtonExitAnyway() {
     return (
@@ -58,7 +85,7 @@ export function ButtonBack() {
 export function ButtonCancel() {
     return (
         <div>
-            <button className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full">
+            <button className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full text-[30px]">
                 { "CANCEL" }
             </button>
         </div>

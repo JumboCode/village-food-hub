@@ -2,6 +2,7 @@ import Banner from "../../components/UpdateInventoryBanner"
 import { ButtonBack, ButtonExit, ButtonNext } from "../../components/SurveyButtons"
 import { NameDropdown } from "../../components/Dropdowns";
 import React from 'react'
+import ExitModal from "../../components/ExitModal"
 
 
 // This function returns the page that allows Volunteers to input data on the

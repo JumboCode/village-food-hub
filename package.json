@@ -20,6 +20,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/material": "^6.1.4",
     "@prisma/client": "^5.21.1",
+    "@types/react-router-dom": "^5.3.3",
     "express": "^4.21.1",
     "flowbite": "^2.5.2",
     "next": "14.2.13",
