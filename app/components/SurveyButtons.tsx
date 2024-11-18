@@ -3,22 +3,27 @@
 // needed for special characters
 import { faArrowLeft, faArrowRight, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { FC } from "react";
+import React, { FC, useState} from "react";
+import ExitModal from "./ExitModal";
+
+interface ButtonProps {
+    onClick?: () => void; 
+}
+
 
 export function ButtonExit() {
-    const handleClick = () => {
-        window.location.href = '../../unsaved-thank-you';
-    };
+    const [showModal, setShowModal] = useState(false);
     
     return (
         <div>
             <button 
-                onClick={handleClick} 
+                onClick={onClick}
                 className="bg-red hover:bg-dark-red text-white font-serif 
                     py-2 px-8 rounded-full text-[30px]">
                 { "EXIT" } 
                 <FontAwesomeIcon className='pl-2' icon={faX} />
             </button>
+            {showModal && <ExitModal />}
         </div>
     );
 }
@@ -85,7 +90,10 @@ export function ButtonBack() {
 export function ButtonCancel() {
     return (
         <div>
-            <button className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full text-[30px]">
+            <button 
+                className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full text-[30px]"
+                
+                >
                 { "CANCEL" }
             </button>
         </div>

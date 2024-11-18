@@ -12,6 +12,7 @@ import React, { useState } from 'react'
 const VolunteerRemoveDetails: React.FC = () => {
 
     const [showModal, setShowModal] = useState(false);
+    
     return (
         <div>
             <Banner/>
@@ -21,7 +22,8 @@ const VolunteerRemoveDetails: React.FC = () => {
                     <ButtonBack/>
                 </div>
                 <div className = "">
-                    <button onClick={() => setShowModal(true)}> TEST </button>
+                    {/* <button onClick={() => setShowModal(true)}> TEST </button> */}
+                    <ButtonExit/>
                     {showModal && <ExitModal />}
                 </div>
             </div>
