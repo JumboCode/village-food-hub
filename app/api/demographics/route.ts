@@ -67,38 +67,22 @@ return await prisma.demographics.delete({
   })
 }
 
-//export the functions
-export default {
-    createDemographic,
-    getDemographic,
-    updateDemographic,
-    deleteDemographic
-};
-
-
 // POST
 export async function POST(req: NextRequest) {
 
-    let record
     try {
-        record = await req.json()
+        const record = await req.json()
         if (!validDemographic(record)) {
-            throw new Error("Invalid data format")
+            return NextResponse.json(
+                { response : "Invalid data format" }, 
+                { status : 400 }
+            )
         }
-    } catch (error) {
-        return NextResponse.json(
-            { response : "Invalid data format" }, 
-            { status : 400 }
-        )
-    }
 
-    try {     
         record.lastVisitDate = new Date()
-        let response = await createDemographic({
-            ...record
-        });
-        return NextResponse.json(response, {status : 201})
+        let response = await createDemographic({ ...record })
 
+        return NextResponse.json(response, {status : 201})
     } catch (error) {
         console.log(error)
         return NextResponse.json(
@@ -110,7 +94,7 @@ export async function POST(req: NextRequest) {
 // GET
 export async function GET() {
     try {
-        let items = await getDemographic()
+        const items = await getDemographic()
         return NextResponse.json(items, { status : 200 })
     } catch (error) {
         console.log(error)
@@ -125,26 +109,19 @@ export async function GET() {
 export async function PUT(
     req: NextRequest,
 ) {    
-    let record
     try {
-        record = await req.json()
+        const record = await req.json()
         if (!validDemographic(record)) {
-            throw new Error("Invalid data format")
+            return NextResponse.json(
+                { response : "Invalid data format" }, 
+                { status : 400 }
+            )
         }
-    } catch (error) {
-        return NextResponse.json(
-            { response : "Invalid data format" }, 
-            { status : 400 }
-        )
-    }
 
-    try {
         record.lastVisitDate = new Date()
-        let item = await updateDemographic({
-            ...record
-        });
-        return NextResponse.json(item, { status : 200 })
+        let item = await updateDemographic({ ...record });
 
+        return NextResponse.json(item, { status : 200 })
     } catch (error) {
         console.log(error)
         return NextResponse.json(
@@ -158,18 +135,15 @@ export async function PUT(
 export async function DELETE(
     req: NextRequest
 ) {
-    let data
     try {
-        data = await req.json()
-        if (!("phoneNumber" in data)) throw new Error("Missing phone number")
-    } catch (error) {
-        return NextResponse.json( 
-            { response: "Missing phone number" },
-            { status: 400 }
-        )
-    }
+        const data = await req.json()
+        if (!("phoneNumber" in data)) {
+            return NextResponse.json( 
+                { response: "Missing phone number" },
+                { status: 400 }
+            )
+        }
 
-    try { 
         const item = await deleteDemographic(data.phoneNumber)
         return NextResponse.json(item, {status : 200})
     } catch (error) {
@@ -188,8 +162,9 @@ function validDemographic(record : any) {
             delete record["lastVisitDate"]
         }
 
-        const fields = new Set<string>(["phoneNumber", "takeCount", "donateCount", 
-                                    "name", "householdSize", "address"])
+        const fields = new Set<string>(["phoneNumber", "takeCount", 
+                                        "donateCount", "name", 
+                                        "householdSize", "address"])
         
         let keys = Object.keys(record)
         if (keys.length !== fields.size) return false
