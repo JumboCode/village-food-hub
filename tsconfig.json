@@ -21,12 +21,10 @@
         "name": "next"
       }
     ],
+    "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "target": "ES2017"
+      "@app/*": ["app/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

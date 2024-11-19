@@ -1,10 +1,10 @@
 import React from 'react';
 import Image from 'next/image';
 
-import Banner from '../../components/DemographicsSurveyBanner';
+import Banner from '@app/components/DemographicsSurveyBanner';
 
-import logo from '../../images/logo.jpg';
-import arrow from '../../images/arrow.png';
+import logo from '@app/images/logo.jpg';
+import arrow from '@app/images/arrow.png';
 
 // This functions returns the thank you page for an unsaved demographic survey
 export default function UnsavedThankYou() {

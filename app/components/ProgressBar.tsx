@@ -1,4 +1,4 @@
-const ProgressBar = ({ progress }) => {
+const ProgressBar = ({ progress }: { progress: number }) => {
   return (
     <div className="h-2.5 w-4/5 bg-gray-300 overflow-hidden">
       <div

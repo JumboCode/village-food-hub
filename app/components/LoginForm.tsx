@@ -1,7 +1,5 @@
 import React from 'react';
 
-// Please edit this file to create the login form component!
-
 const LoginForm: React.FC = () => {
   return (
     <div>
