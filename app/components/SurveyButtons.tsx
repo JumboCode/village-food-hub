@@ -92,12 +92,17 @@ export function ButtonCancel({ onClick, disabled }: ButtonProps) {
   );
 }
 
+
+function redirect(path : string) {
+    window.location.href = path;
+}
+
 export function ButtonRemove({ onClick, disabled }: ButtonProps) {
   return (
       <div>
           <button 
             className="w-[175px] bg-red hover:bg-dark-red text-white font-serif py-2 px-8 rounded-full"
-            onClick={onClick}
+            onClick={() => redirect("../volunteer-remove-pages/page")}
             disabled={disabled}
         >
               { "REMOVE" }
@@ -111,7 +116,7 @@ export function ButtonAdd({ onClick, disabled }: ButtonProps) {
       <div>
           <button 
             className="w-[175px] bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full"
-            onClick={onClick}
+            onClick={() => redirect("../volunteer-add-pages/page")}
             disabled={disabled}
           >
               { "ADD" }
