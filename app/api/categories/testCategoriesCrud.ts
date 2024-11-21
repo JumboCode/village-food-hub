@@ -9,12 +9,13 @@ import CRUD from './route';
 // import { createCategory, readCategories, updateCategory, deleteCategory } from './route';
 
 async function main() {
+    console.log("test1");
     const testData = {
         itemName : 'apple',
         name: 'fruit',
         units: ['pound']
-    }
-    console.log("test");
+    };
+    console.log("test2");
     
     try {
         const testReadEmpty = await CRUD.readCategories();
