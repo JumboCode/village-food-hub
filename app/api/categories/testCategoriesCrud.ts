@@ -4,18 +4,13 @@
 
 // importing the CRUD functions
 import CRUD from './route';
-// import CRUD from '@app/api/categories/route.ts'
-
-// import { createCategory, readCategories, updateCategory, deleteCategory } from './route';
 
 async function main() {
-    console.log("test1");
     const testData = {
-        itemName : 'apple',
+        itemName : 'banana',
         name: 'fruit',
-        units: ['pound']
+        units: ['bunch']
     };
-    console.log("test2");
     
     try {
         const testReadEmpty = await CRUD.readCategories();
@@ -28,18 +23,41 @@ async function main() {
         //TEST READ
         const testRead = await CRUD.readCategories();
         const createdEntry = testRead[0];
-        if (createdEntry.itemName !== 'apple') {
+        if (createdEntry.itemName !== 'banana') {
             throw new Error("error creating itemName");
         }
         if (createdEntry.name !== 'fruit') {
             throw new Error("error creating name");
         }
-        if (createdEntry.units[0] !== 'pound') {
+        if (createdEntry.units[0] !== 'bunch') {
             throw new Error("error creating units");
         }
         console.log("read entry", testRead);
+
+        const testUpdateData = {
+            itemName : 'banana',
+            name: 'fruit',
+            units: ['bag']
+        }
+        const testUpdate = await CRUD.updateCategory(testUpdateData);
+        if (testUpdate.units[0] !== 'bag') {
+            throw new Error("error updating units");
+        }
+        console.log("updated entry", testUpdate);
+        
+        const deleteData = {
+            itemName: "banana",
+            name: "fruit"
+        }
+        const testDelete = await CRUD.deleteCategory(deleteData);
+        console.log("deleted entry");
+        const testReadAfterDelete = await CRUD.readCategories();
+        console.log("read after delete", testReadAfterDelete);
+
     }
     catch (error) {
         console.log(error);
     }
 }
+
+main();

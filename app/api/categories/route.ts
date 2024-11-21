@@ -52,7 +52,7 @@ async function deleteCategory(data: {
         where: {
             itemName_name: {
                 itemName: itemName,
-                name: name
+                name: name,
             }
         }
         });
