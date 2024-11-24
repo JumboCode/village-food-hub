@@ -11,32 +11,11 @@ interface ButtonProps {
 }
 
 
-export function ButtonExit() {
-    const [showModal, setShowModal] = useState(false);
-    
+export function ButtonExit({ onClick }) {
     return (
         <div>
             <button 
-                onClick={onClick}
-                className="bg-red hover:bg-dark-red text-white font-serif 
-                    py-2 px-8 rounded-full text-[30px]">
-                { "EXIT" } 
-                <FontAwesomeIcon className='pl-2' icon={faX} />
-            </button>
-            {showModal && <ExitModal />}
-        </div>
-    );
-}
-
-export function ButtonExit_ExitModal() {
-    const handleClick = () => {
-        window.location.href = '../../volunteer-unsaved';
-    };
-    
-    return (
-        <div>
-            <button 
-                onClick={handleClick} 
+                onClick = { onClick }
                 className="bg-red hover:bg-dark-red text-white font-serif 
                     py-2 px-8 rounded-full text-[30px]">
                 { "EXIT" } 
@@ -87,12 +66,14 @@ export function ButtonBack() {
     );
 }
 
-export function ButtonCancel() {
+
+export function ButtonCancel({ onClick }: ButtonProps) {
     return (
+    
         <div>
             <button 
+                onClick= {onClick}
                 className="bg-transparent text-gray hover:text-black font-serif py-2 px-8 rounded-full text-[30px]"
-                
                 >
                 { "CANCEL" }
             </button>

@@ -1,23 +1,13 @@
 import React, {useState} from 'react';
-import { ButtonCancel_ExitModal, ButtonExit_ExitModal } from "./../components/SurveyButtons"
+import { ButtonCancel, ButtonExit } from "./../components/SurveyButtons"
 
+interface ExitModalProps {
+  closeModal: () => void;
+}
 
-const ExitModal: React.FC = () => {
-  const [showModal, setShowModal] = useState(false);
-  
-  const handleOpenModal = (): void => {
-    setShowModal(true);
-  };
-  
-  const handleCloseModal = (): void => {
-    setShowModal(false);
-  };
-  
-  
+const ExitModal: React.FC<ExitModalProps> = ({ closeModal }) => {
   return (
-    
-    
-    {showModal && (
+    (
       <div className="h-[233px] w-[582px] bg-neutral-200 font-crimson
                       fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                       shadow-xl">
@@ -26,11 +16,11 @@ const ExitModal: React.FC = () => {
               <p className="flex justify-center text-[40px] crimson-bold">Your changes will not be saved.</p>
           </div>
           <div className="flex flex-row justify-around ">
-              <ButtonCancel_ExitModal onClick={handleCloseModal}/>
-              <ButtonExit_ExitModal/>
+              <ButtonCancel onClick={closeModal}/>
+              <ButtonExit onClick={ () => window.location.href = '../../volunteer-unsaved' } />
           </div>
       </div>
-    )}
+    )
   );
 };
 

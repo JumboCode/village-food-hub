@@ -7,12 +7,20 @@ import ExitModal from "../../components/ExitModal";
 import React, { useState } from 'react'
 
 
+
 // This function returns the page that allows Volunteers to input data on the
 // contents they are removing from the inventory
 const VolunteerRemoveDetails: React.FC = () => {
-
+    
     const [showModal, setShowModal] = useState(false);
     
+    const openModal = (): void => {
+        setShowModal(true);
+    };
+    
+    const closeModal = (): void => {
+        setShowModal(false);
+    };
     return (
         <div>
             <Banner/>
@@ -23,8 +31,8 @@ const VolunteerRemoveDetails: React.FC = () => {
                 </div>
                 <div className = "">
                     {/* <button onClick={() => setShowModal(true)}> TEST </button> */}
-                    <ButtonExit/>
-                    {showModal && <ExitModal />}
+                    <ButtonExit onClick={openModal}/>
+                    {showModal && <ExitModal  closeModal={closeModal}/>}
                 </div>
             </div>
             {/* Form Contents */}
