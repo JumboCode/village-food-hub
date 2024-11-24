@@ -17,7 +17,7 @@ const ExitModal: React.FC<ExitModalProps> = ({ closeModal }) => {
           </div>
           <div className="flex flex-row justify-around ">
               <ButtonCancel onClick={closeModal}/>
-              <ButtonExit onClick={ () => window.location.href = '../../volunteer-unsaved' } />
+              <ButtonExit onClick={() => window.location.href = '../../volunteer-unsaved' } />
           </div>
       </div>
     )

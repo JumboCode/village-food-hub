@@ -1,22 +1,23 @@
+"use client"
 import Banner from "../../components/UpdateInventoryBanner"
 import { ButtonBack, ButtonExit, ButtonNext } from "../../components/SurveyButtons"
 import { NameDropdown } from "../../components/Dropdowns";
-import React from 'react'
+import React, { useState } from 'react'
 import ExitModal from "../../components/ExitModal"
 
 
 // This function returns the page that allows Volunteers to input data on the
 // contents they are removing from the inventory
 const VolunteerRemoveDetails: React.FC = () => {
-    //const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     
-    //const openModal = (): void => {
-    //    setShowModal(true);
-    //};
+    const openModal = (): void => {
+        setShowModal(true);
+    };
     
-    //const closeModal = (): void => {
-    //    setShowModal(false);
-    //};
+    const closeModal = (): void => {
+        setShowModal(false);
+    };
     return (
         <div>
             <Banner/>
@@ -25,7 +26,11 @@ const VolunteerRemoveDetails: React.FC = () => {
                 <div className= "flex flex-2">
                     <ButtonBack/>
                 </div>
-                <ButtonExit/>
+                <div className = "">
+                    {/* <button onClick={() => setShowModal(true)}> TEST </button> */}
+                    <ButtonExit onClick={openModal}/>
+                    {showModal && <ExitModal  closeModal={closeModal}/>}
+                </div>
             </div>
             {/* Form Contents */}
             <div className = "flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center mt-5">
