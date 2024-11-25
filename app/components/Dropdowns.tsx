@@ -8,8 +8,7 @@ export function NameDropdown( { onChange } : dropdownProps ) {
         <select 
             className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray"
             onChange={onChange} 
-            defaultValue=""
-        >
+            defaultValue="">
             <option disabled value=""/>
             <option>Placeholder</option>
         </select>

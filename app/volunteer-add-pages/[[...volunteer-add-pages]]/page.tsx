@@ -16,6 +16,13 @@ interface Inventory {
 }
 
 const VolunteerAddPages: React.FC = () => {
+  const [currItem, setCurrItem] = useState<Inventory>({
+        itemName: '',
+        categoryName: '',
+        quantity: 0,
+        units: '',
+        lastUpdated: new Date(),
+  });
   const [currentStep, setCurrentStep] = useState<Step>('details');
 
   const handleNext = () => {
@@ -45,12 +52,12 @@ const VolunteerAddPages: React.FC = () => {
       <div className="flex justify-center w-full h-full">
         {currentStep === 'details' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddDetailsModule />
+            <VolunteerAddDetailsModule currItem={currItem} setCurrItem={setCurrItem} />
           </div>
         )}
         {currentStep === 'confirm' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddConfirmModule />
+            <VolunteerAddConfirmModule currItem={currItem}/>
           </div>
         )}
       </div>
@@ -67,14 +74,11 @@ const VolunteerAddPages: React.FC = () => {
 
 // Subcomponents
 
-const VolunteerAddDetailsModule: React.FC = () => {
-  const [currItem, setCurrItem] = useState<Inventory>({
-      itemName: '',
-      categoryName: '',
-      quantity: 0,
-      units: '',
-      lastUpdated: new Date()
-  });
+interface VolunteerAddDetailsModuleProps{
+    currItem: Inventory,
+    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>;
+}
+const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({currItem, setCurrItem}) => {
   return (
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
@@ -82,7 +86,8 @@ const VolunteerAddDetailsModule: React.FC = () => {
         <p className="mb-2">Category Name</p>
         <NameDropdown onChange={(e) => { 
             setCurrItem({ ...currItem, categoryName: e.target.value });
-            console.log(currItem);
+            //console.log(currItem); WON'T WORK: ASYNCHRONOUS
+            console.log('New currItem value:', { ...currItem, categoryName: e.target.value });
             }
         }/>
       </div>
@@ -108,9 +113,10 @@ const VolunteerAddDetailsModule: React.FC = () => {
   );
 };
 
-//const [currentItem, setCurrentItem] = useState<Inventory>
-
-const VolunteerAddConfirmModule: React.FC = () => {
+interface VolunteerAddConfirmModuleProps {
+    currItem: Inventory
+}
+const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ currItem }) => {
 
   return (
     <div>
@@ -121,7 +127,7 @@ const VolunteerAddConfirmModule: React.FC = () => {
         Add [quantity] [units] of [itemName].
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
-        <ButtonSubmit onClick={alert(currItem)}/>
+        <ButtonSubmit onClick={() => alert(JSON.stringify(currItem))}/>
       </div>
     </div>
   );
