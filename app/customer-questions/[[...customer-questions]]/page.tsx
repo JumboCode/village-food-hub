@@ -8,6 +8,7 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import SavedThankYou from '@app/saved-thank-you/[[...saved-thank-you]]/page';
+import { NameDropdown } from '@app/components/Dropdowns';
 
 // Phone Number Module
 const PhoneNumber: React.FC = () => {
@@ -68,7 +69,7 @@ const Name: React.FC = () => {
                 />
             </div>
 
-    </div>
+        </div>
     );
 };
 
@@ -129,30 +130,13 @@ const Address: React.FC = () => {
 };
 
 const HouseholdSize: React.FC = () => {
-    const [selectedSize, setSelectedSize] = useState<string | null>(null);
-    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedSize(event.target.value);
-    };
+    const sizes = ['1', '2,', '3', '4', '5', '6', '7', '8', '9', '10+']
     return (
       <div className="flex flex-col justify-center items-center py-10">
         <div className="flex flex-col items-center w-full max-w-lg">
-          <p className="text-[40px] font-bold mb-4">Household Size</p>
+          <p className="text-[40px] font-bold mb-10">Household Size</p>
           {/* Placeholder dropdown */}
-          <select
-            className="bg-gray-50 border border-gray-300 text-[24px] text-gray-900 rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 w-36"
-            value={selectedSize || ""}
-            onChange={handleChange}
-          >
-            <option value="" disabled>
-              Select
-            </option>
-            {Array.from({ length: 10 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-            <option value="10+">10+</option>
-          </select>
+          <NameDropdown options={sizes} />
         </div>
       </div>
     );
