@@ -19,6 +19,7 @@ const config: Config = {
         'purple': "#3851BC",
         'light-gray': "#E1E1E1",
         'gray': "#828282",
+        'dark-blue': "#3851BC"
       },
       fontFamily: {
         serif: ["'Crimson Text'", "serif"],
