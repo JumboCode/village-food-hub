@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         }
 
         record.lastVisitDate = new Date()
-        let response = await createDemographic({ ...record })
+        const response = await createDemographic({ ...record })
 
         return NextResponse.json(response, {status : 201})
     } catch (error) {
@@ -119,7 +119,7 @@ export async function PUT(
         }
 
         record.lastVisitDate = new Date()
-        let item = await updateDemographic({ ...record });
+        const item = await updateDemographic({ ...record });
 
         return NextResponse.json(item, { status : 200 })
     } catch (error) {
@@ -155,18 +155,31 @@ export async function DELETE(
     }
 }
 
-function validDemographic(record : any) {
+interface DemographicRecord {
+    phoneNumber: string;
+    takeCount: number;
+    donateCount: number;
+    name: string;
+    householdSize: number;
+    address: string;
+    lastVisitDate: string;
+  }
+
+function validDemographic(record : DemographicRecord): boolean {
 
     try {
-        if ("lastVisitDate" in record) {
-            delete record["lastVisitDate"]
-        }
+        const { lastVisitDate, ...recordWithoutLastVisitDate } = record;
 
-        const fields = new Set<string>(["phoneNumber", "takeCount", 
-                                        "donateCount", "name", 
-                                        "householdSize", "address"])
+        const fields = new Set<string>([
+            "phoneNumber",
+            "takeCount",
+            "donateCount",
+            "name",
+            "householdSize",
+            "address",
+          ]);
         
-        let keys = Object.keys(record)
+        const keys = Object.keys(recordWithoutLastVisitDate)
         if (keys.length !== fields.size) return false
 
         let fieldsMatch = true
