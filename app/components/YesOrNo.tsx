@@ -13,10 +13,11 @@ const YesOrNo: React.FC<YesOrNoProps> = ({ onChange }) => {
             type="radio"
             name="info-changed"
             value="yes"
-            className="radio checked:bg-green-500 mr-4 w-8 h-8"
+            className="radio checked:bg-light-green mr-4 w-8 h-8"
             onChange={() => onChange("yes")} 
+            required
           />
-          <span className="text-[40px] font-bold">Yes</span>
+          <span className="text-[28px] font-bold">Yes</span>
         </label>
       </div>
 
@@ -27,10 +28,11 @@ const YesOrNo: React.FC<YesOrNoProps> = ({ onChange }) => {
             type="radio"
             name="info-changed"
             value="no"
-            className="radio checked:bg-green-500 mr-4 w-8 h-8"
+            className="radio checked:bg-light-green mr-4 w-8 h-8"
             onChange={() => onChange("no")} 
+            required
           />
-          <span className="text-[40px] font-bold">No</span>
+          <span className="text-[28px] font-bold">No</span>
         </label>
       </div>
     </div>
