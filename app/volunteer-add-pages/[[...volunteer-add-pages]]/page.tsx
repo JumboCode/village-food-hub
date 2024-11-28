@@ -8,11 +8,11 @@ import { NameDropdown } from '@app/components/Dropdowns';
 type Step = 'details' | 'confirm';
 
 interface Inventory {
-  categoryName: string | undefined;
-  itemName: string | undefined;
-  quantity: number | undefined;
-  units: string | undefined;
-  lastUpdated: Date | undefined;
+  categoryName: string;
+  itemName: string;
+  quantity: number;
+  units: string;
+  lastUpdated: Date;
 }
 
 const VolunteerAddPages: React.FC = () => {
@@ -57,7 +57,7 @@ const VolunteerAddPages: React.FC = () => {
         )}
         {currentStep === 'confirm' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddConfirmModule currItem={currItem}/>
+            <VolunteerAddConfirmModule currItem={currItem} setCurrItem = {setCurrItem} />
           </div>
         )}
       </div>
@@ -65,7 +65,10 @@ const VolunteerAddPages: React.FC = () => {
       {/* Next Button */}
       {currentStep === 'details' && (
         <div className="flex justify-center mt-8">
-          <ButtonNext onClick={handleNext} />
+          <ButtonNext onClick={() => {
+              console.log(currItem)
+              handleNext();
+            }} />
         </div>
       )}
     </div>
@@ -84,16 +87,16 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
-        <NameDropdown onChange={(e) => { 
-            setCurrItem({ ...currItem, categoryName: e.target.value });
-            //console.log(currItem); WON'T WORK: ASYNCHRONOUS
-            console.log('New currItem value:', { ...currItem, categoryName: e.target.value });
-            }
+        <NameDropdown 
+        onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }
         }/>
       </div>
       <div className="font-bold text-[20px]">
         <p className="mb-2">Item Name</p>
-        <NameDropdown />
+        <NameDropdown onChange={(e) => { 
+            setCurrItem({ ...currItem, itemName: e.target.value });
+            }
+        }/>
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
@@ -102,11 +105,17 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
             type="text"
             placeholder=""
             className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
+            onBlur={(e) => {
+              setCurrItem({ ...currItem, quantity: Number(e.target.value) });
+            }}
           />
         </div>
         <div className="font-bold text-[20px] pt-6">
           <p className="mb-2">Units</p>
-          <NameDropdown />
+          <NameDropdown onChange={(e) => { 
+            setCurrItem({ ...currItem, units: e.target.value });
+          }
+        }/>
         </div>
       </div>
     </div>
@@ -115,9 +124,9 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
 
 interface VolunteerAddConfirmModuleProps {
     currItem: Inventory
+    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>
 }
-const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ currItem }) => {
-
+const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ currItem, setCurrItem }) => {
   return (
     <div>
       <div className="text-black crimson-bold flex text-4xl content-center justify-center text-center">
@@ -127,10 +136,34 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
         Add [quantity] [units] of [itemName].
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
-        <ButtonSubmit onClick={() => alert(JSON.stringify(currItem))}/>
+        <ButtonSubmit onClick={() => {
+          setCurrItem({ ...currItem, lastUpdated: new Date() })
+          fetch("../api/inventory", {method : 'GET'})
+            .then((response) => response.json())
+            .then((jsonData) => jsonData.data )
+            .then((items) => {
+              const exists = items.some((item : Inventory) => 
+                item.itemName == currItem.itemName && 
+                item.units    == currItem.units
+              )
+
+              console.log(exists)
+              if (exists) {
+                var method = 'PUT'
+              } else {
+                var method = 'POST'
+              }
+              fetch("../api/inventory", { 
+                method : method, 
+                body : JSON.stringify(currItem)
+              })
+              console.log(items)
+            })
+        }}/>
       </div>
     </div>
   );
 };
+
 
 export default VolunteerAddPages;

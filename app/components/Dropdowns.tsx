@@ -11,6 +11,7 @@ export function NameDropdown( { onChange } : dropdownProps ) {
             defaultValue="">
             <option disabled value=""/>
             <option>Placeholder</option>
+            <option>Alternative</option>
         </select>
     )
 }
