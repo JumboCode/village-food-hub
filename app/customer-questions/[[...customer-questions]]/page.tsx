@@ -7,7 +7,7 @@ import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
-import { Dropdown } from '@app/components/Dropdowns';
+import { NameDropdown } from '@app/components/Dropdowns';
 
 // Phone Number Module
 const PhoneNumber: React.FC = () => {
@@ -144,7 +144,7 @@ const HouseholdSize: React.FC = () => {
         <p className="text-[36px] font-bold mb-10">Household Size</p>
         {/* Placeholder dropdown */}
         <div className="w-52">
-            <Dropdown options={sizes} />
+            <NameDropdown options={sizes} />
         </div>
       </div>
     </div>

@@ -96,14 +96,14 @@ const VolunteerAddDetailsModule: React.FC = () => {
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2">Quantity</p>
+          <p className="mb-2 w-1/3">Quantity</p>
           <input
             type="text"
             placeholder=""
-            className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
+            className="input input-bordered input-xs max-w-xs rounded-xl border-light-gray"
           />
         </div>
-        <div className="font-bold text-[20px] pt-6">
+        <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
           <NameDropdown />
         </div>

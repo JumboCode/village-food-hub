@@ -1,11 +1,11 @@
 //implements rounded dropdown menu
 
-interface DropdownProps {
+interface NameDropdownProps {
     options: string[];
     onSelect: (selected: string) => void;
 }
 
-export function Dropdown({ options, onSelect }: DropdownProps) {
+export function NameDropdown({ options = [] }: NameDropdownProps) {
     return (
         <select 
             className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
