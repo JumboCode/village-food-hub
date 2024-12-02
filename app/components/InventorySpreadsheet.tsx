@@ -5,10 +5,13 @@ import downloadIcon from "../images/download.png";
 import editIcon from "../images/edit.png";
 import arrowsIcon from "../images/upAndDownArrows.png";
 
-const inventoryItems = [ ['date1', 'Fruits', 'Apple', 4, 'units'], ['date2','Fruits', 'Apple', 5, 'lbs'], 
-['date3','Vegetables', 'Carrot', 10, 'units'], ['date4','Grains', 'Rice', 2, 'kg'] ];
+interface InventorySpreadsheetProps {
+    inventoryItems: (string | number)[][];
+}
 
-export const InventoryPage: React.FC = () => {
+export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
+    console.log("inventoryItems:", inventoryItems);
+
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">

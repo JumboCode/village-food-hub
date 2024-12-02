@@ -1,12 +1,19 @@
 import React from "react";
-import {InventoryPage} from '@app/components/internalViewSpreadsheet';
+import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 
-const internalViewInventoryPage: React.FC = () => {
+const inventoryItems = [
+    ['date1', 'Fruits', 'Apple', 4, 'units'],
+    ['date2', 'Fruits', 'Apple', 5, 'lbs'],
+    ['date3', 'Vegetables', 'Carrot', 10, 'units'],
+    ['date4', 'Grains', 'Rice', 2, 'kg']
+];
+
+const InternalViewInventoryPage: React.FC = () => {
     
     return (
-        <InventoryPage/>
+        <InventorySpreadsheet inventoryItems={inventoryItems} />
     );
   };
   
-  export default InventoryPage;
+  export default InternalViewInventoryPage;
   
