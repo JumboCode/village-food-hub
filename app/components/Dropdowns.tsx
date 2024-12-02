@@ -2,10 +2,10 @@
 
 interface NameDropdownProps {
     options: string[];
-    onSelect: (selected: string) => void;
+    onSelect?: (selected: string) => void;
 }
 
-export function NameDropdown({ options = [] }: NameDropdownProps) {
+export function NameDropdown({ options = [], onSelect  = () => {} }: NameDropdownProps) {
     return (
         <select 
             className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
