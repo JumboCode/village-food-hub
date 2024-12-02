@@ -32,9 +32,10 @@ const VolunteerAddPages: React.FC = () => {
 
   const handleBack = () => {
     console.log('Back clicked, currentStep:', currentStep);
-    if (currentStep === 'confirm') {
+    if (currentStep === 'confirm')
       setCurrentStep('details');
-    }
+    else 
+      window.location.href = "../volunteer-landing";
   };
 
   return (
@@ -148,16 +149,17 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
               )
 
               console.log(exists)
-              if (exists) {
+              if (exists)
                 var method = 'PUT'
-              } else {
+              else
                 var method = 'POST'
-              }
+              
               fetch("../api/inventory", { 
                 method : method, 
                 body : JSON.stringify(currItem)
               })
               console.log(items)
+              window.location.href = "../saved-thank-you";
             })
         }}/>
       </div>

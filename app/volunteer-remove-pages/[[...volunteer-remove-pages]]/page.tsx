@@ -33,9 +33,10 @@ const VolunteerRemovePages: React.FC = () => {
 
   const handleBack = () => {
     console.log('Back clicked, currentStep:', currentStep);
-    if (currentStep === 'confirm') {
+    if (currentStep === 'confirm')
       setCurrentStep('details');
-    }
+    else 
+      window.location.href = "../volunteer-landing";
   };
 
   return (
@@ -192,6 +193,7 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
                   })
               }
               console.log(items)
+              window.location.href = "../saved-thank-you";
             })
       }}/>
       </div>
