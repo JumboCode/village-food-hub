@@ -20,6 +20,7 @@ const config: Config = {
         'light-gray': "#E1E1E1",
         'modal-gray': "#EEEEEE",
         'gray': "#828282",
+        'dark-blue': "#3851BC"
       },
       fontFamily: {
         serif: ["'Crimson Text'", "serif"],
