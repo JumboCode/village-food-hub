@@ -18,6 +18,7 @@ const config: Config = {
         'dark-purple': "#293b8b",
         'purple': "#3851BC",
         'light-gray': "#E1E1E1",
+        'modal-gray': "#EEEEEE",
         'gray': "#828282",
         'dark-blue': "#3851BC"
       },

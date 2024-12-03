@@ -24,5 +24,13 @@ model inventory {
   units        String
   lastUpdated  DateTime
 
-  @@id([itemName, units]) 
+  @@id([itemName, units])
+}
+
+model categories {
+  itemName String
+  units    String[]
+  name     String
+
+  @@id([itemName, name])
 }
