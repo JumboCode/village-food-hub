@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
 import { NameDropdown } from '@app/components/Dropdowns';
+import ExitModal from "@app/components/ExitModal"
 
 type Step = 'details' | 'confirm';
 
@@ -24,6 +25,7 @@ const VolunteerAddPages: React.FC = () => {
         lastUpdated: new Date(),
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
+  const [showModal, setShowModal] = useState(false);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -38,15 +40,28 @@ const VolunteerAddPages: React.FC = () => {
       window.location.href = "../volunteer-landing";
   };
 
+  const openModal = (): void => {
+      setShowModal(true);
+  };
+
+  const closeModal = (): void => {
+      setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
       <UpdateInventoryBanner />
 
       {/* Back and Exit buttons */}
-      <div className="flex flex-row h-full w-full justify-between px-32 py-10">
-        <ButtonBack onClick={handleBack} />
-        <ButtonExit />
+      <div className = "flex flex-row h-full w-full justify-between mt-10 px-40 py-18">
+        <div className= "flex flex-2">
+            <ButtonBack onClick={handleBack}/>
+        </div>
+        <div className = "">
+            <ButtonExit onClick={openModal}/>
+            {showModal && <ExitModal  closeModal={closeModal}/>}
+        </div>
       </div>
 
       {/* Page Content */}
@@ -101,7 +116,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2">Quantity</p>
+          <p className="mb-2 w-1/3">Quantity</p>
           <input
             type="text"
             placeholder=""
@@ -111,7 +126,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
             }}
           />
         </div>
-        <div className="font-bold text-[20px] pt-6">
+        <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
           <NameDropdown onChange={(e) => { 
             setCurrItem({ ...currItem, units: e.target.value });
