@@ -25,6 +25,8 @@ const VolunteerRemovePages: React.FC = () => {
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [nextDisabled, setNextDisabled] = useState(true);
+  const [itemExists, setItemExists] = useState("")
+  const [validQuantity, setValidQuantity] = useState("")
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -58,6 +60,10 @@ const VolunteerRemovePages: React.FC = () => {
               currItem={currItem} 
               setCurrItem={setCurrItem} 
               setNextDisabled={setNextDisabled}
+              itemExists={itemExists}
+              validQuantity={validQuantity}
+              setItemExists={setItemExists}
+              setValidQuantity={setValidQuantity}
             />
           </div>
         )}
@@ -76,6 +82,8 @@ const VolunteerRemovePages: React.FC = () => {
           <ButtonNext 
             disabled={ nextDisabled }
             onClick={() => {
+              setItemExists("")
+              setValidQuantity("")
               console.log(currItem);
               setCurrItem({ ...currItem, lastUpdated: new Date() })
               fetch("../api/inventory", {method : 'GET'})
@@ -93,10 +101,10 @@ const VolunteerRemovePages: React.FC = () => {
                       handleNext();
                     } else {
                       setNextDisabled(true)
-                      throw new Error("Can't remove " + currItem.quantity + " " + requestedItem.units + " of " + requestedItem.itemName + ", only " + requestedItem.quantity + " in inventory");
+                      setValidQuantity("Please input a valid number to remove from the inventory")
                     }
                   } else {
-                    throw new Error('Item with name' + currItem.itemName + ' and units ' + currItem.units + 'does not exist');
+                    setItemExists("Item does not exist in inventory")
                   }
                   console.log(items)
                 })
@@ -112,27 +120,40 @@ const VolunteerRemovePages: React.FC = () => {
 interface VolunteerRemoveDetailsModuleProps{
   currItem: Inventory,
   setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>,
-  setNextDisabled: React.Dispatch<React.SetStateAction<boolean>>
+  setNextDisabled: React.Dispatch<React.SetStateAction<boolean>>,
+  itemExists : string,
+  validQuantity : string,
+  setItemExists : React.Dispatch<React.SetStateAction<string>>,
+  setValidQuantity : React.Dispatch<React.SetStateAction<string>>,
 }
 
-const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> = ({ currItem,  setCurrItem, setNextDisabled}) => {
+const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> = ({ currItem,  setCurrItem, setNextDisabled, itemExists, validQuantity, setItemExists, setValidQuantity}) => {
   return (
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you removing?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
         <NameDropdown 
-          onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }}
+          onChange={(e) => { 
+            setItemExists("")
+            setCurrItem({ ...currItem, categoryName: e.target.value }); 
+          }}
         />
       </div>
       <div className="font-bold text-[20px]">
-        <p className="mb-2">Item Name</p>
+        <p className="mb-2 flex justify-between items-end">
+            <span>Item Name</span>
+            <span className='text-[16px] text-red'>{itemExists}</span>
+          </p>
         <NameDropdown
-          onChange={(e) => { setCurrItem({ ...currItem, itemName: e.target.value }); }}
+          onChange={(e) => { 
+            setItemExists("")
+            setCurrItem({ ...currItem, itemName: e.target.value }); 
+          }}
         />
       </div>
       <div className="flex flex-row w-full justify-between">
-        <div className="font-bold text-[20px] pt-6">
+        <div className="font-bold text-[20px] pt-6 flex flex-col">
           <p className="mb-2">Quantity</p>
           <input
             type="text"
@@ -140,9 +161,11 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
             onBlur={(e) => {
               setCurrItem({ ...currItem, quantity: Number(e.target.value) })
+              setValidQuantity("")
               setNextDisabled(false)
             }}
-          />
+            />
+            <span className='text-[16px] text-red'>{validQuantity}&nbsp;</span>
         </div>
         <div className="font-bold text-[20px] pt-6">
           <p className="mb-2">Units</p>
