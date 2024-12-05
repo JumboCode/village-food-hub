@@ -1,22 +1,20 @@
 //implements rounded dropdown menu
-
-interface NameDropdownProps {
+interface dropdownProps {
     options: string[];
-    onSelect?: (selected: string) => void;
+    onChange?: (e : any) => void;
 }
 
-export function NameDropdown({ options = [], onSelect  = () => {} }: NameDropdownProps) {
+export function NameDropdown( { options = [], onChange, onSelect } : dropdownProps ) {
     return (
         <select 
-            className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
-            defaultValue=""
-            onChange={(e) => onSelect(e.target.value)}
-        >
+            className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray"
+            onChange={onChange} 
+            defaultValue="">
             <option disabled value=""/>
             {options.map((option, index) => (
-                    <option key={index} value={option}>
-                    {option}
-                    </option>
+                <option key={index} value={option}>
+                {option}
+                </option>
             ))}
         </select>
     )
