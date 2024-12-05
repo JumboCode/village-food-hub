@@ -93,10 +93,16 @@ const VolunteerAddPages: React.FC = () => {
 
 // Subcomponents
 
+// TODO: THESE ARE DUMMY VALUES
+const categoryNames = ['Bakery', 'Dairy', 'Frozen', 'Grocery', 'Meat', 'Produce'];
+const itemNames = ['Apples', 'Bananas', 'Bread', 'Butter', 'Carrots', 'Cheese', 'Chicken', 'Eggs', 'Flour', 'Ground Beef', 'Milk', 'Oranges', 'Pasta', 'Pork', 'Potatoes', 'Rice', 'Salmon', 'Spinach', 'Sugar', 'Tomatoes', 'Turkey', 'Yogurt'];
+const units = ['lbs', 'g', 'kg', 'oz', 'gallon', 'quart', 'pint'];
+
 interface VolunteerAddDetailsModuleProps{
     currItem: Inventory,
     setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>;
 }
+
 const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({currItem, setCurrItem}) => {
   return (
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
@@ -104,14 +110,15 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
         <NameDropdown 
-        onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }
+          options={categoryNames}
+          onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }
         }/>
       </div>
       <div className="font-bold text-[20px]">
         <p className="mb-2">Item Name</p>
-        <NameDropdown onChange={(e) => { 
-            setCurrItem({ ...currItem, itemName: e.target.value });
-            }
+        <NameDropdown 
+          options={itemNames}
+          onChange={(e) => { setCurrItem({ ...currItem, itemName: e.target.value }); }
         }/>
       </div>
       <div className="flex flex-row w-full justify-between">
@@ -128,9 +135,9 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
-          <NameDropdown onChange={(e) => { 
-            setCurrItem({ ...currItem, units: e.target.value });
-          }
+          <NameDropdown 
+            options={units}
+            onChange={(e) => { setCurrItem({ ...currItem, units: e.target.value }); }
         }/>
         </div>
       </div>
