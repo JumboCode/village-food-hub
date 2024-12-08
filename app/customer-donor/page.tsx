@@ -1,4 +1,7 @@
 // imports
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { ButtonBack,ButtonExit, NoDone, YesProceed} from "../components/SurveyButtons";
 import UpdateInventoryBanner from "../components/UpdateInventoryBanner";
 import ProgressBar from "@app/components/ProgressBar";
@@ -6,6 +9,16 @@ import ProgressBar from "@app/components/ProgressBar";
 const CustomerDonor: React.FC = () => {
     
     // TODO: Unsure what to do about where to send after pressing a button
+    const router = useRouter();
+    const handleBack = () => {
+        router.push('/customer-action');
+    }
+    const handleNo = () => {
+        router.push('/unsaved-thank-you');
+    }
+    const handleYes = () => {
+        router.push('/customer-questions');
+    }
 
     return (
         <div>
@@ -25,7 +38,7 @@ const CustomerDonor: React.FC = () => {
             <div>
                 {/* Exit Button and Back Button */}
                 <div className="flex pt-[40px] pl-[100px] pr-[100px] crimson-regular text-2xl justify-between">
-                    <ButtonBack/>
+                    <ButtonBack onClick={handleBack}/>
                     <ButtonExit/>
                 </div>
                 {/* Central text */}
@@ -37,8 +50,8 @@ const CustomerDonor: React.FC = () => {
                 </div>
                 {/* Next Button */}
                 <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
-                    <YesProceed/>
-                    <NoDone/>
+                    <YesProceed onClick={handleYes}/>
+                    <NoDone onClick={handleNo}/>
                 </div>
             </div>
         </div>

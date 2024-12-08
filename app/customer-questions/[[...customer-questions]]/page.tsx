@@ -228,7 +228,11 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('changes');
         break;
       case 'changes':
-        setCurrentStep('name');
+        if (responses.changes == "yes") {
+          setCurrentStep('name');
+        } else {
+          router.push('/saved-thank-you');
+        }
         break;
       case 'name':
         setCurrentStep('address');
@@ -249,6 +253,9 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleBackClick = () => {
     switch (currentStep) {
+      case 'phoneNum':
+        router.push('/welcome-page');
+        break;
       case 'confirmation':
         setCurrentStep('houseSize');
         break;
@@ -271,7 +278,8 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
-    setCurrentStep('confirmation')
+    router.push('/saved-thank-you');
+    // setCurrentStep('confirmation')
   };
 
   const getProgress = () => {

@@ -1,11 +1,18 @@
 // imports
+'use client';
+
 import Image from 'next/image';
 import React from 'react';
 import welcomeScreenBG from '../../images/welcome-screen-background.png';
 import welcomeBWLogo from '../../images/welcome-bw-logo.png';
 import qrCode from '../../images/qr-code.png';
+import { useRouter } from 'next/navigation';
 
 const WelcomePage: React.FC = () => {
+    const router = useRouter();
+    const startSurvey = () => {
+        router.push('/customer-action');
+    }
     
   return (
     //creates columns and sets
@@ -93,7 +100,7 @@ const WelcomePage: React.FC = () => {
 
                 {/* the button to start a demographic survey */}
                 <div className="absolute bottom-0 align-bottom pb-20">
-                    <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8">
+                    <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8" onClick={startSurvey}>
                         Start Demographics Survey →
                     </button>
                 </div>

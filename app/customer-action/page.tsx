@@ -22,8 +22,10 @@ const CustomerAction: React.FC = () => {
 
         // if the recieve checkbox is not clicked, visit the donor page
         if (!recieve) {
-            router.push("/customer-donor");
-        } 
+            router.push('/customer-donor');
+        } else {
+            router.push('/customer-questions');
+        }
     }
     
     return (
