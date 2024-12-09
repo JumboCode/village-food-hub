@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function createCategory(data: {
@@ -187,4 +188,21 @@ function validCategory(record : CategoryRecord): boolean {
     }
 }
 
-        
+// export async function getAllCategories(): Promise<string[]> {
+//     try {
+//         const response = await GET();
+//         if (response.status === 200) {
+//             const items = await response.json(); // Assuming items is an array of objects
+      
+//             // Extract the itemName property from each item and return it as a string array
+//             const itemNames: string[] = items.map((item: { itemName: string }) => item.itemName);
+      
+//             return itemNames; // Return the array of item names
+//         } else {
+//             throw new Error('Failed to fetch categories');
+//         }
+//     } catch (error) {
+//         console.error('Error in getItemNames:', error);
+//         return []; // Return an empty array if an error occurs
+//       }
+// }

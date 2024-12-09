@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
 import { NameDropdown } from '@app/components/Dropdowns';
@@ -19,6 +19,9 @@ interface Inventory {
 const VolunteerAddPages: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [showModal, setShowModal] = useState(false);
+  // const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isDropdownsDisabled, setDropdownsDisabled] = useState(true);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -40,6 +43,11 @@ const VolunteerAddPages: React.FC = () => {
       setShowModal(false);
   };
 
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setDropdownsDisabled(!value); 
+  };
+  
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
@@ -88,7 +96,7 @@ const VolunteerAddDetailsModule: React.FC = () => {
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
-        <NameDropdown />
+        <NameDropdown fetchUrl="/api/categories"/>
       </div>
       <div className="font-bold text-[20px]">
         <p className="mb-2">Item Name</p>
