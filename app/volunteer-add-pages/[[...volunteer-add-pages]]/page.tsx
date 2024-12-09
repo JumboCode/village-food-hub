@@ -26,6 +26,7 @@ const VolunteerAddPages: React.FC = () => {
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [showModal, setShowModal] = useState(false);
+  const [nextDisabled, setNextDisabled] = useState(true);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -68,12 +69,20 @@ const VolunteerAddPages: React.FC = () => {
       <div className="flex justify-center w-full h-full">
         {currentStep === 'details' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddDetailsModule currItem={currItem} setCurrItem={setCurrItem} />
+            <VolunteerAddDetailsModule 
+              currItem={currItem} 
+              setCurrItem={setCurrItem} 
+              setNextDisabled={setNextDisabled}
+            />
           </div>
         )}
         {currentStep === 'confirm' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddConfirmModule currItem={currItem} setCurrItem = {setCurrItem} />
+            <VolunteerAddConfirmModule 
+              currItem={currItem} 
+              setCurrItem = {setCurrItem} 
+              setNextDisabled={setNextDisabled}
+            />
           </div>
         )}
       </div>
@@ -81,10 +90,13 @@ const VolunteerAddPages: React.FC = () => {
       {/* Next Button */}
       {currentStep === 'details' && (
         <div className="flex justify-center mt-8">
-          <ButtonNext onClick={() => {
-              console.log(currItem)
+          <ButtonNext 
+            disabled={nextDisabled} 
+            onClick={() => {
+              console.log(currItem);
               handleNext();
-            }} />
+            }} 
+          />
         </div>
       )}
     </div>
@@ -100,7 +112,8 @@ const units = ['lbs', 'g', 'kg', 'oz', 'gallon', 'quart', 'pint'];
 
 interface VolunteerAddDetailsModuleProps{
     currItem: Inventory,
-    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>;
+    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>,
+    setNextDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({currItem, setCurrItem}) => {
@@ -108,14 +121,14 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
-        <p className="mb-2">Category Name</p>
+        <p className="mb-2">Category Name <span className="text-red">*</span></p>
         <NameDropdown 
           options={categoryNames}
           onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }
         }/>
       </div>
       <div className="font-bold text-[20px]">
-        <p className="mb-2">Item Name</p>
+        <p className="mb-2">Item Name <span className="text-red">*</span></p>
         <NameDropdown 
           options={itemNames}
           onChange={(e) => { setCurrItem({ ...currItem, itemName: e.target.value }); }
@@ -123,7 +136,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2 w-1/3">Quantity</p>
+          <p className="mb-2">Quantity <span className="text-red">*</span></p>
           <input
             type="text"
             placeholder=""
@@ -134,7 +147,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({cu
           />
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
-          <p className="mb-2">Units</p>
+          <p className="mb-2">Units <span className="text-red">*</span></p>
           <NameDropdown 
             options={units}
             onChange={(e) => { setCurrItem({ ...currItem, units: e.target.value }); }

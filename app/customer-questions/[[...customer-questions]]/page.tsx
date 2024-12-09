@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
@@ -73,18 +73,23 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
 };
 
 // Phone Number Module
-const PhoneNumber: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
+const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   const handlePhoneNumberChange = (newValue: string) => {
-      setPhoneNumber(newValue);
-      onChange(newValue);
+    setPhoneNumber(newValue);
+    onChange(newValue);
+    if (newValue === "" || newValue === "+1") {
+      setNextDisabled(true);
+    } else {
+      setNextDisabled(false);
+    }
   };
 
   return (
       <div className="flex flex-col justify-center items-center py-10">
           <div className="flex flex-col items-center w-full max-w-lg">
-              <p className="text-[36px] font-bold mb-8">Phone Number</p>
+              <p className="text-[36px] font-bold mb-8">Phone Number <span className="text-red">*</span></p>
               <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
           </div>
       </div>
@@ -93,7 +98,7 @@ const PhoneNumber: React.FC<{ onChange: (value: string) => void }> = ({ onChange
 
 
 // Information Changed Module
-const Changes: React.FC<{ onChange: (newValue: string) => void }> = ({onChange}) => {
+const Changes: React.FC<{ onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({onChange, setNextDisabled}) => {
     const [value, setValue] = useState<string>("");
 
     const handleYesNoChange = (newValue: string) => {
@@ -105,9 +110,9 @@ const Changes: React.FC<{ onChange: (newValue: string) => void }> = ({onChange})
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full">
-        <p className="text-[36px] font-bold">Has your information changed?</p>
+        <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
         <p className="text-[28px] font-bold mb-4">(Name, Address, Household size)</p>
-        <YesOrNo onChange={handleYesNoChange} />
+        <YesOrNo onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
   );
@@ -115,10 +120,24 @@ const Changes: React.FC<{ onChange: (newValue: string) => void }> = ({onChange})
 
 
 // Full Name
-const Name: React.FC<{
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
-}> = ({ onFirstNameChange, onLastNameChange }) => {
+const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onFirstNameChange, onLastNameChange, setNextDisabled }) => {
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value);
+    onFirstNameChange(value);
+  };
+
+  const handleLastNameChange = (value: string) => {
+    setLastName(value);
+    onLastNameChange(value);
+  };
+
+  useEffect(() => {
+    setNextDisabled(firstName === "" || lastName === "");
+  }, [firstName, lastName, setNextDisabled]);
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex flex-col items-center w-full">
@@ -126,21 +145,21 @@ const Name: React.FC<{
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">First Name</p>
+        <p className="text-[24px] mt-4">First Name <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
-          onChange={(e) => onFirstNameChange(e.target.value)}
+          onChange={(e) => handleFirstNameChange(e.target.value)}
           required
         />
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">Last Name</p>
+        <p className="text-[24px] mt-4">Last Name <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
-          onChange={(e) => onLastNameChange(e.target.value)}
+          onChange={(e) => handleLastNameChange(e.target.value)}
           required
         />
       </div>
@@ -149,82 +168,105 @@ const Name: React.FC<{
 };
 
 // Address
-const Address: React.FC<{
-  onLine1Change: (value: string) => void;
-  onLine2Change: (value: string) => void;
-  onCityChange: (value: string) => void;
-  onStateChange: (value: string) => void;
-  onZipChange: (value: string) => void;
-}> = ({ onLine1Change, onLine2Change, onCityChange, onStateChange, onZipChange }) => {
-    return (
-        <div className="flex flex-col items-center">
-        <div className="flex flex-col items-center w-full">
-            <p className="text-[36px] font-bold mb-4">Address</p>
-        </div>
+const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+  const [line, setLine] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [zip, setZip] = useState<string>("");
 
-        <div className="w-2/3">
-            <p className="text-[24px] mt-4">Address Line 1</p>
-            <input
-              type="text"
-              className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              onChange={(e) => onLine1Change(e.target.value)}
-              required
-            />
-        </div>
+  const handleLineChange = (value: string) => {
+    setLine(value);
+    onAddressLineChange(value);
+    // setNextDisabled(value === "" || city === "" || state === "" || zip === "");
+  };
 
-        <div className="w-2/3">
-            <p className="text-[24px] mt-4">Address Line 2</p>
-            <input
-              type="text"
-              className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              onChange={(e) => onLine2Change(e.target.value)}
-            />
-        </div>
+  const handleCityChange = (value: string) => {
+    setCity(value);
+    onCityChange(value);
+    // setNextDisabled(line === "" || value === "" || state === "" || zip === "");
+  };
 
-        <div className='flex flex-row w-2/3 justify-between gap-2'>
-            <div className='flex-1 mr-3'>
-            <p className="text-[24px] mt-4">City</p>
-            <input
-                type="text"
-                className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-                onChange={(e) => onCityChange(e.target.value)}
-                required
-            />
-            </div>
-            <div className='flex-1 mr-3'>
-            <p className="text-[24px] mt-4">State</p>
-            <input
-                type="text"
-                className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-                onChange={(e) => onStateChange(e.target.value)}
-                required
-            />
-            </div>
-            <div className='flex-1'>
-            <p className="text-[24px] mt-4">Zip Code</p>
-            <input
-                type="text"
-                className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-                onChange={(e) => onZipChange(e.target.value)}
-                required
-            />
-            </div>
+  const handleStateChange = (value: string) => {
+    setState(value);
+    onStateChange(value);
+    // setNextDisabled(line === "" || city === "" || value === "" || zip === "");
+  };
+
+  const handleZipChange = (value: string) => {
+    setZip(value);
+    onZipChange(value);
+    // setNextDisabled(line === "" || city === "" || state === "" || value === "");
+  };
+
+  useEffect(() => {
+    setNextDisabled(line === "" || city === "" || state === "" || zip === "");
+  }, [line, city, state, zip, setNextDisabled]);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center w-full">
+        <p className="text-[36px] font-bold mb-4">Address</p>
+      </div>
+
+      <div className="w-2/3">
+        <p className="text-[24px] mt-4">Address Line <span className="text-red">*</span></p>
+        <input
+          type="text"
+          className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+          onChange={(e) => handleLineChange(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className='flex flex-row w-2/3 justify-between gap-2'>
+        <div className='flex-1 mr-3'>
+          <p className="text-[24px] mt-4">City <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleCityChange(e.target.value)}
+            required
+          />
         </div>
+        <div className='flex-1 mr-3'>
+          <p className="text-[24px] mt-4">State <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleStateChange(e.target.value)}
+            required
+          />
         </div>
-    );
+        <div className='flex-1'>
+          <p className="text-[24px] mt-4">Zip Code <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleZipChange(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+    </div>
+  );
 };
 
-
-
 // Household Size
-const HouseholdSize: React.FC<{ onChange: (value: number) => void }> = ({ onChange }) => {
+const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
+  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    const sizeValue = value === "" ? null : Number(value);
+    onChange(sizeValue);
+    setSubmitDisabled(sizeValue === null);
+  };
+
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full max-w-lg">
-        <p className="text-[36px] font-bold mb-10">Household Size</p>
+        <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={(value) => onChange(Number(value))} />
+          <NameDropdown options={sizes} onChange={handleSizeChange} />
         </div>
       </div>
     </div>
@@ -276,6 +318,7 @@ const DemographicsSurvey: React.FC = () => {
     householdSize: 0,
   });
 
+  // For routing
   const [receive, setReceive] = useState(false);
   const [donate, setDonate] = useState(false);
 
@@ -292,6 +335,10 @@ const DemographicsSurvey: React.FC = () => {
       router.push('/unsaved-thank-you');
     }
   };
+  
+  // For disabling empty inputs
+  const [nextDisabled, setNextDisabled] = useState(true);
+  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const updatePhoneNumber = (value: string) => {
     setResponses((prev) => ({ ...prev, phoneNumber: value }));
@@ -321,6 +368,8 @@ const DemographicsSurvey: React.FC = () => {
   
 
   const handleNextClick = () => {
+    if (nextDisabled) return;
+
     switch (currentStep) {
       case 'action':
         if (!responses.receive) {
@@ -435,29 +484,31 @@ const DemographicsSurvey: React.FC = () => {
       <div className='w-full'>
         {currentStep === 'action'   && <CustomerAction onChange={updateAction} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
-        {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} />}
-        {currentStep === 'changes' && <Changes onChange={updateChanges} />}
+        {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
+        {currentStep === 'changes' && <Changes onChange={updateChanges} setNextDisabled={setNextDisabled} />}
         {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}
-                                          onLastNameChange={(value) => updateName('lastName', value)} />}
-        {currentStep === 'address' && <Address onLine1Change={(value) => updateAddress('line1', value)}
-                                                onLine2Change={(value) => updateAddress('line2', value)}
+                                          onLastNameChange={(value) => updateName('lastName', value)} 
+                                          setNextDisabled={setNextDisabled} />}
+        {currentStep === 'address' && <Address onAddressLineChange={(value) => updateAddress('line1', value)}
                                                 onCityChange={(value) => updateAddress('city', value)}
                                                 onStateChange={(value) => updateAddress('state', value)}
-                                                onZipChange={(value) => updateAddress('zip', value)} />}
-        {currentStep === 'houseSize' && <HouseholdSize onChange={updateHouseholdSize} />}
+                                                onZipChange={(value) => updateAddress('zip', value)} 
+                                                setNextDisabled={setNextDisabled} />}
+        {currentStep === 'houseSize' && <HouseholdSize onChange={updateHouseholdSize} 
+                                                       setSubmitDisabled={setSubmitDisabled} />}
         {currentStep === 'confirmation' && <Confirmation />}
       </div>
 
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>
         {(() => {
           if (currentStep === 'houseSize') {
-            return <ButtonSubmit onClick={handleSubmit} />;
+            return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
           } else if (currentStep === 'confirmation') {
             return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
                       { "OK" }
                     </button>
           } else if (currentStep !== 'donor') {
-            return <ButtonNext onClick={handleNextClick} />;
+            return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
       </div>

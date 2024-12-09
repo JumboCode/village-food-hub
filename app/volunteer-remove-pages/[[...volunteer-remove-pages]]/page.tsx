@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
 import { NameDropdown } from '@app/components/Dropdowns';
+import ExitModal from "@app/components/ExitModal"
 
 type Step = 'details' | 'confirm';
 
@@ -24,6 +25,7 @@ const VolunteerRemovePages: React.FC = () => {
         lastUpdated: new Date(),
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
+  const [showModal, setShowModal] = useState(false);
   const [nextDisabled, setNextDisabled] = useState(true);
   const [itemExists, setItemExists] = useState("")
   const [validQuantity, setValidQuantity] = useState("")
@@ -41,15 +43,28 @@ const VolunteerRemovePages: React.FC = () => {
       window.location.href = "../volunteer-landing";
   };
 
+  const openModal = (): void => {
+    setShowModal(true);
+  };
+
+  const closeModal = (): void => {
+    setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
       <UpdateInventoryBanner />
 
       {/* Back and Exit buttons */}
-      <div className="flex flex-row h-full w-full justify-between px-32 py-10">
-        <ButtonBack onClick={handleBack} />
-        <ButtonExit />
+      <div className = "flex flex-row h-full w-full justify-between mt-10 px-40 py-18">
+        <div className= "flex flex-2">
+            <ButtonBack onClick={handleBack}/>
+        </div>
+        <div className = "">
+            <ButtonExit onClick={openModal}/>
+            {showModal && <ExitModal  closeModal={closeModal}/>}
+        </div>
       </div>
 
       {/* Page Content */}
@@ -138,7 +153,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you removing?</p>
       <div className="font-bold text-[20px] py-4">
-        <p className="mb-2">Category Name</p>
+        <p className="mb-2">Category Name <span className="text-red">*</span></p>
         <NameDropdown 
           options={categoryNames}
           onChange={(e) => { 
@@ -148,8 +163,9 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
         />
       </div>
       <div className="font-bold text-[20px]">
-        <p className="mb-2 flex justify-between items-end">
-            <span>Item Name</span>
+        <p className="mb-2">
+            Item Name <span className="text-red">*</span>
+            {/* <span>Item Name <span className="text-red">*</span></span> */}
             <span className='text-[16px] text-red'>{itemExists}</span>
           </p>
         <NameDropdown
@@ -162,7 +178,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6 flex flex-col">
-          <p className="mb-2">Quantity</p>
+          <p className="mb-2">Quantity <span className="text-red">*</span></p>
           <input
             type="text"
             placeholder=""
@@ -176,7 +192,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             <span className='text-[16px] text-red'>{validQuantity}&nbsp;</span>
         </div>
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2">Units</p>
+          <p className="mb-2">Units <span className="text-red">*</span></p>
           <NameDropdown 
             options={units}
             onChange={(e) => { setCurrItem({ ...currItem, units: e.target.value }); }}
