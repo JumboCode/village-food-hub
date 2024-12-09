@@ -83,12 +83,11 @@ const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled
   const handlePhoneNumberChange = (newValue: string) => {
     setPhoneNumber(newValue);
     onChange(newValue);
-    if (newValue === "" || newValue === "+1") {
-      setNextDisabled(true);
-    } else {
-      setNextDisabled(false);
-    }
   };
+
+  useEffect(() => {
+    setNextDisabled(phoneNumber === "" || phoneNumber === "+1");
+  }, [phoneNumber, setNextDisabled]);
 
   return (
       <div className="flex flex-col justify-center items-center py-10">
@@ -341,7 +340,7 @@ const DemographicsSurvey: React.FC = () => {
   };
   
   // For disabling empty inputs
-  const [nextDisabled, setNextDisabled] = useState(false);
+  const [nextDisabled, setNextDisabled] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const updatePhoneNumber = (value: string) => {
