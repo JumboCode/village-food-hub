@@ -1,7 +1,7 @@
 //implements rounded dropdown menu
 interface dropdownProps {
     options: string[];
-    onChange?: (e: any) => void;
+    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     setSubmitDisabled?: (disabled: boolean) => void;
     value?: string;
 }

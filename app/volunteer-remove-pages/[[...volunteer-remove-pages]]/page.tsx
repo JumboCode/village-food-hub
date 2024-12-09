@@ -235,7 +235,7 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
                 item.units    == currItem.units
               )
               if (requestedItem.quantity > currItem.quantity) {
-                  let newQuantity = requestedItem.quantity - currItem.quantity
+                  const newQuantity = requestedItem.quantity - currItem.quantity
                   fetch('../api/inventory', {
                       method : 'PUT',
                       body : JSON.stringify({ ...currItem, quantity : newQuantity})

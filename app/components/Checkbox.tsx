@@ -1,4 +1,4 @@
-const Checkbox = ({ state, setState }: { state: boolean, setState: any }) => {
+const Checkbox = ({ state, setState }: { state: boolean, setState: React.Dispatch<React.SetStateAction<boolean>> }) => {
     
     function updateState () {
         setState(!state);

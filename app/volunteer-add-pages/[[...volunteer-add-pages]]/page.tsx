@@ -81,7 +81,6 @@ const VolunteerAddPages: React.FC = () => {
             <VolunteerAddConfirmModule 
               currItem={currItem} 
               setCurrItem={setCurrItem} 
-              setNextDisabled={setNextDisabled}
             />
           </div>
         )}
@@ -171,6 +170,7 @@ interface VolunteerAddConfirmModuleProps {
     currItem: Inventory
     setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>
 }
+
 const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ currItem, setCurrItem }) => {
   return (
     <div>
@@ -182,34 +182,30 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
         <ButtonSubmit onClick={() => {
-          setCurrItem({ ...currItem, lastUpdated: new Date() })
-          fetch("../api/inventory", {method : 'GET'})
+          setCurrItem({ ...currItem, lastUpdated: new Date() });
+          fetch("../api/inventory", { method: 'GET' })
             .then((response) => response.json())
-            .then((jsonData) => jsonData.data )
+            .then((jsonData) => jsonData.data)
             .then((items) => {
-              const exists = items.some((item : Inventory) => 
-                item.itemName == currItem.itemName && 
-                item.units    == currItem.units
-              )
+              const exists = items.some((item: Inventory) =>
+                item.itemName == currItem.itemName &&
+                item.units == currItem.units
+              );
 
-              console.log(exists)
-              if (exists)
-                var method = 'PUT'
-              else
-                var method = 'POST'
-              
-              fetch("../api/inventory", { 
-                method : method, 
-                body : JSON.stringify(currItem)
-              })
-              console.log(items)
+              console.log(exists);
+              const method = exists ? 'PUT' : 'POST';
+
+              fetch("../api/inventory", {
+                method: method,
+                body: JSON.stringify(currItem)
+              });
+              console.log(items);
               window.location.href = "../volunteer-saved";
-            })
-        }}/>
+            });
+        }} />
       </div>
     </div>
   );
 };
-
 
 export default VolunteerAddPages;

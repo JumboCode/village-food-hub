@@ -80,25 +80,27 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
 const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
 
-  const handlePhoneNumberChange = (newValue: string) => {
-    setPhoneNumber(newValue);
-    onChange(newValue);
+  const handlePhoneNumberChange = (newValue: string | undefined) => {
+    const value = newValue || "";
+    setPhoneNumber(value);
+    onChange(value);
   };
 
   useEffect(() => {
-    setNextDisabled(phoneNumber === "" || phoneNumber === "+1");
+    // Remove any country code prefix (e.g., +1, +44, etc.)
+    const phoneNumberWithoutCountryCode = phoneNumber.replace(/^\+\d+/, '');
+    setNextDisabled(phoneNumberWithoutCountryCode === "");
   }, [phoneNumber, setNextDisabled]);
 
   return (
-      <div className="flex flex-col justify-center items-center py-10">
-          <div className="flex flex-col items-center w-full max-w-lg">
-              <p className="text-[36px] font-bold mb-8">Phone Number <span className="text-red">*</span></p>
-              <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
-          </div>
-      </div>
+    <div className="flex flex-col justify-center items-center py-10">
+        <div className="flex flex-col items-center w-full max-w-lg">
+            <p className="text-[36px] font-bold mb-8">Phone Number <span className="text-red">*</span></p>
+            <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
+        </div>
+    </div>
   );
 };
-
 
 // Information Changed Module
 const Changes: React.FC<{ onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({onChange, setNextDisabled}) => {
@@ -258,9 +260,9 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
 const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    const sizeValue = value === "" ? null : Number(value);
+    const sizeValue = value === "" ? 0 : Number(value); // Default to 0 if value is empty
     onChange(sizeValue);
-    setSubmitDisabled(sizeValue === null);
+    setSubmitDisabled(sizeValue === 0);
   };
 
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
