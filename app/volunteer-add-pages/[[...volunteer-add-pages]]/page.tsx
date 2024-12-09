@@ -91,16 +91,27 @@ const VolunteerAddPages: React.FC = () => {
 // Subcomponents
 
 const VolunteerAddDetailsModule: React.FC = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
+
+  const handleCategorySelect = (selected: string) => {
+    setSelectedCategory(selected);
+  };
+  
+  const handleItemNameSelect = (selected: string) => {
+    setSelectedItemName(selected);
+  };
+  
   return (
     <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
-        <NameDropdown fetchUrl="/api/categories"/>
+        <NameDropdown fetchUrl="/api/categories" filterName="name" onSelect={handleCategorySelect}/>
       </div>
       <div className="font-bold text-[20px]">
         <p className="mb-2">Item Name</p>
-        <NameDropdown />
+        <NameDropdown fetchUrl="/api/categories" filterName="itemName" onSelect={handleItemNameSelect} disabled={!selectedCategory}/>
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
@@ -113,7 +124,7 @@ const VolunteerAddDetailsModule: React.FC = () => {
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
-          <NameDropdown />
+          <NameDropdown fetchUrl="/api/categories" filterName="units" disabled={!selectedItemName}/>
         </div>
       </div>
     </div>
