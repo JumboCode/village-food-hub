@@ -9,6 +9,69 @@ import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import { NameDropdown } from '@app/components/Dropdowns';
 
+const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void }> = ({ onChange }) => {
+  const [receive, setReceive] = useState(false);
+  const [donate, setDonate] = useState(false);
+
+  const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isRChecked = e.target.checked;
+    setReceive(isRChecked);
+    onChange(isRChecked, donate);
+  };
+
+  const handleDonate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isDChecked = e.target.checked;
+    setDonate(isDChecked);
+    onChange(receive, isDChecked);
+  };
+
+  return (
+      <div>
+          <div>
+              {/* Text */}
+              <div className="flex justify-center pt-[60px] text-black crimson-bold text-4xl">
+                  Select all the actions you plan to do today.
+              </div>
+
+              {/* Checkboxes */}
+              <div className="flex pt-[40px] text-black crimson-bold text-4xl justify-center">
+                  <div>
+                      {/* Receive */}
+                      <div className="flex space-x-5">
+                          <div className="flex items-center mb-4">
+                              <input 
+                                  id="default-checkbox" 
+                                  type="checkbox" 
+                                  value="" 
+                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                                  checked={receive}
+                                  onChange={handleReceive}
+                              />
+                          </div>
+                          <div> Receive </div>
+                      </div>
+                      
+                      {/* Donate */}
+                      <div className="flex space-x-5">
+                          <div className="flex items-center mb-4">
+                              <input 
+                                  id="default-checkbox" 
+                                  type="checkbox" 
+                                  value="" 
+                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                                  checked={donate}
+                                  onChange={handleDonate}
+                              />
+                          </div>
+                          <div> Donate </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  );
+};
+
 // Phone Number Module
 const PhoneNumber: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -183,17 +246,27 @@ const Confirmation = () => {
 };
 
 const DemographicsSurvey: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('phoneNum');
-  // const [changesValue, setChangesValue] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<'action' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
   const router = useRouter();
 
   const [responses, setResponses] = useState({
+    receive: false,
+    donate: false,
     phoneNumber: '',
     changes: '',
     name: { firstName: '', lastName: '' },
     address: { line1: '', line2: '', city: '', state: '', zip: '' },
     householdSize: 0,
   });
+
+  const [receive, setReceive] = useState(false);
+  const [donate, setDonate] = useState(false);
+
+  const updateAction = (receiveValue: boolean, donateValue: boolean) => {
+    setResponses((prev) => ({ ...prev, receive: receiveValue, donate: donateValue}));
+    setReceive(receiveValue);
+    setDonate(donateValue);
+  };
 
   const updatePhoneNumber = (value: string) => {
     setResponses((prev) => ({ ...prev, phoneNumber: value }));
@@ -223,7 +296,15 @@ const DemographicsSurvey: React.FC = () => {
   
 
   const handleNextClick = () => {
+    console.log(responses.receive);
     switch (currentStep) {
+      case 'action':
+        if (!responses.receive) {
+          router.push('/customer-donor');
+        } else {
+          setCurrentStep('phoneNum');
+        }
+        break;
       case 'phoneNum':
         setCurrentStep('changes');
         break;
@@ -253,8 +334,14 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleBackClick = () => {
     switch (currentStep) {
-      case 'phoneNum':
+      case 'action':
         router.push('/welcome-page');
+      case 'phoneNum':
+        if (!responses.receive) {
+          router.push('/customer-donor');
+        } else {
+          setCurrentStep('action');
+        }
         break;
       case 'confirmation':
         setCurrentStep('houseSize');
@@ -279,11 +366,12 @@ const DemographicsSurvey: React.FC = () => {
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
     router.push('/saved-thank-you');
-    // setCurrentStep('confirmation')
   };
 
   const getProgress = () => {
     switch (currentStep) {
+      case 'action':
+        return 0;
       case 'phoneNum':
         return 16.67;
       case 'changes':
@@ -314,6 +402,7 @@ const DemographicsSurvey: React.FC = () => {
       </div>
 
       <div className='w-full'>
+        {currentStep === 'action' && <CustomerAction onChange={updateAction} />}
         {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} />}
         {currentStep === 'changes' && <Changes onChange={updateChanges} />}
         {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}

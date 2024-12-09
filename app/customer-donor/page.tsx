@@ -11,7 +11,7 @@ const CustomerDonor: React.FC = () => {
     // TODO: Unsure what to do about where to send after pressing a button
     const router = useRouter();
     const handleBack = () => {
-        router.push('/customer-action');
+        router.push('/customer-questions'); // actually was going to customer-action
     }
     const handleNo = () => {
         router.push('/unsaved-thank-you');

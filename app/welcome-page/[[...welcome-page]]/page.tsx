@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 const WelcomePage: React.FC = () => {
     const router = useRouter();
     const startSurvey = () => {
-        router.push('/customer-action');
+        router.push('/customer-questions');
     }
     
   return (
