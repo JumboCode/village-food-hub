@@ -169,7 +169,7 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
         This action will:
       </div>
       <div className="text-gray crimson-regular pt-10 flex text-4xl content-center justify-center text-center">
-        Add [quantity] [units] of [itemName].
+        Add {currItem.quantity} {currItem.units} of {currItem.itemName}.
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
         <ButtonSubmit onClick={() => {

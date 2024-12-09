@@ -214,7 +214,7 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
         This action will:
       </div>
       <div className="text-gray crimson-regular pt-10 flex text-4xl content-center justify-center text-center">
-        Remove [quantity] [units] of [itemName].
+        Remove {currItem.quantity} {currItem.units} of {currItem.itemName}.
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
       <ButtonSubmit onClick={() => {
