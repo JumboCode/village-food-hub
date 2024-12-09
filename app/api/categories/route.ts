@@ -69,9 +69,7 @@ export async function POST(req: NextRequest) {
                 { status : 400 }
             )
         }
-        console.log("works right before")
         const response = await createCategory({ ...record })
-        console.log("second to last")
         return NextResponse.json(response, {status : 201})
     } catch (error) {
         console.log(error)
@@ -101,19 +99,17 @@ export async function PUT(
 ) {    
     try {
         const data = await req.json()
-        if (!("itemName" in data)) {
-            return NextResponse.json( 
-                { response: "Missing item name" },
-                { status: 400 }
+        if (!validCategory(data)) {
+            return NextResponse.json(
+                { response : "Invalid data format" }, 
+                { status : 400 }
             )
         }
-        if (!("name" in data)) {
-            return NextResponse.json( 
-                { response: "Missing name" },
-                { status: 400 }
-            )
-        }
-        const item = await updateCategory({ data.itemName });
+        const item = await updateCategory({
+            itemName: data.itemName, 
+            name: data.name,
+            units: data.units
+        });
         
         return NextResponse.json(item, { status : 200 })
     } catch (error) {
@@ -191,5 +187,4 @@ function validCategory(record : CategoryRecord): boolean {
     }
 }
 
-module.exports = {createCategory, readCategories, updateCategory, deleteCategory};
         
