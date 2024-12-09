@@ -2,12 +2,75 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
+import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import { NameDropdown } from '@app/components/Dropdowns';
+
+const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void }> = ({ onChange }) => {
+  const [receive, setReceive] = useState(false);
+  const [donate, setDonate] = useState(false);
+
+  const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isRChecked = e.target.checked;
+    setReceive(isRChecked);
+    onChange(isRChecked, donate);
+  };
+
+  const handleDonate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isDChecked = e.target.checked;
+    setDonate(isDChecked);
+    onChange(receive, isDChecked);
+  };
+
+  return (
+      <div>
+          <div>
+              {/* Text */}
+              <div className="flex justify-center pt-[60px] text-black crimson-bold text-4xl">
+                  Select all the actions you plan to do today.
+              </div>
+
+              {/* Checkboxes */}
+              <div className="flex pt-[40px] text-black crimson-bold text-4xl justify-center">
+                  <div>
+                      {/* Receive */}
+                      <div className="flex space-x-5">
+                          <div className="flex items-center mb-4">
+                              <input 
+                                  id="default-checkbox" 
+                                  type="checkbox" 
+                                  value="" 
+                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                                  checked={receive}
+                                  onChange={handleReceive}
+                              />
+                          </div>
+                          <div> Receive </div>
+                      </div>
+                      
+                      {/* Donate */}
+                      <div className="flex space-x-5">
+                          <div className="flex items-center mb-4">
+                              <input 
+                                  id="default-checkbox" 
+                                  type="checkbox" 
+                                  value="" 
+                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                                  checked={donate}
+                                  onChange={handleDonate}
+                              />
+                          </div>
+                          <div> Donate </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  );
+};
 
 // Phone Number Module
 const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
@@ -210,6 +273,24 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisa
   );
 };
 
+const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
+  return (
+      <div>
+        {/* Central text */}
+        <div className="text-black crimson-bold flex pt-40 text-4xl content-center justify-center text-center">
+            We have a demographic survey that is optional. 
+        </div>
+        <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
+            Would you like to fill it out?
+        </div>
+        {/* Next Button */}
+        <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
+            <YesProceed onClick={() => onChange(true)}/>
+            <NoDone onClick={() => onChange(false)}/>
+        </div>
+      </div>
+  );
+};
 
 // TODO: Confirmation Page
 const Confirmation = () => {
@@ -224,11 +305,12 @@ const Confirmation = () => {
 };
 
 const DemographicsSurvey: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('phoneNum');
-  // const [changesValue, setChangesValue] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<'action' | 'donor' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
   const router = useRouter();
 
   const [responses, setResponses] = useState({
+    receive: false,
+    donate: false,
     phoneNumber: '',
     changes: '',
     name: { firstName: '', lastName: '' },
@@ -236,6 +318,25 @@ const DemographicsSurvey: React.FC = () => {
     householdSize: 0,
   });
 
+  // For routing
+  const [receive, setReceive] = useState(false);
+  const [donate, setDonate] = useState(false);
+
+  const updateAction = (receiveValue: boolean, donateValue: boolean) => {
+    setResponses((prev) => ({ ...prev, receive: receiveValue, donate: donateValue}));
+    setReceive(receiveValue);
+    setDonate(donateValue);
+  };
+
+  const redirectDonor = (fillSurvey: boolean) => {
+    if (fillSurvey) {
+      setCurrentStep('phoneNum');
+    } else {
+      router.push('/unsaved-thank-you');
+    }
+  };
+  
+  // For disabling empty inputs
   const [nextDisabled, setNextDisabled] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
@@ -270,11 +371,22 @@ const DemographicsSurvey: React.FC = () => {
     if (nextDisabled) return;
 
     switch (currentStep) {
+      case 'action':
+        if (!responses.receive) {
+          setCurrentStep('donor');
+        } else {
+          setCurrentStep('phoneNum');
+        }
+        break;
       case 'phoneNum':
         setCurrentStep('changes');
         break;
       case 'changes':
-        setCurrentStep('name');
+        if (responses.changes == "yes") {
+          setCurrentStep('name');
+        } else {
+          router.push('/saved-thank-you');
+        }
         break;
       case 'name':
         setCurrentStep('address');
@@ -295,6 +407,20 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleBackClick = () => {
     switch (currentStep) {
+      case 'action':
+        router.push('/welcome-page');
+        break;
+      case 'donor':
+        console
+        setCurrentStep('action');
+        break;
+      case 'phoneNum':
+        if (!responses.receive) {
+          setCurrentStep('donor');
+        } else {
+          setCurrentStep('action');
+        }
+        break;
       case 'confirmation':
         setCurrentStep('houseSize');
         break;
@@ -317,11 +443,15 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
-    setCurrentStep('confirmation')
+    router.push('/saved-thank-you');
   };
 
   const getProgress = () => {
     switch (currentStep) {
+      case 'action':
+        return 0;
+      case 'donor':
+        return 10;
       case 'phoneNum':
         return 16.67;
       case 'changes':
@@ -352,6 +482,8 @@ const DemographicsSurvey: React.FC = () => {
       </div>
 
       <div className='w-full'>
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} />}
+        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
         {currentStep === 'changes' && <Changes onChange={updateChanges} setNextDisabled={setNextDisabled} />}
         {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}
@@ -375,8 +507,8 @@ const DemographicsSurvey: React.FC = () => {
             return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
                       { "OK" }
                     </button>
-          } else {
-            return <ButtonNext onClick={handleNextClick} onClick={handleNextClick} disabled={nextDisabled} />;
+          } else if (currentStep !== 'donor') {
+            return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
       </div>

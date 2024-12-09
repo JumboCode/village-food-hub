@@ -194,7 +194,7 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
                 body : JSON.stringify(currItem)
               })
               console.log(items)
-              window.location.href = "../saved-thank-you";
+              window.location.href = "../volunteer-saved";
             })
         }}/>
       </div>

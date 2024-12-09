@@ -1,6 +1,7 @@
 // Write your code hereimport React from 'react';
+'use client';
 import Image from 'next/image';
-
+import { useRouter } from 'next/navigation';
 import Banner from '../../components/UpdateInventoryBanner';
 
 import logo from '../../images/logo.jpg';
@@ -9,6 +10,11 @@ import arrow from '../../images/arrow.png';
 // This functions returns the thank you page for an unsaved demographic survey
 export default function VolunteerUnsaved() {
     
+    const router = useRouter();
+    const handleNewChange = () => {
+        router.push('/volunteer-landing');
+    }
+
     return (
         <div className="background-white font-black"> 
             <Banner />
@@ -24,7 +30,7 @@ export default function VolunteerUnsaved() {
                     />
                 </div>
                 <p className="mt-6 mb-6"></p>
-                <button className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex">
+                <button className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex" onClick={handleNewChange}>
                     New Inventory Change
                     <div className="relative bottom-0 left-5">
                         <Image

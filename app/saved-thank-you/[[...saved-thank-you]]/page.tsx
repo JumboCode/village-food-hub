@@ -14,7 +14,7 @@ export default function SavedThankYou() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-          window.location.href = "../volunteer-landing";
+          window.location.href = "../welcome-page";
         }, 30000);
   
         return () => clearTimeout(timer);
@@ -37,7 +37,7 @@ export default function SavedThankYou() {
                 <p className="font-bold text-[36px] mt-6 mb-6">Thanks for visiting Village Food Hub!</p>
                 <button 
                   className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex"
-                  onClick={() => window.location.href = "../volunteer-landing"}>
+                  onClick={() => window.location.href = "../welcome-page"}>
                     Return home 
                     <div className="relative bottom-0 left-5">
                         <Image
