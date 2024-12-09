@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
@@ -73,14 +73,18 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
     setNextDisabled(firstName === "" || value === "");
   };
 
+  useEffect(() => {
+    setNextDisabled(firstName === "" || lastName === "");
+  }, [firstName, lastName, setNextDisabled]);
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex flex-col items-center w-full">
-        <p className="text-[36px] font-bold mb-4">Full Name <span className="text-red">*</span></p>
+        <p className="text-[36px] font-bold mb-4">Full Name</p>
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">First Name</p>
+        <p className="text-[24px] mt-4">First Name <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
@@ -90,7 +94,7 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">Last Name</p>
+        <p className="text-[24px] mt-4">Last Name <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
@@ -103,35 +107,39 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
 };
 
 // Address
-const Address: React.FC<{ onLine1Change: (value: string) => void, onLine2Change: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onLine1Change, onLine2Change, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
-  const [line1, setLine1] = useState<string>("");
+const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+  const [line, setLine] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [state, setState] = useState<string>("");
   const [zip, setZip] = useState<string>("");
 
-  const handleLine1Change = (value: string) => {
-    setLine1(value);
-    onLine1Change(value);
-    setNextDisabled(value === "" || city === "" || state === "" || zip === "");
+  const handleLineChange = (value: string) => {
+    setLine(value);
+    onAddressLineChange(value);
+    // setNextDisabled(value === "" || city === "" || state === "" || zip === "");
   };
 
   const handleCityChange = (value: string) => {
     setCity(value);
     onCityChange(value);
-    setNextDisabled(line1 === "" || value === "" || state === "" || zip === "");
+    // setNextDisabled(line === "" || value === "" || state === "" || zip === "");
   };
 
   const handleStateChange = (value: string) => {
     setState(value);
     onStateChange(value);
-    setNextDisabled(line1 === "" || city === "" || value === "" || zip === "");
+    // setNextDisabled(line === "" || city === "" || value === "" || zip === "");
   };
 
   const handleZipChange = (value: string) => {
     setZip(value);
     onZipChange(value);
-    setNextDisabled(line1 === "" || city === "" || state === "" || value === "");
+    // setNextDisabled(line === "" || city === "" || state === "" || value === "");
   };
+
+  useEffect(() => {
+    setNextDisabled(line === "" || city === "" || state === "" || zip === "");
+  }, [line, city, state, zip, setNextDisabled]);
 
   return (
     <div className="flex flex-col items-center">
@@ -140,21 +148,12 @@ const Address: React.FC<{ onLine1Change: (value: string) => void, onLine2Change:
       </div>
 
       <div className="w-2/3">
-        <p className="text-[24px] mt-4">Address Line 1 <span className="text-red">*</span></p>
+        <p className="text-[24px] mt-4">Address Line <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          onChange={(e) => handleLine1Change(e.target.value)}
+          onChange={(e) => handleLineChange(e.target.value)}
           required
-        />
-      </div>
-
-      <div className="w-2/3">
-        <p className="text-[24px] mt-4">Address Line 2</p>
-        <input
-          type="text"
-          className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          onChange={(e) => onLine2Change(e.target.value)}
         />
       </div>
 
@@ -360,8 +359,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}
-        {currentStep === 'address' && <Address onLine1Change={(value) => updateAddress('line1', value)}
-                                                onLine2Change={(value) => updateAddress('line2', value)}
+        {currentStep === 'address' && <Address onAddressLineChange={(value) => updateAddress('line1', value)}
                                                 onCityChange={(value) => updateAddress('city', value)}
                                                 onStateChange={(value) => updateAddress('state', value)}
                                                 onZipChange={(value) => updateAddress('zip', value)} 
