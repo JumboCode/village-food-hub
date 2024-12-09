@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
 import { NameDropdown } from '@app/components/Dropdowns';
+import ExitModal from "@app/components/ExitModal"
 
 type Step = 'details' | 'confirm';
 
@@ -24,6 +25,7 @@ const VolunteerRemovePages: React.FC = () => {
         lastUpdated: new Date(),
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
+  const [showModal, setShowModal] = useState(false);
   const [nextDisabled, setNextDisabled] = useState(true);
   const [itemExists, setItemExists] = useState("")
   const [validQuantity, setValidQuantity] = useState("")
@@ -41,15 +43,28 @@ const VolunteerRemovePages: React.FC = () => {
       window.location.href = "../volunteer-landing";
   };
 
+  const openModal = (): void => {
+    setShowModal(true);
+  };
+
+  const closeModal = (): void => {
+    setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
       <UpdateInventoryBanner />
 
       {/* Back and Exit buttons */}
-      <div className="flex flex-row h-full w-full justify-between px-32 py-10">
-        <ButtonBack onClick={handleBack} />
-        <ButtonExit />
+      <div className = "flex flex-row h-full w-full justify-between mt-10 px-40 py-18">
+        <div className= "flex flex-2">
+            <ButtonBack onClick={handleBack}/>
+        </div>
+        <div className = "">
+            <ButtonExit onClick={openModal}/>
+            {showModal && <ExitModal  closeModal={closeModal}/>}
+        </div>
       </div>
 
       {/* Page Content */}

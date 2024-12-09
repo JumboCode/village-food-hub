@@ -26,6 +26,7 @@ const VolunteerAddPages: React.FC = () => {
   });
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [showModal, setShowModal] = useState(false);
+  const [nextDisabled, setNextDisabled] = useState(true);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -68,12 +69,20 @@ const VolunteerAddPages: React.FC = () => {
       <div className="flex justify-center w-full h-full">
         {currentStep === 'details' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddDetailsModule currItem={currItem} setCurrItem={setCurrItem} />
+            <VolunteerAddDetailsModule 
+              currItem={currItem} 
+              setCurrItem={setCurrItem} 
+              setNextDisabled={setNextDisabled}
+            />
           </div>
         )}
         {currentStep === 'confirm' && (
           <div className="w-4/5 h-4/5">
-            <VolunteerAddConfirmModule currItem={currItem} setCurrItem = {setCurrItem} />
+            <VolunteerAddConfirmModule 
+              currItem={currItem} 
+              setCurrItem = {setCurrItem} 
+              setNextDisabled={setNextDisabled}
+            />
           </div>
         )}
       </div>
@@ -81,10 +90,13 @@ const VolunteerAddPages: React.FC = () => {
       {/* Next Button */}
       {currentStep === 'details' && (
         <div className="flex justify-center mt-8">
-          <ButtonNext onClick={() => {
-              console.log(currItem)
+          <ButtonNext 
+            disabled={nextDisabled} 
+            onClick={() => {
+              console.log(currItem);
               handleNext();
-            }} />
+            }} 
+          />
         </div>
       )}
     </div>
@@ -100,7 +112,8 @@ const units = ['lbs', 'g', 'kg', 'oz', 'gallon', 'quart', 'pint'];
 
 interface VolunteerAddDetailsModuleProps{
     currItem: Inventory,
-    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>;
+    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>,
+    setNextDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({currItem, setCurrItem}) => {
