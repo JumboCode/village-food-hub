@@ -9,7 +9,7 @@ import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import { NameDropdown } from '@app/components/Dropdowns';
 
-const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void }> = ({ onChange }) => {
+const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
   const [receive, setReceive] = useState(false);
   const [donate, setDonate] = useState(false);
 
@@ -24,6 +24,10 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
     setDonate(isDChecked);
     onChange(receive, isDChecked);
   };
+
+  useEffect(() => {
+    setNextDisabled(!receive && !donate);
+  }, [receive, donate, setNextDisabled]);
 
   return (
       <div>
@@ -277,7 +281,7 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   return (
       <div>
         {/* Central text */}
-        <div className="text-black crimson-bold flex pt-40 text-4xl content-center justify-center text-center">
+        <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
             We have a demographic survey that is optional. 
         </div>
         <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
@@ -337,7 +341,7 @@ const DemographicsSurvey: React.FC = () => {
   };
   
   // For disabling empty inputs
-  const [nextDisabled, setNextDisabled] = useState(true);
+  const [nextDisabled, setNextDisabled] = useState(false);
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const updatePhoneNumber = (value: string) => {
@@ -365,7 +369,6 @@ const DemographicsSurvey: React.FC = () => {
   const updateHouseholdSize = (value: number) => {
     setResponses((prev) => ({ ...prev, householdSize: value }));
   };
-  
 
   const handleNextClick = () => {
     if (nextDisabled) return;
@@ -411,7 +414,6 @@ const DemographicsSurvey: React.FC = () => {
         router.push('/welcome-page');
         break;
       case 'donor':
-        console
         setCurrentStep('action');
         break;
       case 'phoneNum':
@@ -471,18 +473,27 @@ const DemographicsSurvey: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Banner */}
       <DemographicsSurveyBanner />
-      <div className='flex justify-center items-center py-10'>
-        <ProgressBar progress={getProgress()} />
+
+      {/* Progress Bar */}
+      <div className="flex py-10 pl-[100px] pr-[100px] items-center">
+          <div></div>
+          <ProgressBar progress={getProgress()}/>   
+          <div className="pl-5 text-2xl">
+            {`${getProgress().toFixed(0)}%`}
+          </div>
       </div>
 
+      {/* Back and Exit Buttons */}
       <div className="flex flex-row h-full w-full justify-between px-32">
         <ButtonBack onClick={handleBackClick} />
         <ButtonExit />
       </div>
 
+      {/* Modules */}
       <div className='w-full'>
-        {currentStep === 'action'   && <CustomerAction onChange={updateAction} />}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
         {currentStep === 'changes' && <Changes onChange={updateChanges} setNextDisabled={setNextDisabled} />}
