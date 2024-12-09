@@ -64,13 +64,11 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
   const handleFirstNameChange = (value: string) => {
     setFirstName(value);
     onFirstNameChange(value);
-    setNextDisabled(value === "" || lastName === "");
   };
 
   const handleLastNameChange = (value: string) => {
     setLastName(value);
     onLastNameChange(value);
-    setNextDisabled(firstName === "" || value === "");
   };
 
   useEffect(() => {
