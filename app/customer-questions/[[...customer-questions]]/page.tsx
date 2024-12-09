@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/components/SurveyButtons';
+import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
@@ -231,7 +231,24 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void }> = ({ onChan
   );
 };
 
-
+const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
+  return (
+      <div>
+        {/* Central text */}
+        <div className="text-black crimson-bold flex pt-40 text-4xl content-center justify-center text-center">
+            We have a demographic survey that is optional. 
+        </div>
+        <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
+            Would you like to fill it out?
+        </div>
+        {/* Next Button */}
+        <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
+            <YesProceed onClick={() => onChange(true)}/>
+            <NoDone onClick={() => onChange(false)}/>
+        </div>
+      </div>
+  );
+};
 
 // TODO: Confirmation Page
 const Confirmation = () => {
@@ -246,7 +263,7 @@ const Confirmation = () => {
 };
 
 const DemographicsSurvey: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<'action' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
+  const [currentStep, setCurrentStep] = useState<'action' | 'donor' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
   const router = useRouter();
 
   const [responses, setResponses] = useState({
@@ -266,6 +283,14 @@ const DemographicsSurvey: React.FC = () => {
     setResponses((prev) => ({ ...prev, receive: receiveValue, donate: donateValue}));
     setReceive(receiveValue);
     setDonate(donateValue);
+  };
+
+  const redirectDonor = (fillSurvey: boolean) => {
+    if (fillSurvey) {
+      setCurrentStep('phoneNum');
+    } else {
+      router.push('/unsaved-thank-you');
+    }
   };
 
   const updatePhoneNumber = (value: string) => {
@@ -296,11 +321,10 @@ const DemographicsSurvey: React.FC = () => {
   
 
   const handleNextClick = () => {
-    console.log(responses.receive);
     switch (currentStep) {
       case 'action':
         if (!responses.receive) {
-          router.push('/customer-donor');
+          setCurrentStep('donor');
         } else {
           setCurrentStep('phoneNum');
         }
@@ -336,9 +360,14 @@ const DemographicsSurvey: React.FC = () => {
     switch (currentStep) {
       case 'action':
         router.push('/welcome-page');
+        break;
+      case 'donor':
+        console
+        setCurrentStep('action');
+        break;
       case 'phoneNum':
         if (!responses.receive) {
-          router.push('/customer-donor');
+          setCurrentStep('donor');
         } else {
           setCurrentStep('action');
         }
@@ -372,6 +401,8 @@ const DemographicsSurvey: React.FC = () => {
     switch (currentStep) {
       case 'action':
         return 0;
+      case 'donor':
+        return 10;
       case 'phoneNum':
         return 16.67;
       case 'changes':
@@ -402,7 +433,8 @@ const DemographicsSurvey: React.FC = () => {
       </div>
 
       <div className='w-full'>
-        {currentStep === 'action' && <CustomerAction onChange={updateAction} />}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} />}
+        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} />}
         {currentStep === 'changes' && <Changes onChange={updateChanges} />}
         {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}
@@ -424,7 +456,7 @@ const DemographicsSurvey: React.FC = () => {
             return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
                       { "OK" }
                     </button>
-          } else {
+          } else if (currentStep !== 'donor') {
             return <ButtonNext onClick={handleNextClick} />;
           }
         })()}
