@@ -25,6 +25,7 @@ const config: Config = {
       fontFamily: {
         serif: ["'Crimson Text'", "serif"],
         crimson: ['"Crimson Text"', 'serif'],
+        poppins: ['"Poppins"', 'sans-serif'],
       },
     },
   },
