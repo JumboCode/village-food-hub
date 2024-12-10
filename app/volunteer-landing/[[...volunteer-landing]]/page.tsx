@@ -18,7 +18,7 @@ const LandingPage: React.FC = () => {
             </div>
             <div>
                 {/* Central text */}
-                <div className="text-black crimson-bold flex pt-40 text-4xl content-center justify-center text-center">
+                <div className="text-black font-crimson crimson-bold flex pt-40 text-4xl content-center justify-center text-center">
                     Are you adding or removing from the inventory?
                 </div>
                 

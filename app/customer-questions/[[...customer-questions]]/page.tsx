@@ -33,12 +33,12 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
       <div>
           <div>
               {/* Text */}
-              <div className="flex justify-center pt-[60px] text-black crimson-bold text-4xl">
+              <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
                   Select all the actions you plan to do today.
               </div>
 
               {/* Checkboxes */}
-              <div className="flex pt-[40px] text-black crimson-bold text-4xl justify-center">
+              <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
                   <div>
                       {/* Receive */}
                       <div className="flex space-x-5">
@@ -94,7 +94,7 @@ const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled
 
   return (
     <div className="flex flex-col justify-center items-center py-10">
-        <div className="flex flex-col items-center w-full max-w-lg">
+        <div className="flex flex-col items-center w-full max-w-lg font-crimson">
             <p className="text-[36px] font-bold mb-8">Phone Number <span className="text-red">*</span></p>
             <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
         </div>
@@ -114,7 +114,7 @@ const Changes: React.FC<{ onChange: (newValue: string) => void, setNextDisabled:
 
   return (
     <div className="flex flex-col justify-center items-center py-10">
-      <div className="flex flex-col items-center w-full">
+      <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
         <p className="text-[28px] font-bold mb-4">(Name, Address, Household size)</p>
         <YesOrNo onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
@@ -144,7 +144,7 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
   }, [firstName, lastName, setNextDisabled]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
         <p className="text-[36px] font-bold mb-4">Full Name</p>
       </div>
@@ -182,25 +182,21 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
   const handleLineChange = (value: string) => {
     setLine(value);
     onAddressLineChange(value);
-    // setNextDisabled(value === "" || city === "" || state === "" || zip === "");
   };
 
   const handleCityChange = (value: string) => {
     setCity(value);
     onCityChange(value);
-    // setNextDisabled(line === "" || value === "" || state === "" || zip === "");
   };
 
   const handleStateChange = (value: string) => {
     setState(value);
     onStateChange(value);
-    // setNextDisabled(line === "" || city === "" || value === "" || zip === "");
   };
 
   const handleZipChange = (value: string) => {
     setZip(value);
     onZipChange(value);
-    // setNextDisabled(line === "" || city === "" || state === "" || value === "");
   };
 
   useEffect(() => {
@@ -208,7 +204,7 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
   }, [line, city, state, zip, setNextDisabled]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
         <p className="text-[36px] font-bold mb-4">Address</p>
       </div>
@@ -258,20 +254,23 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
 
 // Household Size
 const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
+  const [selectedSize, setSelectedSize] = useState<number>(0);
+  
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    const sizeValue = value === "" ? 0 : Number(value); // Default to 0 if value is empty
+    const sizeValue = value === "" ? null : Number(value); // default 1
+    setSelectedSize(sizeValue);
     onChange(sizeValue);
-    setSubmitDisabled(sizeValue === 0);
+    setSubmitDisabled(sizeValue === null);
   };
 
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
   return (
     <div className="flex flex-col justify-center items-center py-10">
-      <div className="flex flex-col items-center w-full max-w-lg">
+      <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} />
+          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize !== null ? selectedSize.toString() : ""} />
         </div>
       </div>
     </div>
@@ -280,7 +279,7 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisa
 
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
   return (
-      <div>
+      <div className="font-crimson">
         {/* Central text */}
         <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
             We have a demographic survey that is optional. 

@@ -155,7 +155,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
   }, [currItem, setNextDisabled]);
 
   return (
-    <div className="flex flex-col h-1/2 w-3/5 justify-center font-crimson justify-self-center">
+    <div className="flex flex-col h-1/2 w-3/5 pt-10 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you removing?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name <span className="text-red">*</span></p>
@@ -218,7 +218,7 @@ interface VolunteerRemoveConfirmModuleProps {
 const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> = ({ currItem }) => {
   return (
     <div>
-      <div className="text-black crimson-bold flex text-4xl content-center justify-center text-center">
+      <div className="text-black font-crimson crimson-bold flex text-4xl content-center justify-center text-center">
         This action will:
       </div>
       <div className="text-gray crimson-regular pt-10 flex text-4xl content-center justify-center text-center">

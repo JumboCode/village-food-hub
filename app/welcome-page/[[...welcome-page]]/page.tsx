@@ -16,10 +16,10 @@ const WelcomePage: React.FC = () => {
     
   return (
     //creates columns and sets
-    <div className="flex flex-col justify-center items-center h-screen bg-[#24593D] text-white">
+    <div className="flex flex-col justify-center items-center h-screen bg-[#24593D] font-crimson text-white">
 
         {/* banner at top of screen */}
-        <div className="h-1/4 w-full text-center content-center text-8xl crimson-bold">
+        <div className="h-1/4 w-full text-center content-center text-7xl crimson-bold">
             Welcome to Village Food Hub!
         </div>
 
@@ -44,7 +44,7 @@ const WelcomePage: React.FC = () => {
 
                     
                         {/* the text prompting the user to fill out the survey */}
-                        <div className="box-content p-8 pt-14">
+                        <div className="box-content p-6 pt-14">
 
                             {/* the bolded, black text */}
                             <span className="font-bold">
@@ -101,7 +101,7 @@ const WelcomePage: React.FC = () => {
                 {/* the button to start a demographic survey */}
                 <div className="absolute bottom-0 align-bottom pb-20">
                     <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8" onClick={startSurvey}>
-                        Start Demographics Survey →
+                        Start Demographic Survey →
                     </button>
                 </div>
 
