@@ -258,10 +258,12 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
 
 // Household Size
 const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
+  const [selectedSize, setSelectedSize] = useState("");
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     const sizeValue = value === "" ? 0 : Number(value); // Default to 0 if value is empty
     onChange(sizeValue);
+    setSelectedSize(value);
     setSubmitDisabled(sizeValue === 0);
   };
 
@@ -271,7 +273,7 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisa
       <div className="flex flex-col items-center w-full max-w-lg">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} />
+          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize}/>
         </div>
       </div>
     </div>

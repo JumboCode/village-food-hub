@@ -250,7 +250,7 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
                   })
               }
               console.log(items)
-              window.location.href = "../saved-thank-you";
+              window.location.href = "../volunteer-saved";
             })
       }}/>
       </div>
