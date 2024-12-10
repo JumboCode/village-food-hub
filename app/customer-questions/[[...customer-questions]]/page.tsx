@@ -254,14 +254,14 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
 
 // Household Size
 const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
-  const [selectedSize, setSelectedSize] = useState<number>(0);
-  
+  const [selectedSize, setSelectedSize] = useState("");
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     const sizeValue = value === "" ? null : Number(value); // default 1
     setSelectedSize(sizeValue);
     onChange(sizeValue);
-    setSubmitDisabled(sizeValue === null);
+    setSelectedSize(value);
+    setSubmitDisabled(sizeValue === 0);
   };
 
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
@@ -270,7 +270,7 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisa
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize !== null ? selectedSize.toString() : ""} />
+          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize}/>
         </div>
       </div>
     </div>
