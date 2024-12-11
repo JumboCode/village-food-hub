@@ -95,10 +95,12 @@ const VolunteerAddDetailsModule: React.FC = () => {
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
 
   const handleCategorySelect = (selected: string) => {
+    console.log("Category selected:", selected);
     setSelectedCategory(selected);
   };
   
   const handleItemNameSelect = (selected: string) => {
+    console.log("Item Name selected:", selected);
     setSelectedItemName(selected);
   };
   
@@ -107,11 +109,19 @@ const VolunteerAddDetailsModule: React.FC = () => {
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
         <p className="mb-2">Category Name</p>
-        <NameDropdown fetchUrl="/api/categories" filterName="name" onSelect={handleCategorySelect}/>
+        <NameDropdown 
+          fetchUrl="/api/categories" 
+          filterName="name" 
+          onSelect={handleCategorySelect}/>
       </div>
       <div className="font-bold text-[20px]">
         <p className="mb-2">Item Name</p>
-        <NameDropdown fetchUrl="/api/categories" filterName="itemName" onSelect={handleItemNameSelect} disabled={!selectedCategory}/>
+        <NameDropdown 
+          fetchUrl="/api/categories" 
+          filterName="itemName" 
+          onSelect={handleItemNameSelect} 
+          disabled={!selectedCategory} 
+          filterValue={selectedCategory || ""}/>
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
@@ -124,7 +134,7 @@ const VolunteerAddDetailsModule: React.FC = () => {
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
-          <NameDropdown fetchUrl="/api/categories" filterName="units" disabled={!selectedItemName}/>
+          <NameDropdown filterName="units" disabled={!selectedItemName}/>
         </div>
       </div>
     </div>
