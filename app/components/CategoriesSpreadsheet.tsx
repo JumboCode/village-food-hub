@@ -16,7 +16,7 @@ export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ ca
         <table className="table-auto w-full">
             <thead className ="font-crimson crimson-regular content-start">
                 <tr className="bg-dark-blue text-white text-lg align-left ">
-                <th className="border-y-1 py-2 px-3">
+                <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
                         <Image src={arrowsIcon}
@@ -27,7 +27,7 @@ export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ ca
                                     </Image>
                         </div>
                     </th>
-                <th className=" py-2 px-3">Units</th>
+                <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
                 <th className=" py-2 px-3">Actions</th>
                 </tr>
             </thead>
@@ -37,7 +37,7 @@ export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ ca
                             {item.map((data, subIndex) => (
                                 <td
                                     key={subIndex}
-                                    className=" py-2 px-3"
+                                    className="border-r-2 border-slate-200 py-2 px-3"
                                 >
                                     {data}
                                 </td>
