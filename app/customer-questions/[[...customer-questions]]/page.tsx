@@ -9,19 +9,14 @@ import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import { NameDropdown } from '@app/components/Dropdowns';
 
-const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
-  const [receive, setReceive] = useState(false);
-  const [donate, setDonate] = useState(false);
-
+const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isRChecked = e.target.checked;
-    setReceive(isRChecked);
     onChange(isRChecked, donate);
   };
 
   const handleDonate = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isDChecked = e.target.checked;
-    setDonate(isDChecked);
     onChange(receive, isDChecked);
   };
 
@@ -30,55 +25,45 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
   }, [receive, donate, setNextDisabled]);
 
   return (
-      <div>
-          <div>
-              {/* Text */}
-              <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
-                  Select all the actions you plan to do today.
-              </div>
-
-              {/* Checkboxes */}
-              <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
-                  <div>
-                      {/* Receive */}
-                      <div className="flex space-x-5">
-                          <div className="flex items-center mb-4">
-                              <input 
-                                  id="default-checkbox" 
-                                  type="checkbox" 
-                                  value="" 
-                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
-                                  checked={receive}
-                                  onChange={handleReceive}
-                              />
-                          </div>
-                          <div> Receive </div>
-                      </div>
-                      
-                      {/* Donate */}
-                      <div className="flex space-x-5">
-                          <div className="flex items-center mb-4">
-                              <input 
-                                  id="default-checkbox" 
-                                  type="checkbox" 
-                                  value="" 
-                                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
-                                  checked={donate}
-                                  onChange={handleDonate}
-                              />
-                          </div>
-                          <div> Donate </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
+    <div>
+      <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
+        Select all the actions you plan to do today. <span className="text-red">*</span>
       </div>
+      <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
+        <div>
+          <div className="flex space-x-5">
+            <div className="flex items-center mb-4">
+              <input 
+                id="default-checkbox" 
+                type="checkbox" 
+                className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                checked={receive}
+                onChange={handleReceive}
+              />
+            </div>
+            <div> Receive </div>
+          </div>
+          <div className="flex space-x-5">
+            <div className="flex items-center mb-4">
+              <input 
+                id="default-checkbox" 
+                type="checkbox" 
+                className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                checked={donate}
+                onChange={handleDonate}
+              />
+            </div>
+            <div> Donate </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
 // Phone Number Module
-const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
+const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+  const [phoneNumber, setPhoneNumber] = useState<string>(value);
 
   const handlePhoneNumberChange = (newValue: string | undefined) => {
     const value = newValue || "";
@@ -103,45 +88,47 @@ const PhoneNumber: React.FC<{ onChange: (value: string) => void, setNextDisabled
 };
 
 // Information Changed Module
-const Changes: React.FC<{ onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({onChange, setNextDisabled}) => {
-    const [value, setValue] = useState<string>("");
+const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+  const [selectedValue, setSelectedValue] = useState<string>(value);
 
-    const handleYesNoChange = (newValue: string) => {
-        setValue(newValue);
-        onChange(newValue);
-        
-    };
+  const handleYesNoChange = (newValue: string) => {
+    setSelectedValue(newValue);
+    onChange(newValue);
+  };
+
+  useEffect(() => {
+    setNextDisabled(selectedValue === "");
+  }, [selectedValue, setNextDisabled]);
 
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
         <p className="text-[28px] font-bold mb-4">(Name, Address, Household size)</p>
-        <YesOrNo onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
+        <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
   );
 };
 
-
 // Full Name
-const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onFirstNameChange, onLastNameChange, setNextDisabled }) => {
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
+const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (value: string) => void, onLastNameChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled }) => {
+  const [firstNameState, setFirstNameState] = useState<string>(firstName);
+  const [lastNameState, setLastNameState] = useState<string>(lastName);
 
   const handleFirstNameChange = (value: string) => {
-    setFirstName(value);
+    setFirstNameState(value);
     onFirstNameChange(value);
   };
 
   const handleLastNameChange = (value: string) => {
-    setLastName(value);
+    setLastNameState(value);
     onLastNameChange(value);
   };
 
   useEffect(() => {
-    setNextDisabled(firstName === "" || lastName === "");
-  }, [firstName, lastName, setNextDisabled]);
+    setNextDisabled(firstNameState === "" || lastNameState === "");
+  }, [firstNameState, lastNameState, setNextDisabled]);
 
   return (
     <div className="flex flex-col items-center font-crimson">
@@ -155,6 +142,7 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
           onChange={(e) => handleFirstNameChange(e.target.value)}
+          value={firstNameState}
           required
         />
       </div>
@@ -165,6 +153,7 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
           onChange={(e) => handleLastNameChange(e.target.value)}
+          value={lastNameState}
           required
         />
       </div>
@@ -173,11 +162,11 @@ const Name: React.FC<{ onFirstNameChange: (value: string) => void, onLastNameCha
 };
 
 // Address
-const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
-  const [line, setLine] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [zip, setZip] = useState<string>("");
+const Address: React.FC<{ line1: string, line2: string, city: string, state: string, zip: string, onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ line1, line2, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+  const [line, setLine] = useState<string>(line1);
+  const [cityState, setCityState] = useState<string>(city);
+  const [stateState, setStateState] = useState<string>(state);
+  const [zipState, setZipState] = useState<string>(zip);
 
   const handleLineChange = (value: string) => {
     setLine(value);
@@ -185,23 +174,23 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
   };
 
   const handleCityChange = (value: string) => {
-    setCity(value);
+    setCityState(value);
     onCityChange(value);
   };
 
   const handleStateChange = (value: string) => {
-    setState(value);
+    setStateState(value);
     onStateChange(value);
   };
 
   const handleZipChange = (value: string) => {
-    setZip(value);
+    setZipState(value);
     onZipChange(value);
   };
 
   useEffect(() => {
-    setNextDisabled(line === "" || city === "" || state === "" || zip === "");
-  }, [line, city, state, zip, setNextDisabled]);
+    setNextDisabled(line === "" || cityState === "" || stateState === "" || zipState === "");
+  }, [line, cityState, stateState, zipState, setNextDisabled]);
 
   return (
     <div className="flex flex-col items-center font-crimson">
@@ -215,6 +204,7 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
           type="text"
           className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
           onChange={(e) => handleLineChange(e.target.value)}
+          value={line}
           required
         />
       </div>
@@ -226,6 +216,7 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
             onChange={(e) => handleCityChange(e.target.value)}
+            value={cityState}
             required
           />
         </div>
@@ -235,6 +226,7 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
             onChange={(e) => handleStateChange(e.target.value)}
+            value={stateState}
             required
           />
         </div>
@@ -244,6 +236,7 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
             onChange={(e) => handleZipChange(e.target.value)}
+            value={zipState}
             required
           />
         </div>
@@ -253,15 +246,15 @@ const Address: React.FC<{ onAddressLineChange: (value: string) => void, onCityCh
 };
 
 // Household Size
-const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
-  const [selectedSize, setSelectedSize] = useState("");
+const HouseholdSize: React.FC<{ onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
+  const [selectedSize, setSelectedSize] = useState<string>("");
+
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    const sizeValue = value === "" ? null : Number(value); // default 1
-    setSelectedSize(sizeValue);
-    onChange(sizeValue);
+    const sizeValue = value === "" ? null : Number(value);
     setSelectedSize(value);
-    setSubmitDisabled(sizeValue === 0);
+    onChange(sizeValue);
+    setSubmitDisabled(sizeValue === null);
   };
 
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
@@ -270,7 +263,7 @@ const HouseholdSize: React.FC<{ onChange: (value: number) => void, setSubmitDisa
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize}/>
+          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize} />
         </div>
       </div>
     </div>
@@ -366,8 +359,8 @@ const DemographicsSurvey: React.FC = () => {
     }));
   };
   
-  const updateHouseholdSize = (value: number) => {
-    setResponses((prev) => ({ ...prev, householdSize: value }));
+  const updateHouseholdSize = (value: number | null) => {
+    setResponses((prev) => ({ ...prev, householdSize: value ?? 0 }));
   };
 
   const handleNextClick = () => {
@@ -493,19 +486,20 @@ const DemographicsSurvey: React.FC = () => {
 
       {/* Modules */}
       <div className='w-full'>
-        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} />}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
-        {currentStep === 'phoneNum' && <PhoneNumber onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
-        {currentStep === 'changes' && <Changes onChange={updateChanges} setNextDisabled={setNextDisabled} />}
-        {currentStep === 'name' && <Name onFirstNameChange={(value) => updateName('firstName', value)}
+        {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
+        {currentStep === 'changes' && <Changes value={responses.changes} onChange={updateChanges} setNextDisabled={setNextDisabled} />}
+        {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}
-        {currentStep === 'address' && <Address onAddressLineChange={(value) => updateAddress('line1', value)}
+        {currentStep === 'address' && <Address line1={responses.address.line1} line2={responses.address.line2} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
+                                                onAddressLineChange={(value) => updateAddress('line1', value)}
                                                 onCityChange={(value) => updateAddress('city', value)}
                                                 onStateChange={(value) => updateAddress('state', value)}
                                                 onZipChange={(value) => updateAddress('zip', value)} 
                                                 setNextDisabled={setNextDisabled} />}
-        {currentStep === 'houseSize' && <HouseholdSize onChange={updateHouseholdSize} 
+        {currentStep === 'houseSize' && <HouseholdSize value={responses.householdSize} onChange={updateHouseholdSize} 
                                                        setSubmitDisabled={setSubmitDisabled} />}
         {currentStep === 'confirmation' && <Confirmation />}
       </div>

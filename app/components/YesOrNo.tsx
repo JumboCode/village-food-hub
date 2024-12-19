@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-const YesOrNo: React.FC<{ onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ onChange, setNextDisabled }) => {
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+const YesOrNo: React.FC<{ value: string, onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+  const [selectedValue, setSelectedValue] = useState<string | null>(value || null);
 
   useEffect(() => {
     if (selectedValue === null) {
@@ -27,6 +27,7 @@ const YesOrNo: React.FC<{ onChange: (value: string) => void, setNextDisabled: (d
             value="yes"
             className="radio checked:bg-light-green mr-4 w-8 h-8"
             onChange={() => handleChange("yes")} 
+            checked={selectedValue === "yes"}
             required
           />
           <span className="text-[28px] font-bold">Yes</span>
@@ -42,6 +43,7 @@ const YesOrNo: React.FC<{ onChange: (value: string) => void, setNextDisabled: (d
             value="no"
             className="radio checked:bg-light-green mr-4 w-8 h-8"
             onChange={() => handleChange("no")} 
+            checked={selectedValue === "no"}
             required
           />
           <span className="text-[28px] font-bold">No</span>
