@@ -246,8 +246,8 @@ const Address: React.FC<{ line1: string, line2: string, city: string, state: str
 };
 
 // Household Size
-const HouseholdSize: React.FC<{ onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ onChange, setSubmitDisabled }) => {
-  const [selectedSize, setSelectedSize] = useState<string>("");
+const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ value, onChange, setSubmitDisabled }) => {
+  const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
