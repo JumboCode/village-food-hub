@@ -19,7 +19,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <tr className="bg-dark-blue text-white text-lg align-left ">
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
-                        <p>Last Updated</p>
+                        <p>Item Name</p>
                         <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
@@ -41,7 +41,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between">
-                        <p>Item Name</p>
+                        <p>Quantity</p>
                         <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
@@ -52,7 +52,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between">
-                        <p>Quantity</p>
+                        <p>Units</p>
                         <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
@@ -61,7 +61,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     </Image>
                         </div>
                 </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Units</th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
                 </tr>
             </thead>
