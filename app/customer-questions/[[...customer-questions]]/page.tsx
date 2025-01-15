@@ -88,7 +88,7 @@ const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, 
 };
 
 // Information Changed Module
-const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: any }> = ({ value, onChange, setNextDisabled, details }) => {
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
   const handleYesNoChange = (newValue: string) => {
@@ -104,7 +104,7 @@ const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, s
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
-        <p className="text-[28px] font-bold mb-4">(Name, Address, Household size)</p>
+        <p className="text-[28px] font-bold mb-4">(Name: {details.name}, Address: {details.address}, Household size: {details.householdSize})</p>
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
@@ -363,7 +363,32 @@ const DemographicsSurvey: React.FC = () => {
     setResponses((prev) => ({ ...prev, householdSize: value ?? 0 }));
   };
 
-  const handleNextClick = () => {
+  const [prevRecord, setPrevRecord] = useState(null);
+  const fetchPrevRecord = async () => {
+    try {
+        const response = await fetch("../api/demographics", { method: "GET" });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const surveyResponses = await response.json();
+        console.log("Fetched responses:", surveyResponses);
+
+        const filteredRecord = surveyResponses.find(
+            (response: any) => response.phoneNumber === responses.phoneNumber
+        );
+
+        console.log("Filtered Record:", filteredRecord);
+        setPrevRecord(filteredRecord || null);
+        return filteredRecord || null;
+    } catch (error) {
+        console.error("Error fetching responses:", error);
+        setPrevRecord(null);
+        return null;
+    }
+  };
+
+
+  const handleNextClick = async () => {
     if (nextDisabled) return;
 
     switch (currentStep) {
@@ -375,7 +400,12 @@ const DemographicsSurvey: React.FC = () => {
         }
         break;
       case 'phoneNum':
-        setCurrentStep('changes');
+        const record = await fetchPrevRecord();
+        if (record !== null) {
+          setCurrentStep('changes');
+        } else {
+          setCurrentStep('name');
+        }
         break;
       case 'changes':
         if (responses.changes == "yes") {
@@ -426,7 +456,11 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('name');
         break;
       case 'name':
-        setCurrentStep('changes');
+        if (prevRecord !== null) {
+          setCurrentStep('changes');
+        } else {
+          setCurrentStep('phoneNum');
+        }
         break;
       case 'changes':
         setCurrentStep('phoneNum');
@@ -489,7 +523,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
-        {currentStep === 'changes' && <Changes value={responses.changes} onChange={updateChanges} setNextDisabled={setNextDisabled} />}
+        {currentStep === 'changes' && <Changes value={responses.changes} onChange={updateChanges} setNextDisabled={setNextDisabled} details={prevRecord}/>}
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}
