@@ -21,7 +21,7 @@ export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ ca
                         <p>Item Name</p>
                         <Image src={arrowsIcon}
                                     width={10}
-                                    height={10}
+                                    height={6}
                                     alt="arrows Icon"
                                     className="">
                                     </Image>

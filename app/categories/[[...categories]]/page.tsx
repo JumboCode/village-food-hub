@@ -47,7 +47,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                 width={18}
                                 height={18}
                                 alt="delete Icon"
-                                className="m-2"
+                                className="m-4 ml-6 mt-2" // specific margins to keep the delete icon in line with the edit icon
                             />
                             )}
                             {showTable && (
@@ -56,18 +56,18 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                 width={18}
                                 height={18}
                                 alt="delete Icon"
-                                className="m-2"
+                                className="m-2 mb-3.5" // specific margins to keep the edit icon in line with the delete icon
                             />
                             )}
                         </div>
 
                         <div>
 
-                            {showTable && (<button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-1 mr-2 mb-2 rounded text-[20px]">
+                            {showTable && (<button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mr-2 mb-2 rounded text-[20px]">
                                 { "Item "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
                             </button>)}
                         
-                            <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-1 mb-2 rounded text-[20px]">
+                            <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]">
                                 { "Category "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
                             </button>
                         </div>
