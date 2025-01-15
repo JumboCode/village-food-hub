@@ -26,20 +26,19 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
         setShowTable(true)
     }
 
-
-    
     return (
         <div> 
-            <p className="font-bold pl-20 pt-10 text-[40px] ">Categories</p>
+            <p className="font-crimson font-bold pl-20 pt-10 text-[40px] ">Categories</p>
            
             <div className='flex justify-center items-center'> 
                 <div className="w-3/5 h-4/5 ">
                     <div className='flex flex-col'>
-                        <p className="crimson-bold text-[24px] pt-5 ">Edit Category</p>
+                        <p className="font-crimson crimson-bold text-[24px] pt-5 ">Edit Category</p>
                         <div className='flex justify-between items-center py-4 w-full'>
                         <div className='flex flex-row items-center w-1/2'>
                             <div className='w-full'>
-                                <NameDropdown options={optionsArr} onSelect={switchState} />
+                                {/* TODO: we will eventually have to add "value" here as the selected option so it shows up in the selected dropdown text */}
+                                <NameDropdown options={optionsArr} onChange={switchState} /> 
                             </div>
                             {showTable && (
                                 <Image
@@ -47,7 +46,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                 width={18}
                                 height={18}
                                 alt="delete Icon"
-                                className="m-4 ml-6 mt-2" // specific margins to keep the delete icon in line with the edit icon
+                                className="m-4 ml-6 mt-2"
                             />
                             )}
                             {showTable && (
@@ -56,7 +55,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                 width={18}
                                 height={18}
                                 alt="delete Icon"
-                                className="m-2 mb-3.5" // specific margins to keep the edit icon in line with the delete icon
+                                className="m-2 mb-3.5"
                             />
                             )}
                         </div>
@@ -77,7 +76,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                 </div>
                     <div className="bg-slate-50 items-center h-full">
                        {showTable && (<CategoriesSpreadsheet categoryItems={categoryItems} />)}
-                        {!showTable && (<p className="flex-center py-[250px] text-[20px] text-center">Select a category.</p>)}
+                        {!showTable && (<p className="flex-center py-[250px] font-crimson text-[20px] text-center">Select a category.</p>)}
 
                     </div> 
                 </div>
