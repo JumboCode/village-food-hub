@@ -87,8 +87,14 @@ const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, 
   );
 };
 
+
+interface Details {
+  name: string;
+  address: string;
+  householdSize: number;
+}
 // Information Changed Module
-const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: any }> = ({ value, onChange, setNextDisabled, details }) => {
+const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: Details }> = ({ value, onChange, setNextDisabled, details }) => {
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
   const handleYesNoChange = (newValue: string) => {
@@ -162,7 +168,7 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
 };
 
 // Address
-const Address: React.FC<{ line1: string, line2: string, city: string, state: string, zip: string, onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ line1, line2, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+const Address: React.FC<{ line1: string, city: string, state: string, zip: string, onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ line1, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
   const [line, setLine] = useState<string>(line1);
   const [cityState, setCityState] = useState<string>(city);
   const [stateState, setStateState] = useState<string>(state);
@@ -364,17 +370,34 @@ const DemographicsSurvey: React.FC = () => {
   };
 
   const [prevRecord, setPrevRecord] = useState(null);
+
+  interface SurveyResponse {
+    phoneNumber: string;
+    changes: string;
+    name: {
+      firstName: string;
+      lastName: string;
+    };
+    address: {
+      line1: string;
+      city: string;
+      state: string;
+      zip: string;
+    };
+    householdSize: number | null;
+  }
+
   const fetchPrevRecord = async () => {
     try {
         const response = await fetch("../api/demographics", { method: "GET" });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const surveyResponses = await response.json();
+        const surveyResponses: SurveyResponse[] = await response.json();
         console.log("Fetched responses:", surveyResponses);
 
         const filteredRecord = surveyResponses.find(
-            (response: any) => response.phoneNumber === responses.phoneNumber
+            (response) => response.phoneNumber === responses.phoneNumber
         );
 
         console.log("Filtered Record:", filteredRecord);

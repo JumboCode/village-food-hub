@@ -20,7 +20,7 @@ function getInventory() {
       .then((jsonData: any) => jsonData.data)
       .then((inventoryObjects: any) => {
         const listOfLists = inventoryObjects.map((object: any) => {
-          let fields = Object.values(object);
+          const fields = Object.values(object);
           // Remove the last field (history object) because it conflicts with the spreadsheet
           fields.pop();
 
