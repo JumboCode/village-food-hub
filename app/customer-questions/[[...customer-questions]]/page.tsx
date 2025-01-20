@@ -7,6 +7,10 @@ import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
+import Image from 'next/image';
+import Banner from '@app/components/DemographicsSurveyBanner';
+import logo from '@app/images/logo.jpg';
+import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
@@ -297,14 +301,45 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
 
 // TODO: Confirmation Page
 const Confirmation = () => {
+  /*return (
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        window.location.href = "../welcome-page";
+      }, 30000);
+
+      return () => clearTimeout(timer);
+    }, []));*/
+
   return (
-    <div className="flex flex-col justify-center items-center py-10">
-      <div className="flex flex-col items-center w-full max-w-lg">
-        <p className="text-[36px] font-bold mb-4">Confirmation</p>
-        <p className="text-[24px] mb-4">TODO: add survey summary here</p>
+      <div className="background-white font-black" > 
+          <div className="font-crimson flex flex-col items-center text-black">
+              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR COMPLETING THE SURVEY!</h1>
+              <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
+              <div className="">
+                  <Image
+                      src={logo}
+                      alt="logo"
+                      width={300}
+                      height={263}
+                  />
+              </div>
+              <p className="font-bold text-[36px] mt-6 mb-6">Thanks for visiting Village Food Hub!</p>
+              <button 
+                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex"
+                onClick={() => window.location.href = "../welcome-page"}>
+                  Return home 
+                  <div className="relative bottom-0 left-5">
+                      <Image
+                          src={arrow}
+                          alt="arrow"
+                          width={42}
+                          height={42}
+                      />
+                  </div>
+              </button>
+          </div>
       </div>
-    </div>
-  );
+      );
 };
 
 const DemographicsSurvey: React.FC = () => {
@@ -495,7 +530,8 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
-    router.push('/saved-thank-you');
+    setCurrentStep('confirmation');
+    //router.push('/saved-thank-you');
   };
 
   const getProgress = () => {
