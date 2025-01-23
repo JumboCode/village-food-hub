@@ -61,7 +61,7 @@ const VolunteerAddPages: React.FC = () => {
         </div>
         <div className="">
           <ButtonExit onClick={openModal} />
-          {showModal && <ExitModal closeModal={closeModal} />}
+          {showModal && <ExitModal closeModal={closeModal} redirectPage={'/volunteer-unsaved'}/> }
         </div>
       </div>
 

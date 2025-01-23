@@ -6,13 +6,14 @@ import { ButtonCancel, ButtonExit } from '@app/components/SurveyButtons';
 
 interface ExitModalProps {
   closeModal: () => void;
+  redirectPage: string;
 }
 
-const ExitModal: React.FC<ExitModalProps> = ({ closeModal }) => {
+const ExitModal: React.FC<ExitModalProps> = ({ closeModal, redirectPage }) => {
   const router = useRouter();
 
   const handleExitAnyway = () => {
-    router.push('/volunteer-unsaved');
+    router.push(redirectPage);
   };
 
   return (
