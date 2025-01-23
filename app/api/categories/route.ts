@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
         const record = await req.json()
         if (!validCategory(record)) {
             return NextResponse.json(
-                { response : "Invalid data format" }, 
+                { response : "Invalid data format"}, 
                 { status : 400 }
             )
         }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import { CategoriesSpreadsheet } from '@app/components/CategoriesSpreadsheet';
@@ -17,7 +17,22 @@ import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 
 const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
 
-    const optionsArr = ["Bakery", "Dairy & Eggs", "Dry Goods", "Meat", "Prepared Foods", "Produce"]
+    const [optionsArr, setOptionsArr] = useState<string[]>([])
+    useEffect(() => {
+        (async () => {
+            try {
+                fetch("../api/categories", {method: 'GET'})
+                    .then((response) => response.json())
+                    .then((json) => {
+                        let categories: string[] = json.map((item: any) => item.name)
+                        setOptionsArr([... new Set(categories)])
+                    })
+            } catch (error) {
+                setOptionsArr([])
+            }
+        })();
+    }, []);
+
     const categoryItems = [["bread", "100"], ["cupcake", "100"]]
 
     const [showTable, setShowTable] = useState(false);

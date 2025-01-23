@@ -66,9 +66,13 @@ export async function POST(req: NextRequest) {
         ...body,
       });
       console.log(result);
-      return NextResponse.json({ message: 'Successfully Created', status: 201, data: result })
+      return NextResponse.json({ message: 'Successfully Created', data: result }, 
+                               { status: 201 }
+      )
     } catch(xerror) {
-      return NextResponse.json({ message: 'Unexpected Error', status: 500 })
+      return NextResponse.json({ message: 'Unexpected Error'}, 
+                               { status: 500 }
+      )
     }
 }
 
@@ -96,7 +100,8 @@ export async function PUT(req: NextRequest) {
     if (!itemName || !units) {
       console.log(itemName);
       console.log(units);
-      return NextResponse.json({ message: 'Missing itemName or units', status: 400 });
+      return NextResponse.json({ message: 'Missing itemName or units'}, 
+                               { status: 400 });
     }
 
     const result = await updateInventoryItem({
@@ -106,10 +111,10 @@ export async function PUT(req: NextRequest) {
     });
 
     console.log(result);
-    return NextResponse.json({ message: 'OK', status: 200, data: result });
+    return NextResponse.json({ message: 'OK', data: result }, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Unexpected Error', status: 500 });
+    return NextResponse.json({ message: 'Unexpected Error'}, { status: 500 });
   }
 }
 
@@ -124,15 +129,15 @@ export async function DELETE(req: NextRequest) {
     const itemName = deleteItem;
 
     if (!itemName || !units) {
-      return NextResponse.json({ message: 'Missing itemName or units', status: 400 });
+      return NextResponse.json({ message: 'Missing itemName or units'}, { status: 400 });
     }
 
     const result = await deleteInventoryItem({ itemName, units });
 
-    return NextResponse.json({ message: 'OK', status: 200, result });
+    return NextResponse.json({ message: 'OK', result }, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Unexpected Error', status: 500 });
+    return NextResponse.json({ message: 'Unexpected Error'}, { status: 500 });
   }
 }
 
