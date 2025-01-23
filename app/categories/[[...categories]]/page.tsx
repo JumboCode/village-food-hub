@@ -18,13 +18,22 @@ import NavBar from '@app/components/NavBar';
 
 const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
 
+    // variables
     const optionsArr = ["Bakery", "Dairy & Eggs", "Dry Goods", "Meat", "Prepared Foods", "Produce"]
     const categoryItems = [["bread", "100"], ["cupcake", "100"]]
 
+    // to show the table
     const [showTable, setShowTable] = useState(false);
 
     const switchState = () => {
         setShowTable(true)
+    }
+
+    // when clicking the categories button
+    const [showModal, setShowModal] = useState(false);
+
+    const categoryButtonClicked = () => {
+        setShowModal(true);
     }
 
     return (
@@ -65,22 +74,76 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
 
                         <div>
 
-                            {showTable && (<button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mr-2 mb-2 rounded text-[20px]">
-                                { "Item "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
-                            </button>)}
+                            {showTable && 
+                                (<button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mr-2 mb-2 rounded text-[20px]">
+                                    { "Item "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
+                                </button>)
+                            }
                         
-                            <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]">
+                            {/* Button to open the add category modal */}
+                            <button 
+                                className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]"
+                                onClick={categoryButtonClicked}
+                            >
                                 { "Category "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
                             </button>
+
+
+                            {/* Add Category Modal */}
+                            {showModal &&
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                    
+                                    <div className="h-[207px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green space-y-[15px]">
+                                        {/* Title */}
+                                        <p className="text-center text-[32px] font-bold">
+                                           Category Name
+                                        </p>
+
+                                        {/* Text Input */}
+                                        <div className="flex w-full justify-center items-center">
+                                            <input 
+                                                type="text"
+                                                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                                            >
+                                            </input>
+                                        </div>
+
+                                        <div className="flex w-full justify-center space-x-[15px] items-center">
+
+                                            {/* Cancel Button */}
+                                            <button 
+                                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                                onClick={categoryButtonClicked}
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            {/* Save Button */}
+                                            <button 
+                                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                                onClick={categoryButtonClicked}
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
 
 
                     </div>
                 </div>
                     <div className="bg-slate-50 items-center h-full">
-                       {showTable && (<CategoriesSpreadsheet categoryItems={categoryItems} />)}
-                        {!showTable && (<p className="flex-center py-[250px] font-crimson text-[20px] text-center">Select a category.</p>)}
+                       {showTable && (
+                            <CategoriesSpreadsheet categoryItems={categoryItems} />
+                        )}
 
+                        {!showTable && (
+                            <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
+                                Select a category.
+                            </p>
+                        )}
                     </div> 
                 </div>
             </div>
