@@ -19,7 +19,6 @@ interface Inventory {
 const VolunteerAddPages: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [showModal, setShowModal] = useState(false);
-  // const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isDropdownsDisabled, setDropdownsDisabled] = useState(true);
 

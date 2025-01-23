@@ -13,12 +13,10 @@ interface NameDropdownProps {
 
 export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, currentDropdown, disabled, filterValue}: NameDropdownProps) {
     const [items, setItems] = useState<string[]>(options);
-    // console.log("filterValue:", filterValue)
     const [units, setUnits] = useState<string[]>(options);
     
     useEffect(() => {
         async function fetchItems() {
-            // console.log("category chosen:", filterValue);
             if (!fetchUrl) return;
             try {
                 const response = await fetch(fetchUrl);
@@ -30,22 +28,15 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
                     const filteredItems = filterValue
                         ? fetchedItems
                             .filter((item: any) => {
-                                // console.log(`Filtering item:${item.name}`);
-                                // console.log("filterValue:", filterValue);
-                                // console.log("filterName:", filterName);
-                                // console.log("current item:", item);
-                                // console.log("current item filterName:", item[filterName]);
                                 return item[filterName] === filterValue;
                             })
                             .flatMap((item: any) => item[currentDropdown])
                         : itemNames;
-                    // console.log("filtered items:", filteredItems)
 
                     const uniqueItemName: string[] = Array.from(new Set(filteredItems));
                     setItems(uniqueItemName);
                     const uniqueUnitName: string[] = Array.from(new Set(filteredItems));
                     console.log("unique unit name:", uniqueUnitName);
-                    // setUnits(uniqueUnitName);
                 } else {
                     throw new Error('Failed to fetch items');
                 }
@@ -56,10 +47,6 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
 
         fetchItems();
     }, [fetchUrl, filterName, filterValue, currentDropdown]);
-    
-    // useEffect(() => {
-    //     console.log('Items state updated:', items);
-    // }, [items]);
     
     return (
         <select 
