@@ -299,6 +299,7 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
+
 // TODO: Confirmation Page
 const Confirmation = () => {
   /*return (
@@ -310,18 +311,72 @@ const Confirmation = () => {
       return () => clearTimeout(timer);
     }, []));*/
 
+  const [newRecord, setNewRecord] = useState({
+    receive: false,
+    donate: false,
+    phoneNumber: '',
+    changes: '',
+    name: { firstName: '', lastName: '' },
+    address: { line1: '', line2: '', city: '', state: '', zip: '' },
+    householdSize: 0,
+  });
+
+  interface newResponse {
+    phoneNumber: string;
+    name: {
+      firstName: string;
+      lastName: string;
+    };
+    address: {
+      line1: string;
+      city: string;
+      state: string;
+      zip: string;
+    };
+    householdSize: number | null;
+  }
+
+  const fetchNewRecord = async () => {
+    try {
+        const response = await fetch("../api/demographics", { method: "GET" });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const newResponses: newResponse[] = await response.json();
+        console.log("Fetched responses:", newResponses);
+
+        const newFilteredRecord = newResponses.find(
+            (response) => response.phoneNumber === newRecord.phoneNumber
+        );
+
+        console.log("Filtered Record:", newFilteredRecord);
+        setNewRecord(newFilteredRecord || null);
+        return newFilteredRecord || null;
+    } catch (error) {
+        console.error("Error fetching responses:", error);
+        setNewRecord(null);
+        return null;
+    }
+  };
+
   return (
       <div className="background-white font-black" > 
           <div className="font-crimson flex flex-col items-center text-black">
-              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR COMPLETING THE SURVEY!</h1>
+              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR VISITING!</h1>
               <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
-              <div className="">
+              <div className="flex col-2 items-center">
+                  <div className="flex flex-row mx-10 content-start font-bold text-[30px] mt-8">
+                    <h1 className="font-bold text-[30px] mt-8" >Your Information</h1>
+                    <div>Full Name</div>
+                  </div>
+                  <div className="flex flex-row">
                   <Image
                       src={logo}
                       alt="logo"
                       width={300}
                       height={263}
                   />
+                  </div>
               </div>
               <p className="font-bold text-[36px] mt-6 mb-6">Thanks for visiting Village Food Hub!</p>
               <button 
@@ -482,6 +537,7 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('confirmation');
         break;
       case 'confirmation':
+        
         console.log('Survey Completed');
         break;
       default:
@@ -563,19 +619,23 @@ const DemographicsSurvey: React.FC = () => {
       <DemographicsSurveyBanner />
 
       {/* Progress Bar */}
-      <div className="flex py-10 pl-[100px] pr-[100px] items-center">
-          <div></div>
-          <ProgressBar progress={getProgress()}/>   
-          <div className="pl-5 text-2xl">
-            {`${getProgress().toFixed(0)}%`}
+      {currentStep !== 'confirmation' && (
+        <>
+          <div className="flex py-10 pl-[100px] pr-[100px] items-center">
+            <div></div>
+            <ProgressBar progress={getProgress()}/>   
+            <div className="pl-5 text-2xl">
+              {`${getProgress().toFixed(0)}%`}
+            </div>
           </div>
-      </div>
 
-      {/* Back and Exit Buttons */}
-      <div className="flex flex-row h-full w-full justify-between px-32">
-        <ButtonBack onClick={handleBackClick} />
-        <ButtonExit />
-      </div>
+          {/* Back and Exit Buttons */}
+          <div className="flex flex-row h-full w-full justify-between px-32">
+            <ButtonBack onClick={handleBackClick} />
+            <ButtonExit />
+          </div>
+        </>
+      )}
 
       {/* Modules */}
       <div className='w-full'>
@@ -601,11 +661,13 @@ const DemographicsSurvey: React.FC = () => {
         {(() => {
           if (currentStep === 'houseSize') {
             return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
-          } else if (currentStep === 'confirmation') {
-            return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
-                      { "OK" }
-                    </button>
-          } else if (currentStep !== 'donor') {
+          } 
+          // else if (currentStep === 'confirmation') {
+          //   return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
+          //             { "OK" }
+          //           </button>
+          // }
+           else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
