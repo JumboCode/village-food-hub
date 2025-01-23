@@ -42,11 +42,6 @@ const VolunteerAddPages: React.FC = () => {
   const closeModal = (): void => {
       setShowModal(false);
   };
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    setDropdownsDisabled(!value); 
-  };
   
   return (
     <div className="min-h-screen bg-gray-100">
@@ -93,6 +88,7 @@ const VolunteerAddPages: React.FC = () => {
 const VolunteerAddDetailsModule: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
 
   const handleCategorySelect = (selected: string) => {
     console.log("Category selected:", selected);
@@ -102,6 +98,11 @@ const VolunteerAddDetailsModule: React.FC = () => {
   const handleItemNameSelect = (selected: string) => {
     console.log("Item Name selected:", selected);
     setSelectedItemName(selected);
+  };
+
+  const handleUnitSelect = (selected: string) => {
+    console.log("Unit selected:", selected);
+    setSelectedUnit(selected);
   };
   
   return (
@@ -118,7 +119,8 @@ const VolunteerAddDetailsModule: React.FC = () => {
         <p className="mb-2">Item Name</p>
         <NameDropdown 
           fetchUrl="/api/categories" 
-          filterName="itemName" 
+          filterName="name" 
+          currentDropdown="itemName"
           onSelect={handleItemNameSelect} 
           disabled={!selectedCategory} 
           filterValue={selectedCategory || ""}/>
@@ -130,11 +132,18 @@ const VolunteerAddDetailsModule: React.FC = () => {
             type="text"
             placeholder=""
             className="input input-bordered input-xs max-w-xs rounded-xl border-light-gray"
+            disabled={!selectedItemName}
           />
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
           <p className="mb-2">Units</p>
-          <NameDropdown filterName="units" disabled={!selectedItemName}/>
+          <NameDropdown 
+            fetchUrl="/api/categories" 
+            filterName="itemName" 
+            currentDropdown="units"
+            onSelect={handleUnitSelect} 
+            disabled={!selectedItemName} 
+            filterValue={selectedItemName || ""}/>
         </div>
       </div>
     </div>

@@ -6,17 +6,19 @@ interface NameDropdownProps {
     onSelect?: (selected: string) => void;
     fetchUrl?: string;
     filterName: string;
+    currentDropdown: string;
     disabled?: boolean;
-    filterValue?: String
+    filterValue?: string;
 }
 
-export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, disabled, filterValue}: NameDropdownProps) {
+export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, currentDropdown, disabled, filterValue}: NameDropdownProps) {
     const [items, setItems] = useState<string[]>(options);
-    //const [filteredItems, setFilteredItems] = useState<string[]>([]);
+    // console.log("filterValue:", filterValue)
+    const [units, setUnits] = useState<string[]>(options);
     
     useEffect(() => {
         async function fetchItems() {
-            console.log("category chosen: ", filterValue);
+            // console.log("category chosen:", filterValue);
             if (!fetchUrl) return;
             try {
                 const response = await fetch(fetchUrl);
@@ -27,18 +29,23 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
                     // If filterValue (category) is provided, filter the items based on category
                     const filteredItems = filterValue
                         ? fetchedItems
-                            .filter((item: any) => item.category === filterValue)
-                            .map((item: any) => item[filterName])
+                            .filter((item: any) => {
+                                // console.log(`Filtering item:${item.name}`);
+                                // console.log("filterValue:", filterValue);
+                                // console.log("filterName:", filterName);
+                                // console.log("current item:", item);
+                                // console.log("current item filterName:", item[filterName]);
+                                return item[filterName] === filterValue;
+                            })
+                            .flatMap((item: any) => item[currentDropdown])
                         : itemNames;
+                    // console.log("filtered items:", filteredItems)
 
-                    /*if (filterValue) {
-                        setFilteredItems(fetchedItems
-                            .filter((item: any) => item.category === filterValue) // Filter items by category
-                            .map((item: any) => item[filterName]));
-                        }*/
-                        
-                    const uniqueItemName: string[] = Array.from(new Set(itemNames));
+                    const uniqueItemName: string[] = Array.from(new Set(filteredItems));
                     setItems(uniqueItemName);
+                    const uniqueUnitName: string[] = Array.from(new Set(filteredItems));
+                    console.log("unique unit name:", uniqueUnitName);
+                    // setUnits(uniqueUnitName);
                 } else {
                     throw new Error('Failed to fetch items');
                 }
@@ -48,7 +55,7 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
         }
 
         fetchItems();
-    }, [fetchUrl, filterName, filterValue]);
+    }, [fetchUrl, filterName, filterValue, currentDropdown]);
     
     // useEffect(() => {
     //     console.log('Items state updated:', items);
