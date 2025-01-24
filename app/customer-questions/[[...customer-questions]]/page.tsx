@@ -302,23 +302,14 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
 
 // TODO: Confirmation Page
 const Confirmation = () => {
-  /*return (
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        window.location.href = "../welcome-page";
-      }, 30000);
-
-      return () => clearTimeout(timer);
-    }, []));*/
-
   const [newRecord, setNewRecord] = useState({
     receive: false,
     donate: false,
-    phoneNumber: '',
+    phoneNumber: '123567890',
     changes: '',
-    name: { firstName: '', lastName: '' },
-    address: { line1: '', line2: '', city: '', state: '', zip: '' },
-    householdSize: 0,
+    name: { firstName: 'John', lastName: 'Smith' },
+    address: { line1: '1 Oak St', line2: 'asd', city: 'Medford', state: 'Ma', zip: '01234' },
+    householdSize: 5,
   });
 
   interface newResponse {
@@ -350,37 +341,52 @@ const Confirmation = () => {
         );
 
         console.log("Filtered Record:", newFilteredRecord);
-        setNewRecord(newFilteredRecord || null);
-        return newFilteredRecord || null;
     } catch (error) {
         console.error("Error fetching responses:", error);
-        setNewRecord(null);
-        return null;
     }
   };
+
+  useEffect(() => {
+    fetchNewRecord();
+  }, []);
 
   return (
       <div className="background-white font-black" > 
           <div className="font-crimson flex flex-col items-center text-black">
               <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR VISITING!</h1>
               <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
-              <div className="flex col-2 items-center">
-                  <div className="flex flex-row mx-10 content-start font-bold text-[30px] mt-8">
-                    <h1 className="font-bold text-[30px] mt-8" >Your Information</h1>
-                    <div>Full Name</div>
-                  </div>
-                  <div className="flex flex-row">
-                  <Image
-                      src={logo}
-                      alt="logo"
-                      width={300}
-                      height={263}
-                  />
+              <div className="flex col-2 items-center mt-8">
+                  <div className="flex flex-row mx-10 content-start text-[30px] break-all">
+                    <div className="flex flex-col">
+                      <div className="text-[30px]">Your Information</div>
+                      <div>
+                        <div className="text-[21px] mt-1">Full Name:
+                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.name.firstName} {newRecord.name.lastName} </span>
+                        </div>
+                      </div>
+                      <div className="text-[21px] mt-1">Phone Number:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.phoneNumber} </span>
+                      </div>
+                      <div className="text-[21px] mt-1">Address:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.address.line1} {newRecord.address.line2} {newRecord.address.city} {newRecord.address.state} {newRecord.address.zip} </span>
+                      </div>
+                      <div className="text-[21px] mt-1">Household Size:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.householdSize} </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center ml-10">
+                      <Image
+                        src={logo}
+                        alt="logo"
+                        width={300}
+                        height={263}
+                      />
+                    </div>
                   </div>
               </div>
-              <p className="font-bold text-[36px] mt-6 mb-6">Thanks for visiting Village Food Hub!</p>
+              <div className="mt-10 mb-15">
               <button 
-                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex"
+                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
                 onClick={() => window.location.href = "../welcome-page"}>
                   Return home 
                   <div className="relative bottom-0 left-5">
@@ -394,6 +400,7 @@ const Confirmation = () => {
               </button>
           </div>
       </div>
+    </div>
       );
 };
 
