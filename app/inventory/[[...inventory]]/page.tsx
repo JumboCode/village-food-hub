@@ -18,6 +18,17 @@ function getInventory() {
         return response.json();
       })
       .then((jsonData: any) => jsonData.data)
+      .then((data: any) => {
+        if (!Array.isArray(data)) {
+            console.log("not an array");
+        } else {
+            console.log(typeof data);
+            console.log(data);
+        }
+        // return data;
+
+        
+    })
       .then((inventoryObjects: any) => {
         const listOfLists = inventoryObjects.map((object: any) => {
           const fields = Object.values(object);

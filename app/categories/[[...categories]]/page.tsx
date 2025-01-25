@@ -11,11 +11,44 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NameDropdown } from '@app/components/Dropdowns';
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 
+const categoriesData = [];
 
-// export default function Categories()  {
+function getCategories() {
+    
+    try {
+        return fetch("/../api/categories", { method: 'GET' })
+        .then((response) => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then((data) => {
+            categoriesData.push(data);
+            return data;
+        })
+        .then((categoriesData) => {
+
+                const rearrangedData = categoriesData.map((record: any) => {
+                    const arr = [record.itemName, record.name, record.units];
+                    return arr
+                });
+
+                return rearrangedData;
+            });
+
+
+    } catch (error) {
+        console.error(error);
+        return Promise.resolve([]);
+    }
+        
+}
+
+
 // FOR TESTING:
 
 const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
+
+
 
     const optionsArr = ["Bakery", "Dairy & Eggs", "Dry Goods", "Meat", "Prepared Foods", "Produce"]
     const categoryItems = [["bread", "100"], ["cupcake", "100"]]
