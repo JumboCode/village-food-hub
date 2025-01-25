@@ -54,37 +54,48 @@ function getInventory() {
 
 const InternalViewInventoryPage: React.FC = () => {
   const [inventory, setInventory] = React.useState<any>();
-  useEffect(() => {
-    getInventory()
-      .then((items: any) => { setInventory(items) })
-  }, []);
-  return (
-    <div className= "px-10">
 
+  React.useEffect(() => {
+    getInventory()
+      .then((items: any) => {
+        setInventory(items);
+      });
+  }, []);
+
+  return (
+    <div className="px-10">
       <div className="flex flex-row justify-between mt-10 mb-6">
-        <div className= "text-[40px] relative overflow-x-auto crimson-regular font-crimson" > Inventory </div>
-        <div className= "flex flex-row items-center">
-          <div className = "border-2 border-[#D9D9D9] rounded-xl shadow-lg w-[400px] h-[54px]">
-            <div className = "flex flex-row py-2 px-2 items-center">
+        <div className="text-[40px] relative overflow-x-auto crimson-regular font-crimson">
+          Inventory
+        </div>
+        <div className="flex flex-row items-center">
+          <div className="border-2 border-[#D9D9D9] rounded-xl shadow-lg w-[400px] h-[54px]">
+            <div className="flex flex-row py-2 px-2 items-center">
               <Image
-                  src={searchSymbol}
-                  alt="search button"
-                  className="pl-2"
-                  width={24}
-                  height={29.14}
+                src={searchSymbol}
+                alt="search button"
+                className="pl-2"
+                width={24}
+                height={29.14}
               />
-              <input className="pl-3 focus:outline-none text-[24px] crimson-bold" placeholder="Search.."></input>
+              <input
+                className="pl-3 font-crimson placeholder:font-crimson text-[24px] font-bold placeholder:font-bold focus:outline-none"
+                placeholder="Search.."
+              >
+              </input>
             </div>
           </div>
-          <button className = "border-2 border-[#D9D9D9] rounded-xl shadow-lg ml-9 h-[54px]">
-            <div className = "flex flex-row py-2 px-3">
+          <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl shadow-lg ml-9 h-[54px]">
+            <div className="flex flex-row py-2 px-3">
               <Image
-                    src={filterSymbol}
-                    alt="filter button"
-                    width={24}
-                    height={29.14}
-                />
-              <div className= "text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2" > Filter </div>
+                src={filterSymbol}
+                alt="filter button"
+                width={24}
+                height={29.14}
+              />
+              <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2">
+                Filter
+              </div>
             </div>
           </button>
         </div>
@@ -95,3 +106,4 @@ const InternalViewInventoryPage: React.FC = () => {
 };
 
 export default InternalViewInventoryPage;
+
