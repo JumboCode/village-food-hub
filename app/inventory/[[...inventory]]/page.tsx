@@ -1,6 +1,8 @@
 "use client"
 import React, { useEffect } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
+import Image from 'next/image';
+import filterSymbol from "@app/images/filterSymbol.svg"
 import NavBar from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
@@ -42,7 +44,7 @@ function getInventory() {
         console.log("List of Lists:", listOfLists);
         return listOfLists;
       });
-  } catch (error) {
+  } catch (error) { 
     console.error(error);
     return Promise.resolve([]);
   }

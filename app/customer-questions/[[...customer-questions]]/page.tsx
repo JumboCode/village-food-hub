@@ -8,6 +8,7 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import { NameDropdown } from '@app/components/Dropdowns';
+import ExitModal from '@app/components/ExitModal';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -497,6 +498,16 @@ const DemographicsSurvey: React.FC = () => {
     console.log('Survey Responses:', responses);
     router.push('/saved-thank-you');
   };
+  
+  const [showModal, setShowModal] = useState(false);
+  
+  const openModal = (): void => {
+    setShowModal(true);
+  };
+
+  const closeModal = (): void => {
+    setShowModal(false);
+  };
 
   const getProgress = () => {
     switch (currentStep) {
@@ -538,7 +549,11 @@ const DemographicsSurvey: React.FC = () => {
       {/* Back and Exit Buttons */}
       <div className="flex flex-row h-full w-full justify-between px-32">
         <ButtonBack onClick={handleBackClick} />
-        <ButtonExit />
+        {/* <ButtonExit /> */}
+        <div>
+          <ButtonExit onClick={openModal} />
+          {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
+        </div>
       </div>
 
       {/* Modules */}
