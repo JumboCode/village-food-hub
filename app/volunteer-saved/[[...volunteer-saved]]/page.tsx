@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
-
+import { useRouter } from 'next/navigation';
 import Banner from '../../components/UpdateInventoryBanner';
 
 import logo from '../../images/logo.jpg';
@@ -9,6 +11,11 @@ import arrow from '../../images/arrow.png';
 // This functions returns the thank you page for successfully submitting the 
 // demographic survey
 export default function VolunteerSaved() {
+
+    const router = useRouter();
+    const handleNewChange = () => {
+        router.push('/volunteer-landing');
+    }
 
     return (
         <div className="background-white font-black" > 
@@ -25,7 +32,7 @@ export default function VolunteerSaved() {
                     />
                 </div>
                 <p className="mt-6 mb-6"></p>
-                <button className="bg-purple hover:bg-dark-purple text-white mt-15 font-bold py-4 px-11 rounded-full text-[28px] flex">
+                <button className="bg-purple hover:bg-dark-purple text-white mt-15 font-bold py-4 px-11 rounded-full text-[28px] flex" onClick={handleNewChange}>
                     New Inventory Change
                     <div className="relative bottom-0 left-5">
                         <Image

@@ -92,6 +92,7 @@ export function ButtonCancel({ onClick, disabled }: ButtonProps) {
   );
 }
 
+
 export function ButtonRemove({ onClick, disabled }: ButtonProps) {
   return (
       <div>
@@ -133,3 +134,31 @@ export function ButtonEdit({ onClick, disabled }: ButtonProps) {
       </div>
   );
 }
+
+export function YesProceed ({ onClick, disabled }: ButtonProps) {
+    return (
+        <div>
+            <button 
+            className="w-[300px] bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full"
+            onClick={onClick}
+              disabled={disabled}
+            >
+                { "Yes, proceed to survey" }
+            </button>
+        </div>
+    );
+  }
+
+export function NoDone ({ onClick, disabled }: ButtonProps) {
+    return (
+        <div>
+            <button 
+            className="w-[300px] bg-red hover:bg-dark-red text-white font-serif py-2 px-8 rounded-full"
+            onClick={onClick}
+              disabled={disabled}
+            >
+                { "No, I'm done" }
+            </button>
+        </div>
+    );
+  }

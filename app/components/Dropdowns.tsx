@@ -1,4 +1,3 @@
-//implements rounded dropdown menu
 import { useEffect, useState } from 'react';
 
 interface NameDropdownProps {
@@ -13,11 +12,9 @@ interface NameDropdownProps {
 
 export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, currentDropdown, disabled, filterValue}: NameDropdownProps) {
     const [items, setItems] = useState<string[]>(options);
-    const [units, setUnits] = useState<string[]>(options);
     
     useEffect(() => {
         async function fetchItems() {
-            if (!fetchUrl) return;
             try {
                 const response = await fetch(fetchUrl);
                 if (response.ok) {
@@ -62,5 +59,5 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
                     </option>
             ))}
         </select>
-    )
+    );
 }

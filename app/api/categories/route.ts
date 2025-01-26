@@ -29,7 +29,7 @@ async function updateCategory(data : {
     name: string,
     units: string[]
 }) {
-    const { itemName, name, ...newData } = data;
+    const { itemName, name } = data;
     
     return await prisma.categories.update({
         where: {
@@ -157,10 +157,10 @@ export async function DELETE(
 }
 
 interface CategoryRecord {
-    itemName: String;
-    units:    String[];
-    name:     String;
-  }
+    itemName: string;
+    units:    string[];
+    name:     string;
+}
 
 function validCategory(record : CategoryRecord): boolean {
 

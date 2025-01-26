@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 
 import Banner from '@app/components/DemographicsSurveyBanner';
@@ -8,6 +10,14 @@ import arrow from '@app/images/arrow.png';
 
 // This functions returns the thank you page for an unsaved demographic survey
 export default function UnsavedThankYou() {
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        window.location.href = "../welcome-page";
+      }, 30000);
+
+      return () => clearTimeout(timer);
+    }, []);
     
     return (
         <div className="background-white font-black"> 
@@ -24,7 +34,9 @@ export default function UnsavedThankYou() {
                     />
                 </div>
                 <p className="font-bold text-[36px] mt-6 mb-6">Thanks for visiting Village Food Hub!</p>
-                <button className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex">
+                <button 
+                  className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex"
+                  onClick={() => window.location.href = "../welcome-page"}>
                     Return home 
                     <div className="relative bottom-0 left-5">
                         <Image
