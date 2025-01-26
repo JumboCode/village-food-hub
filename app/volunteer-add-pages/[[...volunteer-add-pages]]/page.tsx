@@ -35,10 +35,8 @@ const VolunteerAddPages: React.FC = () => {
 
   const handleBack = () => {
     console.log('Back clicked, currentStep:', currentStep);
-    if (currentStep === 'confirm')
-      setCurrentStep('details');
-    else 
-      window.location.href = "../volunteer-landing";
+    if (currentStep === 'confirm') setCurrentStep('details');
+    else window.location.href = "../volunteer-landing";
   };
 
   const openModal = (): void => {
@@ -48,7 +46,7 @@ const VolunteerAddPages: React.FC = () => {
   const closeModal = (): void => {
     setShowModal(false);
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
@@ -104,11 +102,6 @@ const VolunteerAddPages: React.FC = () => {
 
 // Subcomponents
 
-// TODO: THESE ARE DUMMY VALUES
-const categoryNames = ['Bakery', 'Dairy', 'Frozen', 'Grocery', 'Meat', 'Produce'];
-const itemNames = ['Apples', 'Bananas', 'Bread', 'Butter', 'Carrots', 'Cheese', 'Chicken', 'Eggs', 'Flour', 'Ground Beef', 'Milk', 'Oranges', 'Pasta', 'Pork', 'Potatoes', 'Rice', 'Salmon', 'Spinach', 'Sugar', 'Tomatoes', 'Turkey', 'Yogurt'];
-const units = ['lbs', 'g', 'kg', 'oz', 'gallon', 'quart', 'pint'];
-
 interface VolunteerAddDetailsModuleProps{
     currItem: Inventory,
     setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>,
@@ -116,6 +109,8 @@ interface VolunteerAddDetailsModuleProps{
 }
 
 const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ currItem, setCurrItem, setNextDisabled }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   useEffect(() => {
     const { categoryName, itemName, quantity, units } = currItem;
     setNextDisabled(categoryName === '' || itemName === '' || quantity <= 0 || units === '');
@@ -125,24 +120,32 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ c
     <div className="flex flex-col h-1/2 w-3/5 pt-10 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
-        <p className="mb-2">Category Name <span className="text-red">*</span></p>
+        <p className="mb-2">Category Name</p>
         <NameDropdown 
-          options={categoryNames}
-          onChange={(e) => { setCurrItem({ ...currItem, categoryName: e.target.value }); }}
-          value={currItem.categoryName}
+          fetchUrl="/api/categories" 
+          filterName="name" 
+          onSelect={(selected) => {
+            setSelectedCategory(selected);
+            setCurrItem({ ...currItem, categoryName: selected });
+          }}
         />
       </div>
       <div className="font-bold text-[20px]">
-        <p className="mb-2">Item Name <span className="text-red">*</span></p>
+        <p className="mb-2">Item Name</p>
         <NameDropdown 
-          options={itemNames}
-          onChange={(e) => { setCurrItem({ ...currItem, itemName: e.target.value }); }}
-          value={currItem.itemName}
+          fetchUrl="/api/categories" 
+          filterName="name" 
+          currentDropdown="itemName"
+          onSelect={(selected) => {
+            setCurrItem({ ...currItem, itemName: selected });
+          }} 
+          disabled={!selectedCategory} 
+          filterValue={selectedCategory || ""}
         />
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2">Quantity <span className="text-red">*</span></p>
+          <p className="mb-2">Quantity</p>
           <input
             type="text"
             placeholder=""
@@ -154,11 +157,16 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ c
           />
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
-          <p className="mb-2">Units <span className="text-red">*</span></p>
+          <p className="mb-2">Units</p>
           <NameDropdown 
-            options={units}
-            onChange={(e) => { setCurrItem({ ...currItem, units: e.target.value }); }}
-            value={currItem.units}
+            fetchUrl="/api/categories" 
+            filterName="itemName" 
+            currentDropdown="units"
+            onSelect={(selected) => {
+              setCurrItem({ ...currItem, units: selected });
+            }} 
+            disabled={!currItem.itemName} 
+            filterValue={currItem.itemName || ""}
           />
         </div>
       </div>
@@ -188,8 +196,8 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
             .then((jsonData) => jsonData.data)
             .then((items) => {
               const exists = items.some((item: Inventory) =>
-                item.itemName == currItem.itemName &&
-                item.units == currItem.units
+                item.itemName === currItem.itemName &&
+                item.units === currItem.units
               );
 
               console.log(exists);
