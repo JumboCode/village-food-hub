@@ -189,31 +189,58 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
         Add {currItem.quantity} {currItem.units} of {currItem.itemName}.
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
-        <ButtonSubmit onClick={() => {
-          setCurrItem({ ...currItem, lastUpdated: new Date() });
-          fetch("../api/inventory", { method: 'GET' })
-            .then((response) => response.json())
-            .then((jsonData) => jsonData.data)
-            .then((items) => {
-              const exists = items.some((item: Inventory) =>
-                item.itemName === currItem.itemName &&
-                item.units === currItem.units
-              );
+        <ButtonSubmit
+          onClick={() => {
+            setCurrItem({ ...currItem, lastUpdated: new Date() });
 
-              console.log(exists);
-              const method = exists ? 'PUT' : 'POST';
+            // Fetch the current inventory data
+            fetch("../api/inventory", { method: "GET" })
+              .then((response) => response.json())
+              .then((jsonData) => jsonData.data)
+              .then((items) => {
+                const existingItem = items.find(
+                  (item: Inventory) =>
+                    item.itemName === currItem.itemName &&
+                    item.units === currItem.units
+                );
 
-              fetch("../api/inventory", {
-                method: method,
-                body: JSON.stringify(currItem)
+                if (existingItem) {
+                  // If item exists, update the quantity
+                  const updatedQuantity = existingItem.quantity + currItem.quantity;
+
+                  fetch("../api/inventory", {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      ...currItem,
+                      quantity: updatedQuantity,
+                    }),
+                  }).then(() => {
+                    console.log("Quantity updated successfully");
+                    window.location.href = "../volunteer-saved";
+                  });
+                } else {
+                  // If item doesn't exist, create a new entry
+                  fetch("../api/inventory", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(currItem),
+                  }).then(() => {
+                    console.log("Item created successfully");
+                    window.location.href = "../volunteer-saved";
+                  });
+                }
               });
-              console.log(items);
-              window.location.href = "../volunteer-saved";
-            });
-        }} />
+          }}
+        />
       </div>
     </div>
   );
 };
+
 
 export default VolunteerAddPages;
