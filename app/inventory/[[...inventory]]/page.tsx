@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 import Image from 'next/image';
 import filterSymbol from "@app/images/filterSymbol.svg"
-
+import NavBar from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
@@ -57,19 +57,13 @@ const InternalViewInventoryPage: React.FC = () => {
       .then((items: any) => { setInventory(items) })
   }, []);
   return (
-    <div className= "px-10">
-      <div className= "text-[40px] relative overflow-x-auto crimson-regular font-crimson" > Inventory </div>
-      <button className = "flex flex-row border-2 border-grey rounded-l">
-            <Image
-                  src={filterSymbol}
-                  alt="filter button"
-                  width={24}
-                  height={29.14}
-              />
-        <div className= "text-[20px] relative overflow-x-auto crimson-regular font-crimson pl-2" > Filter
-        </div>
-      </button>
-      <InventorySpreadsheet inventoryItems={inventory} />
+    <div>
+      <NavBar/>
+        
+      <div className="px-20">
+        <p className="font-crimson font-bold pt-10 pb-5 text-[40px] ">Inventory</p>
+        <InventorySpreadsheet inventoryItems={inventory} />
+      </div>
     </div>
   );
 };

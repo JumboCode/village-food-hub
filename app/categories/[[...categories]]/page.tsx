@@ -10,6 +10,7 @@ import editIcon from "../../images/edit.png"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NameDropdown } from '@app/components/Dropdowns';
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
+import NavBar from '@app/components/NavBar';
 
 
 // export default function Categories()  {
@@ -28,6 +29,8 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
 
     return (
         <div> 
+            <NavBar/>
+        
             <p className="font-crimson font-bold pl-20 pt-10 text-[40px] ">Categories</p>
            
             <div className='flex justify-center items-center'> 
