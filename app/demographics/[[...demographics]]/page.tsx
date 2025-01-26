@@ -1,31 +1,55 @@
-import React from "react";
+"use client"
+import React, { useEffect } from "react";
 import NavBar from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
 
-const InternalViewDemographicsPage: React.FC = () => {
-    const demographicsItems = [
-        ["2024-01-01", "(415)273-3832", "Tanisha", "10 winthrop st", 2, 3, 1],
-        ["2024-01-02", "(344)343-3343", "Emily", "2 Medford ave", 2, 4, 3],
-        ["2004-01-03", "(234)382-8392", "Karen", "15 Lane ave", 2, 5, 7],
-        ["2024-01-03", "(234)338-2362", "Baren", "15 Lane ave", 4, 5, 7],
-        ["2024-01-05", "(234)322-4392", "Kathy", "15 Lane ave", 1, 2, 7],
-        ["2023-01-03", "(234)383-1392", "Bob", "15 Lane ave", 2, 6, 7],
-        ["1999-01-03", "(323)438-5392", "Tyler", "15 Lane ave", 2, 5, 9],
-    ];
 
+const demographicsData = [];
+
+function getDemographics() {
+    
+    try {
+        return fetch("/../api/demographics", { method: 'GET' })
+        .then((response) => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then((data) => {
+            demographicsData.push(data);
+            return data;
+        })
+        .then((demographicsData) => {
+
+                const rearrangedData = demographicsData.map((record: any) => {
+                    const arr = [record.lastVisitDate.split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
+                    return arr
+                });
+
+
+                return rearrangedData;
+            });
+
+
+    } catch (error) {
+        console.error(error);
+        return Promise.resolve([]);
+    }
+        
+}
+
+
+const InternalViewDemographicsPage: React.FC = () => {
+    const [demographics, setDemographics] = React.useState<any>();
+      useEffect(() => {
+        getDemographics()
+          .then((items: any) => { setDemographics(items) })
+      }, []);
     return (
         <div className="p-4">
             <h1 className="font-crimson text-3xl font-[40px] font-bold m-4 mt-8">Demographic Responses</h1>
-            <DemographicsSpreadsheet demographicsItems={demographicsItems} />
+            <DemographicsSpreadsheet demographicsItems={demographics} />
         </div>
     );
 };
 
-export default function DemographicsPage() {
-    return (
-        <>
-            <NavBar />
-            <InternalViewDemographicsPage />
-        </>
-    );
-}
+export default InternalViewDemographicsPage;
