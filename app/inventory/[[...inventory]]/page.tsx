@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
+import NavBar from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
@@ -54,7 +55,14 @@ const InternalViewInventoryPage: React.FC = () => {
       .then((items: any) => { setInventory(items) })
   }, []);
   return (
-    <InventorySpreadsheet inventoryItems={inventory} />
+    <div>
+      <NavBar/>
+        
+      <div className="px-20">
+        <p className="font-crimson font-bold pt-10 pb-5 text-[40px] ">Inventory</p>
+        <InventorySpreadsheet inventoryItems={inventory} />
+      </div>
+    </div>
   );
 };
 
