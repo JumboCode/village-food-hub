@@ -17,7 +17,7 @@ interface Inventory {
 }
 
 const VolunteerAddPages: React.FC = () => {
-  const [currItem, setCurrItem] = useState<Inventory>({
+  const [itemToAdd, setItemToAdd] = useState<Inventory>({
     itemName: '',
     categoryName: '',
     quantity: 0,
@@ -68,8 +68,8 @@ const VolunteerAddPages: React.FC = () => {
         {currentStep === 'details' && (
           <div className="w-4/5 h-4/5">
             <VolunteerAddDetailsModule 
-              currItem={currItem} 
-              setCurrItem={setCurrItem} 
+              itemToAdd={itemToAdd} 
+              setItemToAdd={setItemToAdd} 
               setNextDisabled={setNextDisabled}
             />
           </div>
@@ -77,8 +77,8 @@ const VolunteerAddPages: React.FC = () => {
         {currentStep === 'confirm' && (
           <div className="w-4/5 h-4/5">
             <VolunteerAddConfirmModule 
-              currItem={currItem} 
-              setCurrItem={setCurrItem} 
+              itemToAdd={itemToAdd} 
+              setItemToAdd={setItemToAdd} 
             />
           </div>
         )}
@@ -90,7 +90,7 @@ const VolunteerAddPages: React.FC = () => {
           <ButtonNext 
             disabled={nextDisabled} 
             onClick={() => {
-              console.log(currItem);
+              console.log(itemToAdd);
               handleNext();
             }} 
           />
@@ -103,41 +103,41 @@ const VolunteerAddPages: React.FC = () => {
 // Subcomponents
 
 interface VolunteerAddDetailsModuleProps{
-    currItem: Inventory,
-    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>,
+    itemToAdd: Inventory,
+    setItemToAdd: React.Dispatch<React.SetStateAction<Inventory>>,
     setNextDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ currItem, setCurrItem, setNextDisabled }) => {
+const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ itemToAdd, setItemToAdd, setNextDisabled }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    const { categoryName, itemName, quantity, units } = currItem;
+    const { categoryName, itemName, quantity, units } = itemToAdd;
     setNextDisabled(categoryName === '' || itemName === '' || quantity <= 0 || units === '');
-  }, [currItem, setNextDisabled]);
+  }, [itemToAdd, setNextDisabled]);
 
   return (
     <div className="flex flex-col h-1/2 w-3/5 pt-10 justify-center font-crimson justify-self-center">
       <p className="justify-self-center text-[36px] font-bold">What are you adding?</p>
       <div className="font-bold text-[20px] py-4">
-        <p className="mb-2">Category Name</p>
+        <p className="mb-2">Category Name <span className="text-red">*</span></p>
         <NameDropdown 
           fetchUrl="/api/categories" 
           filterName="name" 
           onSelect={(selected) => {
             setSelectedCategory(selected);
-            setCurrItem({ ...currItem, categoryName: selected });
+            setItemToAdd({ ...itemToAdd, categoryName: selected });
           }}
         />
       </div>
       <div className="font-bold text-[20px]">
-        <p className="mb-2">Item Name</p>
+        <p className="mb-2">Item Name <span className="text-red">*</span></p>
         <NameDropdown 
           fetchUrl="/api/categories" 
           filterName="name" 
           currentDropdown="itemName"
           onSelect={(selected) => {
-            setCurrItem({ ...currItem, itemName: selected });
+            setItemToAdd({ ...itemToAdd, itemName: selected });
           }} 
           disabled={!selectedCategory} 
           filterValue={selectedCategory || ""}
@@ -145,28 +145,28 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ c
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
-          <p className="mb-2">Quantity</p>
+          <p className="mb-2">Quantity <span className="text-red">*</span></p>
           <input
             type="text"
             placeholder=""
             className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
             onBlur={(e) => {
-              setCurrItem({ ...currItem, quantity: Number(e.target.value) });
+              setItemToAdd({ ...itemToAdd, quantity: Number(e.target.value) });
             }}
-            defaultValue={currItem.quantity > 0 ? currItem.quantity : ''}
+            defaultValue={itemToAdd.quantity > 0 ? itemToAdd.quantity : ''}
           />
         </div>
         <div className="font-bold text-[20px] w-1/3 pt-6">
-          <p className="mb-2">Units</p>
+          <p className="mb-2">Units <span className="text-red">*</span></p>
           <NameDropdown 
             fetchUrl="/api/categories" 
             filterName="itemName" 
             currentDropdown="units"
             onSelect={(selected) => {
-              setCurrItem({ ...currItem, units: selected });
+              setItemToAdd({ ...itemToAdd, units: selected });
             }} 
-            disabled={!currItem.itemName} 
-            filterValue={currItem.itemName || ""}
+            disabled={!itemToAdd.itemName} 
+            filterValue={itemToAdd.itemName || ""}
           />
         </div>
       </div>
@@ -175,23 +175,23 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ c
 };
 
 interface VolunteerAddConfirmModuleProps {
-    currItem: Inventory
-    setCurrItem: React.Dispatch<React.SetStateAction<Inventory>>
+    itemToAdd: Inventory
+    setItemToAdd: React.Dispatch<React.SetStateAction<Inventory>>
 }
 
-const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ currItem, setCurrItem }) => {
+const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ itemToAdd, setItemToAdd }) => {
   return (
     <div className="font-crimson">
       <div className="text-black crimson-bold pt-10 flex text-4xl content-center justify-center text-center">
         This action will:
       </div>
       <div className="text-gray crimson-regular pt-10 flex text-4xl content-center justify-center text-center">
-        Add {currItem.quantity} {currItem.units} of {currItem.itemName}.
+        Add {itemToAdd.quantity} {itemToAdd.units} of {itemToAdd.itemName}.
       </div>
       <div className="flex pt-[250px] crimson-regular text-2xl justify-center">
         <ButtonSubmit
           onClick={() => {
-            setCurrItem({ ...currItem, lastUpdated: new Date() });
+            setItemToAdd({ ...itemToAdd, lastUpdated: new Date() });
 
             // Fetch the current inventory data
             fetch("../api/inventory", { method: "GET" })
@@ -200,13 +200,13 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
               .then((items) => {
                 const existingItem = items.find(
                   (item: Inventory) =>
-                    item.itemName === currItem.itemName &&
-                    item.units === currItem.units
+                    item.itemName === itemToAdd.itemName &&
+                    item.units === itemToAdd.units
                 );
 
                 if (existingItem) {
                   // If item exists, update the quantity
-                  const updatedQuantity = existingItem.quantity + currItem.quantity;
+                  const updatedQuantity = existingItem.quantity + itemToAdd.quantity;
 
                   fetch("../api/inventory", {
                     method: "PUT",
@@ -214,7 +214,7 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
                       "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                      ...currItem,
+                      ...itemToAdd,
                       quantity: updatedQuantity,
                     }),
                   }).then(() => {
@@ -228,7 +228,7 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ c
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(currItem),
+                    body: JSON.stringify(itemToAdd),
                   }).then(() => {
                     console.log("Item created successfully");
                     window.location.href = "../volunteer-saved";
