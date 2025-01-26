@@ -7,6 +7,10 @@ import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
+import Image from 'next/image';
+import Banner from '@app/components/DemographicsSurveyBanner';
+import logo from '@app/images/logo.jpg';
+import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
 
@@ -296,16 +300,109 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
+
 // TODO: Confirmation Page
 const Confirmation = () => {
+  const [newRecord, setNewRecord] = useState({
+    receive: false,
+    donate: false,
+    phoneNumber: '123567890',
+    changes: '',
+    name: { firstName: 'John', lastName: 'Smith' },
+    address: { line1: '1 Oak St', line2: 'asd', city: 'Medford', state: 'Ma', zip: '01234' },
+    householdSize: 5,
+  });
+
+  interface newResponse {
+    phoneNumber: string;
+    name: {
+      firstName: string;
+      lastName: string;
+    };
+    address: {
+      line1: string;
+      city: string;
+      state: string;
+      zip: string;
+    };
+    householdSize: number | null;
+  }
+
+  const fetchNewRecord = async () => {
+    try {
+        const response = await fetch("../api/demographics", { method: "GET" });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const newResponses: newResponse[] = await response.json();
+        console.log("Fetched responses:", newResponses);
+
+        const newFilteredRecord = newResponses.find(
+            (response) => response.phoneNumber === newRecord.phoneNumber
+        );
+
+        console.log("Filtered Record:", newFilteredRecord);
+    } catch (error) {
+        console.error("Error fetching responses:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNewRecord();
+  }, []);
+
   return (
-    <div className="flex flex-col justify-center items-center py-10">
-      <div className="flex flex-col items-center w-full max-w-lg">
-        <p className="text-[36px] font-bold mb-4">Confirmation</p>
-        <p className="text-[24px] mb-4">TODO: add survey summary here</p>
+      <div className="background-white font-black" > 
+          <div className="font-crimson flex flex-col items-center text-black">
+              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR VISITING!</h1>
+              <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
+              <div className="flex col-2 items-center mt-8">
+                  <div className="flex flex-row mx-10 content-start text-[30px] break-all">
+                    <div className="flex flex-col">
+                      <div className="text-[30px]">Your Information</div>
+                      <div>
+                        <div className="text-[21px] mt-1">Full Name:
+                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.name.firstName} {newRecord.name.lastName} </span>
+                        </div>
+                      </div>
+                      <div className="text-[21px] mt-1">Phone Number:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.phoneNumber} </span>
+                      </div>
+                      <div className="text-[21px] mt-1">Address:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.address.line1} {newRecord.address.line2} {newRecord.address.city} {newRecord.address.state} {newRecord.address.zip} </span>
+                      </div>
+                      <div className="text-[21px] mt-1">Household Size:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.householdSize} </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center ml-10">
+                      <Image
+                        src={logo}
+                        alt="logo"
+                        width={300}
+                        height={263}
+                      />
+                    </div>
+                  </div>
+              </div>
+              <div className="mt-10 mb-15">
+              <button 
+                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
+                onClick={() => window.location.href = "../welcome-page"}>
+                  Return home 
+                  <div className="relative bottom-0 left-5">
+                      <Image
+                          src={arrow}
+                          alt="arrow"
+                          width={42}
+                          height={42}
+                      />
+                  </div>
+              </button>
+          </div>
       </div>
     </div>
-  );
+      );
 };
 
 const DemographicsSurvey: React.FC = () => {
@@ -448,6 +545,7 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('confirmation');
         break;
       case 'confirmation':
+        
         console.log('Survey Completed');
         break;
       default:
@@ -496,7 +594,8 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
-    router.push('/saved-thank-you');
+    setCurrentStep('confirmation');
+    //router.push('/saved-thank-you');
   };
   
   const [showModal, setShowModal] = useState(false);
@@ -538,14 +637,15 @@ const DemographicsSurvey: React.FC = () => {
       <DemographicsSurveyBanner />
 
       {/* Progress Bar */}
-      <div className="flex py-10 pl-[100px] pr-[100px] items-center">
-          <div></div>
-          <ProgressBar progress={getProgress()}/>   
-          <div className="pl-5 text-2xl">
-            {`${getProgress().toFixed(0)}%`}
+      {currentStep !== 'confirmation' && (
+        <>
+          <div className="flex py-10 pl-[100px] pr-[100px] items-center">
+            <div></div>
+            <ProgressBar progress={getProgress()}/>   
+            <div className="pl-5 text-2xl">
+              {`${getProgress().toFixed(0)}%`}
+            </div>
           </div>
-      </div>
-
       {/* Back and Exit Buttons */}
       <div className="flex flex-row h-full w-full justify-between px-32">
         <ButtonBack onClick={handleBackClick} />
@@ -580,11 +680,13 @@ const DemographicsSurvey: React.FC = () => {
         {(() => {
           if (currentStep === 'houseSize') {
             return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
-          } else if (currentStep === 'confirmation') {
-            return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
-                      { "OK" }
-                    </button>
-          } else if (currentStep !== 'donor') {
+          } 
+          // else if (currentStep === 'confirmation') {
+          //   return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
+          //             { "OK" }
+          //           </button>
+          // }
+           else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
