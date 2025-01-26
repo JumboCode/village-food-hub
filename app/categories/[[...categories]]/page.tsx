@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import { CategoriesSpreadsheet } from '@app/components/CategoriesSpreadsheet';
@@ -10,6 +10,7 @@ import editIcon from "../../images/edit.png"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NameDropdown } from '@app/components/Dropdowns';
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
+import NavBar from '@app/components/NavBar';
 
 const categoriesData = [];
 
@@ -48,9 +49,24 @@ function getCategories() {
 
 const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
 
-
-
     const optionsArr = ["Bakery", "Dairy & Eggs", "Dry Goods", "Meat", "Prepared Foods", "Produce"]
+
+   // const [optionsArr, setOptionsArr] = useState<string[]>([])
+   //  useEffect(() => {
+   //      (async () => {
+   //          try {
+   //              fetch("../api/categories", {method: 'GET'})
+   //                  .then((response) => response.json())
+   //                  .then((json) => {
+   //                      let categories: string[] = json.map((item: any) => item.name)
+   //                      setOptionsArr([... new Set(categories)])
+   //                  })
+   //          } catch (error) {
+   //              setOptionsArr([])
+   //          }
+   //      })();
+   //  }, []);
+
     const categoryItems = [["bread", "100"], ["cupcake", "100"]]
 
     const [showTable, setShowTable] = useState(false);
@@ -61,6 +77,8 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
 
     return (
         <div> 
+            <NavBar/>
+        
             <p className="font-crimson font-bold pl-20 pt-10 text-[40px] ">Categories</p>
            
             <div className='flex justify-center items-center'> 
