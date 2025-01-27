@@ -45,9 +45,12 @@ const InternalViewDemographicsPage: React.FC = () => {
           .then((items: any) => { setDemographics(items) })
       }, []);
     return (
-        <div className="p-4">
-            <h1 className="font-crimson text-3xl font-[40px] font-bold m-4 mt-8">Demographic Responses</h1>
-            <DemographicsSpreadsheet demographicsItems={demographics} />
+        <div>
+            <NavBar />
+            <div className="p-4">
+                <h1 className="font-crimson text-3xl font-[40px] font-bold m-4 mt-8">Demographic Responses</h1>
+                <DemographicsSpreadsheet demographicsItems={demographics} />
+            </div>
         </div>
     );
 };

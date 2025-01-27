@@ -13,59 +13,50 @@ function formatDate(date: Date): string {
   return `${month}/${day}/${year}`;
 }
 
-function getInventory() {
+async function getInventory() {
   try {
-    return fetch("/../api/inventory", { method: 'GET' })
-      .then((response) => {
-        if (!response.ok) throw response;
-        return response.json();
-      })
-      .then((jsonData: any) => jsonData.data)
-      .then((data: any) => {
-        if (!Array.isArray(data)) {
-            console.log("not an array");
-        } else {
-            console.log(typeof data);
-            console.log(data);
-        }
-        // return data;
+    const response = await fetch("/../api/inventory", { method: 'GET' });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const jsonData = await response.json();
+    const data = jsonData.data;
 
-        
-    })
-      .then((inventoryObjects: any) => {
-        const listOfLists = inventoryObjects.map((object: any) => {
-          const fields = Object.values(object);
-          // Remove the last field (history object) because it conflicts with the spreadsheet
-          fields.pop();
+    if (!Array.isArray(data)) {
+      console.log("not an array");
+      return [];
+    }
 
-          // Format the date field if it exists
-          const dateFieldIndex = fields.length - 1;
-          const dateField = fields[dateFieldIndex];
-          const date = new Date(dateField as string);
+    const listOfLists = data.map((object: any) => {
+      const fields = Object.values(object);
+      // Remove the last field (history object) because it conflicts with the spreadsheet
+      fields.pop();
 
-          if (!isNaN(date.getTime())) {
-            fields[dateFieldIndex] = formatDate(date);
-          } else {
-            fields[dateFieldIndex] = "";
-          }
+      // Format the date field if it exists
+      const dateFieldIndex = fields.length - 1;
+      const dateField = fields[dateFieldIndex];
+      const date = new Date(dateField as string);
 
-          return fields;
-        });
+      if (!isNaN(date.getTime())) {
+        fields[dateFieldIndex] = formatDate(date);
+      } else {
+        fields[dateFieldIndex] = "";
+      }
 
-        console.log("List of Lists:", listOfLists);
-        return listOfLists;
-      });
-  } catch (error) { 
+      return fields;
+    });
+
+    console.log("List of Lists:", listOfLists);
+    return listOfLists;
+  } catch (error) {
     console.error(error);
-    return Promise.resolve([]);
+    return [];
   }
 }
 
 const InternalViewInventoryPage: React.FC = () => {
-  const [inventory, setInventory] = React.useState<any>();
+  const [inventory, setInventory] = React.useState<any[]>([]);
   useEffect(() => {
     getInventory()
-      .then((items: any) => { setInventory(items) })
+      .then((items) => { setInventory(items) })
   }, []);
   return (
     <div>
