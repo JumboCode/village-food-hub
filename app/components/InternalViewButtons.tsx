@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import searchSymbol from "@app/images/searchSymbol.svg"
 import filterSymbol from "@app/images/filterSymbol.svg"
+import saveSymbol from "@app/images/saveSymbol.svg"
 
 export const SearchBar = ({}: {}) => {
   return (
@@ -35,6 +36,24 @@ export const FilterButton = ({} : {}) => {
         />
         <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2">
           Filter
+        </div>
+      </div>
+    </button>
+  );
+};
+
+export const RunReportButton = ({} : {}) => {
+  return (
+    <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px] shadow-lg bg-[#7EB672]">
+      <div className="flex flex-row py-2 px-3">
+        <Image
+          src={saveSymbol}
+          alt="Run Report button"
+          width={24}
+          height={29.14}
+        />
+        <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson text-white pl-2">
+          Run Report
         </div>
       </div>
     </button>

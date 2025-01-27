@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import NavBar from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
+import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 
 
 const demographicsData = [];
@@ -47,8 +48,14 @@ const InternalViewDemographicsPage: React.FC = () => {
     return (
         <div>
             <NavBar />
-            <div className="p-4">
-                <h1 className="font-crimson text-3xl font-[40px] font-bold m-4 mt-8">Demographic Responses</h1>
+            <div className="py-4 px-10">
+                <div className="flex flex-row justify-between mt-10 mb-6">
+                    <h1 className="font-crimson text-3xl text-[40px] font-bold">Demographic Responses</h1>
+                    <div className="flex flex-row">
+                        <SearchBar/>
+                        <RunReportButton/>
+                    </div>
+                </div>
                 <DemographicsSpreadsheet demographicsItems={demographics} />
             </div>
         </div>
