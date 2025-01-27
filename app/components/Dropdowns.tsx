@@ -46,18 +46,20 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
     }, [fetchUrl, filterName, filterValue, currentDropdown]);
     
     return (
-        <select 
-            className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
-            defaultValue=""
-            onChange={(e) => onSelect(e.target.value)}
-            disabled={disabled}
-        >
-            <option disabled value=""/>
-            {items.map((item, index) => (
-                    <option key={index} value={item}>
-                        {item}
-                    </option>
-            ))}
-        </select>
+        <div className="font-crimson">
+            <select 
+                className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
+                defaultValue=""
+                onChange={(e) => onSelect(e.target.value)}
+                disabled={disabled}
+            >
+                <option disabled value=""/>
+                {items.map((item, index) => (
+                        <option key={index} value={item}>
+                            {item}
+                        </option>
+                ))}
+            </select>
+        </div>
     );
 }
