@@ -65,11 +65,11 @@ const InternalViewInventoryPage: React.FC = () => {
   return (
     <div className="px-10">
       <div className="flex flex-row justify-between mt-10 mb-6">
-        <div className="text-[40px] relative overflow-x-auto crimson-regular font-crimson">
+        <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
           Inventory
         </div>
         <div className="flex flex-row items-center">
-          <div className="border-2 border-[#D9D9D9] rounded-xl shadow-lg w-[400px] h-[54px]">
+          <div className="border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
             <div className="flex flex-row py-2 px-2 items-center">
               <Image
                 src={searchSymbol}
@@ -79,13 +79,13 @@ const InternalViewInventoryPage: React.FC = () => {
                 height={29.14}
               />
               <input
-                className="pl-3 font-crimson placeholder:font-crimson text-[24px] font-bold placeholder:font-bold focus:outline-none"
+                className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none"
                 placeholder="Search.."
               >
               </input>
             </div>
           </div>
-          <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl shadow-lg ml-9 h-[54px]">
+          <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]">
             <div className="flex flex-row py-2 px-3">
               <Image
                 src={filterSymbol}
