@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function createCategory(data: {
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
         const record = await req.json()
         if (!validCategory(record)) {
             return NextResponse.json(
-                { response : "Invalid data format" }, 
+                { response : "Invalid data format"}, 
                 { status : 400 }
             )
         }
