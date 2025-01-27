@@ -31,9 +31,45 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
 
     // when clicking the categories button
     const [showModal, setShowModal] = useState(false);
+    const [categoryName, setCategoryName] = useState("");
+    const [showError, setShowError] = useState(false);
 
+    // when the "Category +" button is clicked outside the modal
     const categoryButtonClicked = () => {
         setShowModal(true);
+    }
+
+    // when the "Cancel" button is clicked inside the modal
+    const cancelButtonClicked = () => {
+        setShowModal(false);
+        setShowError(false);
+    }
+
+    // when the "Save" button is clicked inside the modal
+    const saveButtonClicked = () => {
+
+        // if there is not a valid category name
+        if (categoryName === "") {
+            setShowError(true);
+
+        // if there is a valid category name
+        } else {
+            setShowError(false);
+
+            fetch("../api/categories", {
+                method: "POST",
+                body: JSON.stringify({
+                    itemName : "",
+                    name : categoryName,
+                    units : [],
+                })
+            })
+            .then((response) => {
+                console.log(response.json())
+            })
+            
+            setShowModal(false);
+        }
     }
 
     return (
@@ -93,27 +129,34 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                             {showModal &&
                                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                     
-                                    <div className="h-[207px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green space-y-[15px]">
+                                    <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                                         {/* Title */}
-                                        <p className="text-center text-[32px] font-bold">
+                                        <p className="text-center text-[32px] font-bold pb-[15px]">
                                            Category Name
                                         </p>
 
                                         {/* Text Input */}
-                                        <div className="flex w-full justify-center items-center">
+                                        <div className="flex w-full justify-center items-center pb-[30px]">
                                             <input 
                                                 type="text"
+                                                onChange={(e) => setCategoryName(e.target.value)}
                                                 className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
-                                            >
-                                            </input>
+                                            />
                                         </div>
+
+                                        {/* Error Message */}
+                                        {showError &&
+                                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                                please enter a category name
+                                            </p>
+                                        }
 
                                         <div className="flex w-full justify-center space-x-[15px] items-center">
 
                                             {/* Cancel Button */}
                                             <button 
                                                 className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
-                                                onClick={categoryButtonClicked}
+                                                onClick={cancelButtonClicked}
                                             >
                                                 Cancel
                                             </button>
@@ -121,7 +164,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                             {/* Save Button */}
                                             <button 
                                                 className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
-                                                onClick={categoryButtonClicked}
+                                                onClick={saveButtonClicked}
                                             >
                                                 Save
                                             </button>

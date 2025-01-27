@@ -8,13 +8,13 @@ datasource db {
 }
 
 model demographics {
-  phoneNumber   String   @id
-  takeCount     Int
-  donateCount   Int
-  name          String
-  householdSize Int
-  address       String
-  lastVisitDate DateTime
+  phoneNumber        String     @id
+  takeCount          Int
+  donateCount        Int
+  name               String
+  householdSize      Int
+  address            String
+  lastVisitDate      DateTime
   previousVisitDates DateTime[]
 }
 
