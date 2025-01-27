@@ -260,8 +260,7 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
 const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ value, onChange, setSubmitDisabled }) => {
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleSizeChange = (value: string) => {
     const sizeValue = value === "" ? null : Number(value);
     setSelectedSize(value);
     onChange(sizeValue);
@@ -274,7 +273,7 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize} />
+          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} />
         </div>
       </div>
     </div>
@@ -300,8 +299,6 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
-
-// TODO: Confirmation Page
 const Confirmation = () => {
   const [newRecord, setNewRecord] = useState({
     receive: false,
@@ -309,7 +306,7 @@ const Confirmation = () => {
     phoneNumber: '123567890',
     changes: '',
     name: { firstName: 'John', lastName: 'Smith' },
-    address: { line1: '1 Oak St', line2: 'asd', city: 'Medford', state: 'Ma', zip: '01234' },
+    address: { line1: '1 Oak St', city: 'Medford', state: 'Ma', zip: '01234' },
     householdSize: 5,
   });
 
@@ -369,7 +366,7 @@ const Confirmation = () => {
                         <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.phoneNumber} </span>
                       </div>
                       <div className="text-[21px] mt-1">Address:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.address.line1} {newRecord.address.line2} {newRecord.address.city} {newRecord.address.state} {newRecord.address.zip} </span>
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.address.line1} {newRecord.address.city} {newRecord.address.state} {newRecord.address.zip} </span>
                       </div>
                       <div className="text-[21px] mt-1">Household Size:
                         <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.householdSize} </span>
@@ -415,7 +412,7 @@ const DemographicsSurvey: React.FC = () => {
     phoneNumber: '',
     changes: '',
     name: { firstName: '', lastName: '' },
-    address: { line1: '', line2: '', city: '', state: '', zip: '' },
+    address: { line1: '', city: '', state: '', zip: '' },
     householdSize: 0,
   });
 
@@ -456,7 +453,7 @@ const DemographicsSurvey: React.FC = () => {
     }));
   };
   
-  const updateAddress = (field: 'line1' | 'line2' | 'city' | 'state' | 'zip', value: string) => {
+  const updateAddress = (field: 'line1' | 'city' | 'state' | 'zip', value: string) => {
     setResponses((prev) => ({
       ...prev,
       address: { ...prev.address, [field]: value },
@@ -545,7 +542,6 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('confirmation');
         break;
       case 'confirmation':
-        
         console.log('Survey Completed');
         break;
       default:
@@ -655,6 +651,8 @@ const DemographicsSurvey: React.FC = () => {
           {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
         </div>
       </div>
+      </>
+    )}
 
       {/* Modules */}
       <div className='w-full'>
@@ -665,7 +663,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}
-        {currentStep === 'address' && <Address line1={responses.address.line1} line2={responses.address.line2} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
+        {currentStep === 'address' && <Address line1={responses.address.line1} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
                                                 onAddressLineChange={(value) => updateAddress('line1', value)}
                                                 onCityChange={(value) => updateAddress('city', value)}
                                                 onStateChange={(value) => updateAddress('state', value)}

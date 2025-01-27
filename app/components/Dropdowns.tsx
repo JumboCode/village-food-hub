@@ -10,7 +10,7 @@ interface NameDropdownProps {
     filterValue?: string;
 }
 
-export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, currentDropdown, disabled, filterValue}: NameDropdownProps) {
+export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, filterName, currentDropdown, disabled, filterValue, value}: NameDropdownProps) {
     const [items, setItems] = useState<string[]>(options);
     
     useEffect(() => {
@@ -37,12 +37,14 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
                 } else {
                     throw new Error('Failed to fetch items');
                 }
-            } catch (error) {
+            } catch (error) {   
                 console.error('Failed to fetch items', error);
             }
         }
 
-        fetchItems();
+        if (fetchUrl) {
+            fetchItems();
+        }
     }, [fetchUrl, filterName, filterValue, currentDropdown]);
     
     return (
