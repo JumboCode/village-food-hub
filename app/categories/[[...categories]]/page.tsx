@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import { CategoriesSpreadsheet } from '@app/components/CategoriesSpreadsheet';
@@ -10,15 +10,64 @@ import editIcon from "../../images/edit.png"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NameDropdown } from '@app/components/Dropdowns';
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
+import NavBar from '@app/components/NavBar';
+
+const categoriesData = [];
+
+// BELOW: Sofia & Zoya's code (need to integrate)
+
+function getCategories() {
+    
+    try {
+        return fetch("/../api/categories", { method: 'GET' })
+        .then((response) => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then((data) => {
+            categoriesData.push(data);
+            return data;
+        })
+        .then((categoriesData) => {
+
+                const rearrangedData = categoriesData.map((record: any) => {
+                    const arr = [record.itemName, record.name, record.units];
+                    return arr
+                });
+
+                return rearrangedData;
+            });
 
 
-// export default function Categories()  {
+    } catch (error) {
+        console.error(error);
+        return Promise.resolve([]);
+    }
+        
+}
+
+
 // FOR TESTING:
 
 const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange }) => {
 
-    const optionsArr = ["Bakery", "Dairy & Eggs", "Dry Goods", "Meat", "Prepared Foods", "Produce"]
-    const categoryItems = [["bread", "100"], ["cupcake", "100"]]
+   // BELOW: Alex & Charlie's code (need to integrate)
+
+   // const [optionsArr, setOptionsArr] = useState<string[]>([])
+   //  useEffect(() => {
+   //      (async () => {
+   //          try {
+   //              fetch("../api/categories", {method: 'GET'})
+   //                  .then((response) => response.json())
+   //                  .then((json) => {
+   //                      let categories: string[] = json.map((item: any) => item.name)
+   //                      setOptionsArr([... new Set(categories)])
+   //                  })
+   //          } catch (error) {
+   //              setOptionsArr([])
+   //          }
+   //      })();
+   //  }, []);
 
     const [showTable, setShowTable] = useState(false);
 
@@ -28,6 +77,8 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
 
     return (
         <div> 
+            <NavBar/>
+        
             <p className="font-crimson font-bold pl-20 pt-10 text-[40px] ">Categories</p>
            
             <div className='flex justify-center items-center'> 
@@ -38,7 +89,10 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                         <div className='flex flex-row items-center w-1/2'>
                             <div className='w-full'>
                                 {/* TODO: we will eventually have to add "value" here as the selected option so it shows up in the selected dropdown text */}
-                                <NameDropdown options={optionsArr} onChange={switchState} /> 
+                                <NameDropdown 
+                                    fetchUrl="/api/categories" 
+                                    onSelect={switchState} 
+                                    filterName="name"/> 
                             </div>
                             {showTable && (
                                 <Image
@@ -75,7 +129,7 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                     </div>
                 </div>
                     <div className="bg-slate-50 items-center h-full">
-                       {showTable && (<CategoriesSpreadsheet categoryItems={categoryItems} />)}
+                       {showTable && (<CategoriesSpreadsheet categoryItems={categoriesData} />)}
                         {!showTable && (<p className="flex-center py-[250px] font-crimson text-[20px] text-center">Select a category.</p>)}
 
                     </div> 
