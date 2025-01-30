@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="bg-banner-green h-screen w-screen grid grid-cols-5 gap-3 justify-center items-center">
         
-        <div className="flex w-full h-full col-span-2 justify-center items-center py-5">
+        <div className="flex w-full h-full col-span-2 justify-center items-center py-5 font-crimson">
           
           {/* Small Header Logo Image */}
           <Image
@@ -202,7 +202,7 @@ const LoginPage: React.FC = () => {
               {/* Text */}
               <div className="py-5">
                   <label className="block mb-2 text-2xl text-white"> A code has been sent to your email, please</label>
-                  <label className="block mb-2 text-2xl text-white"> check and put and put in the code below.</label>
+                  <label className="block mb-2 text-2xl text-white"> check and put in the code below.</label>
               </div>
 
               {/* Reset Code Input */}
@@ -255,9 +255,8 @@ const LoginPage: React.FC = () => {
 
               {/* Text */}
               <div className="py-5">
-                  <label className="block mb-2 text-2xl text-white"> A new code has been sent to your,</label>
-                  <label className="block mb-2 text-2xl text-white"> email, please check and put and put in the </label>
-                  <label className="block mb-2 text-2xl text-white"> code below.  </label>
+                  <label className="block mb-2 text-2xl text-white"> A new code has been sent to your email,</label>
+                  <label className="block mb-2 text-2xl text-white"> please check and put in the code below.</label>
               </div>
 
               {/* Reset Code Input */}
@@ -267,10 +266,10 @@ const LoginPage: React.FC = () => {
               </div>
 
               <div className="mt-[10px] mb-5">
-              <Button className="left-0 text-neutral-300 ml-[-10px] normal-case" onClick={handleResendCode}>
+              <Button className="left-0 text-neutral-300 ml-[-10px] font-crimson normal-case" onClick={handleResendCode}>
                   Didn't receive a code?
               </Button>
-              <Button className="left-0 text-neutral-300 ml-[-10px] normal-case font-bold" onClick={handleResendCode}>
+              <Button className="left-0 text-neutral-300 ml-[-10px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                   Resend Code
               </Button>
             </div>

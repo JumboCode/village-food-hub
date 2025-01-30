@@ -7,7 +7,12 @@ import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
 import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
+import Image from 'next/image';
+import Banner from '@app/components/DemographicsSurveyBanner';
+import logo from '@app/images/logo.jpg';
+import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
+import ExitModal from '@app/components/ExitModal';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,8 +260,7 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
 const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ value, onChange, setSubmitDisabled }) => {
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleSizeChange = (value: string) => {
     const sizeValue = value === "" ? null : Number(value);
     setSelectedSize(value);
     onChange(sizeValue);
@@ -269,7 +273,7 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onChange={handleSizeChange} value={selectedSize} />
+          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} />
         </div>
       </div>
     </div>
@@ -295,16 +299,93 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
-// TODO: Confirmation Page
-const Confirmation = () => {
+const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
+  const [newRecord, setNewRecord] = useState<newResponse | null>(null);
+
+  interface newResponse {
+    phoneNumber: string;
+    name: string;
+    address: string;
+    householdSize: number | null;
+  }
+
+  const fetchNewRecord = async () => {
+    try {
+        const response = await fetch("../api/demographics", { method: "GET" });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const newResponses: newResponse[] = await response.json();
+        console.log("Fetched responses:", newResponses);
+
+        const newFilteredRecord = newResponses.find(
+            (response) => response.phoneNumber === phoneNumber
+        );
+
+        console.log("Filtered Record:", newFilteredRecord);
+        setNewRecord(newFilteredRecord || null);
+        return newFilteredRecord || null;
+    } catch (error) {
+        console.error("Error fetching responses:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNewRecord();
+  }, []);
+
   return (
-    <div className="flex flex-col justify-center items-center py-10">
-      <div className="flex flex-col items-center w-full max-w-lg">
-        <p className="text-[36px] font-bold mb-4">Confirmation</p>
-        <p className="text-[24px] mb-4">TODO: add survey summary here</p>
+      <div className="background-white font-black" > 
+          <div className="font-crimson flex flex-col items-center text-black">
+              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR VISITING!</h1>
+              <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
+              <div className="flex col-2 items-center mt-8">
+                  <div className="flex flex-row mx-10 content-start text-[30px] break-all">
+                    <div className="flex flex-col">
+                      <div className="text-[30px]">Your Information</div>
+                      <div>
+                        <div className="text-[21px] mt-1">Full Name:
+                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.name} </span>
+                        </div>
+                      </div>
+                      <div className="text-[21px] mt-1">Phone Number:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.phoneNumber} </span>
+                      </div>
+                      <div className="text-[21px] mt-1">Address:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.address}</span>
+                      </div>
+                      <div className="text-[21px] mt-1">Household Size:
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.householdSize} </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center ml-10">
+                      <Image
+                        src={logo}
+                        alt="logo"
+                        width={300}
+                        height={263}
+                      />
+                    </div>
+                  </div>
+              </div>
+              <div className="mt-10 mb-15">
+              <button 
+                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
+                onClick={() => window.location.href = "../welcome-page"}>
+                  Return home 
+                  <div className="relative bottom-0 left-5">
+                      <Image
+                          src={arrow}
+                          alt="arrow"
+                          width={42}
+                          height={42}
+                      />
+                  </div>
+              </button>
+          </div>
       </div>
     </div>
-  );
+      );
 };
 
 const DemographicsSurvey: React.FC = () => {
@@ -317,7 +398,7 @@ const DemographicsSurvey: React.FC = () => {
     phoneNumber: '',
     changes: '',
     name: { firstName: '', lastName: '' },
-    address: { line1: '', line2: '', city: '', state: '', zip: '' },
+    address: { line1: '', city: '', state: '', zip: '' },
     householdSize: 0,
   });
 
@@ -358,7 +439,7 @@ const DemographicsSurvey: React.FC = () => {
     }));
   };
   
-  const updateAddress = (field: 'line1' | 'line2' | 'city' | 'state' | 'zip', value: string) => {
+  const updateAddress = (field: 'line1' | 'city' | 'state' | 'zip', value: string) => {
     setResponses((prev) => ({
       ...prev,
       address: { ...prev.address, [field]: value },
@@ -495,7 +576,18 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
-    router.push('/saved-thank-you');
+    setCurrentStep('confirmation');
+    //router.push('/saved-thank-you');
+  };
+  
+  const [showModal, setShowModal] = useState(false);
+  
+  const openModal = (): void => {
+    setShowModal(true);
+  };
+
+  const closeModal = (): void => {
+    setShowModal(false);
   };
 
   const getProgress = () => {
@@ -527,19 +619,26 @@ const DemographicsSurvey: React.FC = () => {
       <DemographicsSurveyBanner />
 
       {/* Progress Bar */}
-      <div className="flex py-10 pl-[100px] pr-[100px] items-center">
-          <div></div>
-          <ProgressBar progress={getProgress()}/>   
-          <div className="pl-5 text-2xl">
-            {`${getProgress().toFixed(0)}%`}
+      {currentStep !== 'confirmation' && (
+        <>
+          <div className="flex py-10 pl-[100px] pr-[100px] items-center">
+            <div></div>
+            <ProgressBar progress={getProgress()}/>   
+            <div className="pl-5 text-2xl">
+              {`${getProgress().toFixed(0)}%`}
+            </div>
           </div>
-      </div>
-
       {/* Back and Exit Buttons */}
       <div className="flex flex-row h-full w-full justify-between px-32">
         <ButtonBack onClick={handleBackClick} />
-        <ButtonExit />
+        {/* <ButtonExit /> */}
+        <div>
+          <ButtonExit onClick={openModal} />
+          {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
+        </div>
       </div>
+      </>
+    )}
 
       {/* Modules */}
       <div className='w-full'>
@@ -550,7 +649,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}
-        {currentStep === 'address' && <Address line1={responses.address.line1} line2={responses.address.line2} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
+        {currentStep === 'address' && <Address line1={responses.address.line1} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
                                                 onAddressLineChange={(value) => updateAddress('line1', value)}
                                                 onCityChange={(value) => updateAddress('city', value)}
                                                 onStateChange={(value) => updateAddress('state', value)}
@@ -558,18 +657,20 @@ const DemographicsSurvey: React.FC = () => {
                                                 setNextDisabled={setNextDisabled} />}
         {currentStep === 'houseSize' && <HouseholdSize value={responses.householdSize} onChange={updateHouseholdSize} 
                                                        setSubmitDisabled={setSubmitDisabled} />}
-        {currentStep === 'confirmation' && <Confirmation />}
+        {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber}/>}
       </div>
 
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>
         {(() => {
           if (currentStep === 'houseSize') {
             return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
-          } else if (currentStep === 'confirmation') {
-            return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
-                      { "OK" }
-                    </button>
-          } else if (currentStep !== 'donor') {
+          } 
+          // else if (currentStep === 'confirmation') {
+          //   return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
+          //             { "OK" }
+          //           </button>
+          // }
+           else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
