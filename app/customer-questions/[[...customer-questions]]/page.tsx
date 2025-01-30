@@ -299,15 +299,15 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
-const Confirmation = () => {
+const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
   const [newRecord, setNewRecord] = useState({
     receive: false,
     donate: false,
-    phoneNumber: '123567890',
+    phoneNumber: '',
     changes: '',
-    name: { firstName: 'John', lastName: 'Smith' },
-    address: { line1: '1 Oak St', city: 'Medford', state: 'Ma', zip: '01234' },
-    householdSize: 5,
+    name: { firstName: '', lastName: '' },
+    address: { line1: '', city: '', state: '', zip: '' },
+    householdSize: 1,
   });
 
   interface newResponse {
@@ -335,8 +335,13 @@ const Confirmation = () => {
         console.log("Fetched responses:", newResponses);
 
         const newFilteredRecord = newResponses.find(
-            (response) => response.phoneNumber === newRecord.phoneNumber
+            (response) => response.phoneNumber === recordData.phoneNumber
         );
+
+        if (newFilteredRecord) {
+          console.log("Filtered Record:", newFilteredRecord);
+          setNewRecord(newFilteredRecord); 
+        }
 
         console.log("Filtered Record:", newFilteredRecord);
     } catch (error) {
@@ -574,6 +579,7 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('name');
         break;
       case 'name':
+        console.log("previous record", prevRecord);
         if (prevRecord !== null) {
           setCurrentStep('changes');
         } else {
@@ -590,10 +596,62 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
+    console.log("prev record", prevRecord);
     setCurrentStep('confirmation');
-    //router.push('/saved-thank-you');
-  };
   
+    const recordData = {
+      phoneNumber: responses.phoneNumber,
+      receiveCount: responses.receive ? 1 : 0,
+      donateCount: responses.donate ? 1 : 0,
+      name: {
+        firstName: responses.name.firstName,
+        lastName: responses.name.lastName,
+      },
+      address: {
+        line1: responses.address.line1,
+        city: responses.address.city,
+        state: responses.address.state,
+        zip: responses.address.zip,
+      },
+      householdSize: responses.householdSize,
+      datesOfVisits: responses.receive ? [new Date().toISOString()] : [],
+    };
+    if (prevRecord !== null) {
+      // Update existing record if prevRecord not null 
+      fetch("../api/demographics", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(recordData),
+      }).then(() => {
+        console.log("Record updated successfully");
+      }).catch((error) => {
+        console.error("Error updating record:", error);
+      });
+    } else {
+      // Create a new entry if prevRecord is null
+      fetch("/api/demographics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(recordData),
+      }).then(() => {
+        console.log("record data", recordData);
+        console.log("Record created successfully");  
+      }).catch((error) => {
+        console.error("Error creating record:", error);
+      });
+    }
+  };
+  // const recordData = {
+    //   phoneNumber: responses.phoneNumber,
+    //   takeCount: responses.receive ? 1 : 0,
+    //   donateCount: responses.donate ? 1 : 0,
+    //   name: `${responses.name.firstName} ${responses.name.lastName}`,
+    //   householdSize: responses.householdSize,
+    //   address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
+    //   datesOfVisits: responses.receive ? [new Date().toISOString()] : []
+    // };
+
+      
   const [showModal, setShowModal] = useState(false);
   
   const openModal = (): void => {
