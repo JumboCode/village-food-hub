@@ -1,4 +1,5 @@
-import CRUD from './route';
+import { createClerksUser } from './route';
+
 
 enum Role {
     admin,
@@ -19,4 +20,4 @@ const testData = {
 
 };
 
-CRUD.POST(testData);
+createClerksUser(testData);
