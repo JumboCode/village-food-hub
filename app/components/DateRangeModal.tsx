@@ -40,6 +40,22 @@ export function CancelButton({ onClick, disabled }: ButtonProps) {
   );
 }
 
+const CustomDatePickerInput = ({ value, onClick, onChange }: any) => (
+  <div className="relative w-full">
+    <input
+      type="text"
+      value={value}
+      onClick={onClick}
+      onChange={onChange}
+      className="w-full rounded-xl border-[#E1E1E1] text-[26px] pr-10 p-2 focus:ring focus:ring-blue-300 text-[#828282]"
+    />
+    <FaCalendarAlt
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 cursor-pointer text-[#7EB672]"
+      onClick={onClick}
+    />
+  </div>
+);
+
 
 interface DateRangeModalProps {
   closeModal: () => void;
@@ -50,28 +66,12 @@ const DateRangeModal: React.FC<DateRangeModalProps> = ({ closeModal }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   
-  const CustomDatePickerInput = ({ value, onClick, onChange }: any) => (
-    <div className="relative w-full">
-      <input
-        type="text"
-        value={value}
-        onClick={onClick}
-        onChange={onChange}
-        className="w-full rounded-xl border-[#E1E1E1] text-[26px] pr-10 p-2 focus:ring focus:ring-blue-300 text-[#828282]"
-      />
-      <FaCalendarAlt
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 cursor-pointer text-[#7EB672]"
-        onClick={onClick}
-      />
-    </div>
-  );
-  
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black 
                     bg-opacity-50 z-50">  
       <div className="g-modal-gray font-crimson
                     fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                    pt-8 shadow-lg rounded-lg bg-white p-6 border-2 border-[#7EB672]"> 
+                    pt-8 shadow-lg rounded-lg bg-white p-6 pt-4 border-2 border-[#7EB672]"> 
         <div className="text-[32px] font-crimson mb-2"> Date Range</div>
         <div className="flex flex-row gap-x-4"> 
           <div> 
