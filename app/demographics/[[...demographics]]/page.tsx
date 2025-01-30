@@ -1,8 +1,9 @@
 "use client"
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
+import DateRangeModal from "@app/components/DateRangeModal"
 
 
 const demographicsData = [];
@@ -45,6 +46,15 @@ const InternalViewDemographicsPage: React.FC = () => {
         getDemographics()
           .then((items: any) => { setDemographics(items) })
       }, []);
+      
+      const [showModal, setShowModal] = useState(false);
+      const openModal = (): void => {
+        setShowModal(true);
+      };
+    
+      const closeModal = (): void => {
+        setShowModal(false);
+      };
     return (
         <div>
             <NavBar />
@@ -53,7 +63,8 @@ const InternalViewDemographicsPage: React.FC = () => {
                     <h1 className="font-crimson text-3xl text-[40px] font-bold">Demographic Responses</h1>
                     <div className="flex flex-row">
                         <SearchBar/>
-                        <RunReportButton/>
+                        <RunReportButton onClick={openModal} />
+                        {showModal && <DateRangeModal closeModal={closeModal}/> }
                     </div>
                 </div>
                 <DemographicsSpreadsheet demographicsItems={demographics} />

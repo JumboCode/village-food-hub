@@ -42,9 +42,19 @@ export const FilterButton = ({} : {}) => {
   );
 };
 
-export const RunReportButton = ({} : {}) => {
+
+interface RunReportButtonProps {
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+
+export const RunReportButton = ({ onClick, disabled }: RunReportButtonProps) => {
   return (
-    <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px] shadow-lg bg-[#7EB672]">
+    <button className="border-2 border-[#7EB672] font-crimson rounded-xl ml-9 h-[54px] shadow-lg bg-[#7EB672]"
+            onClick={onClick}
+            disabled={disabled}
+    >
       <div className="flex flex-row py-2 px-3">
         <Image
           src={saveSymbol}
