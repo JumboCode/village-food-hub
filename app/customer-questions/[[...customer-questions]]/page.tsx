@@ -601,21 +601,15 @@ const DemographicsSurvey: React.FC = () => {
   
     const recordData = {
       phoneNumber: responses.phoneNumber,
-      receiveCount: responses.receive ? 1 : 0,
+      takeCount: responses.receive ? 1 : 0,
       donateCount: responses.donate ? 1 : 0,
-      name: {
-        firstName: responses.name.firstName,
-        lastName: responses.name.lastName,
-      },
-      address: {
-        line1: responses.address.line1,
-        city: responses.address.city,
-        state: responses.address.state,
-        zip: responses.address.zip,
-      },
+      name: responses.name.firstName + " " + responses.name.lastName,
+      address: responses.address.line1 + ", " + responses.address.city + ", " + 
+      responses.address.state + " " + responses.address.zip,
       householdSize: responses.householdSize,
-      datesOfVisits: responses.receive ? [new Date().toISOString()] : [],
+      lastVisitDate: responses.receive ? new Date().toISOString() : ""
     };
+  
     if (prevRecord !== null) {
       // Update existing record if prevRecord not null 
       fetch("../api/demographics", {
@@ -629,7 +623,7 @@ const DemographicsSurvey: React.FC = () => {
       });
     } else {
       // Create a new entry if prevRecord is null
-      fetch("/api/demographics", {
+      fetch("../api/demographics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(recordData),
@@ -641,17 +635,7 @@ const DemographicsSurvey: React.FC = () => {
       });
     }
   };
-  // const recordData = {
-    //   phoneNumber: responses.phoneNumber,
-    //   takeCount: responses.receive ? 1 : 0,
-    //   donateCount: responses.donate ? 1 : 0,
-    //   name: `${responses.name.firstName} ${responses.name.lastName}`,
-    //   householdSize: responses.householdSize,
-    //   address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
-    //   datesOfVisits: responses.receive ? [new Date().toISOString()] : []
-    // };
-
-      
+   
   const [showModal, setShowModal] = useState(false);
   
   const openModal = (): void => {
