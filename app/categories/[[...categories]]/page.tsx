@@ -156,14 +156,14 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                         {/* Empty Error Message */}
                                         {showEmptyError &&
                                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
-                                                please enter a category name
+                                                Please enter a category name.
                                             </p>
                                         }
 
                                         {/* Retrieval Error Message */}
                                         {showRetrievalError &&
                                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
-                                                failed to add category
+                                                Failed to add category.
                                             </p>
                                         }
 
