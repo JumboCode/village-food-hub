@@ -80,8 +80,6 @@ const DateRangeModal: React.FC<DateRangeModalProps> = ({ closeModal }) => {
               <div className="text-[16px] font-crimson"> (MM/DD/YY) </div> 
             </div>
             <div className="w-[170px] rounded-xl">
-              {/* <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} 
-                showIcon className="w-[95%] rounded-xl border-[#E1E1E1] text-[26px] text-[#828282]"/> */}
               <DatePicker
                   selected={startDate}
                   onChange={(date) => setStartDate(date)}
@@ -95,10 +93,6 @@ const DateRangeModal: React.FC<DateRangeModalProps> = ({ closeModal }) => {
               <div className="text-[16px] font-crimson"> (MM/DD/YY) </div> 
             </div>
             <div className="relative w-[170px] rounded-xl">
-              {/* <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} 
-              showIcon 
-              className="w-[95%] rounded-xl border-[#E1E1E1] text-[26px] text-[#828282]"
-              /> */}
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
