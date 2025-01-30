@@ -1,16 +1,15 @@
 'use client'
 
-import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import './globals.css';
 
 export default function Home() {
-  return (
-    <>
-      <div className="flex flex-col justify-center items-center h-screen">
-        <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Login
-        </Link>
-      </div>
-    </>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/login');
+  }, [router]);
+
+  return null;
 }
