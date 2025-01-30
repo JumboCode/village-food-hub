@@ -32,7 +32,8 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
     // when clicking the categories button
     const [showModal, setShowModal] = useState(false);
     const [categoryName, setCategoryName] = useState("");
-    const [showError, setShowError] = useState(false);
+    const [showEmptyError, setShowEmptyError] = useState(false);
+    const [showRetrievalError, setRetrievalError] = useState(false);
 
     // when the "Category +" button is clicked outside the modal
     const categoryButtonClicked = () => {
@@ -42,20 +43,22 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
     // when the "Cancel" button is clicked inside the modal
     const cancelButtonClicked = () => {
         setShowModal(false);
-        setShowError(false);
+        setShowEmptyError(false);
+        setRetrievalError(false);
     }
 
     // when the "Save" button is clicked inside the modal
-    const saveButtonClicked = () => {
+    const saveButtonClicked = async () => {
 
         // if there is not a valid category name
         if (categoryName === "") {
-            setShowError(true);
-
+            setShowEmptyError(true);
+            setRetrievalError(false);
         // if there is a valid category name
         } else {
-            setShowError(false);
-
+            setShowEmptyError(false);
+        
+            // POST category name to backend
             fetch("../api/categories", {
                 method: "POST",
                 body: JSON.stringify({
@@ -65,10 +68,16 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                 })
             })
             .then((response) => {
-                console.log(response.json())
+                // if success, console.log success message
+                if (response.ok) {
+                    console.log("Successfully Added " + categoryName);
+                    setRetrievalError(false);
+                    setShowModal(false);
+                } else {
+                    // if fail, show error message
+                    setRetrievalError(true);
+                }
             })
-            
-            setShowModal(false);
         }
     }
 
@@ -144,10 +153,17 @@ const Categories: React.FC<{ onChange: (value: string) => void }> = ({ onChange 
                                             />
                                         </div>
 
-                                        {/* Error Message */}
-                                        {showError &&
+                                        {/* Empty Error Message */}
+                                        {showEmptyError &&
                                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
                                                 please enter a category name
+                                            </p>
+                                        }
+
+                                        {/* Retrieval Error Message */}
+                                        {showRetrievalError &&
+                                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                                failed to add category
                                             </p>
                                         }
 
