@@ -68,6 +68,58 @@ const Categories: React.FC = () => {
 
     const selectedCategoryData = categoriesData[selectedCategory] || [];
 
+    // when clicking the categories button
+    const [showModal, setShowModal] = useState(false);
+    const [categoryName, setCategoryName] = useState("");
+    const [showEmptyError, setShowEmptyError] = useState(false);
+    const [showRetrievalError, setRetrievalError] = useState(false);
+
+    // when the "Category +" button is clicked outside the modal
+    const categoryButtonClicked = () => {
+        setShowModal(true);
+    }
+
+    // when the "Cancel" button is clicked inside the modal
+    const cancelButtonClicked = () => {
+        setShowModal(false);
+        setShowEmptyError(false);
+        setRetrievalError(false);
+    }
+
+    // when the "Save" button is clicked inside the modal
+    const saveButtonClicked = async () => {
+
+        // if there is not a valid category name
+        if (categoryName === "") {
+            setShowEmptyError(true);
+            setRetrievalError(false);
+        // if there is a valid category name
+        } else {
+            setShowEmptyError(false);
+        
+            // POST category name to backend
+            fetch("../api/categories", {
+                method: "POST",
+                body: JSON.stringify({
+                    itemName : "",
+                    name : categoryName,
+                    units : [],
+                })
+            })
+            .then((response) => {
+                // if success, console.log success message
+                if (response.ok) {
+                    console.log("Successfully Added " + categoryName);
+                    setRetrievalError(false);
+                    setShowModal(false);
+                } else {
+                    // if fail, show error message
+                    setRetrievalError(true);
+                }
+            })
+        }
+    }
+
     return (
         <div> 
             <NavBar/>
@@ -115,6 +167,97 @@ const Categories: React.FC = () => {
                                     {"Category "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }} />
                                 </button>
                             </div>
+                            {showTable && (
+                                <Image
+                                src={deleteIcon}
+                                width={18}
+                                height={18}
+                                alt="delete Icon"
+                                className="m-4 ml-6 mt-2"
+                            />
+                            )}
+                            {showTable && (
+                                <Image
+                                src={editIcon}
+                                width={18}
+                                height={18}
+                                alt="delete Icon"
+                                className="m-2 mb-3.5"
+                            />
+                            )}
+                        </div>
+
+                        <div>
+
+                            {showTable && 
+                                (<button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mr-2 mb-2 rounded text-[20px]">
+                                    { "Item "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
+                                </button>)
+                            }
+                        
+                            {/* Button to open the add category modal */}
+                            <button 
+                                className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]"
+                                onClick={categoryButtonClicked}
+                            >
+                                { "Category "} <FontAwesomeIcon className='' icon={faPlus} style={{ fontSize: '14px' }}/>
+                            </button>
+
+
+                            {/* Add Category Modal */}
+                            {showModal &&
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                    
+                                    <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+                                        {/* Title */}
+                                        <p className="text-center text-[32px] font-bold pb-[15px]">
+                                           Category Name
+                                        </p>
+
+                                        {/* Text Input */}
+                                        <div className="flex w-full justify-center items-center pb-[30px]">
+                                            <input 
+                                                type="text"
+                                                onChange={(e) => setCategoryName(e.target.value)}
+                                                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                                            />
+                                        </div>
+
+                                        {/* Empty Error Message */}
+                                        {showEmptyError &&
+                                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                                Please enter a category name.
+                                            </p>
+                                        }
+
+                                        {/* Retrieval Error Message */}
+                                        {showRetrievalError &&
+                                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                                Failed to add category.
+                                            </p>
+                                        }
+
+                                        <div className="flex w-full justify-center space-x-[15px] items-center">
+
+                                            {/* Cancel Button */}
+                                            <button 
+                                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                                onClick={cancelButtonClicked}
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            {/* Save Button */}
+                                            <button 
+                                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                                onClick={saveButtonClicked}
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                     <div className="bg-slate-50 items-center h-full">
@@ -133,7 +276,3 @@ const Categories: React.FC = () => {
 };
 
 export default Categories; 
-
-
-/*
-pt-1 pb-1 px-1 mb-2 */
