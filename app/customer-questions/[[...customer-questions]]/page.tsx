@@ -13,6 +13,7 @@ import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
+import { response } from 'express';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,7 +300,7 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   );
 };
 
-const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
+const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
   const [newRecord, setNewRecord] = useState({
     receive: false,
     donate: false,
@@ -312,6 +313,7 @@ const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
 
   interface newResponse {
     phoneNumber: string;
+    changes: string;
     name: {
       firstName: string;
       lastName: string;
@@ -325,6 +327,7 @@ const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
     householdSize: number | null;
   }
 
+
   const fetchNewRecord = async () => {
     try {
         const response = await fetch("../api/demographics", { method: "GET" });
@@ -332,26 +335,26 @@ const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const newResponses: newResponse[] = await response.json();
-        console.log("Fetched responses:", newResponses);
-
+        console.log("Fetched responses 1:", newResponses);
+        console.log("phone number: ", phoneNumber);
         const newFilteredRecord = newResponses.find(
-            (response) => response.phoneNumber === recordData.phoneNumber
+            (response) => response.phoneNumber === phoneNumber
         );
+        console.log("Filtered Record is 1:", newFilteredRecord);
 
         if (newFilteredRecord) {
-          console.log("Filtered Record:", newFilteredRecord);
-          setNewRecord(newFilteredRecord); 
+          console.log("Filtered Record inside:", newFilteredRecord);
+          setNewRecord(newFilteredRecord);
         }
-
-        console.log("Filtered Record:", newFilteredRecord);
+        console.log("Filtered Record 2:", newFilteredRecord);
     } catch (error) {
         console.error("Error fetching responses:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchNewRecord();
-  }, []);
+  }, [phoneNumber]);
 
   return (
       <div className="background-white font-black" > 
@@ -406,6 +409,7 @@ const Confirmation: React.FC<{ recordData: any }> = ({ recordData }) => {
     </div>
       );
 };
+
 
 const DemographicsSurvey: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'action' | 'donor' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
@@ -495,6 +499,7 @@ const DemographicsSurvey: React.FC = () => {
         }
         const surveyResponses: SurveyResponse[] = await response.json();
         console.log("Fetched responses:", surveyResponses);
+        //console.log("the responses: ", responses);
 
         const filteredRecord = surveyResponses.find(
             (response) => response.phoneNumber === responses.phoneNumber
@@ -609,13 +614,24 @@ const DemographicsSurvey: React.FC = () => {
       householdSize: responses.householdSize,
       lastVisitDate: responses.receive ? new Date().toISOString() : ""
     };
+
   
     if (prevRecord !== null) {
       // Update existing record if prevRecord not null 
+      const updatedRecordData = {
+        phoneNumber: responses.phoneNumber,
+        takeCount: prevRecord.takeCount + (responses.receive? 1: 0),
+        donateCount: prevRecord.donateCount + (responses.donate? 1 : 0),
+        name: responses.name.firstName + " " + responses.name.lastName,
+        address: responses.address.line1 + ", " + responses.address.city + ", " + 
+        responses.address.state + " " + responses.address.zip,
+        householdSize: responses.householdSize,
+        lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
+      };
       fetch("../api/demographics", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recordData),
+        body: JSON.stringify(updatedRecordData),
       }).then(() => {
         console.log("Record updated successfully");
       }).catch((error) => {
@@ -628,7 +644,6 @@ const DemographicsSurvey: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(recordData),
       }).then(() => {
-        console.log("record data", recordData);
         console.log("Record created successfully");  
       }).catch((error) => {
         console.error("Error creating record:", error);
