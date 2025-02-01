@@ -23,10 +23,14 @@ export const SearchBar = ({}: {}) => {
     </div>
   );
 };
+
+interface FilterButtonProps {
+  onClick?: () => void;
+}
       
-export const FilterButton = ({} : {}) => {
+export const FilterButton = ({ onClick } : FilterButtonProps) => {
   return (
-    <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]">
+    <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]" onClick={onClick}>
       <div className="flex flex-row py-2 px-3">
         <Image
           src={filterSymbol}

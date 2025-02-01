@@ -192,37 +192,8 @@ const InternalViewInventoryPage: React.FC = () => {
           </div>
           
           <div className="flex flex-row items-center">
-            <div className="border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
-              <div className="flex flex-row py-2 px-2 items-center">
-                <Image
-                  src={searchSymbol}
-                  alt="search button"
-                  className="pl-2"
-                  width={24}
-                  height={29.14}
-                />
-                <input
-                  className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none"
-                  placeholder="Search.."
-                >
-                </input>
-              </div>
-            </div>
-            <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]"
-                onClick={() => setFilterModalOpen(prev => !prev)}                    >
-                <div className="flex flex-row py-2 px-3">
-                    <Image
-                    src={filterSymbol}
-                    alt="filter button"
-                    width={24}
-                    height={29.14}
-                    
-                    />
-                <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2">
-                  Filter
-                </div>
-              </div>
-            </button>
+            <SearchBar />
+            <FilterButton onClick={() => setFilterModalOpen(prev => !prev)} />
             <FilterModal
                 isOpen={FilterModalOpen}
                 categories={categories}
