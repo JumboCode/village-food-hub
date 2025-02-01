@@ -58,120 +58,112 @@ async function getInventory() {
 interface FilterModalProps {
     // visibility 
     isOpen: boolean; 
-
     categories?: string[];
 
     // buttons
     onApply: (selectedCategories: string[]) => void;
     onReset: () => void;
-
+    onClose: () => void;
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
-    isOpen, 
-    categories = [], 
-    onApply, 
-    onReset,
+  isOpen,
+  categories = [],
+  onApply,
+  onReset,
+  onClose,
 }) => {
-    // empty array
-    const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]); 
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
 
-    const handleCheckboxChange = (category: string, checked: boolean) => {
-        setSelectedCategories((prev: any[]) => {
-          if (checked) {
-            return [...prev, category];
-          }
-          return prev.filter(c => c !== category);
-        });
-      };
+  const handleCheckboxChange = (category: string, checked: boolean) => {
+    setSelectedCategories((prev: any[]) => {
+      if (checked) {
+        return [...prev, category];
+      }
+      return prev.filter(c => c !== category);
+    });
+  };
 
-      React.useEffect(() => {
-        if (isOpen) {
-            setSelectedCategories([]);
-        }
-    }, [isOpen]);
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedCategories([]);
+    }
+  }, [isOpen]);
 
-      const handleApply = () => {
-        onApply(selectedCategories);
-      };
+  const handleApply = () => {
+    onApply(selectedCategories);
+  };
 
-      const handleReset = () => {
-        setSelectedCategories([]);
-        onReset();
-      };
+  const handleReset = () => {
+    setSelectedCategories([]);
+    onReset();
+  };
 
-      if (!isOpen) return null;
+  const handleClose = () => {
+    onClose();
+  };
 
+  if (!isOpen) return null;
 
-      return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div
-                className="w-[550px] bg-white font-crimson
-                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                pt-8 shadow-lg rounded-lg, p-3">
-                <div className="flex flex-col">
-                    <div>
-                    {categories && categories.length > 0 ? (
-                        categories.map((category) => (
-                        <div key={category} className="flex items-center space-x-2 mb-3">
-                            <input
-                            type="checkbox"
-                            checked={selectedCategories.includes(category)}
-                            onChange={(e) => handleCheckboxChange(category, e.target.checked)}
-                            className="w-4 h-4"
-                            />
-                            <p 
-                            className="text-lg font-crimson cursor-pointer"
-                            >
-                            {category}
-                            </p>
-                        </div>
-                        ))
-                    ) : (
-                        <div className="text-center text-gray-500 py-4">
-                        No categories available
-                        </div>
-                    )}
-                
-    
-    
-                        
-                    </div>
-    
-                    <div className="flex flex-row justify-evenly">
-                        <button
-                            onClick={handleReset}
-                            className="bg-transparent text-gray hover:text-black crimson py-3 px-8 rounded-full text-[20px] border-gray"
-                        >
-                        Reset
-                        </button>
-                        <button
-                            onClick={handleApply}
-                            className="bg-light-green text-white hover:bg-light-green crimson py-3 px-8 rounded-full text-[20px] border-none"
-                        >
-                        Apply
-                        </button>
-                    </div>
-                   
-                    
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative w-[300px] bg-white py-6 shadow-lg rounded-lg">
+        <button
+          className="absolute top-2 right-2 pr-2 text-gray-500 hover:text-black"
+          onClick={handleClose}
+        >
+          &times;
+        </button>
+        <div className="flex flex-col">
+          <div>
+            {categories && categories.length > 0 ? (
+              categories.map((category) => (
+                <div key={category} className="flex items-center space-x-2 mb-3 pl-6">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category)}
+                    onChange={(e) => handleCheckboxChange(category, e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <p className="text-lg cursor-pointer">
+                    {category}
+                  </p>
                 </div>
-    
-             </div>
-        </div>
-      )
-    
-}
+              ))
+            ) : (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                No categories available
+              </div>
+            )}
+          </div>
 
+          <div className="flex flex-row justify-evenly font-crimson pt-4">
+            <button
+              onClick={handleReset}
+              className="bg-transparent text-gray hover:text-black hover:bg-light-gray py-1.5 px-8 rounded-md text-[20px] border border-gray"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleApply}
+              className="bg-light-green hover:bg-dark-green text-white px-8 py-1.5 rounded-md text-[20px]"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 const InternalViewInventoryPage: React.FC = () => {
   const [inventory, setInventory] = React.useState<any>();
-  const [FilterModalOpen, setFilterModalOpen] = React.useState(false); 
+  const [FilterModalOpen, setFilterModalOpen] = React.useState(false);
 
-
-//   TODO: populate with categories from API 
- const categories = ["Bakery", "Dairy", "ten", "nine", "eight"];
-
+  // TODO: populate with categories from API 
+  const categories = ["Bakery", "Dairy", "ten", "nine", "eight"];
 
   React.useEffect(() => {
     getInventory()
@@ -179,7 +171,6 @@ const InternalViewInventoryPage: React.FC = () => {
         setInventory(items);
       });
   }, []);
-
   
   const handleApplyFilters = (selectedCategories: string[]) => {
     console.log("Selected categories:", selectedCategories);
@@ -189,6 +180,10 @@ const InternalViewInventoryPage: React.FC = () => {
   const handleResetFilters = () => {
     console.log("Filters reset");
   };
+
+  const handleCloseModal = () => {
+    setFilterModalOpen(false);
+  }
 
   return (    
     <div>
@@ -236,6 +231,7 @@ const InternalViewInventoryPage: React.FC = () => {
                 categories={categories}
                 onApply={handleApplyFilters}
                 onReset={handleResetFilters}
+                onClose={handleCloseModal}
             />
           </div>
         </div>
