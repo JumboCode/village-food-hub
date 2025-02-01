@@ -5,7 +5,6 @@ import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal"
 
-
 const demographicsData = [];
 
 function getDemographics() {
