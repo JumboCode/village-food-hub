@@ -301,29 +301,12 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
 };
 
 const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
-  const [newRecord, setNewRecord] = useState({
-    receive: false,
-    donate: false,
-    phoneNumber: '',
-    changes: '',
-    name: { firstName: '', lastName: '' },
-    address: { line1: '', city: '', state: '', zip: '' },
-    householdSize: 1,
-  });
+  const [newRecord, setNewRecord] = useState<newResponse | null>(null);
 
   interface newResponse {
     phoneNumber: string;
-    changes: string;
-    name: {
-      firstName: string;
-      lastName: string;
-    };
-    address: {
-      line1: string;
-      city: string;
-      state: string;
-      zip: string;
-    };
+    name: string;
+    address: string;
     householdSize: number | null;
   }
 
@@ -340,13 +323,10 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
         const newFilteredRecord = newResponses.find(
             (response) => response.phoneNumber === phoneNumber
         );
-        console.log("Filtered Record is 1:", newFilteredRecord);
 
-        if (newFilteredRecord) {
-          console.log("Filtered Record inside:", newFilteredRecord);
-          setNewRecord(newFilteredRecord);
-        }
-        console.log("Filtered Record 2:", newFilteredRecord);
+        console.log("Filtered Record:", newFilteredRecord);
+        setNewRecord(newFilteredRecord || null);
+        return newFilteredRecord || null;
     } catch (error) {
         console.error("Error fetching responses:", error);
     }
@@ -367,17 +347,17 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
                       <div className="text-[30px]">Your Information</div>
                       <div>
                         <div className="text-[21px] mt-1">Full Name:
-                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.name.firstName} {newRecord.name.lastName} </span>
+                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.name} </span>
                         </div>
                       </div>
                       <div className="text-[21px] mt-1">Phone Number:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.phoneNumber} </span>
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.phoneNumber} </span>
                       </div>
                       <div className="text-[21px] mt-1">Address:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.address.line1} {newRecord.address.city} {newRecord.address.state} {newRecord.address.zip} </span>
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.address}</span>
                       </div>
                       <div className="text-[21px] mt-1">Household Size:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord.householdSize} </span>
+                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.householdSize} </span>
                       </div>
                     </div>
                     <div className="flex items-center ml-10">
@@ -728,7 +708,7 @@ const DemographicsSurvey: React.FC = () => {
                                                 setNextDisabled={setNextDisabled} />}
         {currentStep === 'houseSize' && <HouseholdSize value={responses.householdSize} onChange={updateHouseholdSize} 
                                                        setSubmitDisabled={setSubmitDisabled} />}
-        {currentStep === 'confirmation' && <Confirmation />}
+        {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber}/>}
       </div>
 
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>

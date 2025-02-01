@@ -5,7 +5,7 @@ import editIcon from "../images/edit.png";
 import arrowsIcon from "../images/upAndDownArrows.png";
 
 interface CategoriesSpreadsheetProps {
-    inventoryItems: (string | number)[][];
+    categoryItems: (string | number)[][];
 }
 
 export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryItems = [] }) => {
