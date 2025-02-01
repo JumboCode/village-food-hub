@@ -22,7 +22,7 @@ async function createDemographic(data: {
                 name: data.name,
                 householdSize: data.householdSize,
                 address: data.address,
-                lastVisitDate: data.lastVisitDate            
+                lastVisitDate: data.lastVisitDate 
             }
         }
     )
@@ -41,7 +41,7 @@ async function updateDemographic(data : {
     name: string,
     householdSize: number,
     address: string,
-    lastVisitDate: Date
+    lastVisitDate: Date,
 }) {
     return await prisma.demographics.update({
         where: {
@@ -53,7 +53,7 @@ async function updateDemographic(data : {
                 name: data.name,
                 householdSize: data.householdSize,
                 address: data.address,
-                lastVisitDate: data.lastVisitDate     
+                lastVisitDate: data.lastVisitDate
             },
     })
 }

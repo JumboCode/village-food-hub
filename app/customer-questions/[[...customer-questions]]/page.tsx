@@ -592,7 +592,7 @@ const DemographicsSurvey: React.FC = () => {
       address: responses.address.line1 + ", " + responses.address.city + ", " + 
       responses.address.state + " " + responses.address.zip,
       householdSize: responses.householdSize,
-      lastVisitDate: responses.receive ? new Date().toISOString() : ""
+      lastVisitDate: responses.receive ? new Date().toISOString() : "",
     };
 
   
