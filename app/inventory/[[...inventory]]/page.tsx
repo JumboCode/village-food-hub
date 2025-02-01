@@ -14,6 +14,7 @@ function formatDate(date: Date): string {
 
 async function getInventory() {
   try {
+    // NOT WORKING 
     const response = await fetch("/../api/inventory", { method: 'GET' });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const jsonData = await response.json();
@@ -51,8 +52,115 @@ async function getInventory() {
   }
 }
 
+interface FilterModalProps {
+    // visibility 
+    isOpen: boolean; 
+    categories?: string[];
+
+    // buttons
+    onApply: (selectedCategories: string[]) => void;
+    onReset: () => void;
+    onClose: () => void;
+}
+
+const FilterModal: React.FC<FilterModalProps> = ({
+  isOpen,
+  categories = [],
+  onApply,
+  onReset,
+  onClose,
+}) => {
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
+
+  const handleCheckboxChange = (category: string, checked: boolean) => {
+    setSelectedCategories((prev: any[]) => {
+      if (checked) {
+        return [...prev, category];
+      }
+      return prev.filter(c => c !== category);
+    });
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedCategories([]);
+    }
+  }, [isOpen]);
+
+  const handleApply = () => {
+    onApply(selectedCategories);
+  };
+
+  const handleReset = () => {
+    setSelectedCategories([]);
+    onReset();
+  };
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative w-[300px] bg-white py-6 shadow-lg rounded-lg">
+        <button
+          className="absolute top-2 right-2 pr-2 text-gray-500 hover:text-black"
+          onClick={handleClose}
+        >
+          &times;
+        </button>
+        <div className="flex flex-col">
+          <div>
+            {categories && categories.length > 0 ? (
+              categories.map((category) => (
+                <div key={category} className="flex items-center space-x-2 mb-3 pl-6">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category)}
+                    onChange={(e) => handleCheckboxChange(category, e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <p className="text-lg cursor-pointer">
+                    {category}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                No categories available
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-row justify-evenly font-crimson pt-4">
+            <button
+              onClick={handleReset}
+              className="bg-transparent text-gray hover:text-black hover:bg-light-gray py-1.5 px-8 rounded-md text-[20px] border border-gray"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleApply}
+              className="bg-light-green hover:bg-dark-green text-white px-8 py-1.5 rounded-md text-[20px]"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const InternalViewInventoryPage: React.FC = () => {
   const [inventory, setInventory] = React.useState<any>();
+  const [FilterModalOpen, setFilterModalOpen] = React.useState(false);
+
+  // TODO: populate with categories from API 
+  const categories = ["Bakery", "Dairy", "ten", "nine", "eight"];
 
   React.useEffect(() => {
     getInventory()
@@ -60,8 +168,21 @@ const InternalViewInventoryPage: React.FC = () => {
         setInventory(items);
       });
   }, []);
+  
+  const handleApplyFilters = (selectedCategories: string[]) => {
+    console.log("Selected categories:", selectedCategories);
+    setFilterModalOpen(false);
+  };
 
-  return (
+  const handleResetFilters = () => {
+    console.log("Filters reset");
+  };
+
+  const handleCloseModal = () => {
+    setFilterModalOpen(false);
+  }
+
+  return (    
     <div>
       <NavBar/>
       <div className="px-10">
@@ -69,14 +190,52 @@ const InternalViewInventoryPage: React.FC = () => {
           <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
             Inventory
           </div>
-          <div className="flex flex-row">
-            <SearchBar/>
-            <FilterButton/>
+          
+          <div className="flex flex-row items-center">
+            <div className="border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
+              <div className="flex flex-row py-2 px-2 items-center">
+                <Image
+                  src={searchSymbol}
+                  alt="search button"
+                  className="pl-2"
+                  width={24}
+                  height={29.14}
+                />
+                <input
+                  className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none"
+                  placeholder="Search.."
+                >
+                </input>
+              </div>
+            </div>
+            <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]"
+                onClick={() => setFilterModalOpen(prev => !prev)}                    >
+                <div className="flex flex-row py-2 px-3">
+                    <Image
+                    src={filterSymbol}
+                    alt="filter button"
+                    width={24}
+                    height={29.14}
+                    
+                    />
+                <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2">
+                  Filter
+                </div>
+              </div>
+            </button>
+            <FilterModal
+                isOpen={FilterModalOpen}
+                categories={categories}
+                onApply={handleApplyFilters}
+                onReset={handleResetFilters}
+                onClose={handleCloseModal}
+            />
           </div>
         </div>
         <InventorySpreadsheet inventoryItems={inventory} />
       </div>
      </div>
+     
   );
 };
 
