@@ -13,6 +13,7 @@ import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
+import { response } from 'express';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,6 +310,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     householdSize: number | null;
   }
 
+
   const fetchNewRecord = async () => {
     try {
         const response = await fetch("../api/demographics", { method: "GET" });
@@ -316,8 +318,8 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const newResponses: newResponse[] = await response.json();
-        console.log("Fetched responses:", newResponses);
-
+        console.log("Fetched responses 1:", newResponses);
+        console.log("phone number: ", phoneNumber);
         const newFilteredRecord = newResponses.find(
             (response) => response.phoneNumber === phoneNumber
         );
@@ -329,10 +331,10 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
         console.error("Error fetching responses:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchNewRecord();
-  }, []);
+  }, [phoneNumber]);
 
   return (
       <div className="background-white font-black" > 
@@ -387,6 +389,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     </div>
       );
 };
+
 
 const DemographicsSurvey: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'action' | 'donor' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
@@ -476,6 +479,7 @@ const DemographicsSurvey: React.FC = () => {
         }
         const surveyResponses: SurveyResponse[] = await response.json();
         console.log("Fetched responses:", surveyResponses);
+        //console.log("the responses: ", responses);
 
         const filteredRecord = surveyResponses.find(
             (response) => response.phoneNumber === responses.phoneNumber
@@ -560,6 +564,7 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('name');
         break;
       case 'name':
+        console.log("previous record", prevRecord);
         if (prevRecord !== null) {
           setCurrentStep('changes');
         } else {
@@ -576,10 +581,56 @@ const DemographicsSurvey: React.FC = () => {
 
   const handleSubmit = () => {
     console.log('Survey Responses:', responses);
+    console.log("prev record", prevRecord);
     setCurrentStep('confirmation');
-    //router.push('/saved-thank-you');
-  };
   
+    const recordData = {
+      phoneNumber: responses.phoneNumber,
+      takeCount: responses.receive ? 1 : 0,
+      donateCount: responses.donate ? 1 : 0,
+      name: responses.name.firstName + " " + responses.name.lastName,
+      address: responses.address.line1 + ", " + responses.address.city + ", " + 
+      responses.address.state + " " + responses.address.zip,
+      householdSize: responses.householdSize,
+      lastVisitDate: responses.receive ? new Date().toISOString() : "",
+    };
+
+  
+    if (prevRecord !== null) {
+      // Update existing record if prevRecord not null 
+      const updatedRecordData = {
+        phoneNumber: responses.phoneNumber,
+        takeCount: prevRecord.takeCount + (responses.receive? 1: 0),
+        donateCount: prevRecord.donateCount + (responses.donate? 1 : 0),
+        name: responses.name.firstName + " " + responses.name.lastName,
+        address: responses.address.line1 + ", " + responses.address.city + ", " + 
+        responses.address.state + " " + responses.address.zip,
+        householdSize: responses.householdSize,
+        lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
+      };
+      fetch("../api/demographics", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedRecordData),
+      }).then(() => {
+        console.log("Record updated successfully");
+      }).catch((error) => {
+        console.error("Error updating record:", error);
+      });
+    } else {
+      // Create a new entry if prevRecord is null
+      fetch("../api/demographics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(recordData),
+      }).then(() => {
+        console.log("Record created successfully");  
+      }).catch((error) => {
+        console.error("Error creating record:", error);
+      });
+    }
+  };
+   
   const [showModal, setShowModal] = useState(false);
   
   const openModal = (): void => {
