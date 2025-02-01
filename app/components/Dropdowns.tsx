@@ -21,12 +21,14 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
                     const fetchedItems = await response.json();
                     const itemNames = fetchedItems.map((item: any) => item[filterName]);
                     
-                    // If filterValue (category) is provided, filter the items based on category
+                    // If a filter is provided, filter the items based on category
                     const filteredItems = filterValue
                         ? fetchedItems
+                            // apply filter
                             .filter((item: any) => {
                                 return item[filterName] === filterValue;
                             })
+                            // display list flattened
                             .flatMap((item: any) => item[currentDropdown])
                         : itemNames;
 

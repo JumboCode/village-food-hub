@@ -1,10 +1,7 @@
 "use client"
 import React, { useEffect } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
-import Image from 'next/image';
-import filterSymbol from "@app/images/filterSymbol.svg";
-import searchSymbol from "@app/images/searchSymbol.svg";
-import SearchBar from '@app/components/SearchBar';
+import {SearchBar, FilterButton} from '@app/components/InternalViewButtons';
 import NavBar from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
