@@ -8,7 +8,7 @@ interface CategoriesSpreadsheetProps {
     categoryItems: (string | number)[][];
 }
 
-export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryItems = [] }) => {
+const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryItems = [] }) => {
     console.log("categoryItems:", categoryItems);
 
     return(
@@ -70,3 +70,5 @@ export const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ ca
 
     )
 }
+
+export default CategoriesSpreadsheet;

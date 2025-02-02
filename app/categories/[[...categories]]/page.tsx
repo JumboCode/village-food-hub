@@ -34,7 +34,9 @@ const Categories: React.FC = () => {
                     if (!acc[categoryName]) {
                         acc[categoryName] = [];
                     }
-                    acc[categoryName].push([itemName, units]);
+                    // Join the units array into a comma-separated string
+                    const unitsString = units.join(', ');
+                    acc[categoryName].push([itemName, unitsString]);
                     return acc;
                 }, {});
                 setCategoriesData(rearrangedData);
@@ -134,7 +136,7 @@ const Categories: React.FC = () => {
                                 )}
                             </div>
                             {showTable && (
-                                <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mr-2 mb-2 rounded text-[20px]">
+                                <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]">
                                     {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
                                 </button>
                             )}
