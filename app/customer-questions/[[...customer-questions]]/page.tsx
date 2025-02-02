@@ -308,87 +308,94 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     name: string;
     address: string;
     householdSize: number | null;
+    lastVisitDate: string;
   }
-
 
   const fetchNewRecord = async () => {
     try {
-        const response = await fetch("../api/demographics", { method: "GET" });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const newResponses: newResponse[] = await response.json();
-        console.log("Fetched responses 1:", newResponses);
-        console.log("phone number: ", phoneNumber);
-        const newFilteredRecord = newResponses.find(
-            (response) => response.phoneNumber === phoneNumber
-        );
+      const response = await fetch("../api/demographics", { method: "GET" });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const newResponses: newResponse[] = await response.json();
 
-        console.log("Filtered Record:", newFilteredRecord);
-        setNewRecord(newFilteredRecord || null);
-        return newFilteredRecord || null;
+      // Filter for records matching the phone number
+      const matchedRecords = newResponses.filter(
+        (record) => record.phoneNumber === phoneNumber
+      );
+
+      // Sort by `lastVisitDate` to get the latest record
+      const latestRecord = matchedRecords.sort((a, b) =>
+        new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
+      )[0];
+
+      console.log("Latest Record:", latestRecord);
+      setNewRecord(latestRecord || null);
     } catch (error) {
-        console.error("Error fetching responses:", error);
+      console.error("Error fetching responses:", error);
     }
   };
-  
+
   useEffect(() => {
     fetchNewRecord();
-  }, [phoneNumber]);
+  }, [])
 
   return (
-      <div className="background-white font-black" > 
-          <div className="font-crimson flex flex-col items-center text-black">
-              <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR VISITING!</h1>
-              <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
-              <div className="flex col-2 items-center mt-8">
-                  <div className="flex flex-row mx-10 content-start text-[30px] break-all">
-                    <div className="flex flex-col">
-                      <div className="text-[30px]">Your Information</div>
-                      <div>
-                        <div className="text-[21px] mt-1">Full Name:
-                          <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.name} </span>
-                        </div>
-                      </div>
-                      <div className="text-[21px] mt-1">Phone Number:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.phoneNumber} </span>
-                      </div>
-                      <div className="text-[21px] mt-1">Address:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.address}</span>
-                      </div>
-                      <div className="text-[21px] mt-1">Household Size:
-                        <span className="text-[24px]" style={{ color: '#828282' }}> {newRecord?.householdSize} </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center ml-10">
-                      <Image
-                        src={logo}
-                        alt="logo"
-                        width={300}
-                        height={263}
-                      />
-                    </div>
-                  </div>
+    <div className="background-white font-black">
+      <div className="font-crimson flex flex-col items-center text-black">
+        <h1 className="font-bold text-[36px] mt-12">THANK YOU FOR VISITING!</h1>
+        <p className="font-bold text-[36px] mt-6 mb-2">
+          Village Food Hub will be able to grow with your help!
+        </p>
+        <div className="flex col-2 items-center mt-8">
+          <div className="flex flex-row mx-10 content-start text-[30px] break-all">
+            <div className="flex flex-col">
+              <div className="text-[30px]">Your Information</div>
+              <div className="text-[21px] mt-1">
+                Full Name:{" "}
+                <span className="text-[24px]" style={{ color: "#828282" }}>
+                  {newRecord?.name}
+                </span>
               </div>
-              <div className="mt-10 mb-15">
-              <button 
-                className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
-                onClick={() => window.location.href = "../welcome-page"}>
-                  Return home 
-                  <div className="relative bottom-0 left-5">
-                      <Image
-                          src={arrow}
-                          alt="arrow"
-                          width={42}
-                          height={42}
-                      />
-                  </div>
-              </button>
+              <div className="text-[21px] mt-1">
+                Phone Number:{" "}
+                <span className="text-[24px]" style={{ color: "#828282" }}>
+                  {newRecord?.phoneNumber}
+                </span>
+              </div>
+              <div className="text-[21px] mt-1">
+                Address:{" "}
+                <span className="text-[24px]" style={{ color: "#828282" }}>
+                  {newRecord?.address}
+                </span>
+              </div>
+              <div className="text-[21px] mt-1">
+                Household Size:{" "}
+                <span className="text-[24px]" style={{ color: "#828282" }}>
+                  {newRecord?.householdSize}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center ml-10">
+              <Image src={logo} alt="logo" width={300} height={263} />
+            </div>
           </div>
+        </div>
+        <div className="mt-10 mb-15">
+          <button
+            className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
+            onClick={() => window.location.href = "../welcome-page"}>
+            Return home
+            <div className="relative bottom-0 left-5">
+              <Image src={arrow} alt="arrow" width={42} height={42} />
+            </div>
+          </button>
+        </div>
       </div>
     </div>
-      );
+  );
 };
+
 
 
 const DemographicsSurvey: React.FC = () => {
@@ -469,6 +476,8 @@ const DemographicsSurvey: React.FC = () => {
       zip: string;
     };
     householdSize: number | null;
+    lastVisitDate: Date; // TODO: should eventually get rid of this because we have previousVisitDates now
+    previousVisitDates: Date[];
   }
 
   const fetchPrevRecord = async () => {
@@ -579,57 +588,82 @@ const DemographicsSurvey: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Survey Responses:', responses);
-    console.log("prev record", prevRecord);
-    setCurrentStep('confirmation');
-  
+    console.log("Previous record before submission:", prevRecord);
+
+    if (!responses.phoneNumber) {
+        console.error("Error: Phone number is required.");
+        return;
+    }
+
+    const currentDate = new Date();
+
     const recordData = {
-      phoneNumber: responses.phoneNumber,
-      takeCount: responses.receive ? 1 : 0,
-      donateCount: responses.donate ? 1 : 0,
-      name: responses.name.firstName + " " + responses.name.lastName,
-      address: responses.address.line1 + ", " + responses.address.city + ", " + 
-      responses.address.state + " " + responses.address.zip,
-      householdSize: responses.householdSize,
-      lastVisitDate: responses.receive ? new Date().toISOString() : "",
+        phoneNumber: responses.phoneNumber,
+        takeCount: responses.receive ? 1 : 0,
+        donateCount: responses.donate ? 1 : 0,
+        name: `${responses.name.firstName} ${responses.name.lastName}`,
+        address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
+        householdSize: responses.householdSize,
+        lastVisitDate: responses.receive ? currentDate : null,
+        previousVisitDates: [currentDate],
     };
 
-  
-    if (prevRecord !== null) {
-      // Update existing record if prevRecord not null 
-      const updatedRecordData = {
-        phoneNumber: responses.phoneNumber,
-        takeCount: prevRecord.takeCount + (responses.receive? 1: 0),
-        donateCount: prevRecord.donateCount + (responses.donate? 1 : 0),
-        name: responses.name.firstName + " " + responses.name.lastName,
-        address: responses.address.line1 + ", " + responses.address.city + ", " + 
-        responses.address.state + " " + responses.address.zip,
-        householdSize: responses.householdSize,
-        lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
-      };
-      fetch("../api/demographics", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedRecordData),
-      }).then(() => {
-        console.log("Record updated successfully");
-      }).catch((error) => {
-        console.error("Error updating record:", error);
-      });
-    } else {
-      // Create a new entry if prevRecord is null
-      fetch("../api/demographics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recordData),
-      }).then(() => {
-        console.log("Record created successfully");  
-      }).catch((error) => {
-        console.error("Error creating record:", error);
-      });
+    console.log("Record data for submission:", recordData);
+
+    try {
+        if (prevRecord) {
+            // Ensure previous record has required fields
+            const updatedRecordData = {
+                ...prevRecord,
+                phoneNumber: responses.phoneNumber,
+                takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
+                donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
+                name: `${responses.name.firstName} ${responses.name.lastName}`,
+                address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
+                householdSize: responses.householdSize,
+                lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
+                previousVisitDates: Array.isArray(prevRecord.previousVisitDates) 
+                  ? [...prevRecord.previousVisitDates, currentDate] 
+                  : [currentDate],
+            };
+
+            console.log("Updated record data for PUT request:", updatedRecordData);
+
+            const updateResponse = await fetch("/api/demographics", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedRecordData),
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error(`Failed to update record: ${await updateResponse.text()}`);
+            }
+
+            console.log("Record updated successfully.");
+        } else {
+            console.log("Creating a new record...");
+
+            const createResponse = await fetch("/api/demographics", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(recordData),
+            });
+
+            if (!createResponse.ok) {
+                throw new Error(`Failed to create record: ${await createResponse.text()}`);
+            }
+
+            console.log("Record created successfully.");
+        }
+
+        setCurrentStep("confirmation");
+    } catch (error) {
+        console.error("Error submitting survey:", error);
     }
-  };
+};
+
    
   const [showModal, setShowModal] = useState(false);
   
@@ -715,13 +749,7 @@ const DemographicsSurvey: React.FC = () => {
         {(() => {
           if (currentStep === 'houseSize') {
             return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
-          } 
-          // else if (currentStep === 'confirmation') {
-          //   return <button className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]">
-          //             { "OK" }
-          //           </button>
-          // }
-           else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
+          } else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
         })()}
