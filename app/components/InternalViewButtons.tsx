@@ -3,7 +3,7 @@ import searchSymbol from "@app/images/searchSymbol.svg"
 import filterSymbol from "@app/images/filterSymbol.svg"
 import saveSymbol from "@app/images/saveSymbol.svg"
 
-export const SearchBar = ({}: {}) => {
+export const SearchBar = () => {
   return (
     <div className = "border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
       <div className = "flex flex-row py-2 px-2 items-center">

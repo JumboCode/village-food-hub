@@ -1,7 +1,8 @@
-"use client"
-import React, { useEffect } from "react";
+'use client';
+
+import React, { useEffect, useState } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
-import {SearchBar, FilterButton} from '@app/components/InternalViewButtons';
+import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
 import NavBar from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
@@ -12,9 +13,13 @@ function formatDate(date: Date): string {
   return `${month}/${day}/${year}`;
 }
 
-async function getInventory() {
+// Define the structure of the inventory data
+interface InventoryItem {
+  [key: string]: string | number | Date; // Dynamic fields, but for simplicity assuming string, number or Date
+}
+
+async function getInventory(): Promise<InventoryItem[]> {
   try {
-    // NOT WORKING 
     const response = await fetch("/../api/inventory", { method: 'GET' });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const jsonData = await response.json();
@@ -25,7 +30,7 @@ async function getInventory() {
       return [];
     }
 
-    const listOfLists = data.map((object: any) => {
+    const listOfLists = data.map((object: InventoryItem) => {
       const fields = Object.values(object);
       // Remove the last field (history object) because it conflicts with the spreadsheet
       fields.pop();
@@ -53,14 +58,11 @@ async function getInventory() {
 }
 
 interface FilterModalProps {
-    // visibility 
-    isOpen: boolean; 
-    categories?: string[];
-
-    // buttons
-    onApply: (selectedCategories: string[]) => void;
-    onReset: () => void;
-    onClose: () => void;
+  isOpen: boolean;
+  categories?: string[];
+  onApply: (selectedCategories: string[]) => void;
+  onReset: () => void;
+  onClose: () => void;
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
@@ -70,10 +72,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onReset,
   onClose,
 }) => {
-  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const handleCheckboxChange = (category: string, checked: boolean) => {
-    setSelectedCategories((prev: any[]) => {
+    setSelectedCategories((prev: string[]) => {
       if (checked) {
         return [...prev, category];
       }
@@ -81,7 +83,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setSelectedCategories([]);
     }
@@ -154,17 +156,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
   );
 };
 
-
 const InternalViewInventoryPage: React.FC = () => {
-  const [inventory, setInventory] = React.useState<any>();
-  const [FilterModalOpen, setFilterModalOpen] = React.useState(false);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]); // Array of inventory items
+  const [FilterModalOpen, setFilterModalOpen] = useState(false);
 
   // TODO: populate with categories from API 
   const categories = ["Bakery", "Dairy", "ten", "nine", "eight"];
 
-  React.useEffect(() => {
+  useEffect(() => {
     getInventory()
-      .then((items: any) => {
+      .then((items: InventoryItem[]) => {
         setInventory(items);
       });
   }, []);
@@ -205,10 +206,8 @@ const InternalViewInventoryPage: React.FC = () => {
         </div>
         <InventorySpreadsheet inventoryItems={inventory} />
       </div>
-     </div>
-     
+    </div>
   );
 };
 
 export default InternalViewInventoryPage;
-

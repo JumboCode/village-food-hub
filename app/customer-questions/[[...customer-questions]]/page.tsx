@@ -274,7 +274,7 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} />
+          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} filterName="size"/>
         </div>
       </div>
     </div>
@@ -460,10 +460,12 @@ const DemographicsSurvey: React.FC = () => {
     setResponses((prev) => ({ ...prev, householdSize: value ?? 0 }));
   };
 
-  const [prevRecord, setPrevRecord] = useState(null);
+  const [prevRecord, setPrevRecord] = useState<SurveyResponse | null>(null);
 
   interface SurveyResponse {
     phoneNumber: string;
+    takeCount: number;
+    donateCount: number;
     changes: string;
     name: {
       firstName: string;
@@ -730,7 +732,25 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
-        {currentStep === 'changes' && <Changes value={responses.changes} onChange={updateChanges} setNextDisabled={setNextDisabled} details={prevRecord}/>}
+        {currentStep === 'changes' && (<Changes
+                                          value={responses.changes}
+                                          onChange={updateChanges}
+                                          setNextDisabled={setNextDisabled}
+                                          details={
+                                            prevRecord
+                                              ? {
+                                                  name: `${prevRecord.name.firstName} ${prevRecord.name.lastName}`,
+                                                  address: `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`,
+                                                  householdSize: prevRecord.householdSize ?? 0,
+                                                }
+                                              : {
+                                                  name: '',
+                                                  address: '',
+                                                  householdSize: 0,
+                                                }
+                                          }
+                                        />
+                                      )}
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
                                           onLastNameChange={(value) => updateName('lastName', value)} 
                                           setNextDisabled={setNextDisabled} />}

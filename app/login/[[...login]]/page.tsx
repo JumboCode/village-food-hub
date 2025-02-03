@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@mui/material';
-import LoginForm from '@app/components/LoginForm';
 import Image from 'next/image';
 import headerLogo from '../../images/headerLogo.png';
 import irlPantry from '../../images/irl_pantry.png';
@@ -214,7 +213,7 @@ const LoginPage: React.FC = () => {
               {/* Resend Buttons */}
               <div className="mt-[10px] mb-5">
               <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case" onClick={handleResendCode}>
-                  Didn't receive a code?
+                Didn&rsquo;t receive a code?
               </Button>
               <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case font-bold" onClick={handleResendCode}>
                   Resend Code
@@ -267,7 +266,7 @@ const LoginPage: React.FC = () => {
 
               <div className="mt-[10px] mb-5">
               <Button className="left-0 text-neutral-300 ml-[-10px] font-crimson normal-case" onClick={handleResendCode}>
-                  Didn't receive a code?
+                Didn&rsquo;t receive a code?
               </Button>
               <Button className="left-0 text-neutral-300 ml-[-10px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                   Resend Code
@@ -344,8 +343,8 @@ const LoginPage: React.FC = () => {
         <div className="my-[20px] flex h-full px-7 py-7 justify-center items-center col-span-3">
           <Image
             src={irlPantry}
-            width={585}
-            height={734}
+            width={468}
+            height={587.2}
             alt="welcome BW Logo"
             className="flex border border-banner-green rounded-[10px] object-contain"
           />

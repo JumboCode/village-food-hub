@@ -10,9 +10,14 @@ import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
 import deleteIcon from '../../images/delete.png';
 import editIcon from '../../images/edit.png';
 
+// Define types to avoid using `any`
+interface CategoryData {
+  [key: string]: [string, string][];
+}
+
 const Categories: React.FC = () => {
     // State variables
-    const [categoriesData, setCategoriesData] = useState<{ [key: string]: any[] }>({});
+    const [categoriesData, setCategoriesData] = useState<CategoryData>({});
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [showTable, setShowTable] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -27,7 +32,7 @@ const Categories: React.FC = () => {
                 const response = await fetch("/api/categories");
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                const rearrangedData = data.reduce((acc: any, record: any) => {
+                const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
                     const categoryName = record.name;
                     const itemName = record.itemName;
                     const units = record.units || [];
@@ -40,8 +45,8 @@ const Categories: React.FC = () => {
                     return acc;
                 }, {});
                 setCategoriesData(rearrangedData);
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error(err);
             }
         })();
     }, []);
@@ -87,7 +92,7 @@ const Categories: React.FC = () => {
                 } else {
                     setRetrievalError(true);
                 }
-            } catch (error) {
+            } catch (err) {
                 setRetrievalError(true);
             }
         }
@@ -113,6 +118,7 @@ const Categories: React.FC = () => {
                                         fetchUrl="/api/categories"
                                         filterName="name"
                                         onSelect={handleCategoryChange}
+                                        value={selectedCategory}
                                     />
                                 </div>
                                 {showTable && (

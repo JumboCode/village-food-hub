@@ -5,7 +5,19 @@ import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal"
 
-const demographicsData = [];
+// Define a type for the structure of each record in demographicsData
+interface DemographicsRecord {
+    lastVisitDate: string;
+    phoneNumber: string;
+    name: string;
+    address: string;
+    householdSize: number;
+    takeCount: number;
+    donateCount: number;
+}
+
+// Define the type for the demographics state
+const demographicsData: DemographicsRecord[] = [];
 
 function getDemographics() {
     
@@ -16,16 +28,15 @@ function getDemographics() {
             return response.json();
         })
         .then((data) => {
-            demographicsData.push(data);
+            demographicsData.push(...data);  // Spread the fetched data into the demographicsData array
             return data;
         })
         .then((demographicsData) => {
 
-                const rearrangedData = demographicsData.map((record: any) => {
+                const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
                     const arr = [record.lastVisitDate.split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
-                    return arr
+                    return arr;
                 });
-
 
                 return rearrangedData;
             });
@@ -38,22 +49,30 @@ function getDemographics() {
         
 }
 
-
 const InternalViewDemographicsPage: React.FC = () => {
-    const [demographics, setDemographics] = React.useState<any>();
-      useEffect(() => {
+    // Define the state to store demographics data with an appropriate type
+    const [demographics, setDemographics] = useState<string[][] | null>(null);
+
+    useEffect(() => {
         getDemographics()
-          .then((items: any) => { setDemographics(items) })
+          .then((items) => { setDemographics(items) })
       }, []);
       
-      const [showModal, setShowModal] = useState(false);
-      const openModal = (): void => {
-        setShowModal(true);
-      };
+    const [showModal, setShowModal] = useState(false);
     
-      const closeModal = (): void => {
+    const openModal = (): void => {
+        setShowModal(true);
+    };
+    
+    const closeModal = (): void => {
         setShowModal(false);
-      };
+    };
+
+    const handleRunReport = (startDate: Date, endDate: Date) => {
+        // Default implementation that does nothing
+        console.log("Run report from", startDate, "to", endDate);
+    };
+
     return (
         <div>
             <NavBar />
@@ -63,10 +82,11 @@ const InternalViewDemographicsPage: React.FC = () => {
                     <div className="flex flex-row">
                         <SearchBar/>
                         <RunReportButton onClick={openModal} />
-                        {showModal && <DateRangeModal closeModal={closeModal}/> }
+                        {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} /> }
                     </div>
                 </div>
-                <DemographicsSpreadsheet demographicsItems={demographics} />
+                {/* Pass the correctly typed demographics data to DemographicsSpreadsheet */}
+                <DemographicsSpreadsheet demographicsItems={demographics || []} />
             </div>
         </div>
     );
