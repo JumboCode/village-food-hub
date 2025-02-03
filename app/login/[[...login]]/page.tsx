@@ -22,8 +22,12 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   
   // handler function to display the inventory after the sign-in button has been pressed
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    const response = await fetch('../../api/users', {method: "GET"})
+    const newResponse = await response.json();
+    console.log(newResponse);
     router.push('/inventory'); 
+
   }
 
   // handler function to show the forgot password module
