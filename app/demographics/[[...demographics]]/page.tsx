@@ -34,7 +34,7 @@ function getDemographics() {
         .then((demographicsData) => {
 
                 const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
-                    const arr = [new Date(record.lastVisitDate).toLocaleString("en-US", {timeZone: "America/New_York"}).split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize == 11 ? "10+" : record.householdSize.toString(), record.takeCount, record.donateCount];
+                    const arr = [new Date(record.lastVisitDate).toLocaleString("en-US", {timeZone: "America/New_York"}).split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
                     return arr;
                 });
 
