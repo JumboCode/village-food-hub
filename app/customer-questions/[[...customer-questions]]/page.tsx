@@ -8,12 +8,10 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
-import Banner from '@app/components/DemographicsSurveyBanner';
 import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
-import { response } from 'express';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
