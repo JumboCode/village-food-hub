@@ -100,7 +100,17 @@ interface Details {
   householdSize: number;
 }
 // Information Changed Module
-const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: Details }> = ({ value, onChange, setNextDisabled, details }) => {
+const Changes: React.FC<{ value: string; onChange: (newValue: string) => void; setNextDisabled: (disabled: boolean) => void; details?: Details }> = ({
+  value,
+  onChange,
+  setNextDisabled,
+  details,
+}) => {
+
+  if (!details) {
+    return <p className="text-[28px] font-bold">Loading previous record...</p>;
+  }
+  
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
   const handleYesNoChange = (newValue: string) => {
@@ -506,6 +516,12 @@ const DemographicsSurvey: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (responses.phoneNumber) {
+        fetchPrevRecord();
+    }
+  }, [responses.phoneNumber]);
+
 
   const handleNextClick = async () => {
     if (nextDisabled) return;
@@ -519,13 +535,28 @@ const DemographicsSurvey: React.FC = () => {
         }
         break;
       case 'phoneNum':
-        const record = await fetchPrevRecord();
+        if (!responses.phoneNumber) {
+            console.error("Phone number is missing before fetching records.");
+            return;
+        }
+    
+        const record = await fetchPrevRecord();  // Wait for fetch
+        console.log("Fetched record before transition:", record);
+    
         if (record !== null) {
-          setCurrentStep('changes');
+            setCurrentStep('changes');
         } else {
-          setCurrentStep('name');
+            setCurrentStep('name');
         }
         break;
+      // case 'phoneNum':
+      //   const record = await fetchPrevRecord();
+      //   if (record !== null) {
+      //     setCurrentStep('changes');
+      //   } else {
+      //     setCurrentStep('name');
+      //   }
+      //   break;
       case 'changes':
         if (responses.changes == "yes") {
           setCurrentStep('name');
@@ -736,19 +767,7 @@ const DemographicsSurvey: React.FC = () => {
                                           value={responses.changes}
                                           onChange={updateChanges}
                                           setNextDisabled={setNextDisabled}
-                                          details={
-                                            prevRecord
-                                              ? {
-                                                  name: `${prevRecord.name.firstName} ${prevRecord.name.lastName}`,
-                                                  address: `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`,
-                                                  householdSize: prevRecord.householdSize ?? 0,
-                                                }
-                                              : {
-                                                  name: '',
-                                                  address: '',
-                                                  householdSize: 0,
-                                                }
-                                          }
+                                          details={prevRecord}
                                         />
                                       )}
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
