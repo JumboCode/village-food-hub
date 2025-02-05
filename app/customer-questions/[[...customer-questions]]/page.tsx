@@ -270,7 +270,8 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
   const handleSizeChange = (value: string) => {
-    const sizeValue = value === "" ? null : Number(value);
+    // If the selected value is "10+", set it to 11 for the backend
+    const sizeValue = value === "10+" ? 11 : value === "" ? null : Number(value);
     setSelectedSize(value);
     onChange(sizeValue);
     setSubmitDisabled(sizeValue === null);
@@ -380,7 +381,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
               <div className="text-[21px] mt-1">
                 Household Size:{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
-                  {newRecord?.householdSize}
+                  {newRecord?.householdSize === 11 ? "10+" : newRecord?.householdSize}
                 </span>
               </div>
             </div>
