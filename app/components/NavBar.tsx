@@ -107,7 +107,7 @@ export default function NavBar() {
                   </li>
                   <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer">
                     <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
-                    Settings
+                    Manage Users
                   </li>
                   <li
                     className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
