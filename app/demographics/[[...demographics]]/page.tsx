@@ -41,13 +41,13 @@ function getDemographics() {
                 return rearrangedData;
             });
 
-
     } catch (error) {
         console.error(error);
         return Promise.resolve([]);
     }
         
 }
+
 
 const InternalViewDemographicsPage: React.FC = () => {
     // Define the state to store demographics data with an appropriate type
@@ -67,11 +67,50 @@ const InternalViewDemographicsPage: React.FC = () => {
     const closeModal = (): void => {
         setShowModal(false);
     };
+    
 
     const handleRunReport = (startDate: Date, endDate: Date) => {
         // Default implementation that does nothing
+        downloadCSV(startDate, endDate);
         console.log("Run report from", startDate, "to", endDate);
     };
+
+    const filterDate = (data:DemographicsRecord[], startDate: Date, endDate: Date) => {
+        if (!startDate || !endDate) {
+            return[];
+        }
+        return data.filter((record) => {
+            const visitDate = new Date(record.lastVisitDate);
+            return visitDate >= startDate && visitDate <= endDate;
+        });
+    };
+
+    const downloadCSV = (startDate: Date, endDate: Date) => {
+        const filteredData = filterDate(demographicsData, startDate, endDate);
+        const headers = ["Phone Number", "Name", "Address", "Household Size", "Number of Receives"];
+        const rows = [
+            headers.join(","), 
+            ...filteredData.map(record => [
+                record.phoneNumber, 
+                record.name, 
+                record.address, 
+                record.householdSize.toString(), 
+                record.takeCount.toString()
+            ].map(field => `"${field}"`).join(","))
+        ].join("\r\n");
+
+        const start = startDate.toISOString().split("T")[0];
+        const end = endDate.toISOString().split("T")[0];
+        const fileName = `${start}_-_${end}demographics.csv`;
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
 
     return (
         <div>
