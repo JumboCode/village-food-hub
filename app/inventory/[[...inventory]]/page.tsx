@@ -121,8 +121,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                 const uniqueItemName: string[] = Array.from(new Set(filteredItems));
                 setCategories(uniqueItemName);
                 
-            console.log('categoriessss:', categoryNames); 
-        } else {
+              } else {
             throw new Error('Failed to fetch categories')
         }
 
@@ -205,15 +204,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
 const InternalViewInventoryPage: React.FC = () => {
     const [inventory, setInventory] = useState<InventoryItem[]>([]); // Array of inventory items
+    const [displayInventory, setDisplayInventory] = useState<InventoryItem[]>([])
     const [FilterModalOpen, setFilterModalOpen] = useState(false);
-
-  // TODO: populate with categories from API 
-//   const categories = getCategories()
 
     useEffect(() => {
         getInventory()
           .then((items: InventoryItem[]) => {
             setInventory(items);
+            setDisplayInventory(items);
           });
       }, []);
 
@@ -221,13 +219,25 @@ const InternalViewInventoryPage: React.FC = () => {
   
   const handleApplyFilters = (selectedCategories: string[]) => {
 
-    console.log("Selected categories:", selectedCategories);
-    // console.log("INVENTORY!!!!", inventory)
+    let itemsToDisplay = [];
+
+    for (const item of inventory) {
+       if (selectedCategories.includes(item[1] as string)) {
+          itemsToDisplay.push(item)
+       }
+
+    console.log(selectedCategories)
+    }
+    
+    setDisplayInventory(itemsToDisplay);
     setFilterModalOpen(false);
   };
 
   const handleResetFilters = () => {
     console.log("Filters reset");
+    setDisplayInventory(inventory)
+    setFilterModalOpen(false);
+
   };
 
   const handleCloseModal = () => {
@@ -256,7 +266,7 @@ const InternalViewInventoryPage: React.FC = () => {
             />
           </div>
         </div>
-        <InventorySpreadsheet inventoryItems={inventory} />
+        <InventorySpreadsheet inventoryItems={displayInventory} />
       </div>
     </div>
   );
