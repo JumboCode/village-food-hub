@@ -560,7 +560,9 @@ const DemographicsSurvey: React.FC = () => {
         if (responses.changes == "yes") {
           setCurrentStep('name');
         } else {
-          router.push('/saved-thank-you');
+          handleSubmit();
+          setCurrentStep('confirmation');
+          // router.push('/saved-thank-you');
         }
         break;
       case 'name':
@@ -652,9 +654,9 @@ const DemographicsSurvey: React.FC = () => {
                 phoneNumber: responses.phoneNumber,
                 takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
                 donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
-                name: `${responses.name.firstName} ${responses.name.lastName}`,
-                address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
-                householdSize: responses.householdSize,
+                name: responses.changes == "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
+                address: responses.changes == "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
+                householdSize: responses.changes == "yes" ? responses.householdSize : prevRecord.householdSize,
                 lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
                 previousVisitDates: Array.isArray(prevRecord.previousVisitDates) 
                   ? [...prevRecord.previousVisitDates, currentDate] 
