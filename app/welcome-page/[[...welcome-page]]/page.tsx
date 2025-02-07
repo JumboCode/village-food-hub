@@ -2,10 +2,9 @@
 'use client';
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import welcomeScreenBG from '../../images/welcome-screen-background.png';
 import welcomeBWLogo from '../../images/welcome-bw-logo.png';
-import qrCode from '../../images/qr-code.png';
 import { useRouter } from 'next/navigation';
 
 const WelcomePage: React.FC = () => {
@@ -13,6 +12,76 @@ const WelcomePage: React.FC = () => {
     const startSurvey = () => {
         router.push('/customer-questions');
     }
+
+    // for the language picker
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    // when the language dropdown is toggled
+    const clickDropdown = () => {
+        setDropdownOpen(!dropdownOpen);
+    }
+
+    // when navigating to this page
+    useEffect(() => {
+      const language = localStorage.getItem("language");
+      translateText(language === '' ? 'en' : language);
+    }, []);
+
+    // selecting a language for translating
+    const [language, setLanguage] = useState('')
+    // storing the translations
+    const [translations, setTranslations] = useState([
+        "Welcome to Village Food Hub!",
+        "Please fill out this quick demographic survey",
+        "each visit",
+        "to help us grow and reach more people in the community!",
+        "Choose Language",
+        "English",
+        "Spanish",
+        "Click to Complete the Demographic Survey",
+        "Start Demographic Survey →",
+    ]);
+
+    // function to translate the text with API calls
+    const translateText = async (language: any) => {
+        try {
+            // Reset back to english to avoid lost in translation after resets
+            let newTranslations = [
+                "Welcome to Village Food Hub!",
+                "Please fill out this quick demographic survey",
+                "each visit",
+                "to help us grow and reach more people in the community!",
+                "Choose Language",
+                "English",
+                "Spanish",
+                "Click to Complete the Demographic Survey",
+                "Start Demographic Survey →",
+            ]
+
+            // if the language is not english, translate it
+            if (language !== 'en') {
+                for (let i = 0; i < translations.length; i++) {
+                    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+                }
+            }
+                
+            // store the translations
+            setTranslations(newTranslations);
+
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // triggered when the dropdown is clicked
+    useEffect(() => {
+        localStorage.setItem("language", language);
+        translateText(language);
+        setDropdownOpen(false);
+    }, [language])
     
   return (
     //creates columns and sets
@@ -20,7 +89,7 @@ const WelcomePage: React.FC = () => {
 
         {/* banner at top of screen */}
         <div className="h-1/4 w-full text-center content-center text-7xl crimson-bold">
-            Welcome to Village Food Hub!
+            {translations[0]}
         </div>
 
         {/* sets rows below welcome banner */}
@@ -48,7 +117,7 @@ const WelcomePage: React.FC = () => {
 
                             {/* the bolded, black text */}
                             <span className="font-bold">
-                                Please fill out this quick demographic survey
+                                {translations[1]}
                             </span>
 
                             <br/>
@@ -56,13 +125,13 @@ const WelcomePage: React.FC = () => {
                             {/* the bolded, green text */}
                             &nbsp;
                             <span className="font-bold text-[#7EB672]">
-                                each visit
+                                {translations[2]}
                             </span>
 
                             {/* the normal text */}
                             &nbsp;
                             <span>
-                                to help us grow and reach more people in the community!
+                                {translations[3]}
                             </span>
                         </div>
                         
@@ -81,27 +150,65 @@ const WelcomePage: React.FC = () => {
 
 
             {/* the right column of the screen */}
-            <div className="flex bg-white justify-center p-10 pt-14 w-full">
+            <div className="flex flex-col bg-white justify-center items-center p-10 pt-14 w-full space-y-10">
 
                 {/* the text that prompts the user to chose how to complete the survey */}
-                <div className="relative text-center text-black text-4xl crimson-bold">
-                    Scan or Click to Complete the Demographic Survey
+                <div className="flex flex-row absolute top-[220px] space-x-5">
+                    
+                    {/* Prompt */}
+                    <div className="text-black text-3xl crimson">
+                        {translations[4]}
+                    </div>
+
+                    {/* Dropdown */}
+                    <div className="w-[200px] h-[35px] flex-col">
+                        <button id="dropdownDefaultButton" 
+                            className="w-full h-full text-white bg-white hover:bg-modal-gray border-2 border-modal-gray font-medium rounded-lg text-sm text-center inline-flex items-center" 
+                            type="button"
+                            onClick={() => clickDropdown()}
+                        >
+                            <div className="font-bold text-black pl-4">
+                                {language === '' || language === 'en' ? translations[5] : translations[6]}
+                            </div>
+                            <svg className={`w-2.5 h-2.5 ms-3 ${dropdownOpen ? "" : "transform rotate-180"} absolute right-5`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="gray" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
+                            </svg>
+                        </button>
+
+                        {/* Dropdown options */}
+                        {dropdownOpen &&
+                            <div className="absolute top-[35px] text-black w-[200px] border-x-2 border-modal-gray rounded">
+                                {/* English */}
+                                <div className="h-[35px] border-b-2 border-modal-gray justify-center item-center">
+                                    <button 
+                                        className="h-full w-full justify-center item-center hover:bg-[#ebf9e9]" 
+                                        onClick={() => setLanguage('en')}
+                                    >
+                                        <p className="h-full w-full pt-[5px]">{translations[5]}</p>
+                                    </button>
+                                </div>
+                                {/* Spanish */}
+                                <div className="h-[35px] border-b-2 border-modal-gray">
+                                    <button 
+                                        className="h-full w-full hover:bg-[#ebf9e9]"
+                                        onClick={() => setLanguage('es')}>
+                                        <p className="h-full w-full pt-[5px]">{translations[6]}</p>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
 
-                {/* the QR code that links to the demographic survey */}
-                <div className="flex absolute m-[50px] top-1/3">
-                    <Image
-                        src={qrCode}
-                        width={294}
-                        height={294}
-                        alt="welcome BW Logo"
-                    />
+                {/* the text that prompts the user to chose how to complete the survey */}
+                <div className="text-center text-black text-4xl crimson-bold">
+                    {translations[7]}
                 </div>
 
                 {/* the button to start a demographic survey */}
-                <div className="absolute bottom-0 align-bottom pb-20">
+                <div className="justify-center items-center pb-20">
                     <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8" onClick={startSurvey}>
-                        Start Demographic Survey →
+                        {translations[8]}
                     </button>
                 </div>
 
