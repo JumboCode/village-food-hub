@@ -22,11 +22,42 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   
   // handler function to display the inventory after the sign-in button has been pressed
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
+  const [usernameError, setUsernameError] = useState(false)
+  const [passwordError, setPasswordError] = useState(false)
+
   const handleSignIn = async () => {
-    const response = await fetch('../../api/users', {method: "GET"})
-    const newResponse = await response.json();
-    console.log(newResponse);
-    router.push('/inventory'); 
+    console.log([username, password])
+    setUsernameError(false)
+    setPasswordError(false)
+    const response = await fetch('api/users', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+          username: username,
+          password: password
+      })
+    });
+    const responseData = await response.json();
+
+    switch (response.status) {
+      case 200: 
+        console.log("Success")
+        router.push('/inventory'); 
+        break;
+      
+      case 401:
+        setPasswordError(true)
+        break;
+
+      case 403:
+        setUsernameError(true)
+        break;
+    }
 
   }
 
@@ -99,14 +130,21 @@ const LoginPage: React.FC = () => {
 
             {/* Username Input */}
             <div className="py-5">
+            <div className="flex justify-between text-l align-bottom">
                 <label className="block mb-2 text-2xl text-white"> Username </label>
-                <input type="text" id="username" className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" placeholder="Username" required />
+                { usernameError ? <div style={{ color: '#8B0000' }} className="flexalign-bottom">Username not found</div> : null }
+            </div>
+       
+                <input type="text" id="username" className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" onChange={(e) => setUsername(e.target.value)} placeholder="Username" required/>
             </div>
 
             {/* Password Input */}
             <div className="pt-5">
-              <label className="block mb-2 text-2xl text-white">Password</label>
-              <input id="password" type={showPassword ? "text" : "password"} className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" placeholder="Password" required />    
+              <div className="flex justify-between text-l align-bottom">
+                <label className="block mb-2 text-2xl text-white">Password</label>
+                { passwordError ? <div style={{ color: '#8B0000' }} className="flexalign-bottom">Incorrect Password</div> : null }
+              </div>
+              <input id="password" type={showPassword ? "text" : "password"} className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />    
               
               {/* Show / Hide Password */}
               <div className="flex w-full justify-end mt-[-35px] pr-[10px]">
