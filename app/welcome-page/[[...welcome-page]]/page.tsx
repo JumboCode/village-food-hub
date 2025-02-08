@@ -25,8 +25,11 @@ const WelcomePage: React.FC = () => {
     };
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState<string>('en');
     const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS);
+
+    // Added loading state to ensure language is set before render
+    const [loading, setLoading] = useState(true); 
 
     const clickDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -47,11 +50,15 @@ const WelcomePage: React.FC = () => {
                 setTranslations(translatedTexts);
             } else {
                 console.error(`Unexpected response format for translation: ${JSON.stringify(data)}`);
-                setTranslations(DEFAULT_TRANSLATIONS); // Fallback to original text if translation fails
+
+                // Fallback to original text if translation fails
+                setTranslations(DEFAULT_TRANSLATIONS); 
             }
         } catch (e) {
             console.error("Translation error:", e);
-            setTranslations(DEFAULT_TRANSLATIONS); // Fallback to original text if translation fails
+
+            // Fallback to original text if translation fails
+            setTranslations(DEFAULT_TRANSLATIONS); 
         }
     };
 
@@ -59,13 +66,26 @@ const WelcomePage: React.FC = () => {
         const savedLanguage = localStorage.getItem("language") || 'en';
         setLanguage(savedLanguage);
         translateText(savedLanguage);
+
+        // Ensure loading state is turned off once language is set
+        setLoading(false); 
     }, []);
 
     useEffect(() => {
-        localStorage.setItem("language", language);
-        translateText(language);
-        setDropdownOpen(false);
-    }, [language]);
+        // Only update localStorage once the language state is set
+        if (!loading) { 
+            localStorage.setItem("language", language);
+            translateText(language);
+
+            // Close the dropdown when the language is updated
+            setDropdownOpen(false);  
+        }
+    }, [language, loading]);
+
+    // If the page is loading, do not render the dropdown yet
+    if (loading) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col justify-center items-center h-screen bg-[#24593D] font-crimson text-white">
