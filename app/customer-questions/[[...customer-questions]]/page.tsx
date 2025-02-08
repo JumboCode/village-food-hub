@@ -239,7 +239,7 @@ const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, s
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">{translations[0]} <span className="text-red">*</span></p>
         <p className="text-[28px] font-bold mb-4">
-          ({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]}: {details.householdSize === 11 ? '10+' : details.householdSize})
+          ({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]} {details.householdSize === 11 ? '10+' : details.householdSize})
         </p>
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
