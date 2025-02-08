@@ -124,7 +124,9 @@ const Changes: React.FC<{ value: string; onChange: (newValue: string) => void; s
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
-        <p className="text-[28px] font-bold mb-4">(Name: {details.name}, Address: {details.address}, Household size: {details.householdSize})</p>
+        <p className="text-[28px] font-bold mb-4">
+          (Name: {details.name}, Address: {details.address}, Household size: {details.householdSize === 11 ? '10+' : details.householdSize})
+        </p>
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
@@ -560,7 +562,9 @@ const DemographicsSurvey: React.FC = () => {
         if (responses.changes == "yes") {
           setCurrentStep('name');
         } else {
-          router.push('/saved-thank-you');
+          handleSubmit();
+          setCurrentStep('confirmation');
+          // router.push('/saved-thank-you');
         }
         break;
       case 'name':
@@ -652,9 +656,9 @@ const DemographicsSurvey: React.FC = () => {
                 phoneNumber: responses.phoneNumber,
                 takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
                 donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
-                name: `${responses.name.firstName} ${responses.name.lastName}`,
-                address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
-                householdSize: responses.householdSize,
+                name: responses.changes == "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
+                address: responses.changes == "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
+                householdSize: responses.changes == "yes" ? responses.householdSize : prevRecord.householdSize,
                 lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
                 previousVisitDates: Array.isArray(prevRecord.previousVisitDates) 
                   ? [...prevRecord.previousVisitDates, currentDate] 

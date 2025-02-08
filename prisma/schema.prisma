@@ -8,13 +8,13 @@ datasource db {
 }
 
 model demographics {
-  phoneNumber        String     @id
-  takeCount          Int
-  donateCount        Int
-  name               String
-  householdSize      Int
-  address            String
-  lastVisitDate      DateTime
+  phoneNumber   String   @id
+  takeCount     Int
+  donateCount   Int
+  name          String
+  householdSize Int
+  address       String
+  lastVisitDate DateTime
   previousVisitDates DateTime[]
 }
 
@@ -35,4 +35,24 @@ model categories {
   name     String
 
   @@id([itemName, name])
+}
+
+enum Role {
+    admin
+    staff
+    volunteer
+    customer
+}
+
+model users {
+    firstName   String
+    lastName    String
+    pronouns    String 
+    username    String 
+    email       String 
+    role        Role 
+    phoneNumber String 
+    password    String
+
+    @@id([username])
 }

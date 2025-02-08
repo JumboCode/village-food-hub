@@ -70,9 +70,7 @@ const InternalViewDemographicsPage: React.FC = () => {
     
 
     const handleRunReport = (startDate: Date, endDate: Date) => {
-        // Default implementation that does nothing
         downloadCSV(startDate, endDate);
-        console.log("Run report from", startDate, "to", endDate);
     };
 
     const filterDate = (data:DemographicsRecord[], startDate: Date, endDate: Date) => {
@@ -99,9 +97,14 @@ const InternalViewDemographicsPage: React.FC = () => {
             ].map(field => `"${field}"`).join(","))
         ].join("\r\n");
 
-        const start = startDate.toISOString().split("T")[0];
-        const end = endDate.toISOString().split("T")[0];
-        const fileName = `${start}_-_${end}demographics.csv`;
+        const formatLocalDate = (date: Date) => {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+                .toISOString().split("T")[0];
+        };
+
+        const start = formatLocalDate(startDate);
+        const end = formatLocalDate(endDate);
+        const fileName = `${start}_to_${end}_demographics.csv`;
 
         const link = document.createElement("a");
         link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
