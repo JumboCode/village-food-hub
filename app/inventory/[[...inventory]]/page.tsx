@@ -112,12 +112,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
             const filteredItems = filterValue
                 ? fetchedCategories 
                 .filter((category) => category[filterName] === filterValue)
-            
                 .flatMap((category) => categoriesList && Array.isArray(category[categoriesList]) ? category[categoriesList] : [])            
-
                 : categoryNames; 
 
-                // const uniqueCategoryNames: string[] = Array.from(new Set(filteredItems)))
                 const uniqueItemName: string[] = Array.from(new Set(filteredItems));
                 setCategories(uniqueItemName);
                 
@@ -163,7 +160,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
           <div>
             {Categories && Categories.length > 0 ? (
               Categories.map((category) => (
-                <div key={category} className="flex items-center space-x-2 mb-3 pl-6">
+                <div key={category} className="flex items-center space-x-2 mb-3 pl-8 font-crimson">
                   <input
                     type="checkbox"
                     checked={selectedCategories.includes(category)}
