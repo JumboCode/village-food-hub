@@ -10,7 +10,6 @@ import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
 import deleteIcon from '../../images/delete.png';
 import editIcon from '../../images/edit.png';
 
-// Define types to avoid using `any`
 interface CategoryData {
   [key: string]: [string, string][];
 }
@@ -141,17 +140,19 @@ const Categories: React.FC = () => {
                                     </>
                                 )}
                             </div>
-                            {showTable && (
-                                <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]">
-                                    {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                            <div className="flex justify-end w-full">
+                                {showTable && (
+                                    <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]">
+                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                    </button>
+                                )}
+                                <button
+                                    className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
+                                    onClick={categoryButtonClicked}
+                                >
+                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
                                 </button>
-                            )}
-                            <button
-                                className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]"
-                                onClick={categoryButtonClicked}
-                            >
-                                {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
-                            </button>
+                            </div>
                         </div>
                     </div>
                     <div className="bg-slate-50 items-center h-full">
@@ -183,7 +184,7 @@ const Categories: React.FC = () => {
                         )}
                         {showRetrievalError && (
                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
-                                Failed to add category.
+                                Category name already exists.
                             </p>
                         )}
                         <div className="flex w-full justify-center space-x-[15px] items-center">

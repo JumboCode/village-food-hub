@@ -8,12 +8,10 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
-import Banner from '@app/components/DemographicsSurveyBanner';
 import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
-import { response } from 'express';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
 
@@ -240,7 +238,9 @@ const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, s
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">{translations[0]} <span className="text-red">*</span></p>
-        <p className="text-[28px] font-bold mb-4">({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]} {details.householdSize})</p>
+        <p className="text-[28px] font-bold mb-4">
+          ({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]}: {details.householdSize === 11 ? '10+' : details.householdSize})
+        </p>
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
@@ -512,7 +512,8 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
   const handleSizeChange = (value: string) => {
-    const sizeValue = value === "" ? null : Number(value);
+    // If the selected value is "10+", set it to 11 for the backend
+    const sizeValue = value === "10+" ? 11 : value === "" ? null : Number(value);
     setSelectedSize(value);
     onChange(sizeValue);
     setSubmitDisabled(sizeValue === null);
@@ -714,7 +715,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
               <div className="text-[21px] mt-1">
                 {translations[0]}{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
-                  {newRecord?.householdSize}
+                  {newRecord?.householdSize === 11 ? "10+" : newRecord?.householdSize}
                 </span>
               </div>
             </div>
@@ -848,6 +849,12 @@ const DemographicsSurvey: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (responses.phoneNumber) {
+        fetchPrevRecord();
+    }
+  }, [responses.phoneNumber]);
+
 
   const handleNextClick = async () => {
     if (nextDisabled) return;
@@ -861,18 +868,35 @@ const DemographicsSurvey: React.FC = () => {
         }
         break;
       case 'phoneNum':
-        const record = await fetchPrevRecord();
+        if (!responses.phoneNumber) {
+            console.error("Phone number is missing before fetching records.");
+            return;
+        }
+    
+        const record = await fetchPrevRecord();  // Wait for fetch
+        console.log("Fetched record before transition:", record);
+    
         if (record !== null) {
-          setCurrentStep('changes');
+            setCurrentStep('changes');
         } else {
-          setCurrentStep('name');
+            setCurrentStep('name');
         }
         break;
+      // case 'phoneNum':
+      //   const record = await fetchPrevRecord();
+      //   if (record !== null) {
+      //     setCurrentStep('changes');
+      //   } else {
+      //     setCurrentStep('name');
+      //   }
+      //   break;
       case 'changes':
         if (responses.changes == "yes") {
           setCurrentStep('name');
         } else {
-          router.push('/saved-thank-you');
+          handleSubmit();
+          setCurrentStep('confirmation');
+          // router.push('/saved-thank-you');
         }
         break;
       case 'name':
@@ -964,9 +988,9 @@ const DemographicsSurvey: React.FC = () => {
                 phoneNumber: responses.phoneNumber,
                 takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
                 donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
-                name: `${responses.name.firstName} ${responses.name.lastName}`,
-                address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
-                householdSize: responses.householdSize,
+                name: responses.changes == "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
+                address: responses.changes == "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
+                householdSize: responses.changes == "yes" ? responses.householdSize : prevRecord.householdSize,
                 lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
                 previousVisitDates: Array.isArray(prevRecord.previousVisitDates) 
                   ? [...prevRecord.previousVisitDates, currentDate] 
@@ -1078,19 +1102,7 @@ const DemographicsSurvey: React.FC = () => {
                                           value={responses.changes}
                                           onChange={updateChanges}
                                           setNextDisabled={setNextDisabled}
-                                          details={
-                                            prevRecord
-                                              ? {
-                                                  name: `${prevRecord.name.firstName} ${prevRecord.name.lastName}`,
-                                                  address: `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`,
-                                                  householdSize: prevRecord.householdSize ?? 0,
-                                                }
-                                              : {
-                                                  name: '',
-                                                  address: '',
-                                                  householdSize: 0,
-                                                }
-                                          }
+                                          details={prevRecord}
                                         />
                                       )}
         {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
