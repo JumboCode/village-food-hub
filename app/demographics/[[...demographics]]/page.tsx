@@ -14,6 +14,7 @@ interface DemographicsRecord {
     householdSize: number;
     takeCount: number;
     donateCount: number;
+    previousVisitDates: string[];
 }
 
 // Define the type for the demographics state
@@ -77,10 +78,30 @@ const InternalViewDemographicsPage: React.FC = () => {
         if (!startDate || !endDate) {
             return[];
         }
-        return data.filter((record) => {
-            const visitDate = new Date(record.lastVisitDate);
-            return visitDate >= startDate && visitDate <= endDate;
-        });
+        
+        return data
+        .map((record) => {
+            let visitCount = 0;
+
+            if (record.previousVisitDates && Array.isArray(record.previousVisitDates)) {
+                visitCount = record.previousVisitDates
+                    .map(dateStr => new Date(dateStr)) 
+                    .filter(date => {
+                        const visitDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+                        return visitDate >= start && visitDate <= end;
+                    })
+                    .length;
+            }
+
+            return {
+                ...record,
+                visitCount, 
+            };
+        })
+        .filter(record => record.visitCount > 0);
     };
 
     const downloadCSV = (startDate: Date, endDate: Date) => {
@@ -93,7 +114,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                 record.name, 
                 record.address, 
                 record.householdSize.toString(), 
-                record.takeCount.toString()
+                record.visitCount.toString()
             ].map(field => `"${field}"`).join(","))
         ].join("\r\n");
 
