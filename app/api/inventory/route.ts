@@ -8,7 +8,8 @@ async function createInventoryItem(data : {
   categoryName : string,
   quantity     : number, 
   units        : string, 
-  lastUpdated  : Date
+  lastUpdated  : Date,
+  history?     : Prisma.JsonValue
 }) {
   return await prisma.inventory.create({ 
     data: { ...data }
@@ -26,16 +27,56 @@ async function updateInventoryItem(data : {
   categoryName : string,
   quantity     : number, 
   units        : string, 
-  lastUpdated  : Date
+  lastUpdated  : Date,
+  history?     : Prisma.JsonValue
 }) {
   const { itemName, units, ...newData } = data;
+  
+  const currentItem = await prisma.inventory.findUnique({
+    where: {
+      itemName_units: {
+        itemName: itemName,
+        units: units,
+      }
+    }
+  });
+
+  if (!currentItem) {
+    throw new Error('Item not found');
+  }
+
+  // Determine if the update is an 'add' or 'remove'
+  const action = newData.quantity > currentItem.quantity ? 'add' : 'remove';
+  const quantityChanged = Math.abs(newData.quantity - currentItem.quantity);
+  const updatedDate = new Date();
+
+  // Append the current state to the history
+  const newHistory = {
+    ...currentItem.history,
+    [`${itemName}_${units}`]: [
+      ...(currentItem.history?.[`${itemName}_${units}`] || []),
+      {
+        itemName: currentItem.itemName,
+        categoryName: currentItem.categoryName,
+        units: currentItem.units,
+        action: action,
+        quantityChanged: quantityChanged,
+        date: updatedDate,
+      }
+    ]
+  };
+
   return await prisma.inventory.update({
     where : {
       itemName_units : {
         itemName: itemName,
         units: units,
       }
-    }, data: { ...newData }
+    }, 
+    data: { 
+      ...newData,
+      history: newHistory
+    }
   })
 }
 
