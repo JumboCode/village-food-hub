@@ -36,6 +36,10 @@ export default function NavBar() {
     router.push("/categories");
   };
 
+  const handleManageUsers = () => {
+    router.push("/manage-users");
+  };
+
   const [currentPath, setCurrentPath] = useState("");
 
   useEffect(() => {
@@ -110,7 +114,9 @@ export default function NavBar() {
                     <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
                     My Profile
                   </li>
-                  <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer">
+                  <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                      onClick={handleManageUsers}
+                  >
                     <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
                     Manage Users
                   </li>

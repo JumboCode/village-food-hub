@@ -12,7 +12,7 @@ interface User {
     username: string;
     email: string;
     role: string;
-    phoneNumber: number;
+    phoneNumber: string;
 }
 
 const InternalViewManageUsersPage: React.FC = () => {
@@ -20,9 +20,22 @@ const InternalViewManageUsersPage: React.FC = () => {
     const [users, setUsers] = useState<string[][]>([]);
 
     useEffect(() => {
-        fetch("/../api/manageUsers", { method: 'GET' })
+        fetch("../api/users", { method: 'GET' })
         .then((res) => res.json())
-        .then((data) => setUsers(data))
+        .then((data) => {
+            if (data?.data) {
+                const formattedUsers: string[][] = data.data.map((user: any) => [
+                    user.firstName || "N/A",
+                    user.lastName || "N/A",
+                    user.publicMetadata?.pronouns || "N/A",
+                    user.username || "N/A",
+                    user.emailAddresses?.[0]?.emailAddress || "N/A",
+                    user.publicMetadata?.role || "N/A",
+                    user.publicMetadata?.phoneNumber || "N/A",
+                ]);
+                setUsers(formattedUsers);
+            }
+        })
         .catch((err) => console.error("Error fetching users:", err));
     }, []);
     
