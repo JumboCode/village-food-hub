@@ -61,6 +61,36 @@ async function getInventory(): Promise<InventoryItem[]> {
     }
   }
 
+  const downloadCSV = (object: InventoryItem) => {
+    const headers = ["date", "quantity-change", "action-of-change"];
+    const rows = [
+        headers.join(","), 
+        ...filteredData.map(record => [
+            record.phoneNumber, 
+            record.name, 
+            record.address, 
+            record.householdSize.toString(), 
+            record.visitCount.toString()
+        ].map(field => `"${field}"`).join(","))
+    ].join("\r\n");
+
+    const formatLocalDate = (date: Date) => {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+            .toISOString().split("T")[0];
+    };
+
+    const start = formatLocalDate(startDate);
+    const end = formatLocalDate(endDate);
+    const fileName = `${start}_to_${end}_demographics.csv`;
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 interface FilterModalProps {
   isOpen: boolean;
   categoriesList?: string;

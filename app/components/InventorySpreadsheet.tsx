@@ -12,6 +12,14 @@ interface InventorySpreadsheetProps {
 export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
     console.log("inventoryItems:", inventoryItems);
 
+    /*interface DownloadButtonProps {
+        onClick?: () => void;
+    }*/
+
+    const handleClick = () => {
+        console.log('Button clicked');
+    };
+
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">
@@ -94,13 +102,16 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     alt="delete Icon"
                                     className=""
                                 />
-                                <Image
-                                    src={downloadIcon}
-                                    width={18}
-                                    height={18}
-                                    alt="download Icon"
-                                    className=""
-                                />
+                                <button onClick={handleClick} >
+                                    <Image
+                                        src={downloadIcon}
+                                        width={18}
+                                        height={18}
+                                        alt="download Icon"
+                                        className=""
+                                    />
+                                </button>
+                                
                             </td>
                         </tr>
                     ))}
