@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@mui/material';
 import Image from 'next/image';
 import headerLogo from '../../images/headerLogo.png';
 import irlPantry from '../../images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
+import { useSignIn, useAuth } from "@clerk/nextjs";
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const { signIn, setActive } = useSignIn();
+  const { isSignedIn, userId } = useAuth();
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -25,41 +28,68 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
+  // error handling
   const [usernameError, setUsernameError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
+  const [emptyUsernameError, setEmptyUsernameError] = useState(false)
+  const [emptyPasswordError, setEmptyPasswordError] = useState(false)
 
   const handleSignIn = async () => {
-    console.log([username, password])
-    setUsernameError(false)
-    setPasswordError(false)
-    const response = await fetch('api/users', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          username: username,
-          password: password
-      })
-    });
-    const responseData = await response.json();
+    setUsernameError(false);
+    setPasswordError(false);
 
-    switch (response.status) {
-      case 200: 
-        console.log("Success")
-        router.push('/inventory'); 
-        break;
-      
-      case 401:
-        setPasswordError(true)
-        break;
-
-      case 403:
-        setUsernameError(true)
-        break;
+    if (!username || !password) {
+      if (!username) setUsernameError(true);
+      if (!password) setPasswordError(true);
+      return;
     }
 
-  }
+    try {
+      // Sign-in flow
+      const result = await signIn.create({ identifier: username, password });
+
+      if (result.status === "complete") {
+        console.log("Sign in successful");
+        await setActive({ session: result.createdSessionId });
+        router.push('/inventory');
+        // if (user) { // TODO: do role stuff
+        //   redirectUserBasedOnRole(user);
+        // }
+      } else {
+        console.log("Unexpected sign-in status. Please try again.");
+      }
+    } catch (error: any) {
+      console.log('Login error:', error);
+      if (error.errors) {
+        error.errors.forEach((err: any) => {
+          if (err.code === 'form_identifier_not_found') setUsernameError(true);
+          if (err.code === 'form_password_incorrect') setPasswordError(true);
+        });
+      }
+    }
+  };
+  
+  // TODO: redirect based on role after successful login
+  // const redirectUserBasedOnRole = (user: any) => {
+  //   if (user && user.publicMetadata) {
+  //     if (user.publicMetadata.role === 'customer') {
+  //       console.log("Redirecting to welcome page...");
+  //       router.push('/welcome-page');
+  //     } else if (user.publicMetadata.role === 'volunteer') {
+  //       console.log("Redirecting to volunteer landing page...");
+  //       router.push('/volunteer-landing');
+  //     } else if (user.publicMetadata.role === 'staff' || user.publicMetadata.role === 'admin') {
+  //       console.log("Redirecting to inventory...");
+  //       router.push('/inventory');
+  //     } else {
+  //       console.log("Redirecting to inventory...");
+  //       router.push('/inventory'); // default
+  //     }
+  //   } else {
+  //     console.log("User not found. Redirecting to login page...");
+  //     router.push('/login');
+  //   }
+  // };
 
   // handler function to show the forgot password module
   const handleForgotPassword = () => {
@@ -104,7 +134,6 @@ const LoginPage: React.FC = () => {
     setShowWelcomeBack(true);
   }
 
-
   return (
     <div className="bg-banner-green h-screen w-screen grid grid-cols-5 gap-3 justify-center items-center">
         
@@ -132,22 +161,24 @@ const LoginPage: React.FC = () => {
             <div className="py-5">
             <div className="flex justify-between text-l align-bottom">
                 <label className="block mb-2 text-2xl text-white"> Username </label>
-                { usernameError ? <div style={{ color: '#8B0000' }} className="flexalign-bottom">Username not found</div> : null }
+                { emptyUsernameError ? <div style={{ color: '#ff8585' }} className="flexalign-bottom">Username is required</div> : null }
+                { usernameError ? <div style={{ color: '#ff8585' }} className="flexalign-bottom">Username not found</div> : null }
             </div>
-       
+      
                 <input type="text" id="username" className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" onChange={(e) => setUsername(e.target.value)} placeholder="Username" required/>
             </div>
 
             {/* Password Input */}
             <div className="pt-5">
-              <div className="flex justify-between text-l align-bottom">
+            <div className="flex justify-between text-l align-bottom">
                 <label className="block mb-2 text-2xl text-white">Password</label>
-                { passwordError ? <div style={{ color: '#8B0000' }} className="flexalign-bottom">Incorrect Password</div> : null }
+                { emptyPasswordError ? <div style={{ color: '#ff8585' }} className="flexalign-bottom">Password is required</div> : null }
+                { passwordError ? <div style={{ color: '#ff8585' }} className="flexalign-bottom">Incorrect Password</div> : null }
               </div>
               <input id="password" type={showPassword ? "text" : "password"} className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />    
               
               {/* Show / Hide Password */}
-              <div className="flex w-full justify-end mt-[-35px] pr-[10px]">
+              <div className="flex w-full justify-end mt-[-35px] pr-[10px] cursor-pointer">
                 {showPassword ?
                   // shown eyeball icon
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" className="size-6" onClick={() => setShowPassword(false)}>
