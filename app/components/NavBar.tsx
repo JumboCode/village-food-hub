@@ -11,12 +11,17 @@ import settings from '@app/images/Frame7.png';
 import icon from '@app/images/Frame8.png';
 import downArrow2 from '@app/images/downArrow.png';
 
+// Clerk
+import { useClerk } from '@clerk/nextjs'
+
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const router = useRouter(); 
+  const router = useRouter();
+  const { signOut } = useClerk()
 
-  const handleSignOut = () => {
-    router.push("/login");
+  const handleSignOut = async () => {
+    signOut({ redirectUrl: '/' })
+    console.log("Sign out successful")
   };
 
   const handleDemographics = () => {

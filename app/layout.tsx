@@ -2,6 +2,7 @@
 
 import './globals.css';
 import { Metadata } from 'next';
+import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata: Metadata = {
   title: 'Village Food Hub',
@@ -14,10 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head />
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head />
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
 
