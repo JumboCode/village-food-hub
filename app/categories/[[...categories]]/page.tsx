@@ -20,8 +20,11 @@ const Categories: React.FC = () => {
     const [categoriesData, setCategoriesData] = useState<CategoryData>({});
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [showTable, setShowTable] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showItemModal, setShowItemModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<string>('');
     const [categoryName, setCategoryName] = useState("");
+    const [itemName, setItemName] = useState("");
     const [showEmptyError, setShowEmptyError] = useState(false);
     const [showRetrievalError, setRetrievalError] = useState(false);
 
@@ -59,16 +62,30 @@ const Categories: React.FC = () => {
 
     // Open modal to add a new category
     const categoryButtonClicked = () => {
-        setShowModal(true);
+        setShowCategoryModal(true);
     };
 
     // Close modal and reset error states
     const cancelButtonClicked = () => {
-        setShowModal(false);
+        setShowCategoryModal(false);
+        setShowEmptyError(false);
+        setRetrievalError(false);
+
+    };
+
+    // Open modal to add a new item
+    const itemButtonClicked = () => {
+        setShowItemModal(true);
+    };
+
+    // Close modal and reset error states
+    const cancelButtonClicked2 = () => {
+        setShowItemModal(false);
         setShowEmptyError(false);
         setRetrievalError(false);
     };
-
+    
+   
     // Save new category
     const saveButtonClicked = async () => {
         if (categoryName === "") {
@@ -88,7 +105,7 @@ const Categories: React.FC = () => {
                 if (response.ok) {
                     console.log("Successfully Added " + categoryName);
                     setRetrievalError(false);
-                    setShowModal(false);
+                    setShowCategoryModal(false);
                 } else {
                     setRetrievalError(true);
                 }
@@ -142,15 +159,19 @@ const Categories: React.FC = () => {
                                 )}
                             </div>
                             {showTable && (
-                                <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]">
-                                    {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
+                                    onClick={itemButtonClicked}
+                                >
+                                    {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} 
+                                />
                                 </button>
                             )}
                             <button
                                 className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 rounded text-[20px]"
                                 onClick={categoryButtonClicked}
                             >
-                                {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }}
+                            />
                             </button>
                         </div>
                     </div>
@@ -165,7 +186,60 @@ const Categories: React.FC = () => {
                     </div>
                 </div>
             </div>
-            {showModal && (
+            {showItemModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+                        <div className="flex-col w-full justify-center items-center pb-[30px] font-crimson size-[32px]">
+                            <div className='flex justify-center'>
+                                {/* <div className="font-crimson size-[32px]"> */}
+                                <div className="font-crimson size-[50px]">Name</div>
+                                <input
+                                    type="text"
+                                    onChange={(e) => setItemName(e.target.value)}
+                                    className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                                />
+                            </div>
+
+                            {/* function to render because we have to render up to 5x */}
+                            <div className='flex justify-center'>
+                                <div className="font-crimson size-[50px]">Units</div>
+                                <input
+                                    type="text"
+                                    onChange={(e) => setItemName(e.target.value)}
+                                    className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                                />
+                            </div>
+                            {/* </div> */}
+                            
+                        </div>
+                        {showEmptyError && (
+                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                Please enter an item name.
+                            </p>
+                        )}
+                        {showRetrievalError && (
+                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                Failed to add item.
+                            </p>
+                        )}
+                        <div className="flex w-full justify-center space-x-[15px] items-center">
+                            <button
+                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                onClick={cancelButtonClicked2}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                onClick={saveButtonClicked}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showCategoryModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                         <p className="text-center text-[32px] font-bold pb-[15px]">Category Name</p>
