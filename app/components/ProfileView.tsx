@@ -37,12 +37,9 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
             setViewProfileMode(true);
         } else {
             setError("Invalid mode: " + mode + " Mode must be 'create', 'edit' or 'view'");
+            console.log(error);
         }
     }, [mode]);
-    console.log(mode)
-    console.log("createProfileMode: " + createProfileMode)
-    console.log("editProfileMode: " + editProfileMode)
-    console.log("viewProfileMode: " + viewProfileMode)
     
     const handleEditProfileModeOn = () => {
         setEditProfileMode(true);
