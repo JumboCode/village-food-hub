@@ -55,7 +55,10 @@ const InternalViewDemographicsPage: React.FC = () => {
 
     useEffect(() => {
         getDemographics()
-          .then((items) => { setDemographics(items) })
+          .then((items) => { 
+            setDemographics(items);
+            setFilteredDemographics(items);
+        })
       }, []);
       
     const [showModal, setShowModal] = useState(false);
@@ -73,6 +76,32 @@ const InternalViewDemographicsPage: React.FC = () => {
         console.log("Run report from", startDate, "to", endDate);
     };
 
+    // states for the search bar
+    const [searchInput, setSearchInput] = useState('');
+    const [filteredDemographics, setFilteredDemographics] = useState<string[][] | null>(null);
+
+    // when the search input is changed, refilter
+    useEffect(() => {
+
+        // filters the demographic's phone numbers, names, and addresses separately
+        let phoneNumberIndices = demographics?.map((item) => item[1].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        let nameIndices = demographics?.map((item) => item[2].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        let addressIndices = demographics?.map((item) => item[3].toUpperCase().includes(searchInput.toUpperCase())) || [];
+
+        const demoLength = demographics?.length || 0;
+        let filteredDemographics = [];
+
+        // loops over the demographics and adds the ones that match the filter
+        for (let i = 0; i < demoLength; i++) {
+            if (phoneNumberIndices[i] || nameIndices[i] || addressIndices[i]) {
+                filteredDemographics.push(demographics![i]);
+            }
+        }
+        
+        // stores the filtered demographics
+        setFilteredDemographics(filteredDemographics);
+    }, [searchInput])
+
     return (
         <div>
             <NavBar />
@@ -80,13 +109,17 @@ const InternalViewDemographicsPage: React.FC = () => {
                 <div className="flex flex-row justify-between mt-10 mb-6">
                     <h1 className="font-crimson text-3xl text-[40px] font-bold">Demographic Responses</h1>
                     <div className="flex flex-row">
-                        <SearchBar/>
+                        <SearchBar
+                            input={searchInput}
+                            setInput={setSearchInput}
+                            placeholder={"Search by name, phone number, or name..."}
+                        />
                         <RunReportButton onClick={openModal} />
                         {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} /> }
                     </div>
                 </div>
                 {/* Pass the correctly typed demographics data to DemographicsSpreadsheet */}
-                <DemographicsSpreadsheet demographicsItems={demographics || []} />
+                <DemographicsSpreadsheet demographicsItems={filteredDemographics || []} />
             </div>
         </div>
     );
