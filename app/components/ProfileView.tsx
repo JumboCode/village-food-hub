@@ -165,36 +165,36 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                 </div>
             </div>
             
-            <div className="flex flex-row gap-[30px]">
-                { createProfileMode ? (
-                    <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Create </button>
-                ) : (
-                    editProfileMode ? (
-                        <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]" onClick={handleEditProfileModeOn}> Save Changes</button>
+            <div className="flex flex-row gap-[30px] justify-between">
+                <div className="flex flex-row gap-[30px]">
+                    { createProfileMode ? (
+                        <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Create </button>
                     ) : (
-                        viewProfileMode ? (
-                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Edit Profile</button>
-                        ) : null
-                    )
-                ) }
-                        
-                <button 
-                    className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] border-[2px] border-gray"
-                    onClick={onCancel}
-                >
-                    { "Cancel" }
-                </button>
-                
-                { editProfileMode ? (
-                    <button
-                        className="bg-red hover:bg-red text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"
+                        editProfileMode ? (
+                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]" onClick={handleEditProfileModeOn}> Save Changes</button>
+                        ) : (
+                            viewProfileMode ? (
+                                <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Edit Profile</button>
+                            ) : null
+                        )
+                    ) }
+                            
+                    <button 
+                        className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] border-[2px] border-gray"
+                        onClick={onCancel}
                     >
+                        { "Cancel" }
+                    </button>
+                </div>
+                
+                { viewProfileMode ? (
+                    <button className="bg-red hover:bg-red text-white text-[32px] font-crimson w-[250px] h-[65px] rounded-xl mt-[100px] flex items-center justify-center pr-1">
                         <Image
                             src={deleteIcon}
                             alt="search button"
-                            className="pl-2"
-                            width={24}
-                            height={29.14}
+                            className="mr-2 ml-1"
+                            width={29}
+                            height={29}
                         />
                         Delete Account
                     </button>

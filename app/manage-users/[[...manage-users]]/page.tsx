@@ -53,7 +53,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         <div>
             <NavBar />
             {showProfileView ? (
-                <ProfileView visible={showProfileView} mode="create" onCancel={handleCancelProfileView}/>
+                <ProfileView visible={showProfileView} mode="view" onCancel={handleCancelProfileView}/>
             ) : (
                 <div className="py-4 px-10">
                 <div className="flex flex-row justify-between mt-10 mb-6">
