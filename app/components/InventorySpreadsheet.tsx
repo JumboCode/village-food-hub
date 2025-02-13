@@ -20,6 +20,30 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         console.log('Button clicked');
     };
 
+    const downloadCSV = (item: (string | number)[]) => {
+        const itemName = item[0];
+        const headers = ["date", "quantity-change", "action-of-change"];
+        const rows = [
+            headers.join(","), 
+            ...filteredData.map(record => [
+                record.phoneNumber, 
+                record.name, 
+                record.address, 
+                record.householdSize.toString(), 
+                record.visitCount.toString()
+            ].map(field => `"${field}"`).join(","))
+        ].join("\r\n");
+    
+        const fileName = `inventory.csv`;
+    
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">
