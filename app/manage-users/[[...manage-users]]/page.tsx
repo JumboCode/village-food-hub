@@ -17,8 +17,8 @@ interface User {
 }
 
 const InternalViewManageUsersPage: React.FC = () => {
-    
     const [users, setUsers] = useState<string[][]>([]);
+    const [showProfileView, setShowProfileView] = useState(false);
 
     useEffect(() => {
         fetch("../api/users", { method: 'GET' })
@@ -40,21 +40,33 @@ const InternalViewManageUsersPage: React.FC = () => {
         .catch((err) => console.error("Error fetching users:", err));
     }, []);
     
+    function handleProfileView () {
+        setShowProfileView(true);
+    }
+    
+    function handleCancelProfileView () {
+        setShowProfileView(false);
+    }
+    
     return (
+        
         <div>
             <NavBar />
-            {/* <ProfileView/> */}
-            <div className="py-4 px-10">
+            {showProfileView ? (
+                <ProfileView visible={showProfileView} mode="create" onCancel={handleCancelProfileView}/>
+            ) : (
+                <div className="py-4 px-10">
                 <div className="flex flex-row justify-between mt-10 mb-6">
                     <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
                     <div className="flex flex-row">
-                        <NewUserButton onClick={() => console.log("Button clicked")} />
+                        <NewUserButton onClick={(handleProfileView)} />
                         {/* <NewUserButton/> */}
                     </div>
                 </div>
                 {/* Pass the correctly typed manageUsers data to ManageUsersSpreadsheet */}
                 <ManageUsersSpreadsheet manageUsersItems={users} />
             </div>
+            )}
         </div>
     );
 };

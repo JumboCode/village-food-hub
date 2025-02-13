@@ -2,6 +2,7 @@ import Image from 'next/image';
 import searchSymbol from "@app/images/searchSymbol.svg"
 import filterSymbol from "@app/images/filterSymbol.svg"
 import saveSymbol from "@app/images/saveSymbol.svg"
+import plusSymbol from "@app/images/plusSymbol.svg"
 
 export const SearchBar = () => {
   return (
@@ -68,6 +69,27 @@ export const RunReportButton = ({ onClick, disabled }: RunReportButtonProps) => 
         />
         <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson text-white pl-2">
           Run Report
+        </div>
+      </div>
+    </button>
+  );
+};
+
+export const NewUserButton = ({ onClick, disabled }: RunReportButtonProps) => {
+  return (
+    <button className="border-2 border-[#7EB672] font-crimson rounded-xl ml-9 h-[54px] bg-[#7EB672]"
+            onClick={onClick}
+            disabled={disabled}
+    >
+      <div className="flex flex-row py-2 px-3">
+        <Image
+          src={plusSymbol}
+          alt="Run Report button"
+          width={24}
+          height={29.14}
+        />
+        <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson text-white pl-2">
+          New User
         </div>
       </div>
     </button>
