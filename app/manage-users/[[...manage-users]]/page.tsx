@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import NavBar from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
 import { NewUserButton } from "@app/components/InternalViewButtons";
+import ProfileView from "@app/components/ProfileView"
 
 // Define a type for the structure of each record in manageUsersData
 interface User {
@@ -42,11 +43,13 @@ const InternalViewManageUsersPage: React.FC = () => {
     return (
         <div>
             <NavBar />
+            {/* <ProfileView/> */}
             <div className="py-4 px-10">
                 <div className="flex flex-row justify-between mt-10 mb-6">
                     <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
                     <div className="flex flex-row">
                         <NewUserButton onClick={() => console.log("Button clicked")} />
+                        {/* <NewUserButton/> */}
                     </div>
                 </div>
                 {/* Pass the correctly typed manageUsers data to ManageUsersSpreadsheet */}
@@ -56,11 +59,4 @@ const InternalViewManageUsersPage: React.FC = () => {
     );
 };
 
-export defauimport React, { useState } from 'react';
-import ProfileView from "@app/components/ProfileView"
-
-export default function ManageUsers () {
-    return (
-        <ProfileView/>
-        );
-    }
+export default InternalViewManageUsersPage
