@@ -19,6 +19,8 @@ interface DemographicsRecord {
 // Define the type for the demographics state
 const demographicsData: DemographicsRecord[] = [];
 
+// make a new modal 
+
 function getDemographics() {
     
     try {
@@ -86,7 +88,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                     </div>
                 </div>
                 {/* Pass the correctly typed demographics data to DemographicsSpreadsheet */}
-                <DemographicsSpreadsheet demographicsItems={demographics || []} />
+                <DemographicsSpreadsheet demographicsItems={demographics || [] /* TODO add onClickDelete here */} />
             </div>
         </div>
     );
