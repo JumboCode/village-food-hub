@@ -4,10 +4,12 @@ import filterSymbol from "@app/images/filterSymbol.svg"
 import saveSymbol from "@app/images/saveSymbol.svg"
 import plusSymbol from "@app/images/plusSymbol.svg"
 
-export const SearchBar = () => {
+
+export const SearchBar = ({ input, setInput, placeholder }: { input: string, setInput: React.Dispatch<React.SetStateAction<string>>, placeholder: string }) => {
+  
   return (
     <div className = "border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
-      <div className = "flex flex-row py-2 px-2 items-center">
+      <div className = "flex flex-row py-2 px-2 items-center h-full">
         <Image
             src={searchSymbol}
             alt="search button"
@@ -16,8 +18,10 @@ export const SearchBar = () => {
             height={29.14}
         />
         <input
-            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none"
-            placeholder="Search.."
+            onChange = {(item) => setInput(item.target.value)}
+            value = {input}
+            className="w-full h-full pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none"
+            placeholder={placeholder}
           >
         </input>
       </div>
