@@ -88,6 +88,9 @@ const Categories: React.FC = () => {
         setRetrievalError(false);
     };
     
+    const refreshPage = () => {
+        window.location.reload();
+    };
    
     // Save new category
     const saveButtonClicked = async () => {
@@ -109,6 +112,7 @@ const Categories: React.FC = () => {
                     console.log("Successfully Added " + categoryName);
                     setRetrievalError(false);
                     setShowCategoryModal(false);
+                    refreshPage();
                 } else {
                     setRetrievalError(true);
                 }
@@ -197,15 +201,19 @@ const Categories: React.FC = () => {
                             </div>
                             <div className="flex justify-end w-full">
                                 {showTable && (
-                                    <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]">
-                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                    <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
+                                        onClick={itemButtonClicked}
+                                    >
+                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} 
+                                    />
                                     </button>
                                 )}
                                 <button
                                     className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
                                     onClick={categoryButtonClicked}
                                 >
-                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }}
+                                />
                                 </button>
                             </div>
                         </div>
@@ -240,7 +248,7 @@ const Categories: React.FC = () => {
                                 onUnitsChange={setUnits}
                             />
 
-                        </div>
+</div>
                         {showEmptyError && (
                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
                                 Please enter an item name.
