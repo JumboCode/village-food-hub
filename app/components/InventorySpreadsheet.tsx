@@ -61,7 +61,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             ].map(field => `"${field}"`).join(","))
         ].join("\r\n");
     
-        const fileName = `${itemName}_inventory.csv`;
+        const fileName = `${itemName}_${unitData}_inventory.csv`;
     
         const link = document.createElement("a");
         link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
