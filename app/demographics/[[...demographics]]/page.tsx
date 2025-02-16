@@ -112,7 +112,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                         <SearchBar
                             input={searchInput}
                             setInput={setSearchInput}
-                            placeholder={"Search by name, phone number, or name..."}
+                            placeholder={"Search by name, phone number, or address..."}
                         />
                         <RunReportButton onClick={openModal} />
                         {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} /> }
