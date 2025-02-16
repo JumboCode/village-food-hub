@@ -13,7 +13,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleD
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
       <div
-        className="h-[250px] w-[400px] bg-modal-gray font-crimson
+        className="h-[260px] w-[400px] bg-modal-gray font-crimson
                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                    pt-8 shadow-lg rounded-lg"
       >
@@ -23,7 +23,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleD
             want to delete
           </p>
           <p className="flex justify-center text-[28px] crimson-bold">
-           {userName}
+           {userName} ?
           </p>
           {/* TODO: get row data to display name*/}
         </div>

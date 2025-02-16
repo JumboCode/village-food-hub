@@ -29,6 +29,9 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         setName(null);
       };
 
+      const refreshPage = () => {
+        window.location.reload();
+      };
    
       const handleDelete = async () => {
         if (!selectedData) return;
@@ -41,13 +44,12 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ phoneNumber: selectedData }),
-                
             });
 
             if (!response.ok) {
-                throw new Error("THHIS IS NOT WORKING ON OUR END");
+                throw new Error("Error fetching demographics data.");
             }
-
+            refreshPage();
             console.log("Deleted successfully!");
             closeModal();
         } catch (error) {
@@ -148,7 +150,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     width={18}
                                     height={18}
                                     alt="delete Icon"
-                                    className="" 
+                                    className="cursor-pointer" 
                                     // onClick={() => openModal(item[1])} /* get the phonenumber from this row in column 2*/
                                     onClick={() => openModal((String(demographicsItems[index][1])), (String(demographicsItems[index][2])))}
                                 
