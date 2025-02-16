@@ -134,7 +134,7 @@ const Categories: React.FC = () => {
     
             console.log("Sending payload:", payload);
             const response = await fetch("../api/categories", {
-                method: "PUT",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
