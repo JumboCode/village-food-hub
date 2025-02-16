@@ -7,8 +7,8 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { NameDropdown } from '@app/components/Dropdowns';
 import NavBar from '@app/components/NavBar';
 import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
-import deleteIcon from '../../images/delete.png';
-import editIcon from '../../images/edit.png';
+import deleteIcon from '@app/images/delete.png';
+import editIcon from '@app/images/edit.png';
 
 interface CategoryData {
   [key: string]: [string, string][];
