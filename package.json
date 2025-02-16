@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.14.0",
-    "@clerk/nextjs": "^6.10.2",
+    "@clerk/nextjs": "^6.11.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@fontsource/inter": "^5.1.0",
@@ -21,11 +21,15 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/material": "^6.1.4",
     "@prisma/client": "^6.1.0",
+    "@types/react-router": "^5.1.20",
+    "@vitalets/google-translate-api": "^9.2.1",
     "express": "^4.21.1",
     "flowbite": "^2.5.2",
+    "google-translate-api-x": "^10.7.2",
     "jquery": "^3.7.1",
     "jquery-ui-dist": "^1.13.3",
     "next": "^15.1.6",
+    "open-google-translator": "^1.0.5",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-datepicker": "^7.6.0",
@@ -34,6 +38,7 @@
     "react-icons": "^5.4.0",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^6.28.0",
+    "react-translate": "^7.0.1",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
