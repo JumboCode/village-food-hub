@@ -19,7 +19,7 @@ function formatDate(date: Date): string {
 
 // Define the structure of the inventory data
 interface InventoryItem {
-  [key: string]: string | number | Date; // Dynamic fields, but for simplicity assuming string, number or Date
+  [key: string]: string | number | Date | JSON; // Dynamic fields, but for simplicity assuming string, number or Date
 }
 
 async function getInventory(): Promise<InventoryItem[]> {
@@ -33,33 +33,25 @@ async function getInventory(): Promise<InventoryItem[]> {
         console.log("not an array");
         return [];
       }
-  
+      
       const listOfLists = data.map((object: InventoryItem) => {
-        const fields = Object.values(object);
-        // Remove the last field (history object) because it conflicts with the spreadsheet
-        fields.pop();
-  
-        // Format the date field if it exists
-        const dateFieldIndex = fields.length - 1;
-        const dateField = fields[dateFieldIndex];
-        const date = new Date(dateField as string);
-  
-        if (!isNaN(date.getTime())) {
-          fields[dateFieldIndex] = formatDate(date);
-        } else {
-          fields[dateFieldIndex] = "";
-        }
-  
-        return fields;
-      });
-  
-      console.log("List of Lists:", listOfLists);
-      return listOfLists;
-    } catch (error) {
-      console.error(error);
-      return [];
+            const { itemName, categoryName, quantity, units, lastUpdated, history } = object;
+            const formattedDate = lastUpdated ? formatDate(new Date(lastUpdated as string)) : "";
+            // Convert history to a string (preserves JSON structure but keeps it as a list value)
+            const historyString = history ? JSON.stringify(history) : "";
+            // Return a list instead of an object
+            return [itemName, categoryName, quantity, units, formattedDate, historyString];
+        });
+
+        console.log("List of Lists:", listOfLists);
+        return listOfLists;
+
+        } catch (error) {
+          console.error(error);
+          return [];
     }
   }
+
 
 interface FilterModalProps {
   isOpen: boolean;
