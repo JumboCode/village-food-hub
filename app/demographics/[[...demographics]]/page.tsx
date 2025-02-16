@@ -19,6 +19,8 @@ interface DemographicsRecord {
 // Define the type for the demographics state
 const demographicsData: DemographicsRecord[] = [];
 
+// make a new modal 
+
 function getDemographics() {
     
     try {
