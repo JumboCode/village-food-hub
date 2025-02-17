@@ -18,7 +18,7 @@ interface User {
 
 const InternalViewManageUsersPage: React.FC = () => {
     const [users, setUsers] = useState<string[][]>([]);
-    const [showProfileView, setShowProfileView] = useState(false);
+    const [showCreateProfileView, setShowCreateProfileView] = useState(false);
 
     useEffect(() => {
         fetch("../api/users", { method: 'GET' })
@@ -41,31 +41,44 @@ const InternalViewManageUsersPage: React.FC = () => {
     }, []);
     
     function handleProfileView () {
-        setShowProfileView(true);
+        setShowCreateProfileView(true);
     }
     
     function handleCancelProfileView () {
-        setShowProfileView(false);
+        setShowCreateProfileView(false);
     }
     
     return (
         
         <div>
             <NavBar />
-            {showProfileView ? (
-                <ProfileView visible={showProfileView} mode="view" onCancel={handleCancelProfileView}/>
-            ) : (
-                <div className="py-4 px-10">
-                <div className="flex flex-row justify-between mt-10 mb-6">
-                    <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
-                    <div className="flex flex-row">
-                        <NewUserButton onClick={(handleProfileView)} />
-                        {/* <NewUserButton/> */}
+            {showCreateProfileView ? (
+                <div>    
+                    <div className="p-[80px] pt-[50px]">
+                        <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
+                        <ProfileView visible={showCreateProfileView} mode="create" onCancel={handleCancelProfileView}/>
+                        <div>
+                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] mr-[30px]"> Create </button>
+                            <button 
+                                className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] border-[2px] border-gray"
+                                onClick={handleCancelProfileView}
+                            >Cancel</button>
+                        </div>
                     </div>
                 </div>
-                {/* Pass the correctly typed manageUsers data to ManageUsersSpreadsheet */}
-                <ManageUsersSpreadsheet manageUsersItems={users} />
-            </div>
+            ) : (
+                <div> 
+                    <div className="py-4 px-10">
+                        <div className="flex flex-row justify-between mt-10 mb-6">
+                            <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
+                            <div className="flex flex-row">
+                                <NewUserButton onClick={(handleProfileView)} />
+                            </div>
+                        </div>
+                        {/* Pass the correctly typed manageUsers data to ManageUsersSpreadsheet */}
+                        <ManageUsersSpreadsheet manageUsersItems={users} />
+                    </div>
+                </div>
             )}
         </div>
     );
