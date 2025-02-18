@@ -19,7 +19,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@mui/material": "^6.1.4",
+    "@mui/material": "^6.4.3",
     "@prisma/client": "^6.1.0",
     "@types/react-router": "^5.1.20",
     "@vitalets/google-translate-api": "^9.2.1",
