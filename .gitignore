@@ -35,7 +35,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-DATABASE_URL=postgresql://village-food-hub_owner:ZLVY7JCym9bD@ep-winter-band-a5z43gsf.us-east-2.aws.neon.tech/village-food-hub?sslmode=require
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_c2FmZS1jYXJpYm91LTE2LmNsZXJrLmFjY291bnRzLmRldiQ
-CLERK_SECRET_KEY=sk_test_F6gIKEJxIt0L2mK6MtGzAWlIZXJlLwZG2tntmqWijv
