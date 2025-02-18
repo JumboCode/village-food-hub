@@ -58,9 +58,9 @@ const InternalViewManageUsersPage: React.FC = () => {
                         <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
                         <ProfileView visible={showCreateProfileView} mode="create" onCancel={handleCancelProfileView}/>
                         <div>
-                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] mr-[30px]"> Create </button>
+                            <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]"> Create </button>
                             <button 
-                                className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] border-[2px] border-gray"
+                                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] border-[2px] border-gray"
                                 onClick={handleCancelProfileView}
                             >Cancel</button>
                         </div>

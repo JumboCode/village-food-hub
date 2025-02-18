@@ -65,33 +65,33 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                 )) } */}
             <div className="flex flex-row gap-[100px] mt-[25px]">
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">First Name 
+                    <div className="font-crimson text-[20px] mb-[5px]">First Name 
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="">
                         </input>
                     }
                 </div>
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Last Name 
+                    <div className="font-crimson text-[20px] mb-[5px]">Last Name 
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="">
                         </input>
                     }
@@ -99,35 +99,35 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
             </div>
             <div className="flex flex-row gap-[100px] mt-[25px]">
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Username 
+                    <div className="font-crimson text-[20px] mb-[5px]">Username 
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="" 
                             required disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="" 
                             required>
                         </input>
                     }
                 </div>
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Role
+                    <div className="font-crimson text-[20px] mb-[5px]">Role
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="">
                         </input>
                     }
@@ -135,34 +135,34 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
             </div>
             <div className="flex flex-row gap-[100px] mt-[25px]">
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Pronouns 
+                    <div className="font-crimson text-[20px] mb-[5px]">Pronouns 
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="">
                         </input>
                     }
                 </div>
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Phone Number
+                    <div className="font-crimson text-[20px] mb-[5px]">Phone Number
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" 
                             required disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="" 
                             required>
                         </input>
@@ -171,32 +171,32 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
             </div>
             <div className="flex flex-row gap-[100px] mt-[25px]">
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Email
+                    <div className="font-crimson text-[20px] mb-[5px]">Email
                         <span className="text-red">*</span> 
                     </div>
                     { viewProfileMode?
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]"
                             placeholder="" required disabled readOnly>
                         </input>
                         :
                         <input
-                            className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required"
+                            className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required"
                             placeholder="" required>
                         </input>
                     }
                 </div>
                 <div>
-                    <div className="font-crimson text-[24px] mb-[5px]">Password
+                    <div className="font-crimson text-[20px] mb-[5px]">Password
                         <span className="text-red">*</span> 
                     </div>
                     { createProfileMode?
-                        <input id="password" type={showPassword ? "text" : "password"} className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required" onChange={(e) => setPassword(e.target.value)} required/>  
+                        <input id="password" type={showPassword ? "text" : "password"} className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] focus:ring-0 focus:border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required" onChange={(e) => setPassword(e.target.value)} required/>  
                         :
-                        <input id="password" type={showPassword ? "text" : "password"} className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none border-[2px] border-[#E1E1E1] rounded-xl w-[452px] h-[65px] required bg-[#F4F4F4]" onChange={(e) => setPassword(e.target.value)} required disabled readOnly/>    
+                        <input id="password" type={showPassword ? "text" : "password"} className="pl-3 font-crimson placeholder:font-crimson text-[20px] focus:outline-none border-[2px] border-[#E1E1E1] focus:ring-0 focus:border-[#E1E1E1] rounded-xl w-[452px] h-[50px] required bg-[#F4F4F4]" onChange={(e) => setPassword(e.target.value)} required disabled readOnly/>    
                     }
                     
-                    <div className="flex w-full justify-end mt-[-48px] pr-[20px] cursor-pointer">
+                    <div className="flex w-full justify-end mt-[-44px] pr-[20px] cursor-pointer">
                         {showPassword ?
                         // shown eyeball icon
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="gray" className="size-8" onClick={() => setShowPassword(false)}>
@@ -215,19 +215,19 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
             <div className="flex flex-row gap-[30px] justify-between">
                 <div className="flex flex-row gap-[30px]">
                     { createProfileMode ? (
-                        <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Create </button>
+                        <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[50px] rounded-xl mt-[100px]"> Create </button>
                     ) : (
                         editProfileMode ? (
-                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]" onClick={handleEditProfileModeOn}> Save Changes</button>
+                            <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[50px] rounded-xl mt-[100px]" onClick={handleEditProfileModeOn}> Save Changes</button>
                         ) : (
                             viewProfileMode ? (
-                                <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px]"> Edit Profile</button>
+                                <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[245px] h-[50px] rounded-xl mt-[100px]"> Edit Profile</button>
                             ) : null
                         )
                     ) }
                             
                     <button 
-                        className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[65px] rounded-xl mt-[100px] border-[2px] border-gray"
+                        className="bg-white hover:bg-light-gray text-gray text-[32px] font-crimson w-[245px] h-[50px] rounded-xl mt-[100px] border-[2px] border-gray"
                         onClick={onCancel}
                     >
                         { "Cancel" }
@@ -235,7 +235,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                 </div>
                 
                 { viewProfileMode ? (
-                    <button className="bg-red hover:bg-red text-white text-[32px] font-crimson w-[250px] h-[65px] rounded-xl mt-[100px] flex items-center justify-center pr-1">
+                    <button className="bg-red hover:bg-red text-white text-[32px] font-crimson w-[250px] h-[50px] rounded-xl mt-[100px] flex items-center justify-center pr-1">
                         <Image
                             src={deleteIcon}
                             alt="search button"
