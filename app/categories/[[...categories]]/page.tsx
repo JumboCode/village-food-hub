@@ -29,6 +29,7 @@ const Categories: React.FC = () => {
     const [showEmptyError, setShowEmptyError] = useState(false);
     const [showRetrievalError, setRetrievalError] = useState(false);
     const [units, setUnits] = useState<string[]>([]);
+    const [updateScreen, setUpdateScreen] = useState(false);
 
 
     // Fetch categories data on component mount
@@ -56,6 +57,8 @@ const Categories: React.FC = () => {
             }
         })();
     }, []);
+
+    
 
     // Handle category selection change
     const handleCategoryChange = (value: string) => {

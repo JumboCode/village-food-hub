@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import deleteIcon from '../images/delete.png';
 import editIcon from "../images/edit.png";
@@ -9,18 +9,27 @@ interface CategoriesSpreadsheetProps {
 }
 
 const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryItems = [] }) => {
-    console.log("categoryItems:", categoryItems);
+    const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
+    const [topSorted, setTopSorted] = useState(true);
 
-    const sortAlphabetically = (categoryItems : any) => {
-        let sortedItems = [];
-        let i = 0;
-        for (; i < categoryItems.length; i++) {
-            sortedItems = categoryItems.sort((a,b) => a[0].localeCompare(b[0]));
-        }
+    useEffect(() => {
+        setSortedItems([...categoryItems]);
+    }, [categoryItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+    );
+    
+        console.log(topSorted)
         let j = 0
-        for (; j < categoryItems.length; j++) {
-            console.log(categoryItems[j][0]);
+        for (; j < sortedItems.length; j++) {
+            console.log(sortedItems[j][0]);
         }
+    
+        console.log("sortedList:", sortedList);
+        setSortedItems([...sortedList]);
+        setTopSorted(!topSorted);
     }
 
     return(
@@ -31,7 +40,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
-                        <button onClick={() => sortAlphabetically(categoryItems)}>
+                        <button onClick={() => sortAlphabetically()}>
                             <Image src={arrowsIcon}
                                         width={10}
                                         height={6}
@@ -46,7 +55,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 </tr>
             </thead>
             <tbody className="bg-slate-50 font-crimson crimson-regular">
-            {categoryItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
                         <tr key={index} className="py-2">
                             {item.map((data, subIndex) => (
                                 <td

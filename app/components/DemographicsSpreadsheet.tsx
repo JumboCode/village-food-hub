@@ -15,6 +15,28 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
     const [showModal, setShowModal] = useState(false);
     const [selectedData, setSelectedData] = useState<string | null>(null);
     const [name, setName] = useState<string | null>(null);
+
+    const [sortedItems, setSortedItems] = useState<(string | number)[][][][]>(demographicsItems);
+    const [topSorted, setTopSorted] = useState(true);
+    
+    useEffect(() => {
+        setSortedItems([...demographicsItems]);
+    }, [demographicsItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+    );
+    
+        console.log(topSorted)
+        let j = 0
+        for (; j < sortedItems.length; j++) {
+            console.log(sortedItems[j][0]);
+        }
+    
+        setSortedItems([...sortedList]);
+        setTopSorted(!topSorted);
+    }
     
 
     const openModal = (data: string, name: string) => {
@@ -81,12 +103,14 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="font-[20px] flex flex-row justify-between">
                         <p>Name</p>
+                        <button onClick={() => sortAlphabetically()}>
                         <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                        </button>
                         </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import deleteIcon from '../images/delete.png';
 import downloadIcon from "../images/download.png";
@@ -29,9 +29,27 @@ function formatDate(date: string | Date): string {
 export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
     console.log("inventoryItems:", inventoryItems);
 
-    /*interface DownloadButtonProps {
-        onClick?: () => void;
-    }*/
+    const [sortedItems, setSortedItems] = useState<(string | number)[][]>(inventoryItems);
+    const [topSorted, setTopSorted] = useState(true);
+
+    useEffect(() => {
+        setSortedItems([...inventoryItems]);
+    }, [inventoryItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+    );
+    
+        console.log(topSorted)
+        let j = 0
+        for (; j < sortedItems.length; j++) {
+            console.log(sortedItems[j][0]);
+        }
+    
+        setSortedItems([...sortedList]);
+        setTopSorted(!topSorted);
+    }
 
     const handleClick = () => {
         console.log('Button clicked');
@@ -79,23 +97,27 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
-                        <Image src={arrowsIcon}
+                            <button onClick={() => sortAlphabetically()}>
+                                <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
                                     className="">
-                                    </Image>
+                                </Image>
+                            </button>
                         </div>
                     </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between">
                         <p>Category</p>
-                        <Image src={arrowsIcon}
+                        <button onClick={() => sortAlphabetically()}>
+                            <Image src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
                                     className="">
-                                    </Image>
+                            </Image>
+                        </button>
                         </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -125,7 +147,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-            {inventoryItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
                         <tr key={index} className="py-2">
                             {item.map((data, subIndex) => (
                                 <td
