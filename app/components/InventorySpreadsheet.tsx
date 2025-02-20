@@ -1,19 +1,18 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Image from 'next/image';
 import deleteIcon from '../images/delete.png';
 import downloadIcon from "../images/download.png";
 import editIcon from "../images/edit.png";
 import arrowsIcon from "../images/upAndDownArrows.png";
+import DeleteInventoryModal from "./DeleteInventoryModal";
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
 }
 
 function formatDate(date: string | Date): string {
-    // If date is a string, convert it to a Date object
     const parsedDate = typeof date === "string" ? new Date(date) : date;
 
-    // Ensure the date is valid
     if (isNaN(parsedDate.getTime())) {
         console.error("Invalid date:", date);
         return "Invalid Date";
@@ -27,23 +26,63 @@ function formatDate(date: string | Date): string {
 }
 
 export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
-    console.log("inventoryItems:", inventoryItems);
-
-    /*interface DownloadButtonProps {
-        onClick?: () => void;
-    }*/
-
+    const [showModal, setShowModal] = useState(false);
+    const [itemName, setItemName] = useState<string | null>(null);
+    const [units, setUnits] = useState<string | null>(null);
+    
+    
     const handleClick = () => {
         console.log('Button clicked');
+    };
+    
+    const openModal = (itemName: string, units: string) => {
+        setShowModal(true);
+        setItemName(itemName);
+        setUnits(units)
+    };
+
+    const closeModal = (): void => {
+        setShowModal(false);
+        setItemName(null);
+        setUnits(null);
+    };
+    
+    const refreshPage = () => {
+        window.location.reload();
+    };
+    
+    const handleDelete = async () => {
+        if (!itemName) return;
+        if (!units) return;
+
+        const deleteItem = { itemName, units };
+
+        try {
+            const response = await fetch("/../api/inventory", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                
+                body: JSON.stringify({ data: deleteItem }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Error fetching inventory data.");
+            }
+            refreshPage();
+            console.log("Deleted successfully!");
+            closeModal();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const downloadCSV = (item: (string | number)[]) => {
         console.log(item);
         const itemName = item[0];
-        console.log("itemName:", itemName);
 
         const unitData = item[3];
-        console.log("unitData:", unitData);
         
         let historyData = item[5];
         let parsedHistory: any = historyData;
@@ -152,7 +191,9 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     height={18}
                                     alt="delete Icon"
                                     className=""
+                                    onClick={() => openModal((String(inventoryItems[index][0])), (String(inventoryItems[index][3])))}
                                 />
+                                {showModal && <DeleteInventoryModal itemName={String(itemName)} units={String(units)} closeModal={closeModal} handleDelete={handleDelete} /> }
                                 <button onClick={() => downloadCSV(item)} >
                                     <Image
                                         src={downloadIcon}
@@ -171,5 +212,5 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         </div>
 
     )
-
+    
 }
