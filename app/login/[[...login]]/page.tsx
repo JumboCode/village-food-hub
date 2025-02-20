@@ -47,11 +47,18 @@ const LoginPage: React.FC = () => {
     try {
       // Sign-in flow
       const result = await signIn.create({ identifier: username, password });
-
+      console.log(username);
       if (result.status === "complete") {
         console.log("Sign in successful");
         await setActive({ session: result.createdSessionId });
-        router.push('/inventory');
+        if(username == "customer") {
+          router.push('/welcome-page');
+        }
+        else if(username == "volunteer") {
+          router.push('/volunteer-landing');
+        } else {
+          router.push('/inventory');
+        }
         // if (user) { // TODO: do role stuff
         //   redirectUserBasedOnRole(user);
         // }

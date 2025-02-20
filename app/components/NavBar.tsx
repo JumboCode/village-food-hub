@@ -10,14 +10,44 @@ import face from '@app/images/Frame6.png';
 import settings from '@app/images/Frame7.png';
 import icon from '@app/images/Frame8.png';
 import downArrow2 from '@app/images/downArrow.png';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 // Clerk
-import { useClerk } from '@clerk/nextjs'
+import { useClerk, useUser } from '@clerk/nextjs'
+//import { currentUser } from '@clerk/nextjs/server'
 
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  // const [loggedInUser, setLoggedInUser] = useState("");
   const router = useRouter();
   const { signOut } = useClerk()
+
+  // const { isLoaded, session, isSignedIn } = useSession();
+  // console.log("session: ", session);
+
+  const { user } = useUser();
+  console.log("user: ", user);
+  if(user?.firstName && user.lastName && loggedInUser == "") {
+    setLoggedInUser(user?.firstName + " " + user?.lastName);
+    if(user.publicMetadata.role == "admin") {
+      setIsAdmin(true);
+    }
+  }
+
+  // useEffect(() => {
+  //   // (async () => {
+  //     try {
+  //       const { isLoaded, user } = useUser();
+  //       // let user : String = "";
+  //       //const user = await currentUser();
+  //       console.log("logged in user: ", user);
+  //       // setLoggedInUser(user);
+  //     } catch (err) {
+  //       console.log(err);
+  //   };
+  // }, []);
 
   const handleSignOut = async () => {
     signOut({ redirectUrl: '/' })
@@ -97,7 +127,7 @@ export default function NavBar() {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center text-[21px] font-crimson font-bold text-white"
             >
-              Glen McLeod
+              {loggedInUser}
               <Image
                 src={isDropdownOpen ? downArrow2 : dropArrow}
                 alt="drop-down-arrow"
@@ -114,12 +144,13 @@ export default function NavBar() {
                     <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
                     My Profile
                   </li>
+                  {isAdmin && (
                   <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
                       onClick={handleManageUsers}
                   >
                     <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
                     Manage Users
-                  </li>
+                  </li>)}
                   <li
                     className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
                     onClick={handleSignOut}
