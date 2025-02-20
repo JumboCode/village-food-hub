@@ -31,6 +31,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
     const [sortedItems, setSortedItems] = useState<(string | number)[][]>(inventoryItems);
     const [topSorted, setTopSorted] = useState(true);
+    const [quantityAscending, setQuantityAscending] = useState(true);
+    const [DateAscending, setDateAscending] = useState(false);
 
     useEffect(() => {
         setSortedItems([...inventoryItems]);
@@ -41,15 +43,30 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
     );
     
-        console.log(topSorted)
-        let j = 0
-        for (; j < sortedItems.length; j++) {
-            console.log(sortedItems[j][0]);
-        }
-    
-        setSortedItems([...sortedList]);
+        setSortedItems(sortedList);
         setTopSorted(!topSorted);
     }
+
+    const sortQuantity= () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            quantityAscending ?  Number(b[2]) - Number(a[2]) : Number(a[2]) - Number(b[2])
+    );
+        setSortedItems(sortedList);
+        setQuantityAscending(!quantityAscending);
+    }
+
+    const sortDate = () => {
+    
+        const sortedList = [...sortedItems].sort((a, b) => {
+            const dateA = new Date(a[4]); 
+            const dateB = new Date(b[4]);
+    
+            return DateAscending ? dateB.getTime() - dateA.getTime(): dateA.getTime() - dateB.getTime();
+        });
+        
+        setSortedItems(sortedList);
+        setDateAscending(!DateAscending); 
+    };
 
     const handleClick = () => {
         console.log('Button clicked');
@@ -122,6 +139,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between">
+                        <button onClick={() => sortQuantity()}>
                         <p>Quantity</p>
                         <Image src={arrowsIcon}
                                     width={15}
@@ -129,6 +147,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                        </button>
                         </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -142,7 +161,19 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     </Image>
                         </div>
                 </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                <div className="flex flex-row justify-between">
+                    <p>Last Updated</p>
+                    <button onClick={sortDate}>
+                        <Image 
+                            src={arrowsIcon}
+                            width={15}
+                            height={15}
+                            alt="arrows Icon"
+                        />
+                    </button>
+                </div>
+            </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
                 </tr>
             </thead>

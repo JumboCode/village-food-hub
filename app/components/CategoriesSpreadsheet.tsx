@@ -21,14 +21,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
             topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
     );
     
-        console.log(topSorted)
-        let j = 0
-        for (; j < sortedItems.length; j++) {
-            console.log(sortedItems[j][0]);
-        }
-    
-        console.log("sortedList:", sortedList);
-        setSortedItems([...sortedList]);
+        setSortedItems(sortedList);
         setTopSorted(!topSorted);
     }
 

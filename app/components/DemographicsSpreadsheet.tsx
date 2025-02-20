@@ -18,6 +18,8 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
 
     const [sortedItems, setSortedItems] = useState<(string | number)[][][][]>(demographicsItems);
     const [topSorted, setTopSorted] = useState(true);
+    const [quantityAscending, setQuantityAscending] = useState(true);
+    const [DateAscending, setDateAscending] = useState(false);
     
     useEffect(() => {
         setSortedItems([...demographicsItems]);
@@ -28,15 +30,29 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
             topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
     );
     
-        console.log(topSorted)
-        let j = 0
-        for (; j < sortedItems.length; j++) {
-            console.log(sortedItems[j][0]);
-        }
-    
-        setSortedItems([...sortedList]);
+        setSortedItems(sortedList);
         setTopSorted(!topSorted);
     }
+
+    const sortQuantity= () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            quantityAscending ?  Number(b[2]) - Number(a[2]) : Number(a[2]) - Number(b[2])
+    );
+        setSortedItems(sortedList);
+        setQuantityAscending(!quantityAscending);
+    }
+
+    const sortDate = () => {
+        const sortedList = [...sortedItems].sort((a, b) => {
+            const dateA = new Date(a[0]); 
+            const dateB = new Date(b[0]);
+    
+            return DateAscending ? dateB.getTime() - dateA.getTime(): dateA.getTime() - dateB.getTime();
+        });
+        
+        setSortedItems(sortedList);
+        setDateAscending(!DateAscending); 
+    };
     
 
     const openModal = (data: string, name: string) => {
@@ -86,6 +102,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <tr className="bg-dark-blue text-white text-lg align-left ">
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
+                        <button onClick={() => sortDate()}>
                         <p>Date</p>
                         <Image src={arrowsIcon}
                                     width={15}
@@ -93,6 +110,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                        </button>
                         </div>
                     </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -120,6 +138,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
+                        <button onClick={() => sortQuantity}>
                         <p>House Size</p>
                         <Image src={arrowsIcon}
                                     width={15}
@@ -127,10 +146,12 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                                    </button>
                         </div>
                     </th>
                     <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
+                        <button onClick={() => sortQuantity}>
                         <p>Received</p>
                         <Image src={arrowsIcon}
                                     width={15}
@@ -138,10 +159,12 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                        </button>
                         </div>
                     </th>
                     <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
+                        <button onClick={() => sortQuantity}>
                         <p>Donated</p>
                         <Image src={arrowsIcon}
                                     width={15}
@@ -149,6 +172,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     alt="arrows Icon"
                                     className="">
                                     </Image>
+                        </button>
                         </div>
                     </th>
                 <th className="font-[20px] border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
