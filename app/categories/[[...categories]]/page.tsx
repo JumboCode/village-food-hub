@@ -7,8 +7,10 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { NameDropdown } from '@app/components/Dropdowns';
 import NavBar from '@app/components/NavBar';
 import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
-import deleteIcon from '../../images/delete.png';
-import editIcon from '../../images/edit.png';
+import UnitBoxes from '@app/components/UnitBoxes';
+import deleteIcon from '@app/images/delete.png';
+import editIcon from '@app/images/edit.png';
+import addIcon from '@app/images/Vector.png';
 
 interface CategoryData {
   [key: string]: [string, string][];
@@ -19,10 +21,15 @@ const Categories: React.FC = () => {
     const [categoriesData, setCategoriesData] = useState<CategoryData>({});
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [showTable, setShowTable] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showItemModal, setShowItemModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<string>('');
     const [categoryName, setCategoryName] = useState("");
+    const [itemName, setItemName] = useState("");
     const [showEmptyError, setShowEmptyError] = useState(false);
     const [showRetrievalError, setRetrievalError] = useState(false);
+    const [units, setUnits] = useState<string[]>([]);
+
 
     // Fetch categories data on component mount
     useEffect(() => {
@@ -58,16 +65,33 @@ const Categories: React.FC = () => {
 
     // Open modal to add a new category
     const categoryButtonClicked = () => {
-        setShowModal(true);
+        setShowCategoryModal(true);
     };
 
     // Close modal and reset error states
     const cancelButtonClicked = () => {
-        setShowModal(false);
+        setShowCategoryModal(false);
+        setShowEmptyError(false);
+        setRetrievalError(false);
+
+    };
+
+    // Open modal to add a new item
+    const itemButtonClicked = () => {
+        setShowItemModal(true);
+    };
+
+    // Close modal and reset error states
+    const itemModalClosed = () => {
+        setShowItemModal(false);
         setShowEmptyError(false);
         setRetrievalError(false);
     };
-
+    
+    const refreshPage = () => {
+        window.location.reload();
+    };
+   
     // Save new category
     const saveButtonClicked = async () => {
         if (categoryName === "") {
@@ -87,13 +111,48 @@ const Categories: React.FC = () => {
                 if (response.ok) {
                     console.log("Successfully Added " + categoryName);
                     setRetrievalError(false);
-                    setShowModal(false);
+                    setShowCategoryModal(false);
+                    refreshPage();
                 } else {
                     setRetrievalError(true);
                 }
             } catch (err) {
                 setRetrievalError(true);
             }
+        }
+    };
+
+    const saveCategories = async () => {
+        try {
+
+            // Filter out empty values and make sure units is never null
+            const validUnits = units.filter(unit => unit && unit.trim() !== "");
+            
+            const payload = {
+                itemName: itemName.trim(),
+                name: selectedCategory.trim(),
+                units: validUnits
+            };
+    
+            console.log("Sending payload:", payload);
+            const response = await fetch("../api/categories", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload),
+            });
+    
+            if (!response.ok) {
+                // Set error state?
+                console.log("Server error response:", response);
+            }
+    
+            itemModalClosed();
+        } catch (err) {
+            console.log("Error in saveCategories:", err);
+            
+            // Set error state?
         }
     };
 
@@ -142,15 +201,19 @@ const Categories: React.FC = () => {
                             </div>
                             <div className="flex justify-end w-full">
                                 {showTable && (
-                                    <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]">
-                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                    <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
+                                        onClick={itemButtonClicked}
+                                    >
+                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} 
+                                    />
                                     </button>
                                 )}
                                 <button
                                     className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
                                     onClick={categoryButtonClicked}
                                 >
-                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
+                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }}
+                                />
                                 </button>
                             </div>
                         </div>
@@ -166,7 +229,54 @@ const Categories: React.FC = () => {
                     </div>
                 </div>
             </div>
-            {showModal && (
+            {showItemModal && ( 
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="w-[412px] bg-[#FFFFFF] font-crimson justify-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+                        <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Add Item</div>
+                        <div className="flex-col mb-[30px] font-crimson">
+                            <div className='flex mb-2'>
+                                <div className="text-[30px] w-24 ml-[5%]">Name</div>
+                                <input
+                                    type="text"
+                                    onChange={(e) => setItemName(e.target.value)}
+                                    className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
+                                />
+                            </div>
+
+                            <UnitBoxes 
+                                icon={addIcon}
+                                onUnitsChange={setUnits}
+                            />
+
+</div>
+                        {showEmptyError && (
+                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                Please enter an item name.
+                            </p>
+                        )}
+                        {showRetrievalError && (
+                            <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
+                                Failed to add item.
+                            </p>
+                        )}
+                        <div className="flex w-full justify-center space-x-[15px] items-center">
+                            <button
+                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                onClick={itemModalClosed}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                onClick={saveCategories}
+                            >
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showCategoryModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                         <p className="text-center text-[32px] font-bold pb-[15px]">Category Name</p>

@@ -11,12 +11,17 @@ import settings from '@app/images/Frame7.png';
 import icon from '@app/images/Frame8.png';
 import downArrow2 from '@app/images/downArrow.png';
 
+// Clerk
+import { useClerk } from '@clerk/nextjs'
+
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const router = useRouter(); 
+  const router = useRouter();
+  const { signOut } = useClerk()
 
-  const handleSignOut = () => {
-    router.push("/login");
+  const handleSignOut = async () => {
+    signOut({ redirectUrl: '/' })
+    console.log("Sign out successful")
   };
 
   const handleDemographics = () => {
@@ -29,6 +34,10 @@ export default function NavBar() {
 
   const handleCategories = () => {
     router.push("/categories");
+  };
+
+  const handleManageUsers = () => {
+    router.push("/manage-users");
   };
 
   const [currentPath, setCurrentPath] = useState("");
@@ -105,9 +114,11 @@ export default function NavBar() {
                     <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
                     My Profile
                   </li>
-                  <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer">
+                  <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                      onClick={handleManageUsers}
+                  >
                     <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
-                    Settings
+                    Manage Users
                   </li>
                   <li
                     className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"

@@ -14,6 +14,48 @@ import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
 
 const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Select all the actions you plan to do today. ",
+    " Receive ",
+    " Donate ",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Select all the actions you plan to do today. ",
+            " Receive ",
+            " Donate ",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isRChecked = e.target.checked;
     onChange(isRChecked, donate);
@@ -31,7 +73,7 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
   return (
     <div>
       <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
-        Select all the actions you plan to do today. <span className="text-red">*</span>
+        {translations[0]}<span className="text-red">*</span>
       </div>
       <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
         <div>
@@ -45,7 +87,7 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
                 onChange={handleReceive}
               />
             </div>
-            <div> Receive </div>
+            <div>{translations[1]}</div>
           </div>
           <div className="flex space-x-5">
             <div className="flex items-center mb-4">
@@ -57,7 +99,7 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
                 onChange={handleDonate}
               />
             </div>
-            <div> Donate </div>
+            <div>{translations[2]}</div>
           </div>
         </div>
       </div>
@@ -67,6 +109,44 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
 
 // Phone Number Module
 const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Phone Number",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Phone Number",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   const [phoneNumber, setPhoneNumber] = useState<string>(value);
 
   const handlePhoneNumberChange = (newValue: string | undefined) => {
@@ -84,7 +164,7 @@ const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, 
   return (
     <div className="flex flex-col justify-center items-center py-10">
         <div className="flex flex-col items-center w-full max-w-lg font-crimson">
-            <p className="text-[36px] font-bold mb-8">Phone Number <span className="text-red">*</span></p>
+            <p className="text-[36px] font-bold mb-8">{translations[0]} <span className="text-red">*</span></p>
             <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
         </div>
     </div>
@@ -98,15 +178,49 @@ interface Details {
   householdSize: number;
 }
 // Information Changed Module
-const Changes: React.FC<{ value: string; onChange: (newValue: string) => void; setNextDisabled: (disabled: boolean) => void; details?: Details }> = ({
-  value,
-  onChange,
-  setNextDisabled,
-  details,
-}) => {
+const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: Details }> = ({ value, onChange, setNextDisabled, details }) => {
 
-  if (!details) {
-    return <p className="text-[28px] font-bold">Loading previous record...</p>;
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Has your information changed? ",
+    "Name:",
+    "Address:",
+    "Household size:",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Has your information changed? ",
+            "Name:",
+            "Address:",
+            "Household size:",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
   }
   
   const [selectedValue, setSelectedValue] = useState<string>(value);
@@ -123,9 +237,9 @@ const Changes: React.FC<{ value: string; onChange: (newValue: string) => void; s
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
-        <p className="text-[36px] font-bold">Has your information changed? <span className="text-red">*</span></p>
+        <p className="text-[36px] font-bold">{translations[0]} <span className="text-red">*</span></p>
         <p className="text-[28px] font-bold mb-4">
-          (Name: {details.name}, Address: {details.address}, Household size: {details.householdSize === 11 ? '10+' : details.householdSize})
+          ({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]} {details.householdSize === 11 ? '10+' : details.householdSize})
         </p>
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
@@ -135,6 +249,48 @@ const Changes: React.FC<{ value: string; onChange: (newValue: string) => void; s
 
 // Full Name
 const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (value: string) => void, onLastNameChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Full Name",
+    "First Name",
+    "Last Name",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Full Name",
+            "First Name",
+            "Last Name",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   const [firstNameState, setFirstNameState] = useState<string>(firstName);
   const [lastNameState, setLastNameState] = useState<string>(lastName);
 
@@ -155,11 +311,11 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
   return (
     <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
-        <p className="text-[36px] font-bold mb-4">Full Name</p>
+        <p className="text-[36px] font-bold mb-4">{translations[0]}</p>
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">First Name <span className="text-red">*</span></p>
+        <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
@@ -170,7 +326,7 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
       </div>
 
       <div>
-        <p className="text-[24px] mt-4">Last Name <span className="text-red">*</span></p>
+        <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-96"
@@ -185,6 +341,52 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
 
 // Address
 const Address: React.FC<{ line1: string, city: string, state: string, zip: string, onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ line1, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Address",
+    "Address Line",
+    "City",
+    "State",
+    "Zip Code",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Address",
+            "Address Line",
+            "City",
+            "State",
+            "Zip Code",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+  
   const [line, setLine] = useState<string>(line1);
   const [cityState, setCityState] = useState<string>(city);
   const [stateState, setStateState] = useState<string>(state);
@@ -217,11 +419,11 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
   return (
     <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
-        <p className="text-[36px] font-bold mb-4">Address</p>
+        <p className="text-[36px] font-bold mb-4">{translations[0]}</p>
       </div>
 
       <div className="w-2/3">
-        <p className="text-[24px] mt-4">Address Line <span className="text-red">*</span></p>
+        <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
         <input
           type="text"
           className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
@@ -233,7 +435,7 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
 
       <div className='flex flex-row w-2/3 justify-between gap-2'>
         <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">City <span className="text-red">*</span></p>
+          <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
@@ -243,7 +445,7 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
           />
         </div>
         <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">State <span className="text-red">*</span></p>
+          <p className="text-[24px] mt-4">{translations[3]} <span className="text-red">*</span></p>
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
@@ -253,7 +455,7 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
           />
         </div>
         <div className='flex-1'>
-          <p className="text-[24px] mt-4">Zip Code <span className="text-red">*</span></p>
+          <p className="text-[24px] mt-4">{translations[4]} <span className="text-red">*</span></p>
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
@@ -269,6 +471,44 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
 
 // Household Size
 const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ value, onChange, setSubmitDisabled }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Household Size",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Household Size",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
   const handleSizeChange = (value: string) => {
@@ -283,7 +523,7 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
-        <p className="text-[36px] font-bold mb-10">Household Size <span className="text-red">*</span></p>
+        <p className="text-[36px] font-bold mb-10">{translations[0]} <span className="text-red">*</span></p>
         <div className="w-52">
           <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} filterName="size"/>
         </div>
@@ -293,14 +533,54 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
 };
 
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "We have a demographic survey that is optional.",
+    "Would you like to fill it out?",
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "We have a demographic survey that is optional.",
+            "Would you like to fill it out?",
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   return (
       <div className="font-crimson">
         {/* Central text */}
         <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
-            We have a demographic survey that is optional. 
+            {translations[0]}  
         </div>
         <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
-            Would you like to fill it out?
+            {translations[1]}
         </div>
         {/* Next Button */}
         <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
@@ -312,6 +592,58 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
 };
 
 const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
+
+  // storing the translations
+  const [translations, setTranslations] = useState([
+    "Household size:",
+    "THANK YOU FOR VISITING!",
+    "Village Food Hub will be able to grow with your help!",
+    "Your Information",
+    "Full Name:",
+    "Phone Number:",
+    "Address:",
+    "Return home"
+  ]);
+
+  // when navigating to this page
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    translateText(language === '' ? 'en' : language);
+  }, []);
+
+  // function to translate the text with API calls
+  const translateText = async (language: any) => {
+      try {
+          // Reset back to english to avoid lost in translation after resets
+          let newTranslations = [
+            "Household size:",
+            "THANK YOU FOR VISITING!",
+            "Village Food Hub will be able to grow with your help!",
+            "Your Information",
+            "Full Name:",
+            "Phone Number:",
+            "Address:",
+            "Return home"
+          ]
+
+          // if the language is not english, translate it
+          if (language !== 'en') {
+              for (let i = 0; i < translations.length; i++) {
+                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
+                  const response = await fetch(url);
+                  const data = await response.json();
+                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
+              }
+          }
+              
+          // store the translations
+          setTranslations(newTranslations);
+
+      } catch (e) {
+          console.error(e);
+      }
+  }
+
   const [newRecord, setNewRecord] = useState<newResponse | null>(null);
 
   interface newResponse {
@@ -354,34 +686,34 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
   return (
     <div className="background-white font-black">
       <div className="font-crimson flex flex-col items-center text-black">
-        <h1 className="font-bold text-[36px] mt-12">THANK YOU FOR VISITING!</h1>
+        <h1 className="font-bold text-[36px] mt-12">{translations[1]}</h1>
         <p className="font-bold text-[36px] mt-6 mb-2">
-          Village Food Hub will be able to grow with your help!
+          {translations[2]}
         </p>
         <div className="flex col-2 items-center mt-8">
           <div className="flex flex-row mx-10 content-start text-[30px] break-all">
             <div className="flex flex-col">
-              <div className="text-[30px]">Your Information</div>
+              <div className="text-[30px]">{translations[3]}</div>
               <div className="text-[21px] mt-1">
-                Full Name:{" "}
+                {translations[4]}{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
                   {newRecord?.name}
                 </span>
               </div>
               <div className="text-[21px] mt-1">
-                Phone Number:{" "}
+                {translations[5]}{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
                   {newRecord?.phoneNumber}
                 </span>
               </div>
               <div className="text-[21px] mt-1">
-                Address:{" "}
+                {translations[6]}{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
                   {newRecord?.address}
                 </span>
               </div>
               <div className="text-[21px] mt-1">
-                Household Size:{" "}
+                {translations[0]}{" "}
                 <span className="text-[24px]" style={{ color: "#828282" }}>
                   {newRecord?.householdSize === 11 ? "10+" : newRecord?.householdSize}
                 </span>
@@ -396,7 +728,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
           <button
             className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
             onClick={() => window.location.href = "../welcome-page"}>
-            Return home
+            {translations[7]}
             <div className="relative bottom-0 left-5">
               <Image src={arrow} alt="arrow" width={42} height={42} />
             </div>
