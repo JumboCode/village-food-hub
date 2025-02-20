@@ -11,6 +11,18 @@ interface CategoriesSpreadsheetProps {
 const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryItems = [] }) => {
     console.log("categoryItems:", categoryItems);
 
+    const sortAlphabetically = (categoryItems : any) => {
+        let sortedItems = [];
+        let i = 0;
+        for (; i < categoryItems.length; i++) {
+            sortedItems = categoryItems.sort((a,b) => a[0].localeCompare(b[0]));
+        }
+        let j = 0
+        for (; j < categoryItems.length; j++) {
+            console.log(categoryItems[j][0]);
+        }
+    }
+
     return(
         <div className="relative overflow-x-auto font-arial bg-slate-50">
         <table className="table-auto w-full">
@@ -19,12 +31,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
-                        <Image src={arrowsIcon}
-                                    width={10}
-                                    height={6}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortAlphabetically(categoryItems)}>
+                            <Image src={arrowsIcon}
+                                        width={10}
+                                        height={6}
+                                        alt="arrows Icon"
+                                        className="">
+                            </Image>
+                        </button>
                         </div>
                     </th>
                 <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
