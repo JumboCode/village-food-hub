@@ -56,8 +56,9 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
 
             const requestData = {
                 itemName: currItemName,
-                name: updatedName, // TODO: Are we updating the category name? Do we want this here?
-                units: [updatedUnits]
+                ...(updatedName && { name: updatedName }),
+                // name: updatedName, // TODO: Are we updating the category name? Do we want this here?
+                units: updatedUnits
             };
             
             console.log('Sending request with data:', requestData);
