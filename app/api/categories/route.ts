@@ -100,7 +100,10 @@ export async function PUT(
 ) {    
     try {
         const data = await req.json()
+        console.log('Received data in API:', data);
+
         if (!validCategory(data)) {
+            console.log('Invalid category data:', data);
             return NextResponse.json(
                 { response : "Invalid data format" }, 
                 { status : 400 }
