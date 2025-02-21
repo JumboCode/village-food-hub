@@ -39,7 +39,7 @@ async function updateCategory(data : {
             }
         }, data:
             {
-                units: data.units
+                units: data.units // TODO: What about itemName?
             },
     })
 }
