@@ -189,6 +189,7 @@ const Categories: React.FC = () => {
                                             alt="delete Icon"
                                             className="m-4 ml-6 mt-2"
                                         />
+                                        
                                         <Image
                                             src={editIcon}
                                             width={18}
@@ -220,7 +221,10 @@ const Categories: React.FC = () => {
                     </div>
                     <div className="bg-slate-50 items-center h-full">
                         {showTable ? (
-                            <CategoriesSpreadsheet categoryItems={selectedCategoryData} />
+                            <CategoriesSpreadsheet 
+                                categoryName={selectedCategory}
+                                categoryItems={selectedCategoryData} 
+                            />
                         ) : (
                             <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
                                 Select a category.
