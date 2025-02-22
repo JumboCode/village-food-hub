@@ -7,10 +7,14 @@ interface EditModalProps {
     itemName: string;
     units: string;
     closeModal: () => void;
-    handleSave: (category: string, unit: string) => void; 
+    // handle save updates the category/inventory database 
+    // input: updated name, updated units, current category
+    handleSave: (updatedName: string, unit: string, selectedCategory: string) => void; 
+    selectedCategory: string;
+
 }
 
-const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, handleSave}) => {
+const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, handleSave, selectedCategory}) => {
     const [categoryName, setCategoryName] = useState(itemName);
     const [unitValue, setUnitValue] = useState(units);
 
@@ -56,7 +60,7 @@ const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, hand
         
 
                     <ButtonCancel onClick={closeModal} />
-                    <ButtonSave onClick={() => handleSave(String(categoryName), String(unitValue))}/>
+                    <ButtonSave onClick={() => handleSave(String(categoryName), String(unitValue), String(selectedCategory))}/>
                 
                 </div>
             </div>

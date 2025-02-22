@@ -220,7 +220,7 @@ const Categories: React.FC = () => {
                     </div>
                     <div className="bg-slate-50 items-center h-full">
                         {showTable ? (
-                            <CategoriesSpreadsheet categoryItems={selectedCategoryData} />
+                            <CategoriesSpreadsheet categoryItems={selectedCategoryData} selectedCategory={selectedCategory} />
                         ) : (
                             <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
                                 Select a category.
