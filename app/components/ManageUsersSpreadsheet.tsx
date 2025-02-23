@@ -1,7 +1,7 @@
 import React from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import arrowsIcon from "../images/upAndDownArrows.png";
+import deleteIcon from '@app/images/delete.png';
+import arrowsIcon from "@app/images/upAndDownArrows.png";
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];

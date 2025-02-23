@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import downloadIcon from "../images/download.png";
-import editIcon from "../images/edit.png";
-import arrowsIcon from "../images/upAndDownArrows.png";
+import deleteIcon from '@app/images/delete.png';
+import downloadIcon from "@app/images/download.png";
+import editIcon from "@app/images/edit.png";
+import arrowsIcon from "@app/images/upAndDownArrows.png";
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
@@ -109,7 +109,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">
-            <thead className ="font-crimson border- crimson-regular border-separate content-start">
+            <thead className ="font-crimson crimson-regular border-separate content-start">
                 <tr className="bg-dark-blue text-white text-lg align-left ">
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
