@@ -163,11 +163,9 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log(body);
 
     // Extract deleteItem from the request body and map it to itemName
-    const { deleteItem, units } = body;
-    const itemName = deleteItem;
+    const { itemName, units } = body.data;
 
     if (!itemName || !units) {
       return NextResponse.json({ message: 'Missing itemName or units'}, { status: 400 });
