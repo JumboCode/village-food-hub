@@ -60,7 +60,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
         try {
             const updateData = {
                 itemName: itemName,
-                categoryName: selectedCategory,
+                categoryName: selectedCategory, 
                 quantity: inventoryItem.quantity,
                 units: newUnit,
                 lastUpdated: new Date().toISOString(),
