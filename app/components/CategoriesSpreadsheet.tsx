@@ -1,8 +1,8 @@
 import React from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import editIcon from "../images/edit.png";
-import arrowsIcon from "../images/upAndDownArrows.png";
+import deleteIcon from '@app/images/delete.png';
+import editIcon from "@app/images/edit.png";
+import arrowsIcon from "@app/images/upAndDownArrows.png";
 
 interface CategoriesSpreadsheetProps {
     categoryItems: (string | number)[][];

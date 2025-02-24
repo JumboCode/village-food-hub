@@ -1,21 +1,31 @@
-// api/users/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 
+interface ClerkError {
+  errors: { longMessage: string }[];
+}
+
+function isClerkError(error: unknown): error is ClerkError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray((error as { errors: unknown }).errors)
+  );
+}
+
 /* 
  * GETs a list of users from the database. Users can be filtered by their 
- * emails and usernames
- * Expects a username to be provided as a query parameter 
+ * emails and usernames.
+ * Expects a username to be provided as a query parameter.
  */
 export async function GET(req: NextRequest) {
   const client = await clerkClient();
   const searchParams = req.nextUrl.searchParams;
-  let username = searchParams.get('username');
-  let email = searchParams.get('emailAddress');
-  let queryFilters: { [key: string]: any } = {};
+  const username = searchParams.get('username');
+  const email = searchParams.get('emailAddress');
+  const queryFilters: { [key: string]: string[] | number } = {};
 
-  // Set filters based on query params
   if (username) {
     queryFilters.username = [username];
   }
@@ -28,15 +38,15 @@ export async function GET(req: NextRequest) {
   try {
     const users = await client.users.getUserList(queryFilters);
     return NextResponse.json(users);
-  } catch (error) {
+  } catch {
     return new NextResponse('Error: User not found', { status: 404 });
   }
 }
 
 /* 
- * Inserts a new user into the database
- * Expects the request body to be json with the fields username, password,
- * firstName, lastName, pronouns, role, emailAddress & phoneNumber
+ * Inserts a new user into the database.
+ * Expects the request body to be JSON with the fields: username, password,
+ * firstName, lastName, pronouns, role, emailAddress & phoneNumber.
  */
 export async function POST(req: NextRequest) {
   const client = await clerkClient();
@@ -45,14 +55,16 @@ export async function POST(req: NextRequest) {
     console.log('Received data:', data);
 
     // Check for all required fields
-    if (!('username' in data &&
-          'password' in data &&
-          'firstName' in data &&
-          'lastName' in data && 
-          'pronouns' in data &&
-          'emailAddress' in data &&
-          'phoneNumber' in data &&
-          'role' in data)) {
+    if (
+      !('username' in data &&
+        'password' in data &&
+        'firstName' in data &&
+        'lastName' in data &&
+        'pronouns' in data &&
+        'emailAddress' in data &&
+        'phoneNumber' in data &&
+        'role' in data)
+    ) {
       return new NextResponse('Error: Missing required fields', { status: 400 });
     }
 
@@ -67,15 +79,16 @@ export async function POST(req: NextRequest) {
         pronouns: data.pronouns,
         role: data.role,
         phoneNumber: data.phoneNumber,
-      }
+      },
     });
 
-    // Return the created user as a response
     return NextResponse.json(user);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating user:', error);
-    
-    const errorMessage = error?.errors?.[0]?.longMessage || 'An unknown error occurred'; 
+    let errorMessage = 'An unknown error occurred';
+    if (isClerkError(error)) {
+      errorMessage = error.errors[0]?.longMessage || errorMessage;
+    }
     return new NextResponse('Error: ' + errorMessage, { status: 500 });
   }
 }

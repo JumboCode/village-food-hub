@@ -1,9 +1,9 @@
 "use client"
 import React, {useState, useEffect} from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import arrowsIcon from "../images/upAndDownArrows.png";
-import DeleteModal from "./DeleteModal";
+import deleteIcon from '@app/images/delete.png';
+import arrowsIcon from "@app/images/upAndDownArrows.png";
+import DeleteModal from "@app/components/DeleteModal";
 
 
 interface DemographicsSpreadsheetProps {

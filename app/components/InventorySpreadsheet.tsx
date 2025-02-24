@@ -1,13 +1,19 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import downloadIcon from "../images/download.png";
-import editIcon from "../images/edit.png";
-import arrowsIcon from "../images/upAndDownArrows.png";
-import DeleteInventoryModal from "./DeleteInventoryModal";
+import deleteIcon from '@app/images/delete.png';
+import downloadIcon from "@app/images/download.png";
+import editIcon from "@app/images/edit.png";
+import arrowsIcon from "@app/images/upAndDownArrows.png";
+import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
+}
+
+interface InventoryHistoryRecord {
+    date: string; // or Date if preferred, but string is used for formatting
+    quantityChanged: number;
+    action: string;
 }
 
 function formatDate(date: string | Date): string {
@@ -30,7 +36,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const [itemName, setItemName] = useState<string | null>(null);
     const [units, setUnits] = useState<string | null>(null);
     
-    
     const handleClick = () => {
         console.log('Button clicked');
     };
@@ -38,7 +43,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const openModal = (itemName: string, units: string) => {
         setShowModal(true);
         setItemName(itemName);
-        setUnits(units)
+        setUnits(units);
     };
 
     const closeModal = (): void => {
@@ -52,9 +57,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };
     
     const handleDelete = async () => {
-        if (!itemName) return;
-        if (!units) return;
-
+        if (!itemName || !units) return;
         const deleteItem = { itemName, units };
 
         try {
@@ -63,7 +66,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 headers: {
                     "Content-Type": "application/json",
                 },
-                
                 body: JSON.stringify({ data: deleteItem }),
             });
 
@@ -81,23 +83,30 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const downloadCSV = (item: (string | number)[]) => {
         console.log(item);
         const itemName = item[0];
-
         const unitData = item[3];
+        const historyData = item[5];
         
-        let historyData = item[5];
-        let parsedHistory: any = historyData;
-        parsedHistory = JSON.parse(historyData as string);
+        // Build a key to extract the relevant history records
         const key = `${itemName}_${unitData}`;
-        parsedHistory = parsedHistory?.[key] ?? [];
+        let historyRecords: InventoryHistoryRecord[] = [];
+        try {
+            // Parse historyData as a JSON object whose keys map to arrays of InventoryHistoryRecord
+            const parsedData = JSON.parse(historyData as string) as Record<string, InventoryHistoryRecord[]>;
+            historyRecords = parsedData?.[key] ?? [];
+        } catch (e) {
+            console.error("Error parsing history data:", e);
+        }
 
         const headers = ["date", "quantity-change", "action-of-change"];
         const rows = [
             headers.join(","), 
-            ...parsedHistory.map((record: any) => [
-                formatDate(record.date), 
-                record.quantityChanged, 
-                record.action, 
-            ].map(field => `"${field}"`).join(","))
+            ...historyRecords.map((record: InventoryHistoryRecord) =>
+                [
+                    formatDate(record.date),
+                    record.quantityChanged,
+                    record.action
+                ].map(field => `"${field}"`).join(",")
+            )
         ].join("\r\n");
     
         const fileName = `${itemName}_${unitData}_inventory.csv`;
@@ -108,63 +117,67 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    };
 
-    return(
+    return (
         <div className="relative overflow-x-auto crimson-regular font-crimson">
-        <table className="table-auto w-full">
-            <thead className ="font-crimson border- crimson-regular border-separate content-start">
-                <tr className="bg-dark-blue text-white text-lg align-left ">
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                    <div className="flex flex-row justify-between">
-                        <p>Item Name</p>
-                        <Image src={arrowsIcon}
+            <table className="table-auto w-full">
+                <thead className="font-crimson border- crimson-regular border-separate content-start">
+                    <tr className="bg-dark-blue text-white text-lg align-left ">
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            <div className="flex flex-row justify-between">
+                                <p>Item Name</p>
+                                <Image
+                                    src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                    </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
-                        <p>Category</p>
-                        <Image src={arrowsIcon}
+                                    className=""
+                                />
+                            </div>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            <div className="flex flex-row justify-between">
+                                <p>Category</p>
+                                <Image
+                                    src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
-                        <p>Quantity</p>
-                        <Image src={arrowsIcon}
+                                    className=""
+                                />
+                            </div>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            <div className="flex flex-row justify-between">
+                                <p>Quantity</p>
+                                <Image
+                                    src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
-                        <p>Units</p>
-                        <Image src={arrowsIcon}
+                                    className=""
+                                />
+                            </div>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            <div className="flex flex-row justify-between">
+                                <p>Units</p>
+                                <Image
+                                    src={arrowsIcon}
                                     width={15}
                                     height={15}
                                     alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
-                </tr>
-            </thead>
-            <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-            {inventoryItems.map((item, index) => (
+                                    className=""
+                                />
+                            </div>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
+                    {inventoryItems.map((item, index) => (
                         <tr key={index} className="py-2">
                             {item.map((data, subIndex) => (
                                 <td
@@ -191,10 +204,22 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     height={18}
                                     alt="delete Icon"
                                     className=""
-                                    onClick={() => openModal((String(inventoryItems[index][0])), (String(inventoryItems[index][3])))}
+                                    onClick={() =>
+                                        openModal(
+                                            String(inventoryItems[index][0]),
+                                            String(inventoryItems[index][3])
+                                        )
+                                    }
                                 />
-                                {showModal && <DeleteInventoryModal itemName={String(itemName)} units={String(units)} closeModal={closeModal} handleDelete={handleDelete} /> }
-                                <button onClick={() => downloadCSV(item)} >
+                                {showModal && (
+                                    <DeleteInventoryModal
+                                        itemName={String(itemName)}
+                                        units={String(units)}
+                                        closeModal={closeModal}
+                                        handleDelete={handleDelete}
+                                    />
+                                )}
+                                <button onClick={() => downloadCSV(item)}>
                                     <Image
                                         src={downloadIcon}
                                         width={18}
@@ -203,14 +228,11 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                         className=""
                                     />
                                 </button>
-                                
                             </td>
                         </tr>
                     ))}
-            </tbody>
+                </tbody>
             </table>
         </div>
-
-    )
-    
-}
+    );
+};
