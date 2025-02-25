@@ -18,6 +18,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
     const [itemWarning, setItemWarning] = useState(false);
     const [unitWarning, setUnitWarning] = useState(-1);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+    const [lastUnitWarning, setLastUnitWarning] = useState(false);
     
     // to open the modal to delete parts of an item
     const openDeleteModal = (categoryName: string, item: (string | number)[]) => {
@@ -34,18 +35,80 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
         setItemWarning(false);
         setUnitWarning(-1);
         setDeleteConfirmation(false);
+        setLastUnitWarning(false);
     }
 
     // deleting the specific item
-    const deleteItem = () => {
+    const deleteItem = async () => {
         closeDeleteModal();
+        
+        // deleting from inventory
+        modalItem[1].toString().split(", ").forEach(async (item) => {
+            try {
+                const inventoryResponse = await fetch("../api/inventory", 
+                {
+                    method: 'DELETE', 
+                    body: JSON.stringify({deleteItem: modalItem[0], units: item})
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                      throw new Error(`Deleting from inventory error; status: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+            } catch(e) {
+                console.error(e);
+            }
+        })
+
+        // deleting from categories
+        try {
+            const categoryResponse = await fetch("../api/categories", 
+            {
+                method: 'DELETE', 
+                body: JSON.stringify({itemName: modalItem[0], name: modalCategory})
+            })
+            .then((response) => {
+                if (!response.ok) {
+                  throw new Error(`Deleting from categories error; status: ${response.status}`);
+                }
+                return response.json();
+              })
+        } catch(e) {
+            console.error(e);
+        }
+
         setDeleteConfirmation(true);
     }
 
     // deleting the item's unit
-    const deleteUnit = () => {
+    const deleteUnit = async (unit: string) => {
         setUnitWarning(-1);
         // TODO: BACKEND
+
+        console.log(modalItem[1].toString().split(", ").length);
+
+        if (modalItem[1].toString().split(", ").length === 1) {
+            setLastUnitWarning(true);
+        } else {
+        
+            // deleting from inventory
+            try {
+                const inventoryResponse = await fetch("../api/inventory", 
+                {
+                    method: 'DELETE', 
+                    body: JSON.stringify({deleteItem: modalItem[0], units: unit})
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                      throw new Error(`Deleting from inventory error; status: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+            } catch(e) {
+                console.error(e);
+            }
+        }
     }
 
     return (
@@ -119,8 +182,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                     {/* Warning if deleting an item */}
                     {itemWarning && 
                         <div className="flex flex-row items-center space-x-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-Width="2" stroke="#EB2B0C" className="size-6 pb-[1px]">
-                                <path stroke-Linecap="round" stroke-Linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="#EB2B0C" className="size-6 pb-[1px]">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                             </svg>
 
                             <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">All inventory entries with this item will be deleted.</p>
@@ -174,45 +237,67 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                     {/* Map of Units */}
                     <div>
                         {modalItem[1].toString().split(", ").map((item, index) => (
-                            <div key={index} className="flex flex-row w-full justify-center items-center pb-3">
-                                <p className="text-[32px] w-[15%] flex justify-center items-center font-crimson crimson-semibold">
-                                    Units
-                                </p>
-                                <div className="flex w-[60%] px-[30px]">
-                                    <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"}`}>
-                                        {item}
+                            <div className="flex flex-col justify-center space-y-3">
+                
+                                {/* Warning if deleting a unit */}
+                                {unitWarning === index && 
+                                    <div className="flex flex-row items-center space-x-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="#EB2B0C" className="size-6 pb-[1px]">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                        </svg>
+
+                                        <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">All inventory entries with this unit will be deleted.</p>
+                                    </div>
+                                }
+                                {lastUnitWarning &&
+                                    <div className="flex flex-row items-center space-x-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="#EB2B0C" className="size-6 pb-[1px]">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                        </svg>
+                                        <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">Cannot delete the last unit of an item.</p>
+                                    </div>
+                                }
+                                
+                                <div key={index} className="flex flex-row w-full justify-center items-center pb-3">
+                                    <p className="text-[32px] w-[15%] flex justify-center items-center font-crimson crimson-semibold">
+                                        Units
                                     </p>
-                                </div>
-                                <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
-                                    {unitWarning !== index
-                                    ?
-                                        <button onClick={() => setUnitWarning(index)}>
-                                            <Image
-                                                src={deleteIcon}
-                                                width={18}
-                                                height={18}
-                                                alt="delete Icon"
-                                                className="h-4/5"
-                                            />
-                                        </button>
-                                        :
-                                            // Decision
-                                            <div className="flex flex-col">
-                                                <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">Are you sure?</p>
-                                                <div className="flex flex-row space-x-2">
-                                                    <button onClick={() => setUnitWarning(-1)}>
-                                                        <div className="w-[65px] h-[25px] rounded-[8px] border-[#828282] border-[1px]">
-                                                            <p className="font-crimson text-[#828282] text-[16px] crimson-semibold">Cancel</p>
-                                                        </div>
-                                                    </button>
-                                                    <button onClick={() => deleteUnit()}>
-                                                        <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
-                                                            <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">Delete</p>
-                                                        </div>
-                                                    </button>
+                                    <div className="flex w-[60%] px-[30px]">
+                                        <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"}`}>
+                                            {item}
+                                        </p>
+                                    </div>
+                                    <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
+                                        {unitWarning !== index
+                                        ?
+                                            <button onClick={() => setUnitWarning(index)}>
+                                                <Image
+                                                    src={deleteIcon}
+                                                    width={18}
+                                                    height={18}
+                                                    alt="delete Icon"
+                                                    className="h-4/5"
+                                                />
+                                            </button>
+                                            :
+                                                // Decision
+                                                <div className="flex flex-col">
+                                                    <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">Are you sure?</p>
+                                                    <div className="flex flex-row space-x-2">
+                                                        <button onClick={() => setUnitWarning(-1)}>
+                                                            <div className="w-[65px] h-[25px] rounded-[8px] border-[#828282] border-[1px]">
+                                                                <p className="font-crimson text-[#828282] text-[16px] crimson-semibold">Cancel</p>
+                                                            </div>
+                                                        </button>
+                                                        <button onClick={() => deleteUnit(item)}>
+                                                            <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
+                                                                <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">Delete</p>
+                                                            </div>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        }
+                                            }
+                                    </div>
                                 </div>
                             </div>
                         ))}

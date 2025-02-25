@@ -99,7 +99,9 @@ const Categories: React.FC = () => {
             setRetrievalError(false);
         } else {
             setShowEmptyError(false);
+
             try {
+                
                 const response = await fetch("../api/categories", {
                     method: "POST",
                     body: JSON.stringify({
