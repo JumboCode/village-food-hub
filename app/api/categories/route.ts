@@ -97,8 +97,10 @@ export async function GET() {
 
 // PUT
 export async function PUT(
-    req: NextRequest,
-) {    
+    req: NextRequest, 
+) {  
+    
+    console.log('HELLO');
     try {
         const data = await req.json()
         console.log('Received data in API:', data);
@@ -182,8 +184,7 @@ function validCategory(record : CategoryRecord): boolean {
         keys.forEach( (field: string) => {
             if (!fields.has(field)) fieldsMatch = false
             fields.delete(field)
-        })
-        
+        })        
         return fieldsMatch
         
     } catch (error) {

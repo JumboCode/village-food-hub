@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { ButtonCancel, ButtonSave } from './SurveyButtons';
+import UnitBoxes from './UnitBoxes';
+import addIcon from '@app/images/Vector.png';
 
 interface EditModalProps {
     itemName: string;
@@ -16,7 +18,8 @@ interface EditModalProps {
 
 const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, handleSave, selectedCategory}) => {
     const [categoryName, setCategoryName] = useState(itemName);
-    const [unitValue, setUnitValue] = useState(units);
+    const [newUnits, setNewUnits] = useState<string[]>([]);
+    
 
 
     return (
@@ -38,20 +41,10 @@ const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, hand
                     </div>
 
                     {/* Units Input */}
-                    <div className="flex mb-2">
-                        <div className="text-[32px] w-24 ml-[5%]">Units</div>
-                        <div className="flex w-[242px]">
-                            <input
-                                type="text"
-                                value={unitValue}
-                                onChange={(e) => setUnitValue(e.target.value)}
-                                className="flex w-[200px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-3 text-lg"
-                            />
-                            <button className="ml-2 bg-light-green text-white px-3 py-1 rounded-[8px] text-[24px] font-bold">
-                                +
-                            </button>
-                        </div>
-                    </div>
+                    <UnitBoxes 
+                        icon={addIcon}
+                        onUnitsChange={setNewUnits}
+                    />
                 </div> 
 
                 {/* Buttons */}
@@ -60,7 +53,7 @@ const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, hand
         
 
                     <ButtonCancel onClick={closeModal} />
-                    <ButtonSave onClick={() => handleSave(String(categoryName), String(unitValue), String(selectedCategory))}/>
+                    <ButtonSave onClick={() => handleSave(String(categoryName), String(newUnits), String(selectedCategory))}/>
                 
                 </div>
             </div>

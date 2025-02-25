@@ -23,8 +23,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
         setShowModal(true);
         setItemName(itemName); 
         setUnits(units);
-        console.log("Item to edit:", itemName); 
-        console.log("Unit to edit:", units); 
     };
 
     const closeModal = (): void => {
@@ -51,42 +49,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
         }
     };
     
-    const updateInventoryUnits = async (
-        itemName: string, 
-        oldUnit: string, 
-        newUnit: string,
-        inventoryItem: any
-    ) => {
-        try {
-            const updateData = {
-                itemName: itemName,
-                categoryName: selectedCategory, 
-                quantity: inventoryItem.quantity,
-                units: newUnit,
-                lastUpdated: new Date().toISOString(),
-                history: inventoryItem.history
-            };
-
-            const response = await fetch("/api/inventory", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updateData)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update inventory. Status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error("Error updating inventory:", error);
-            throw error;
-        }
-    };
-
-
     const handleSave = async (updatedName: string, updatedUnits: string, selectedCategory: String ) => {
-        if (!currItemName || !updatedName || !updatedUnits) return;
+        // if (!currItemName || !updatedName || !updatedUnits) return;
+
+        console.log('IN HANDLE SAVE'); 
+
+        if (updatedUnits.length == 0) {
+            updatedUnits = currUnits;
+        } 
 
         try {
             const requestDataCateogories = {
@@ -102,24 +72,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 body: JSON.stringify(requestDataCateogories)
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-
-            if (currUnits !== updatedUnits) {
-                const inventoryItems = await fetchCurrentInventory(currItemName);
-                
-                if (inventoryItems && inventoryItems.length > 0) {
-                    for (const item of inventoryItems) {
-                        await updateInventoryUnits(
-                            // new name and new units
-                            updatedName, 
-                            currUnits,  
-                            updatedUnits, 
-                            item
-                        );
-                    }
-                }
-            }
+            if (!response.ok) throw new Error(`I fucked up: ${response.status}`);
 
             closeModal();
             refreshPage();
