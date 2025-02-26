@@ -21,6 +21,17 @@ interface ClerkUser {
 const InternalViewManageUsersPage: React.FC = () => {
   const [users, setUsers] = useState<string[][]>([]);
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
+  
+  const [profileData, setProfileData] = useState({
+      firstName: "",
+      lastName: "",
+      username: "",
+      emailAddress: "",
+      pronouns: "",
+      role: "",
+      phoneNumber: "",
+      password: ""
+  });
 
   useEffect(() => {
     fetch("../api/users", { method: 'GET' })
@@ -57,7 +68,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         <div>
           <div className="p-[80px] pt-[50px]">
             <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
-            <ProfileView visible={showCreateProfileView} mode="create" onCancel={handleCancelProfileView} />
+            <ProfileView visible={showCreateProfileView} mode="create" onCancel={handleCancelProfileView} profileData={profileData}/>
             <div>
               <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]">
                 Create

@@ -92,3 +92,23 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Error: ' + errorMessage, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const data = await req.json();
+    const { userId, firstName, lastName, pronouns, role, phoneNumber } = data;
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+    const client = await clerkClient();
+    const updatedUser = await client.users.updateUser(userId, {
+      firstName,
+      lastName,
+      publicMetadata: { pronouns, role, phoneNumber },
+    });
+    return NextResponse.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

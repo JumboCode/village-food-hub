@@ -8,9 +8,29 @@ interface ProfileViewProps {
     visible: boolean;
     mode: string;
     onCancel?: () => void;
+    profileData: {
+        firstName: string;
+        lastName: string;
+        username: string;
+        emailAddress: string;
+        pronouns: string;
+        role: string;
+        phoneNumber: string;
+        password: string;
+      };
+      setProfileData?: React.Dispatch<React.SetStateAction<{
+        firstName: string;
+        lastName: string;
+        username: string;
+        emailAddress: string;
+        pronouns: string;
+        role: string;
+        phoneNumber: string;
+        password: string;
+      }>>;
   }
   
-const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) => {
+const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
     
@@ -28,8 +48,9 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
     const [error, setError] = useState("");
     
     const { user } = useUser();
-    // const { user, isLoaded, isSignedIn } = useUser();
     const clerkUsername = user?.username;
+    
+    
     
     useEffect(() => {
         if (mode === "create") {
@@ -81,6 +102,19 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                     setPronouns(userData.publicMetadata?.pronouns || "");
                     setRole(userData.publicMetadata?.role || "");
                     setPhoneNumber(userData.publicMetadata?.phoneNumber || "");
+                    
+                    if (setProfileData) {
+                        setProfileData({
+                          firstName: userData.firstName || "",
+                          lastName: userData.lastName || "",
+                          username: userData.username || "",
+                          emailAddress: email,
+                          pronouns: userData.publicMetadata?.pronouns || "",
+                          role: userData.publicMetadata?.role || "",
+                          phoneNumber: userData.publicMetadata?.phoneNumber || "",
+                          password: "",
+                        });
+                      }
                 } else {
                     console.error("Failed to fetch user data");
                 }
@@ -118,8 +152,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         First Name <span className="text-red">*</span>
                     </label>
                     <input
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        // value={firstName}
+                        value={profileData.firstName}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
+                        // onChange={(e) => setFirstName(e.target.value)}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -132,8 +168,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Last Name <span className="text-red">*</span>
                     </label>
                     <input
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        value={profileData.lastName}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -148,8 +184,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Username <span className="text-red">*</span>
                     </label>
                     <input
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        value={profileData.username}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, username: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         // In edit and view modes, username should not be editable.
@@ -163,8 +199,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Role <span className="text-red">*</span>
                     </label>
                     <input
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
+                        value={profileData.role}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, role: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -179,8 +215,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Pronouns <span className="text-red">*</span>
                     </label>
                     <input
-                        value={pronouns}
-                        onChange={(e) => setPronouns(e.target.value)}
+                        value={profileData.pronouns}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, pronouns: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -193,8 +229,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Phone Number <span className="text-red">*</span>
                     </label>
                     <input
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        value={profileData.phoneNumber}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, phoneNumber: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -209,8 +245,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel }) =
                         Email <span className="text-red">*</span>
                     </label>
                     <input
-                        value={emailAddress}
-                        onChange={(e) => setEmailAddress(e.target.value)}
+                        value={profileData.emailAddress}
+                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, emailAddress: e.target.value }))}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         // In edit and view modes, email should not be editable.
