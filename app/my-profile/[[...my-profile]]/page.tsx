@@ -65,34 +65,6 @@ const MyProfilePage: React.FC = () => {
         setShowEditProfileView(false);
     }
 
-    // const handleSaveChange = async () => {
-    //     setShowEditProfileView(false);
-    // }
-      
-    //     try {
-    //       const response = await fetch('/api/users/update', {
-    //         method: 'PUT', // or PATCH, based on your API design
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(updatedData),
-    //       });
-      
-    //       if (response.ok) {
-    //         // Handle success: show a success message, refresh the data, etc.
-    //         console.log("User updated successfully");
-    //         // Optionally, switch back to view mode.
-    //         setEditProfileMode(false);
-    //         setViewProfileMode(true);
-    //       } else {
-    //         // Handle error: show an error message.
-    //         console.error("Failed to update user data");
-    //       }
-    //     } catch (error) {
-    //       console.error("Error updating user data:", error);
-    //     }
-    //   };
-      
     
     return (
         <div>
