@@ -33,29 +33,34 @@ const Categories: React.FC = () => {
 
     // Fetch categories data on component mount
     useEffect(() => {
-        (async () => {
-            try {
-                const response = await fetch("/api/categories");
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
-                    const categoryName = record.name;
-                    const itemName = record.itemName;
-                    const units = record.units || [];
-                    if (!acc[categoryName]) {
-                        acc[categoryName] = [];
-                    }
-                    // Join the units array into a comma-separated string
-                    const unitsString = units.join(', ');
-                    acc[categoryName].push([itemName, unitsString]);
-                    return acc;
-                }, {});
-                setCategoriesData(rearrangedData);
-            } catch (err) {
-                console.error(err);
-            }
-        })();
+        loadCategoriesData();
     }, []);
+
+    // to fetch the categories data from the database
+    const loadCategoriesData = async () => {
+        try {
+            const response = await fetch("/api/categories");
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
+                const categoryName = record.name;
+                const itemName = record.itemName;
+                const units = record.units || [];
+                if (!acc[categoryName]) {
+                    acc[categoryName] = [];
+                }
+                // Join the units array into a comma-separated string
+                const unitsString = units.join(', ');
+                acc[categoryName].push([itemName, unitsString]);
+                return acc;
+            }, {});
+            setCategoriesData(rearrangedData);
+            console.log("rearrangedData: " + rearrangedData);
+            return rearrangedData;
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     // Handle category selection change
     const handleCategoryChange = (value: string) => {
@@ -80,6 +85,20 @@ const Categories: React.FC = () => {
     const itemButtonClicked = () => {
         setShowItemModal(true);
     };
+
+    // reload from database after item is added
+    useEffect(() => {
+        if (!showItemModal) {
+            loadCategoriesData();
+        }
+    }, [showItemModal]);
+
+    // reload from database after category is added
+    useEffect(() => {
+        if (!showCategoryModal) {
+            loadCategoriesData();
+        }
+    }, [showCategoryModal]);
 
     // Close modal and reset error states
     const itemModalClosed = () => {
@@ -226,6 +245,7 @@ const Categories: React.FC = () => {
                             <CategoriesSpreadsheet 
                                 categoryName={selectedCategory}
                                 categoryItems={selectedCategoryData} 
+                                loadData={loadCategoriesData}
                             />
                         ) : (
                             <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
@@ -254,7 +274,7 @@ const Categories: React.FC = () => {
                                 onUnitsChange={setUnits}
                             />
 
-</div>
+                        </div>
                         {showEmptyError && (
                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
                                 Please enter an item name.

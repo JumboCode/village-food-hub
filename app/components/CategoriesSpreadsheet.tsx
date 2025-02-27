@@ -7,31 +7,34 @@ import arrowsIcon from "../images/upAndDownArrows.png";
 interface CategoriesSpreadsheetProps {
     categoryName: string;
     categoryItems: (string | number)[][];
+    loadData: any; 
 }
 
-const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryName = "", categoryItems = [] }) => {
+const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryName = "", categoryItems = [], loadData }) => {
     console.log("categoryItems:", categoryItems);
 
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [modalCategory, setModalCategory] = useState("");
     const [modalItem, setModalItem] = useState<(string | number)[]>([]);
+    const [modalItemIndex, setModalItemIndex] = useState(-1);
     const [itemWarning, setItemWarning] = useState(false);
     const [unitWarning, setUnitWarning] = useState(-1);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
     const [lastUnitWarning, setLastUnitWarning] = useState(false);
     
     // to open the modal to delete parts of an item
-    const openDeleteModal = (categoryName: string, item: (string | number)[]) => {
+    const openDeleteModal = (categoryName: string, item: (string | number)[], index: number) => {
         setIsDeleteModalVisible(true);
         setModalCategory(categoryName);
         setModalItem(item);
+        setModalItemIndex(index);
     }
 
     // to close the modal that deletes parts of an item
     const closeDeleteModal = () => {
         setIsDeleteModalVisible(false);
         setModalCategory("");
-        setModalItem([]);
+        setModalItemIndex(-1);
         setItemWarning(false);
         setUnitWarning(-1);
         setDeleteConfirmation(false);
@@ -52,7 +55,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                 })
                 .then((response) => {
                     if (!response.ok) {
-                      throw new Error(`Deleting from inventory error; status: ${response.status}`);
+                      throw new Error(`Deleting item from inventory error; status: ${response.status}`);
                     }
                     return response.json();
                   })
@@ -70,7 +73,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
             })
             .then((response) => {
                 if (!response.ok) {
-                  throw new Error(`Deleting from categories error; status: ${response.status}`);
+                  throw new Error(`Deleting item from categories error; status: ${response.status}`);
                 }
                 return response.json();
               })
@@ -79,14 +82,12 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
         }
 
         setDeleteConfirmation(true);
+        loadData();
     }
 
     // deleting the item's unit
     const deleteUnit = async (unit: string) => {
         setUnitWarning(-1);
-        // TODO: BACKEND
-
-        console.log(modalItem[1].toString().split(", ").length);
 
         if (modalItem[1].toString().split(", ").length === 1) {
             setLastUnitWarning(true);
@@ -101,13 +102,39 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                 })
                 .then((response) => {
                     if (!response.ok) {
-                      throw new Error(`Deleting from inventory error; status: ${response.status}`);
+                      throw new Error(`Deleting unit from inventory error; status: ${response.status}`);
                     }
                     return response.json();
                   })
             } catch(e) {
                 console.error(e);
             }
+
+            // deleting from categories
+            try {
+                const newUnits = modalItem[1].toString().split(", ").filter((elt) => elt !== unit);
+
+                const categoryResponse = await fetch("../api/categories", 
+                {
+                    method: 'PUT', 
+                    body: JSON.stringify({itemName: modalItem[0], name: modalCategory, units: newUnits })
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                      throw new Error(`Deleting unit from categories error; status: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+            } catch(e) {
+                console.error(e);
+            }
+
+            // reloading the item (and its units)
+            const newData = await loadData();
+            
+            // reopening the modal
+            setTimeout(() => setIsDeleteModalVisible(false), 500);
+            setTimeout(() => openDeleteModal(categoryName, newData[categoryName][modalItemIndex], modalItemIndex), 1000);
         }
     }
 
@@ -155,7 +182,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                                     alt="edit Icon"
                                     className=""
                                 />
-                                <button onClick={() => openDeleteModal(categoryName, item)}>
+                                <button onClick={() => openDeleteModal(categoryName, item, index)}>
                                     <Image
                                         src={deleteIcon}
                                         width={18}
@@ -237,7 +264,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                     {/* Map of Units */}
                     <div>
                         {modalItem[1].toString().split(", ").map((item, index) => (
-                            <div className="flex flex-col justify-center space-y-3">
+                            <div key={index} className="flex flex-col justify-center space-y-3">
                 
                                 {/* Warning if deleting a unit */}
                                 {unitWarning === index && 
@@ -321,7 +348,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
                         Delete Menu
                     </p>
                     <p className="text-[32px] flex font-crimson crimson-semibold items-center justify-start">
-                        Item deleted.
+                        {`${modalItem[0]} deleted.`}
                     </p>
                     <div className="flex justify-center items-center">
                         <button className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282]" onClick={() => closeDeleteModal()}>
