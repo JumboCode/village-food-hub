@@ -17,18 +17,18 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
 
     const [showEditModal, setShowModal] = useState(false); 
     const [currItemName, setItemName] = useState(''); 
-    const [currUnits, setUnits] = useState(''); 
+    // const [currUnits, setUnits] = useState(''); 
 
-    const openModal = (itemName: string, units: string) => {
+    const openModal = (itemName: string) => {
         setShowModal(true);
         setItemName(itemName); 
-        setUnits(units);
+        // setUnits(units);
     };
 
     const closeModal = (): void => {
         setShowModal(false);
         setItemName(''); 
-        setUnits('');
+        // setUnits('');
     };
 
     const refreshPage = () => {
@@ -49,33 +49,33 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
         }
     };
     
-    const handleSave = async (updatedName: string, updatedUnits: string, selectedCategory: String ) => {
+    const handleSave = async (updatedName: string, updatedUnits: string[], selectedCategory: string ) => {
         // if (!currItemName || !updatedName || !updatedUnits) return;
 
-        console.log('IN HANDLE SAVE'); 
-
-        if (updatedUnits.length == 0) {
-            updatedUnits = currUnits;
-        } 
-
+    
         try {
-            const requestDataCateogories = {
-                itemName: updatedName,
-                name: selectedCategory, 
-                units: updatedUnits
+            const validUnits = updatedUnits.filter(unit => unit && unit.trim() !== "");
+
+            const payload = {
+                itemName: updatedName.trim(),
+                name: selectedCategory.trim(), 
+                units: x
             };
-            
-            console.log('Sending request with data:', requestDataCateogories);
+
+            console.log('Sending request with payload:', payload);
 
             const response = await fetch("/api/categories", {
                 method: "PUT", 
-                body: JSON.stringify(requestDataCateogories)
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`I fucked up: ${response.status}`);
-
+            if (!response.ok) {console.log(`Server error: ${response.status}`)};
+ 
             closeModal();
-            refreshPage();
+            // refreshPage();
 
         } catch (error) {
             console.error("Error updating data:", error);
@@ -111,10 +111,10 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                                     height={18}
                                     alt="edit Icon"
                                     className="cursor-pointer"
-                                    onClick={() => openModal(String(categoryItems[index][0]), String(categoryItems[index][1]))}
+                                    onClick={() => openModal((String(categoryItems[index][0])))}
                                 />
                                 <Image src={deleteIcon} width={18} height={18} alt="delete Icon" className="cursor-pointer" />
-                                {showEditModal && <EditModal itemName={currItemName} units={currUnits} closeModal={closeModal} handleSave={handleSave} selectedCategory={selectedCategory} />}
+                                {showEditModal && <EditModal itemNameOld={currItemName} closeModal={closeModal} handleSave={handleSave} selectedCategory={selectedCategory} />}
                             </td>
                         </tr>
                     ))}
