@@ -69,6 +69,10 @@ export default function NavBar() {
   const handleManageUsers = () => {
     router.push("/manage-users");
   };
+  
+  const handleMyProfile = () => {
+    router.push("/my-profile");
+  };
 
   const [currentPath, setCurrentPath] = useState("");
 
@@ -140,7 +144,8 @@ export default function NavBar() {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-7 bg-white rounded-md shadow-lg w-48 z-50">
                 <ul>
-                  <li className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer">
+                  <li className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                      onClick={handleMyProfile}>
                     <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
                     My Profile
                   </li>
