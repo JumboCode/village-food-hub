@@ -17,18 +17,19 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
 
     const [showEditModal, setShowModal] = useState(false); 
     const [currItemName, setItemName] = useState(''); 
-    // const [currUnits, setUnits] = useState(''); 
+
+    /* This would be used to pass the initial units to the EditModal
+    for the unit boxes
+    const [currUnits, setUnits] = useState(''); */
 
     const openModal = (itemName: string) => {
         setShowModal(true);
         setItemName(itemName); 
-        // setUnits(units);
     };
 
     const closeModal = (): void => {
         setShowModal(false);
         setItemName(''); 
-        // setUnits('');
     };
 
     const refreshPage = () => {
@@ -51,7 +52,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
     
     const handleSave = async (updatedName: string, updatedUnits: string[], selectedCategory: string ) => {
         // if (!currItemName || !updatedName || !updatedUnits) return;
-
     
         try {
             const validUnits = updatedUnits.filter(unit => unit && unit.trim() !== "");
@@ -59,11 +59,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
             const payload = {
                 itemName: updatedName.trim(),
                 name: selectedCategory.trim(), 
-<<<<<<< Updated upstream
-                units: x
-=======
-                units: validUnits
->>>>>>> Stashed changes
+            units: validUnits
             };
 
             console.log('Sending request with payload:', payload);
@@ -76,13 +72,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 body: JSON.stringify(payload)
             });
 
-<<<<<<< Updated upstream
-            if (!response.ok) {console.log(`Server error: ${response.status}`)};
- 
-=======
-            if (!response.ok) {console.log(`I fucked up: ${response.status}`)};
+            if (!response.ok) {console.log(`Error editing category with server response: ${response.status}`)};
 
->>>>>>> Stashed changes
             closeModal();
             // refreshPage();
 

@@ -17,12 +17,14 @@ interface EditModalProps {
 }
 
 const EditModal: React.FC<EditModalProps> = ({ itemNameOld, closeModal, handleSave, selectedCategory}) => {
-    const [itemName, setItemName] = useState('');
+    const [itemName, setItemName] = useState(itemNameOld);
     const [newUnits, setNewUnits] = useState<string[]>([]);
+
+    // setItemName(itemNameOld);
     
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <div className="w-[412px] bg-[#FFFFFF] font-crimson justify-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                 {/* Title */}
                 <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Edit Item</div>
@@ -53,7 +55,6 @@ const EditModal: React.FC<EditModalProps> = ({ itemNameOld, closeModal, handleSa
 
                     <ButtonCancel onClick={closeModal} />
                     <ButtonSave onClick={() => handleSave(String(itemName), newUnits, String(selectedCategory))}/>
-                    {/* <ButtonSave onClick={() => {console.log(newUnits.type)}} */}
                 
                 </div>
             </div>
