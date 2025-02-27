@@ -6,21 +6,20 @@ import UnitBoxes from './UnitBoxes';
 import addIcon from '@app/images/Vector.png';
 
 interface EditModalProps {
-    itemName: string;
-    units: string;
+    itemNameOld: string;
+    // units: string[]([]);
     closeModal: () => void;
     // handle save updates the category/inventory database 
     // input: updated name, updated units, current category
-    handleSave: (updatedName: string, unit: string, selectedCategory: string) => void; 
+    handleSave: (updatedName: string, unit: string[], selectedCategory: string) => void; 
     selectedCategory: string;
 
 }
 
-const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, handleSave, selectedCategory}) => {
-    const [categoryName, setCategoryName] = useState(itemName);
+const EditModal: React.FC<EditModalProps> = ({ itemNameOld, closeModal, handleSave, selectedCategory}) => {
+    const [itemName, setItemName] = useState('');
     const [newUnits, setNewUnits] = useState<string[]>([]);
     
-
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -34,8 +33,8 @@ const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, hand
                         <div className="text-[32px] w-24 ml-[5%]">Name</div>
                         <input
                             type="text"
-                            value={categoryName}
-                            onChange={(e) => setCategoryName(e.target.value)}
+                            value={itemName}
+                            onChange={(e) => setItemName(e.target.value)}
                             className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-3 text-lg"
                         />
                     </div>
@@ -53,7 +52,8 @@ const EditModal: React.FC<EditModalProps> = ({ itemName, units, closeModal, hand
         
 
                     <ButtonCancel onClick={closeModal} />
-                    <ButtonSave onClick={() => handleSave(String(categoryName), String(newUnits), String(selectedCategory))}/>
+                    <ButtonSave onClick={() => handleSave(String(itemName), newUnits, String(selectedCategory))}/>
+                    {/* <ButtonSave onClick={() => {console.log(newUnits.type)}} */}
                 
                 </div>
             </div>

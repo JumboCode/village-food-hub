@@ -59,7 +59,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
             const payload = {
                 itemName: updatedName.trim(),
                 name: selectedCategory.trim(), 
+<<<<<<< Updated upstream
                 units: x
+=======
+                units: validUnits
+>>>>>>> Stashed changes
             };
 
             console.log('Sending request with payload:', payload);
@@ -72,8 +76,13 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                 body: JSON.stringify(payload)
             });
 
+<<<<<<< Updated upstream
             if (!response.ok) {console.log(`Server error: ${response.status}`)};
  
+=======
+            if (!response.ok) {console.log(`I fucked up: ${response.status}`)};
+
+>>>>>>> Stashed changes
             closeModal();
             // refreshPage();
 
