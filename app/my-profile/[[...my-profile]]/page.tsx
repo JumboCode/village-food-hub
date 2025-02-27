@@ -77,13 +77,13 @@ const MyProfilePage: React.FC = () => {
                     <ProfileView visible={showEditProfileView} mode="edit" onCancel={handleCancelProfileView} 
                         profileData={profileData} setProfileData={setProfileData}/>
                     <div>
-                    <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]"
+                    <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px]"
                         onClick={handleSaveChange}
                         >
                         Save Changes
                     </button>
                     <button 
-                        className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] border-[2px] border-gray"
+                        className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] border-[2px] border-gray"
                         onClick={handleCancelProfileView}
                     >
                         Cancel
@@ -98,7 +98,7 @@ const MyProfilePage: React.FC = () => {
                         <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData}/>
                     <div>
                     <div className="flex flex-row justify-between">
-                        <button className="bg-light-green hover:bg-dark-green text-white text-[32px] font-crimson w-[257px] h-[50px] rounded-xl mt-[100px] mr-[30px] flex items-center justify-center "
+                        <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
                                 onClick={handleEditProfileView}
                         > 
                             <Image
@@ -110,7 +110,7 @@ const MyProfilePage: React.FC = () => {
                             />
                             Edit Profile
                         </button>
-                        <button className="bg-red hover:bg-red text-white text-[32px] font-crimson w-[250px] h-[50px] rounded-xl mt-[100px] flex items-center justify-center pr-1">
+                        <button className="bg-red hover:bg-red text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] flex items-center justify-center">
                             <Image
                                 src={deleteIcon}
                                 alt="search button"
