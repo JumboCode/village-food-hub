@@ -5,6 +5,7 @@ import downloadIcon from "@app/images/download.png";
 import editIcon from "@app/images/edit.png";
 import arrowsIcon from "@app/images/upAndDownArrows.png";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
+import QuantityModal from "@app/components/QuantityModal";
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
@@ -35,6 +36,27 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const [showModal, setShowModal] = useState(false);
     const [itemName, setItemName] = useState<string | null>(null);
     const [units, setUnits] = useState<string | null>(null);
+    const [currCategoryName, setCurrCategoryName] = useState<string | null>(null);
+
+
+    const [showQuantityModal, setShowQuantityModal] = useState(false); 
+
+
+    const closeQuantityModal = (): void => {
+        setShowQuantityModal(false);
+        setItemName(null);
+        setUnits(null);
+        setCurrCategoryName(null);
+    };
+
+    const openQuantityModal = (itemName: string, units: string, category: string): void => {
+        setShowQuantityModal(true);
+        setItemName(itemName);
+        setUnits(units);
+        setCurrCategoryName(category);
+    };
+
+
     
     const handleClick = () => {
         console.log('Button clicked');
@@ -56,6 +78,41 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         window.location.reload();
     };
     
+    const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: Number, categoryName: string) => {
+        if (!itemName || !units) return;
+
+        const updatedData = {
+            categoryName,
+            itemName,
+            quantity: Number(quantityChange),
+            units,
+            lastUpdated: new Date(),
+        }
+        try {
+            const response = await fetch("/../api/inventory", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...updatedData,
+                    quantity: quantityChange,
+                  }),
+            });
+            if (!response.ok) {
+                throw new Error("Error updating inventory data.");
+            }
+            closeQuantityModal();
+            refreshPage();
+            console.log("Updated successfully!");
+          
+        } catch (error) {
+            console.log(error);
+            closeQuantityModal();
+
+        }
+    };
+
     const handleDelete = async () => {
         if (!itemName || !units) return;
         const deleteItem = { itemName, units };
@@ -197,6 +254,13 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     height={18}
                                     alt="edit Icon"
                                     className=""
+                                    onClick={() =>
+                                        openQuantityModal(
+                                            String(inventoryItems[index][0]),
+                                            String(inventoryItems[index][3]), 
+                                            String(inventoryItems[index][1]), 
+                                        )
+                                    }
                                 />
                                 <Image
                                     src={deleteIcon}
@@ -207,7 +271,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     onClick={() =>
                                         openModal(
                                             String(inventoryItems[index][0]),
-                                            String(inventoryItems[index][3])
+                                            String(inventoryItems[index][3]), 
                                         )
                                     }
                                 />
@@ -217,6 +281,15 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                         units={String(units)}
                                         closeModal={closeModal}
                                         handleDelete={handleDelete}
+                                    />
+                                )}
+                                {showQuantityModal && (
+                                    <QuantityModal
+                                        itemName={(String(itemName))}
+                                        units={(String(units))}
+                                        closeModal={closeQuantityModal}
+                                        handleUpdate={handleUpdateQuantity}
+                                        categoryName={String(currCategoryName)}
                                     />
                                 )}
                                 <button onClick={() => downloadCSV(item)}>
