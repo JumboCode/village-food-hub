@@ -265,7 +265,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder=""
-                        className="pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
+                        className="pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] bg-[#fafafa]"
                         // In edit and view modes, password should not be editable.
                         disabled={isView || isEdit}
                     />
