@@ -78,7 +78,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         window.location.reload();
     };
     
-    const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: Number, categoryName: string) => {
+    const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: number, categoryName: string) => {
         if (!itemName || !units) return;
 
         const updatedData = {
