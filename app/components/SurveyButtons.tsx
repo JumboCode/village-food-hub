@@ -80,6 +80,20 @@ export function ButtonSubmit({ onClick, disabled }: ButtonProps) {
   );
 }
 
+export function ButtonSave({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        { "SAVE" }
+      </button>
+    </div>
+  );
+}
+
 export function ButtonBack({ onClick, disabled }: ButtonProps) {
   return (
     <div>
