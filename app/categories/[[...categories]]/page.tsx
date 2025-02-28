@@ -11,6 +11,7 @@ import UnitBoxes from '@app/components/UnitBoxes';
 import deleteIcon from '@app/images/delete.png';
 import editIcon from '@app/images/edit.png';
 import addIcon from '@app/images/Vector.png';
+import DeleteCategoryModal from "@app/components/DeleteCategoryModal";
 
 interface CategoryData {
   [key: string]: [string, string][];
@@ -29,6 +30,56 @@ const Categories: React.FC = () => {
     const [showEmptyError, setShowEmptyError] = useState(false);
     const [showRetrievalError, setRetrievalError] = useState(false);
     const [units, setUnits] = useState<string[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedData, setSelectedData] = useState<string | null>(null);
+    const [name, setName] = useState<string | null>(null);
+    
+    const openModal = (categoryName: string, itemName: string) => {
+        setShowModal(true);
+        setCategoryName(categoryName);
+        setItemName(itemName);
+    };
+
+    const closeModal = (): void => {
+        setShowModal(false);
+        setName(null);
+    };
+
+    // Get data for the selected category
+    const selectedCategoryData = categoriesData[selectedCategory] || [];
+
+    const handleDelete = async () => {
+        if (!categoryName) return;
+        if (!itemName) return;
+
+        if (!selectedCategoryData) {
+            console.log("nothing in selected Category data")
+        }
+        const deleteItem = selectedCategoryData.map(([itemName]) => ({
+            itemName, categoryName, 
+        }));
+
+        try {
+            for (const item of deleteItem) {
+            const response = await fetch("/api/categories", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({data: item}),
+            });
+
+            if (!response.ok) {
+                throw new Error("Error fetching categories data.");
+            }
+        }
+            refreshPage();
+            console.log("Deleted successfully!");
+            closeModal();
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
 
     // Fetch categories data on component mount
@@ -91,6 +142,7 @@ const Categories: React.FC = () => {
     const refreshPage = () => {
         window.location.reload();
     };
+
    
     // Save new category
     const saveButtonClicked = async () => {
@@ -156,8 +208,6 @@ const Categories: React.FC = () => {
         }
     };
 
-    // Get data for the selected category
-    const selectedCategoryData = categoriesData[selectedCategory] || [];
 
     return (
         <div>
@@ -182,13 +232,17 @@ const Categories: React.FC = () => {
                                 {showTable && (
                                     <>
                                         {/* Delete and Edit Icons */}
+                                        {/* <button onClick={() => DeleteCategoryModal()}> */}
                                         <Image
                                             src={deleteIcon}
                                             width={18}
                                             height={18}
                                             alt="delete Icon"
                                             className="m-4 ml-6 mt-2"
+                                            onClick={() => openModal((String(selectedCategory)), (String(selectedCategoryData[0][0])))}
                                         />
+                                        {showModal && <DeleteCategoryModal categoryName={String(selectedCategory)} itemName={String(itemName)} closeModal={closeModal} handleDelete={handleDelete} /> }
+                                        {/* </button> */}
                                         <Image
                                             src={editIcon}
                                             width={18}

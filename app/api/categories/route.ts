@@ -48,7 +48,11 @@ async function deleteCategory(data: {
     itemName: string,
     name: string
 }) {
+    console.log(data.itemName);
+    console.log(data.name);
     const { itemName, name } = data;
+    console.log(itemName);
+    console.log(name);
     
     return await prisma.categories.delete({
         where: {
@@ -127,15 +131,16 @@ export async function PUT(
 export async function DELETE(
     req: NextRequest
 ) {
+    
     try {
-        const data = await req.json()
+        const { data } = await req.json();
         if (!("itemName" in data)) {
             return NextResponse.json( 
                 { response: "Missing item name" },
                 { status: 400 }
             )
         }
-        if (!("name" in data)) {
+        if (!("categoryName" in data)) {
             return NextResponse.json( 
                 { response: "Missing name" },
                 { status: 400 }
@@ -144,7 +149,7 @@ export async function DELETE(
         
         const item = await deleteCategory({
             itemName: data.itemName, 
-            name: data.name 
+            name: data.categoryName
         })
         return NextResponse.json(item, {status : 200})
     } catch (error) {
