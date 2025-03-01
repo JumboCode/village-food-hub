@@ -1,5 +1,6 @@
 // route file for inventory
 import { Prisma, PrismaClient } from '@prisma/client';
+import { error } from 'console';
 import { NextRequest, NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
@@ -98,6 +99,52 @@ async function deleteInventoryItem(data: {
     }
   });
 }
+
+async function updateInventoryCategoryNames(data: {
+    oldCategoryName: string,
+    newCategoryName: string
+}) {
+    const { oldCategoryName, newCategoryName } = data;
+
+    return await prisma.inventory.updateMany({
+        where: {
+            categoryName: oldCategoryName
+        },
+        data: {
+            categoryName: newCategoryName,
+            lastUpdated: new Date()
+        }
+    });
+}
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { oldName, newName } = body
+
+        if (!oldName || !newName) {
+            return NextResponse.json({data: "Invalid request" }, {status: 400});
+        }
+
+        const items = await updateInventoryCategoryNames({
+            oldCategoryName: oldName,
+            newCategoryName: newName
+        });
+
+        return NextResponse.json(
+            {data: items }, 
+            {status: 200}
+        );
+
+    } catch (error) {
+        return NextResponse.json(
+            {data: "Failed to update inventory items" }, 
+            {status: 500}
+        );
+    }
+}
+
+
 
 export async function POST(req: NextRequest) {
     try {
