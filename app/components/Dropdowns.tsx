@@ -15,51 +15,43 @@ export function NameDropdown({ options = [], onSelect  = () => {}, fetchUrl, fil
     
     useEffect(() => {
         async function fetchItems() {
+            if (!fetchUrl) return;  // Prevents fetching if fetchUrl is not provided
+    
             try {
                 const response = await fetch(fetchUrl);
-                if (response.ok) {
-                    const fetchedItems = await response.json();
-                    const itemNames = fetchedItems.map((item: any) => item[filterName]);
-                    
-                    // If filterValue (category) is provided, filter the items based on category
-                    const filteredItems = filterValue
-                        ? fetchedItems
-                            .filter((item: any) => {
-                                return item[filterName] === filterValue;
-                            })
-                            .flatMap((item: any) => item[currentDropdown])
-                        : itemNames;
-
-                    const uniqueItemName: string[] = Array.from(new Set(filteredItems));
-                    setItems(uniqueItemName);
-                    const uniqueUnitName: string[] = Array.from(new Set(filteredItems));
-                    console.log("unique unit name:", uniqueUnitName);
-                } else {
-                    throw new Error('Failed to fetch items');
-                }
+                if (!response.ok) throw new Error('Failed to fetch items');
+    
+                const fetchedItems = await response.json();
+                const itemNames = fetchedItems.map((item: any) => item[filterName]);
+    
+                const filteredItems = filterValue
+                    ? fetchedItems
+                        .filter((item: any) => item[filterName] === filterValue)
+                        .flatMap((item: any) => item[currentDropdown])
+                    : itemNames;
+    
+                setItems(Array.from(new Set(filteredItems)));
             } catch (error) {
                 console.error('Failed to fetch items', error);
             }
         }
-
+    
         fetchItems();
     }, [fetchUrl, filterName, filterValue, currentDropdown]);
     
     return (
-        <div className="font-crimson">
-            <select 
-                className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
-                defaultValue=""
-                onChange={(e) => onSelect(e.target.value)}
-                disabled={disabled}
-            >
-                <option disabled value=""/>
-                {items.map((item, index) => (
-                        <option key={index} value={item}>
-                            {item}
-                        </option>
-                ))}
-            </select>
-        </div>
+        <select 
+            className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray" 
+            defaultValue=""
+            onChange={(e) => onSelect(e.target.value)}
+            disabled={disabled}
+        >
+            <option disabled value=""/>
+            {items.map((item, index) => (
+                    <option key={index} value={item}>
+                        {item}
+                    </option>
+            ))}
+        </select>
     );
 }

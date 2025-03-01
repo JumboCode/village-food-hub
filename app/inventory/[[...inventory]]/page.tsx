@@ -1,12 +1,14 @@
-"use client"
-import React, { useEffect } from "react";
+'use client';
+
+import React, { useEffect, useState } from "react";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
-import Image from 'next/image';
-import filterSymbol from "@app/images/filterSymbol.svg";
-import searchSymbol from "@app/images/searchSymbol.svg";
-import SearchBar from '@app/components/SearchBar';
+import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
 import NavBar from '@app/components/NavBar';
 
+
+interface FetchedCategory {
+    [key: string]: string | string[];
+} 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -15,56 +17,248 @@ function formatDate(date: Date): string {
   return `${month}/${day}/${year}`;
 }
 
-async function getInventory() {
-  try {
-    const response = await fetch("/../api/inventory", { method: 'GET' });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const jsonData = await response.json();
-    const data = jsonData.data;
-
-    if (!Array.isArray(data)) {
-      console.log("not an array");
-      return [];
-    }
-
-    const listOfLists = data.map((object: any) => {
-      const fields = Object.values(object);
-      // Remove the last field (history object) because it conflicts with the spreadsheet
-      fields.pop();
-
-      // Format the date field if it exists
-      const dateFieldIndex = fields.length - 1;
-      const dateField = fields[dateFieldIndex];
-      const date = new Date(dateField as string);
-
-      if (!isNaN(date.getTime())) {
-        fields[dateFieldIndex] = formatDate(date);
-      } else {
-        fields[dateFieldIndex] = "";
-      }
-
-      return fields;
-    });
-
-    console.log("List of Lists:", listOfLists);
-    return listOfLists;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
+// Define the structure of the inventory data
+interface InventoryItem {
+  [key: string]: string | number | Date | JSON; // Dynamic fields, but for simplicity assuming string, number or Date
 }
 
-const InternalViewInventoryPage: React.FC = () => {
-  const [inventory, setInventory] = React.useState<any>();
+async function getInventory(): Promise<InventoryItem[]> {
+    try {
+      const response = await fetch("/../api/inventory", { method: 'GET' });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const jsonData = await response.json();
+      const data = jsonData.data;
+  
+      if (!Array.isArray(data)) {
+        console.log("not an array");
+        return [];
+      }
+      
+      const listOfLists = data.map((object: InventoryItem) => {
+            const { itemName, categoryName, quantity, units, lastUpdated, history } = object;
+            const formattedDate = lastUpdated ? formatDate(new Date(lastUpdated as string)) : "";
+            // Convert history to a string (preserves JSON structure but keeps it as a list value)
+            const historyString = history ? JSON.stringify(history) : "";
+            // Return a list instead of an object
+            return [itemName, categoryName, quantity, units, formattedDate, historyString];
+        });
 
-  React.useEffect(() => {
-    getInventory()
-      .then((items: any) => {
-        setInventory(items);
-      });
-  }, []);
+        console.log("List of Lists:", listOfLists);
+        return listOfLists;
+
+        } catch (error) {
+          console.error(error);
+          return [];
+    }
+  }
+
+
+interface FilterModalProps {
+  isOpen: boolean;
+  categoriesList?: string;
+  onApply: (selectedCategories: string[]) => void;
+  onReset: () => void;
+  onClose: () => void;
+  fetchUrl?: string;
+  filterName: string;
+  filterValue?: string;
+}
+
+const FilterModal: React.FC<FilterModalProps> = ({
+  isOpen,
+  categoriesList,
+  onApply,
+  onReset,
+  onClose,
+  fetchUrl, 
+  filterName, 
+  filterValue
+}) => {
+  const [Categories, setCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const handleCheckboxChange = (category: string, checked: boolean) => {
+    setSelectedCategories((prev: string[]) => {
+      if (checked) {
+        return [...prev, category];
+      }
+      return prev.filter(c => c !== category);
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedCategories([]);
+    }
+  }, [isOpen]);
+
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch(fetchUrl || ''); 
+        if (response.ok) {
+            const fetchedCategories: FetchedCategory[] = await response.json(); 
+            const categoryNames = fetchedCategories.map((item)  => item[filterName] as string); 
+            
+            const filteredItems = filterValue
+                ? fetchedCategories 
+                .filter((category) => category[filterName] === filterValue)
+                .flatMap((category) => categoriesList && Array.isArray(category[categoriesList]) ? category[categoriesList] : [])            
+                : categoryNames; 
+
+                const uniqueItemName: string[] = Array.from(new Set(filteredItems));
+                setCategories(uniqueItemName);
+                
+              } else {
+            throw new Error('Failed to fetch categories')
+        }
+
+      } catch (error) {
+          console.error('Failed to fetch categories', error)
+      }
+    }
+
+    if (fetchUrl) {
+        fetchCategories();
+    }
+  }, [fetchUrl, filterName, filterValue, categoriesList])
+
+  const handleApply = () => {
+    onApply(selectedCategories);
+  };
+
+  const handleReset = () => {
+    setSelectedCategories([]);
+    onReset();
+  };
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  if (!isOpen) return null;
 
   return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative w-[300px] bg-white py-6 shadow-lg rounded-lg">
+        <button
+          className="absolute top-2 right-2 pr-2 text-gray-500 hover:text-black"
+          onClick={handleClose}
+        >
+          &times;
+        </button>
+        <div className="flex flex-col">
+          <div>
+            {Categories && Categories.length > 0 ? (
+              Categories.map((category) => (
+                <div key={category} className="flex items-center space-x-2 mb-3 pl-8 font-crimson">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category)}
+                    onChange={(e) => handleCheckboxChange(category, e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <p className="text-lg cursor-pointer">
+                    {category}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                No categories available
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-row justify-evenly font-crimson pt-4">
+            <button
+              onClick={handleReset}
+              className="bg-transparent text-gray hover:text-black hover:bg-light-gray py-1.5 px-8 rounded-md text-[20px] border border-gray"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleApply}
+              className="bg-light-green hover:bg-dark-green text-white px-8 py-1.5 rounded-md text-[20px]"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InternalViewInventoryPage: React.FC = () => {
+    const [inventory, setInventory] = useState<InventoryItem[]>([]); // Array of inventory items
+    const [displayInventory, setDisplayInventory] = useState<InventoryItem[]>([])
+    const [FilterModalOpen, setFilterModalOpen] = useState(false);
+
+    useEffect(() => {
+        getInventory()
+          .then((items: InventoryItem[]) => {
+            setInventory(items);
+            setFilteredInventory(items);
+            setDisplayInventory(items);
+          });
+      }, []);
+
+
+  
+  const handleApplyFilters = (selectedCategories: string[]) => {
+
+    const itemsToDisplay = [];
+
+    for (const item of inventory) {
+       if (selectedCategories.includes(item[1] as string)) {
+          itemsToDisplay.push(item)
+       }
+
+    console.log(selectedCategories)
+    }
+    
+    setDisplayInventory(itemsToDisplay);
+    setFilterModalOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    console.log("Filters reset");
+    setDisplayInventory(inventory)
+    setFilterModalOpen(false);
+
+  };
+
+  const handleCloseModal = () => {
+    setFilterModalOpen(false);
+  }
+
+  // states for the search bar
+  const [searchInput, setSearchInput] = useState('');
+  const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>([]);
+
+  // when the search input is changed, refilter
+  useEffect(() => {
+
+      // filters the demographic's phone numbers, names, and addresses separately
+      const nameIndices = inventory?.map((item) => item[0].toString().toUpperCase().includes(searchInput.toUpperCase())) || [];
+      
+      const demoLength = inventory?.length || 0;
+      const filteredInventory = [];
+
+      // loops over the inventory and adds the ones that match the filter
+      for (let i = 0; i < demoLength; i++) {
+          if (nameIndices[i]) {
+              filteredInventory.push(inventory![i]);
+          }
+      }
+      
+      // stores the filtered inventory
+      setFilteredInventory(filteredInventory);
+  }, [searchInput])
+
+  return (    
     <div>
       <NavBar/>
       <div className="px-10">
@@ -72,43 +266,28 @@ const InternalViewInventoryPage: React.FC = () => {
           <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
             Inventory
           </div>
+          
           <div className="flex flex-row items-center">
-            <div className="border-2 border-[#D9D9D9] rounded-xl w-[400px] h-[54px]">
-              <div className="flex flex-row py-2 px-2 items-center">
-                <Image
-                  src={searchSymbol}
-                  alt="search button"
-                  className="pl-2"
-                  width={24}
-                  height={29.14}
-                />
-                <input
-                  className="pl-3 font-crimson placeholder:font-crimson text-[24px] focus:outline-none"
-                  placeholder="Search.."
-                >
-                </input>
-              </div>
-            </div>
-            <button className="border-2 border-[#D9D9D9] font-crimson rounded-xl ml-9 h-[54px]">
-              <div className="flex flex-row py-2 px-3">
-                <Image
-                  src={filterSymbol}
-                  alt="filter button"
-                  width={24}
-                  height={29.14}
-                />
-                <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson pl-2">
-                  Filter
-                </div>
-              </div>
-            </button>
+            <SearchBar 
+            input={searchInput}
+            setInput={setSearchInput}
+            placeholder={"Search by item name..."}
+            />
+            <FilterButton onClick={() => setFilterModalOpen(prev => !prev)} />
+            <FilterModal
+                isOpen={FilterModalOpen}
+                onApply={handleApplyFilters}
+                onReset={handleResetFilters}
+                onClose={handleCloseModal}
+                fetchUrl="/api/categories"
+                filterName="name"
+            />
           </div>
         </div>
-        <InventorySpreadsheet inventoryItems={inventory} />
+        <InventorySpreadsheet inventoryItems={filteredInventory} />
       </div>
-     </div>
+    </div>
   );
 };
 
 export default InternalViewInventoryPage;
-

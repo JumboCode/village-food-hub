@@ -1,14 +1,61 @@
-import React from "react";
+"use client"
+import React, {useState, useEffect} from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import arrowsIcon from "../images/upAndDownArrows.png";
+import deleteIcon from '@app/images/delete.png';
+import arrowsIcon from "@app/images/upAndDownArrows.png";
+import DeleteModal from "@app/components/DeleteModal";
+
 
 interface DemographicsSpreadsheetProps {
     demographicsItems: (string | number)[][][][];
 }
 
-export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = ({ demographicsItems = [] }) => {
-    console.log("demographicsItems:", demographicsItems);
+export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = ({ demographicsItems = []}) => {
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedData, setSelectedData] = useState<string | null>(null);
+    const [name, setName] = useState<string | null>(null);
+    
+
+    const openModal = (data: string, name: string) => {
+        setShowModal(true);
+        setSelectedData(data); 
+        setName(name)
+      };
+    
+      const closeModal = (): void => {
+        setShowModal(false);
+        setSelectedData(null); 
+        setName(null);
+      };
+
+      const refreshPage = () => {
+        window.location.reload();
+      };
+   
+      const handleDelete = async () => {
+        if (!selectedData) return;
+        
+
+        try {
+            const response = await fetch("/../api/demographics", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ phoneNumber: selectedData }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Error fetching demographics data.");
+            }
+            refreshPage();
+            console.log("Deleted successfully!");
+            closeModal();
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
@@ -103,8 +150,13 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     width={18}
                                     height={18}
                                     alt="delete Icon"
-                                    className=""
+                                    className="cursor-pointer" 
+                                    // onClick={() => openModal(item[1])} /* get the phonenumber from this row in column 2*/
+                                    onClick={() => openModal((String(demographicsItems[index][1])), (String(demographicsItems[index][2])))}
+                                
+                                    
                                 />
+                                {showModal && <DeleteModal userName={String(name)} closeModal={closeModal} handleDelete={handleDelete} /> }
                             </td>
                         </tr>
                     ))}

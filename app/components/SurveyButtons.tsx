@@ -22,6 +22,21 @@ export function ButtonExit({ onClick, disabled }: ButtonProps) {
   );
 }
 
+export function ButtonDelete({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-red hover:bg-dark-red text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        { "Delete" } 
+      </button>
+    </div>
+  );
+}
+
+
 export function ButtonExitAnyway({ onClick, disabled }: ButtonProps) {
   return (
     <div>
@@ -35,6 +50,7 @@ export function ButtonExitAnyway({ onClick, disabled }: ButtonProps) {
     </div>
   );
 }
+
 
 export function ButtonNext({ onClick, disabled }: ButtonProps) {
   return (
@@ -59,6 +75,20 @@ export function ButtonSubmit({ onClick, disabled }: ButtonProps) {
         disabled={disabled}
       >
         { "SUBMIT" } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
+      </button>
+    </div>
+  );
+}
+
+export function ButtonSave({ onClick, disabled }: ButtonProps) {
+  return (
+    <div>
+      <button 
+        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        { "SAVE" }
       </button>
     </div>
   );

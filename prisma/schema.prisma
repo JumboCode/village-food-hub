@@ -38,12 +38,6 @@ model categories {
 }
 
 
-enum Role {
-    admin
-    staff
-    volunteer
-    customer
-}
 
 model users {
     firstName   String
