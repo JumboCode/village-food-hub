@@ -77,6 +77,7 @@ const Categories: React.FC = () => {
         setShowEmptyError(false);
         setRetrievalError(false);
         setShowEditModal(false);
+        setShowDuplicateError(false);
     };
 
     // Open modal to add a new item
@@ -167,6 +168,7 @@ const Categories: React.FC = () => {
     const saveEditCategory = async () => {
         setShowEmptyError(false);
         setRetrievalError(false);
+        setShowDuplicateError(false);
 
         console.log(categoriesData)
         if (editCategoryName == "") {
