@@ -1,8 +1,12 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Image from 'next/image';
 import editIcon from '@app/images/edit.png';
 import deleteIcon from '@app/images/delete.png';
 import arrowsIcon from "@app/images/upAndDownArrows.png";
+import DeleteUserModal from "@app/components/DeleteUserModal";
+// import { NextRequest, NextResponse } from 'next/server';
+// import { clerkClient } from '@clerk/nextjs/server';
+// import { constants } from "node:buffer";
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
@@ -10,7 +14,69 @@ interface ManageUsersSpreadsheetProps {
 
 export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [] }) => {
     console.log("manageUsersItems:", manageUsersItems);
+    const [showModal, setShowModal] = useState(false);
+    const [firstName, setFirstName] = useState<string | null>(null);
+    const [lastName, setLastName] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
+    const [showAdminModal, setShowAdminModal] = useState(false);
 
+    const openModal = (firstName: string, lastName: string, username: string) => {
+        setShowModal(true);
+        setFirstName(firstName); 
+        setLastName(lastName)
+        setUsername(username); 
+    };
+
+    const closeModal = (): void => {
+        setShowModal(false);
+        setFirstName(null);
+        setLastName(null);
+        setUsername(null); 
+    };
+
+    const openAdminModal = (): void => {
+        setShowAdminModal(true);
+    }
+
+    const refreshPage = () => {
+        window.location.reload();
+    };
+
+    const handleDelete = async () => {
+        // Check that there's enough admins:
+        // Try to delete user
+        if (!username) return;
+
+
+    
+        try {
+
+            console.log("trying to delete user", username);
+
+            const response = await fetch('/../api/users', {
+                method: 'DELETE', 
+                body: JSON.stringify({username})
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                console.log("User deleted successfully")
+                refreshPage();
+                setShowModal(false);
+            } else {
+                if (result.showAdminModal) {
+                    setShowAdminModal(true);
+                }
+            }
+         
+        } catch (error) {
+            console.error('User not deleted: ', error);
+           
+        }
+
+    };
+    
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">
@@ -82,7 +148,35 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                     height={18}
                                     alt="delete Icon"
                                     className=""
-                                />
+                                    onClick={() => openModal((String(manageUsersItems[index][0])), (String(manageUsersItems[index][1])), (String(manageUsersItems[index][3])))}
+                                    />
+
+                                {showModal && <DeleteUserModal userName={String(firstName) + " " + String(lastName)} closeModal={closeModal} handleDelete={handleDelete}/> }
+                                {showAdminModal && 
+                                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+                                 <div
+                                   className="h-[260px] w-[400px] bg-modal-gray font-crimson
+                                              fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                                              pt-8 shadow-lg rounded-lg"
+                                 >
+                                   <div className="flex flex-col">
+                                    <p className="flex justify-center text-[28px] crimson-bold">The system has to have at least one admin.</p>
+                                
+                                    
+                                    <p className='flex justify-center text-[18px] crimson-bold text-green-100'>Your account was not deleted</p>
+                                   </div>
+                                   <div className="flex flex-row justify-around pt-8">
+
+                                   <button 
+                                            className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+                                            onClick={() => (setShowAdminModal(false))}
+                                        >
+                                            { "Okay" }
+                                        </button>
+                                    </div>
+                                 </div>
+                               </div>
+                               }
                             </td>
                         </tr>
                     ))}

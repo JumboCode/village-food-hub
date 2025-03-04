@@ -112,3 +112,35 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+
+
+export async function DELETE(req: NextRequest) {
+  try {
+
+    const data = await req.json();
+    const { userId } = data;
+
+    const client = await clerkClient(); 
+
+
+    const userList = await client.users.getUserList({ limit: 100});
+    const users = userList.data;
+    const isAdmin = users.filter(
+      user => user.publicMetadata?.role == 'admin' && user.publicMetadata?.userId != username); 
+    
+    if (isAdmin.length === 0){
+
+    await client.users.deleteUser(username); 
+      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModa: true}, {status: 403}); 
+    }
+
+    await client.users.deleteUser(username); 
+    
+    return NextResponse.json({message: 'User deleted successfully', success: true}, {status: 200})
+
+  } catch (error) {
+      console.error(error)
+      return NextResponse.json({ error: 'User not deleted' }, {status: 500})
+  }
+}
