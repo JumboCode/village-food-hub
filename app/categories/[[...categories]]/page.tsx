@@ -428,13 +428,13 @@ const Categories: React.FC = () => {
                         )}
                         <div className="flex w-full justify-center space-x-[15px] items-center">
                             <button
-                                className="flex text-gray hover:bg-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex text-gray hover:bg-white font-serif pt-[6px] w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={cancelButtonClicked}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif pt-[6px] w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={saveEditCategory}
                             >
                                 Save
