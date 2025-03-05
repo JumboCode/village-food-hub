@@ -24,26 +24,25 @@ async function readCategories() {
     return categories;
 }
 
-async function updateCategory(data : {
-    itemName : string,
-    name: string,
-    units: string[]
-}) {
-    const { itemName, name } = data;
-    
+async function updateCategory(data: {
+    oldItemName: string;
+    itemName: string;  // new name
+    name: string;      // category name (unchanged)
+    units: string[];
+  }) {
     return await prisma.categories.update({
-        where: {
-            itemName_name: {
-                itemName: itemName,
-                name: name
-            }
-        }, data:
-            {
-                itemName: data.itemName,
-                units: data.units // TODO: What about itemName?
-            },
-    })
-}
+      where: {
+        itemName_name: {
+          itemName: data.oldItemName,  // use old value to locate record
+          name: data.name,
+        },
+      },
+      data: {
+        itemName: data.itemName,       // update to new value
+        units: data.units,
+      },
+    });
+}  
 
 async function deleteCategory(data: {
     itemName: string,
@@ -96,37 +95,33 @@ export async function GET() {
 }
 
 // PUT
-export async function PUT(
-    req: NextRequest, 
-) {  
-    
-    console.log('HELLO');
+export async function PUT(req: NextRequest) {
     try {
-        const data = await req.json()
-        console.log('Received data in API:', data);
-
-        if (!validCategory(data)) {
-            console.log('Invalid category data:', data);
-            return NextResponse.json(
-                { response : "Invalid data format" }, 
-                { status : 400 }
-            )
-        }
-        const item = await updateCategory({
-            itemName: data.itemName, 
-            name: data.name,
-            units: data.units
-        });
-        
-        return NextResponse.json(item, { status : 200 })
+      const data = await req.json();
+      console.log('Received data in API:', data);
+      
+      // Validate required keys (using our new, flexible validCategory)
+      if (!validCategory(data) || !data.oldItemName) {
+        console.log('Invalid category data:', data);
+        return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
+      }
+      
+      const updatedCategory = await updateCategory({
+        oldItemName: data.oldItemName,
+        itemName: data.itemName,
+        name: data.name,
+        units: data.units,
+      });
+      
+      // Here you would also update all inventory records with oldItemName to new itemName,
+      // for example using a similar updateMany query on the inventory table.
+      
+      return NextResponse.json(updatedCategory, { status: 200 });
     } catch (error) {
-        console.log(error)
-        return NextResponse.json(
-            { response : "Failed to update entry" },
-            { status : 500 }
-        )
+      console.log(error);
+      return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
     }
-}
+}  
 
 
 // DELETE 
@@ -168,27 +163,35 @@ interface CategoryRecord {
     name:     string;
 }
 
-function validCategory(record : CategoryRecord): boolean {
+// function validCategory(record : CategoryRecord): boolean {
 
-    try {
-        const fields = new Set<string>([
-            "itemName",
-            "units",
-            "name",
-          ]);
+//     try {
+//         const fields = new Set<string>([
+//             "itemName",
+//             "units",
+//             "name",
+//           ]);
         
-        const keys = Object.keys(record)
-        if (keys.length !== fields.size) return false
+//         const keys = Object.keys(record)
+//         if (keys.length !== fields.size) return false
 
-        let fieldsMatch = true
-        keys.forEach( (field: string) => {
-            if (!fields.has(field)) fieldsMatch = false
-            fields.delete(field)
-        })        
-        return fieldsMatch
+//         let fieldsMatch = true
+//         keys.forEach( (field: string) => {
+//             if (!fields.has(field)) fieldsMatch = false
+//             fields.delete(field)
+//         })        
+//         return fieldsMatch
         
-    } catch (error) {
-        console.log(error)
-        return false
-    }
-}
+//     } catch (error) {
+//         console.log(error)
+//         return false
+//     }
+// }
+
+function validCategory(record: CategoryRecord): boolean {
+    return record &&
+           typeof record.itemName === 'string' &&
+           Array.isArray(record.units) &&
+           typeof record.name === 'string';
+  }
+  
