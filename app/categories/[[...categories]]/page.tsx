@@ -24,7 +24,7 @@ const Categories: React.FC = () => {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showItemModal, setShowItemModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<string>(''); // This has build error not used
+    const [selectedItem, setSelectedItem] = useState<string>(''); // (currently not used)
     const [categoryName, setCategoryName] = useState("");
     const [editCategoryName, setEditCategoryName] = useState("");
     const [showDuplicateError, setShowDuplicateError] = useState(false);
@@ -33,32 +33,36 @@ const Categories: React.FC = () => {
     const [showRetrievalError, setRetrievalError] = useState(false);
     const [units, setUnits] = useState<string[]>([]);
 
-
-    // Fetch categories data on component mount
-    const setCategories = useEffect(() => {
-        (async () => {
-            try {
-                const response = await fetch("/api/categories");
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
-                    const categoryName = record.name;
-                    const itemName = record.itemName;
-                    const units = record.units || [];
-                    if (!acc[categoryName]) {
-                        acc[categoryName] = [];
-                    }
-                    // Join the units array into a comma-separated string
-                    const unitsString = units.join(', ');
-                    acc[categoryName].push([itemName, unitsString]);
-                    return acc;
-                }, {});
-                setCategoriesData(rearrangedData);
-            } catch (err) {
-                console.error(err);
-            }
-        })();
+    // Fetch categories data on component mount.
+    useEffect(() => {
+        loadCategoriesData();
     }, []);
+
+    // to fetch the categories data from the database
+    const loadCategoriesData = async () => {
+        try {
+            const response = await fetch("/api/categories");
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
+                const categoryName = record.name;
+                const itemName = record.itemName;
+                const units = record.units || [];
+                if (!acc[categoryName]) {
+                    acc[categoryName] = [];
+                }
+                // Join the units array into a comma-separated string
+                const unitsString = units.join(', ');
+                acc[categoryName].push([itemName, unitsString]);
+                return acc;
+            }, {});
+            setCategoriesData(rearrangedData);
+            console.log("rearrangedData:", rearrangedData);
+            return rearrangedData;
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     // Handle category selection change
     const handleCategoryChange = (value: string) => {
@@ -85,12 +89,27 @@ const Categories: React.FC = () => {
         setShowItemModal(true);
     };
 
+    // Reload from database after item modal is closed
+    useEffect(() => {
+        if (!showItemModal) {
+            loadCategoriesData();
+        }
+    }, [showItemModal]);
+
+    // Reload from database after category modal is closed
+    useEffect(() => {
+        if (!showCategoryModal) {
+            loadCategoriesData();
+        }
+    }, [showCategoryModal]);
+
+    // Function for edit button click (to open edit modal)
     const editButtonClicked = () => {
         setShowEditModal(true);
-        console.log("edit button clicked function!")
-    }
+        console.log("edit button clicked function!");
+    };
 
-    // Close modal and reset error states
+    // Close modal and reset error states for item modal
     const itemModalClosed = () => {
         setShowItemModal(false);
         setShowEmptyError(false);
@@ -131,12 +150,11 @@ const Categories: React.FC = () => {
         }
     };
 
+    // Save a new item for the selected category
     const saveCategories = async () => {
         try {
-
-            // Filter out empty values and make sure units is never null
+            // Filter out empty values and ensure units is never null
             const validUnits = units.filter(unit => unit && unit.trim() !== "");
-            
             const payload = {
                 itemName: itemName.trim(),
                 name: selectedCategory.trim(),
@@ -153,34 +171,31 @@ const Categories: React.FC = () => {
             });
     
             if (!response.ok) {
-                // Set error state?
                 console.log("Server error response:", response);
             }
-    
             itemModalClosed();
         } catch (err) {
             console.log("Error in saveCategories:", err);
-            
-            // Set error state?
         }
     };
 
+    // Save edit for category name change
     const saveEditCategory = async () => {
         setShowEmptyError(false);
         setRetrievalError(false);
         setShowDuplicateError(false);
 
-        console.log(categoriesData)
-        if (editCategoryName == "") {
+        console.log(categoriesData);
+        if (editCategoryName === "") {
             setShowEmptyError(true);
         } else if (Object.keys(categoriesData).includes(editCategoryName)) {
             setShowDuplicateError(true);
         } else {
             try {
-                const response = await fetch("../api/categories")
-                const categories = await response.json()
+                const response = await fetch("../api/categories");
+                const categories = await response.json();
  
-                const nameExists = categories.some( (category) => 
+                const nameExists = categories.some((category) => 
                     category.name === editCategoryName
                 );
                 
@@ -189,7 +204,7 @@ const Categories: React.FC = () => {
                     return;
                 }
 
-                const oldCategories = categories.filter( (category) => 
+                const oldCategories = categories.filter((category) => 
                     category.name === selectedCategory
                 );
                 
@@ -198,21 +213,19 @@ const Categories: React.FC = () => {
                     return;
                 }
 
-                const updateCatRes = await fetch("../api/categories/", 
-                    {
-                        method: "PUT",
-                        body: JSON.stringify({
-                            oldName: selectedCategory,
-                            newName: editCategoryName,
+                const updateCatRes = await fetch("../api/categories/", {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        oldName: selectedCategory,
+                        newName: editCategoryName,
                     }),
                 });
 
-                const updateInvRes = await fetch("../api/inventory/", 
-                    {
-                        method: "PATCH",
-                        body: JSON.stringify({
-                            oldName: selectedCategory,
-                            newName: editCategoryName,
+                const updateInvRes = await fetch("../api/inventory/", {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                        oldName: selectedCategory,
+                        newName: editCategoryName,
                     }),
                 });
 
@@ -220,15 +233,15 @@ const Categories: React.FC = () => {
                     setRetrievalError(true);
                 }    
 
-                console.log(`Updated ${selectedCategory} to be ${editCategoryName}`)
+                console.log(`Updated ${selectedCategory} to be ${editCategoryName}`);
                 setShowEditModal(false);
-                setSelectedCategory(editCategoryName)
-                refreshPage()
+                setSelectedCategory(editCategoryName);
+                refreshPage();
             } catch (err) {
                 setRetrievalError(true);
             }
         }
-    }
+    };
 
     // Get data for the selected category
     const selectedCategoryData = categoriesData[selectedCategory] || [];
@@ -264,12 +277,12 @@ const Categories: React.FC = () => {
                                             className="m-4 ml-6 mt-2"
                                         />
                                         <button onClick={editButtonClicked}>
-                                        <Image
-                                            src={editIcon}
-                                            width={18}
-                                            height={18}
-                                            alt="edit Icon"
-                                            className="m-2 mb-3.5"
+                                            <Image
+                                                src={editIcon}
+                                                width={18}
+                                                height={18}
+                                                alt="edit Icon"
+                                                className="m-2 mb-3.5"
                                             />
                                         </button>
                                     </>
@@ -280,23 +293,27 @@ const Categories: React.FC = () => {
                                     <button className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
                                         onClick={itemButtonClicked}
                                     >
-                                        {"Item "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} 
-                                    />
+                                        {"Item "} 
+                                        <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
                                     </button>
                                 )}
                                 <button
                                     className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
                                     onClick={categoryButtonClicked}
                                 >
-                                    {"Category "} <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }}
-                                />
+                                    {"Category "} 
+                                    <FontAwesomeIcon className="" icon={faPlus} style={{ fontSize: '14px' }} />
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div className="bg-slate-50 items-center h-full">
                         {showTable ? (
-                            <CategoriesSpreadsheet categoryItems={selectedCategoryData} />
+                            <CategoriesSpreadsheet 
+                                categoryName={selectedCategory}
+                                categoryItems={selectedCategoryData} 
+                                loadData={loadCategoriesData}
+                            />
                         ) : (
                             <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
                                 Select a category.
@@ -318,13 +335,11 @@ const Categories: React.FC = () => {
                                     className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
                                 />
                             </div>
-
                             <UnitBoxes 
                                 icon={addIcon}
                                 onUnitsChange={setUnits}
                             />
-
-</div>
+                        </div>
                         {showEmptyError && (
                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
                                 Please enter an item name.
@@ -337,13 +352,13 @@ const Categories: React.FC = () => {
                         )}
                         <div className="flex w-full justify-center space-x-[15px] items-center">
                             <button
-                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex text-gray hover:bg-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={itemModalClosed}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={saveCategories}
                             >
                                 Add
@@ -375,13 +390,13 @@ const Categories: React.FC = () => {
                         )}
                         <div className="flex w-full justify-center space-x-[15px] items-center">
                             <button
-                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex text-gray hover:bg-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={cancelButtonClicked}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={saveButtonClicked}
                             >
                                 Save
@@ -413,13 +428,13 @@ const Categories: React.FC = () => {
                         )}
                         <div className="flex w-full justify-center space-x-[15px] items-center">
                             <button
-                                className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex text-gray hover:bg-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={cancelButtonClicked}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                                 onClick={saveEditCategory}
                             >
                                 Save
