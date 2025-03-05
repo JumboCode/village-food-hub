@@ -1,7 +1,8 @@
 import React from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import arrowsIcon from "../images/upAndDownArrows.png";
+import editIcon from '@app/images/edit.png';
+import deleteIcon from '@app/images/delete.png';
+import arrowsIcon from "@app/images/upAndDownArrows.png";
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
@@ -69,6 +70,13 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                 className="flex row justify-around border-collapse border-zinc-300 border-2 border-y-1 py-2 px-3"
                             >
                                 <Image
+                                    src={editIcon}
+                                    width={18}
+                                    height={18}
+                                    alt="edit Icon"
+                                    className=""
+                                />
+                                <Image
                                     src={deleteIcon}
                                     width={18}
                                     height={18}
@@ -81,7 +89,5 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             </tbody>
             </table>
         </div>
-
     )
-
 }

@@ -35,6 +35,9 @@ const WelcomePage: React.FC = () => {
         setDropdownOpen(!dropdownOpen);
     };
 
+    // Define a type for the translation tuple returned by the API.
+    type TranslationTuple = [string, ...unknown[]];
+
     const translateText = async (lang: string) => {
         if (lang === 'en') {
             setTranslations(DEFAULT_TRANSLATIONS);
@@ -45,20 +48,21 @@ const WelcomePage: React.FC = () => {
             const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(DEFAULT_TRANSLATIONS.join('\n'))}`;
             const response = await fetch(url);
             const data = await response.json();
-            if (data && Array.isArray(data[0]) && data[0].length > 0 && Array.isArray(data[0][0])) {
-                const translatedTexts = data[0].map((t: any[]) => t[0]);
+            if (
+                data &&
+                Array.isArray(data[0]) &&
+                data[0].length > 0 &&
+                Array.isArray(data[0][0])
+            ) {
+                const translatedTexts = (data[0] as TranslationTuple[]).map((t) => t[0]);
                 setTranslations(translatedTexts);
             } else {
                 console.error(`Unexpected response format for translation: ${JSON.stringify(data)}`);
-
-                // Fallback to original text if translation fails
-                setTranslations(DEFAULT_TRANSLATIONS); 
+                setTranslations(DEFAULT_TRANSLATIONS);
             }
         } catch (e) {
             console.error("Translation error:", e);
-
-            // Fallback to original text if translation fails
-            setTranslations(DEFAULT_TRANSLATIONS); 
+            setTranslations(DEFAULT_TRANSLATIONS);
         }
     };
 
@@ -66,23 +70,17 @@ const WelcomePage: React.FC = () => {
         const savedLanguage = localStorage.getItem("language") || 'en';
         setLanguage(savedLanguage);
         translateText(savedLanguage);
-
-        // Ensure loading state is turned off once language is set
         setLoading(false); 
     }, []);
 
     useEffect(() => {
-        // Only update localStorage once the language state is set
         if (!loading) { 
             localStorage.setItem("language", language);
             translateText(language);
-
-            // Close the dropdown when the language is updated
             setDropdownOpen(false);  
         }
     }, [language, loading]);
 
-    // If the page is loading, do not render the dropdown yet
     if (loading) {
         return null;
     }

@@ -30,8 +30,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleD
         <div className="flex flex-row justify-around pt-8">
           <ButtonCancel onClick={closeModal} />
           <ButtonDelete onClick={handleDelete}/>
-
-
         </div>
       </div>
     </div>
