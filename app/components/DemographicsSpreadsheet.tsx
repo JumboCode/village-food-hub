@@ -163,7 +163,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
             </tbody>
             </table>
         </div>
-
     )
-
 }
+
+export default DemographicsSpreadsheet;

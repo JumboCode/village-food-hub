@@ -26,7 +26,7 @@ const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName,
     };
 
     return (
-<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20">
+<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-20">
                     <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                         <p className="text-center text-[32px] font-bold pb-[15px]">Edit Quantity</p>
                         <div className="flex w-full justify-center items-center pb-[30px]">

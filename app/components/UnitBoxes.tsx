@@ -9,7 +9,7 @@ interface AddUnitBoxProps {
 function AddUnitBox({ value, onChange }: AddUnitBoxProps) {
   return (
     <div className='flex ml-[5%] mb-2'>
-      <div className="font-crimson text-[30px] w-24 items-center">Units</div>
+      <div className="font-crimson text-[28px] w-24 items-center">Units</div>
       <input
         type="text"
         value={value}
