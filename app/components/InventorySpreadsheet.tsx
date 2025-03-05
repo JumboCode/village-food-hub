@@ -253,7 +253,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     width={18}
                                     height={18}
                                     alt="edit Icon"
-                                    className=""
+                                    className="cursor-pointer"
                                     onClick={() =>
                                         openQuantityModal(
                                             String(inventoryItems[index][0]),
@@ -267,7 +267,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                                     width={18}
                                     height={18}
                                     alt="delete Icon"
-                                    className=""
+                                    className="cursor-pointer"
                                     onClick={() =>
                                         openModal(
                                             String(inventoryItems[index][0]),
