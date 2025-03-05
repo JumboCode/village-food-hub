@@ -14,15 +14,14 @@ interface DemographicsRecord {
     householdSize: number;
     takeCount: number;
     donateCount: number;
+    previousVisitDates: string[];
 }
 
 // Define the type for the demographics state
 const demographicsData: DemographicsRecord[] = [];
 
 // make a new modal 
-
 function getDemographics() {
-    
     try {
         return fetch("/../api/demographics", { method: 'GET' })
         .then((response) => {
@@ -34,21 +33,16 @@ function getDemographics() {
             return data;
         })
         .then((demographicsData) => {
-
-                const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
-                    const arr = [new Date(record.lastVisitDate).toLocaleString("en-US", {timeZone: "America/New_York"}).split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
-                    return arr;
-                });
-
-                return rearrangedData;
+            const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
+                const arr = [record.lastVisitDate.split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
+                return arr;
             });
-
-
+            return rearrangedData;
+        });
     } catch (error) {
         console.error(error);
         return Promise.resolve([]);
     }
-        
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
@@ -72,11 +66,68 @@ const InternalViewDemographicsPage: React.FC = () => {
     const closeModal = (): void => {
         setShowModal(false);
     };
-
+    
     const handleRunReport = (startDate: Date, endDate: Date) => {
-        // Default implementation that does nothing
-        console.log("Run report from", startDate, "to", endDate);
+        downloadCSV(startDate, endDate);
     };
+
+    const filterDate = (data: DemographicsRecord[], startDate: Date, endDate: Date) => {
+        if (!startDate || !endDate) {
+            return [];
+        }
+        
+        return data
+        .map((record) => {
+            let visitCount = 0;
+            if (record.previousVisitDates && Array.isArray(record.previousVisitDates)) {
+                visitCount = record.previousVisitDates
+                    .map(dateStr => new Date(dateStr)) 
+                    .filter(date => {
+                        const visitDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+                        return visitDate >= start && visitDate <= end;
+                    })
+                    .length;
+            }
+            return {
+                ...record,
+                visitCount, 
+            };
+        })
+        .filter(record => record.visitCount > 0);
+    };
+
+    const downloadCSV = (startDate: Date, endDate: Date) => {
+        const filteredData = filterDate(demographicsData, startDate, endDate);
+        const headers = ["Phone Number", "Name", "Address", "Household Size", "Number of Receives"];
+        const rows = [
+            headers.join(","), 
+            ...filteredData.map(record => [
+                record.phoneNumber, 
+                record.name, 
+                record.address, 
+                record.householdSize.toString(), 
+                record.visitCount.toString()
+            ].map(field => `"${field}"`).join(","))
+        ].join("\r\n");
+
+        const formatLocalDate = (date: Date) => {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+                .toISOString().split("T")[0];
+        };
+
+        const start = formatLocalDate(startDate);
+        const end = formatLocalDate(endDate);
+        const fileName = `${start}_to_${end}_demographics.csv`;
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([rows], { type: "text/csv" }));
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     // states for the search bar
     const [searchInput, setSearchInput] = useState('');
@@ -84,25 +135,23 @@ const InternalViewDemographicsPage: React.FC = () => {
 
     // when the search input is changed, refilter
     useEffect(() => {
-
         // filters the demographic's phone numbers, names, and addresses separately
-        let phoneNumberIndices = demographics?.map((item) => item[1].toUpperCase().includes(searchInput.toUpperCase())) || [];
-        let nameIndices = demographics?.map((item) => item[2].toUpperCase().includes(searchInput.toUpperCase())) || [];
-        let addressIndices = demographics?.map((item) => item[3].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const phoneNumberIndices = demographics?.map((item) => item[1].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const nameIndices = demographics?.map((item) => item[2].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const addressIndices = demographics?.map((item) => item[3].toUpperCase().includes(searchInput.toUpperCase())) || [];
 
         const demoLength = demographics?.length || 0;
-        let filteredDemographics = [];
-
+        const filteredDemographicsArray = [];
         // loops over the demographics and adds the ones that match the filter
         for (let i = 0; i < demoLength; i++) {
             if (phoneNumberIndices[i] || nameIndices[i] || addressIndices[i]) {
-                filteredDemographics.push(demographics![i]);
+                filteredDemographicsArray.push(demographics![i]);
             }
         }
         
         // stores the filtered demographics
-        setFilteredDemographics(filteredDemographics);
-    }, [searchInput])
+        setFilteredDemographics(filteredDemographicsArray);
+    }, [searchInput, demographics]);
 
     return (
         <div>
