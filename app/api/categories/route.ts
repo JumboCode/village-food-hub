@@ -25,24 +25,36 @@ async function readCategories() {
 }
 
 async function updateCategory(data : {
-    itemName : string,
-    name: string,
-    units: string[]
-}) {
-    const { itemName, name } = data;
-    
-    return await prisma.categories.update({
+    oldName : string,
+    newName: string,
+}) {    
+
+    console.log(`oldname: ${data.oldName}`)
+    const existingCategory = await prisma.categories.findFirst({
         where: {
-            itemName_name: {
-                itemName: itemName,
-                name: name
+            name: {
+                equals: data.oldName,
             }
-        }, data:
-            {
-                units: data.units
-            },
+        }
+    });
+    
+    console.log("Found categories to update:", existingCategory);
+    
+    if (!existingCategory) {
+        console.log("No categories found with name:", data.oldName);
+        return { updated: 0 };
+    }
+
+    return await prisma.categories.updateMany({
+        where: {
+            name: data.oldName,
+        }, 
+        data: {
+            name: data.newName
+        },
     })
 }
+
 
 async function deleteCategory(data: {
     itemName: string,
@@ -100,16 +112,10 @@ export async function PUT(
 ) {    
     try {
         const data = await req.json()
-        if (!validCategory(data)) {
-            return NextResponse.json(
-                { response : "Invalid data format" }, 
-                { status : 400 }
-            )
-        }
+        
         const item = await updateCategory({
-            itemName: data.itemName, 
-            name: data.name,
-            units: data.units
+            oldName: data.oldName, 
+            newName: data.newName,
         });
         
         return NextResponse.json(item, { status : 200 })
