@@ -92,51 +92,61 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryN
         if (modalItem[1].toString().split(", ").length === 1) {
             setLastUnitWarning(true);
         } else {
-        
             // deleting from inventory
             try {
-                const inventoryResponse = await fetch("../api/inventory", 
-                {
-                    method: 'DELETE', 
-                    body: JSON.stringify({deleteItem: modalItem[0], units: unit})
-                })
-                .then((response) => {
-                    if (!response.ok) {
-                      throw new Error(`Deleting unit from inventory error; status: ${response.status}`);
+                const inventoryResponse = await fetch("../api/inventory", {
+                    method: 'DELETE',
+                    body: JSON.stringify({ deleteItem: modalItem[0], units: unit })
+                });
+
+                if (!inventoryResponse.ok) {
+                    // If status is 500, we assume it means no inventory record exists.
+                    if (inventoryResponse.status === 500) {
+                        console.warn("Received 500 from inventory deletion; ignoring error.");
+                    } else {
+                        // For any other error status, try to parse the response and throw an error.
+                        const responseText = await inventoryResponse.text();
+                        let errorData = {};
+                        try {
+                            errorData = responseText ? JSON.parse(responseText) : {};
+                        } catch (parseError) {
+                            console.error("Error parsing inventory error response:", parseError);
+                        }
+                        throw new Error(`Deleting unit from inventory error; status: ${inventoryResponse.status}`);
                     }
-                    return response.json();
-                  })
-            } catch(e) {
-                console.error(e);
+                } else {
+                    // If deletion succeeded, read the response (optional)
+                    await inventoryResponse.json();
+                }
+            } catch (e) {
+                console.warn("Error during inventory deletion (ignored):", e);
             }
 
             // deleting from categories
             try {
-                const newUnits = modalItem[1].toString().split(", ").filter((elt) => elt !== unit);
+                const newUnits = modalItem[1]
+                    .toString()
+                    .split(", ")
+                    .filter((elt) => elt !== unit);
 
-                const categoryResponse = await fetch("../api/categories", 
-                {
-                    method: 'PUT', 
-                    body: JSON.stringify({itemName: modalItem[0], name: modalCategory, units: newUnits })
-                })
-                .then((response) => {
-                    if (!response.ok) {
-                      throw new Error(`Deleting unit from categories error; status: ${response.status}`);
-                    }
-                    return response.json();
-                  })
-            } catch(e) {
+                const categoryResponse = await fetch("../api/categories", {
+                    method: 'PUT',
+                    body: JSON.stringify({ itemName: modalItem[0], name: modalCategory, units: newUnits })
+                });
+                if (!categoryResponse.ok) {
+                    throw new Error(`Deleting unit from categories error; status: ${categoryResponse.status}`);
+                }
+                await categoryResponse.json();
+            } catch (e) {
                 console.error(e);
             }
 
             // reloading the item (and its units)
             const newData = await loadData();
-            
-            // reopening the modal
             setTimeout(() => setIsDeleteModalVisible(false), 500);
             setTimeout(() => openDeleteModal(categoryName, newData[categoryName][modalItemIndex], modalItemIndex), 1000);
         }
-    }
+    };
 
     return (
         <>
