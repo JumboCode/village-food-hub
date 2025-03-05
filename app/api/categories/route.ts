@@ -4,192 +4,196 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function createCategory(data: {
-    itemName : string,
-    name: string,
-    units: string[]
+  itemName: string;
+  name: string;
+  units: string[];
 }) {
-    return await prisma.categories.create(
-        {   data: 
-            {
-                itemName: data.itemName,
-                name: data.name,
-                units: data.units
-            }
-        }
-    )
+  return await prisma.categories.create({
+    data: {
+      itemName: data.itemName,
+      name: data.name,
+      units: data.units,
+    },
+  });
 }
 
 async function readCategories() {
-    const categories = await prisma.categories.findMany();
-    return categories;
+  const categories = await prisma.categories.findMany();
+  return categories;
 }
 
-async function updateCategory(data : {
-    oldName : string,
-    newName: string,
-}) {    
-
-    console.log(`oldname: ${data.oldName}`)
-    const existingCategory = await prisma.categories.findFirst({
-        where: {
-            name: {
-                equals: data.oldName,
-            }
-        }
-    });
-    
-    console.log("Found categories to update:", existingCategory);
-    
-    if (!existingCategory) {
-        console.log("No categories found with name:", data.oldName);
-        return { updated: 0 };
-    }
-
-    return await prisma.categories.updateMany({
-        where: {
-            name: data.oldName,
-        }, 
-        data: {
-            name: data.newName
-        },
-    })
-}
-
-
-async function deleteCategory(data: {
-    itemName: string,
-    name: string
+/*
+  This update function uses the original itemName (oldItemName) along with the category name 
+  (which is not being changed) to locate the record, and then updates it with the new itemName and units.
+*/
+async function updateCategory(data: {
+  oldItemName: string;
+  itemName: string; // new name
+  name: string;     // category name (unchanged)
+  units: string[];
 }) {
-    const { itemName, name } = data;
-    
-    return await prisma.categories.delete({
-        where: {
-            itemName_name: {
-                itemName: itemName,
-                name: name,
-            }
-        }
-        });
-    }
-    
+  return await prisma.categories.update({
+    where: {
+      itemName_name: {
+        itemName: data.oldItemName, // locate record using the original item name
+        name: data.name,
+      },
+    },
+    data: {
+      itemName: data.itemName, // update to new value
+      units: data.units,
+    },
+  });
+}
+
+async function deleteCategory(data: { itemName: string; name: string }) {
+  const { itemName, name } = data;
+  return await prisma.categories.delete({
+    where: {
+      itemName_name: {
+        itemName: itemName,
+        name: name,
+      },
+    },
+  });
+}
+
 // POST
 export async function POST(req: NextRequest) {
-    try {
-        const record = await req.json()
-        if (!validCategory(record)) {
-            return NextResponse.json(
-                { response : "Invalid data format"}, 
-                { status : 400 }
-            )
-        }
-        const response = await createCategory({ ...record })
-        return NextResponse.json(response, {status : 201})
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json(
-            { response : "Failed to create record" }, 
-            { status : 500 })
+  try {
+    const record = await req.json();
+    if (!validCategory(record)) {
+      return NextResponse.json(
+        { response: "Invalid data format" },
+        { status: 400 }
+      );
     }
+    const response = await createCategory({ ...record });
+    return NextResponse.json(response, { status: 201 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { response: "Failed to create record" },
+      { status: 500 }
+    );
+  }
 }
 
 // GET
 export async function GET() {
-    try {
-        const items = await readCategories()
-        return NextResponse.json(items, { status : 200 })
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json(
-            { response : "Failed to get categories" }, 
-            { status : 500 }
-        )
-    }
+  try {
+    const items = await readCategories();
+    return NextResponse.json(items, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { response: "Failed to get categories" },
+      { status: 500 }
+    );
+  }
 }
 
 // PUT
-export async function PUT(
-    req: NextRequest,
-) {    
-    try {
-        const data = await req.json()
-        
-        const item = await updateCategory({
-            oldName: data.oldName, 
-            newName: data.newName,
-        });
-        
-        return NextResponse.json(item, { status : 200 })
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json(
-            { response : "Failed to update entry" },
-            { status : 500 }
-        )
+export async function PUT(req: NextRequest) {
+  try {
+    const data = await req.json();
+    console.log("Received data in API:", data);
+
+    // Validate required keys using our flexible validCategory function and ensure oldItemName is present.
+    if (!validCategory(data) || !data.oldItemName) {
+      console.log("Invalid category data:", data);
+      return NextResponse.json(
+        { response: "Invalid data format" },
+        { status: 400 }
+      );
     }
+
+    const updatedCategory = await updateCategory({
+      oldItemName: data.oldItemName,
+      itemName: data.itemName,
+      name: data.name,
+      units: data.units,
+    });
+
+    // (Optional) Update inventory records here if needed.
+
+    return NextResponse.json(updatedCategory, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { response: "Failed to update entry" },
+      { status: 500 }
+    );
+  }
 }
 
-
-// DELETE 
-export async function DELETE(
-    req: NextRequest
-) {
-    try {
-        const data = await req.json()
-        if (!("itemName" in data)) {
-            return NextResponse.json( 
-                { response: "Missing item name" },
-                { status: 400 }
-            )
-        }
-        if (!("name" in data)) {
-            return NextResponse.json( 
-                { response: "Missing name" },
-                { status: 400 }
-            )
-        }
-        
-        const item = await deleteCategory({
-            itemName: data.itemName, 
-            name: data.name 
-        })
-        return NextResponse.json(item, {status : 200})
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json( 
-            { response : "Failed to delete record" },
-            { status : 500 }
-        )
+// DELETE
+export async function DELETE(req: NextRequest) {
+  try {
+    const data = await req.json();
+    if (!("itemName" in data)) {
+      return NextResponse.json(
+        { response: "Missing item name" },
+        { status: 400 }
+      );
     }
+    if (!("name" in data)) {
+      return NextResponse.json(
+        { response: "Missing name" },
+        { status: 400 }
+      );
+    }
+
+    const item = await deleteCategory({
+      itemName: data.itemName,
+      name: data.name,
+    });
+    return NextResponse.json(item, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { response: "Failed to delete record" },
+      { status: 500 }
+    );
+  }
 }
 
 interface CategoryRecord {
-    itemName: string;
-    units:    string[];
-    name:     string;
+  itemName: string;
+  units: string[];
+  name: string;
 }
 
-function validCategory(record : CategoryRecord): boolean {
-
-    try {
-        const fields = new Set<string>([
-            "itemName",
-            "units",
-            "name",
-          ]);
-        
-        const keys = Object.keys(record)
-        if (keys.length !== fields.size) return false
-
-        let fieldsMatch = true
-        keys.forEach( (field: string) => {
-            if (!fields.has(field)) fieldsMatch = false
-            fields.delete(field)
-        })
-        
-        return fieldsMatch
-        
-    } catch (error) {
-        console.log(error)
-        return false
-    }
+function validCategory(record: CategoryRecord): boolean {
+  return (
+    record &&
+    typeof record.itemName === "string" &&
+    Array.isArray(record.units) &&
+    typeof record.name === "string"
+  );
 }
+
+// function validCategory(record : CategoryRecord): boolean {
+
+//     try {
+//         const fields = new Set<string>([
+//             "itemName",
+//             "units",
+//             "name",
+//           ]);
+        
+//         const keys = Object.keys(record)
+//         if (keys.length !== fields.size) return false
+
+//         let fieldsMatch = true
+//         keys.forEach( (field: string) => {
+//             if (!fields.has(field)) fieldsMatch = false
+//             fields.delete(field)
+//         })        
+//         return fieldsMatch
+        
+//     } catch (error) {
+//         console.log(error)
+//         return false
+//     }
+// }
