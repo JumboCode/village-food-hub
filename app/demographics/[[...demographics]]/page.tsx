@@ -4,6 +4,10 @@ import NavBar from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal"
+import ProgressBar from "@app/components/ProgressBar"
+import deleteIcon from '@app/images/delete.png';
+import crossIcon from '@app/images/cross-svgrepo-com.svg';
+import Image from 'next/image';
 
 // Define a type for the structure of each record in demographicsData
 interface DemographicsRecord {
@@ -153,20 +157,103 @@ const InternalViewDemographicsPage: React.FC = () => {
         setFilteredDemographics(filteredDemographicsArray);
     }, [searchInput, demographics]);
 
+    // for the storage modal
+    const [showStorageModal, setShowStorageModal] = useState(false);
+    const [showStorageCancel, setShowStorageCancel] = useState(false);
+    const [checkedDelete, setCheckedDelete] = useState(false);
+
     return (
         <div>
             <NavBar />
             <div className="py-4 px-10">
                 <div className="flex flex-row justify-between mt-10 mb-6">
                     <h1 className="font-crimson text-3xl text-[40px] font-bold">Demographic Responses</h1>
-                    <div className="flex flex-row">
+                    <div className={`flex flex-row items-center ${!showStorageModal && !showModal && "space-x-4"}`}>
                         <SearchBar
                             input={searchInput}
                             setInput={setSearchInput}
                             placeholder={"Search by name, phone number, or address..."}
                         />
                         <RunReportButton onClick={openModal} />
+                        {/* bar showing storage used */}
+                        <button className = "flex flex-col justify-center items-center w-[60px] space-y-[-5px]" onClick={() => setShowStorageModal(true)}>
+                            <ProgressBar progress={50}/>
+                            <ProgressBar progress={50}/>
+                            <p className="font-crimson crimson-semibold text-[16px] pt-2">500 MB</p>
+                        </button>
                         {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} /> }
+
+                        {showStorageModal && 
+                            <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
+                                <div className={`flex flex-col w-[455px] border-2 ${showStorageCancel ? "border-[#EB2B0C]" : "border-[#7EB672]"} bg-white z-50 rounded-[7px] px-7 py-5`}>
+                                    <div className="flex flex-row justify-center">
+                                    <div className="flex flex-col w-3/4">
+                                            <p className="font-crimson text-[32px]">Storage (50% full)</p>
+                                            <div className="flex w-full h-full">
+                                                <ProgressBar progress={50}/>
+                                            </div>
+                                            <p className="font-crimson text-[24px] text-[#828282] pb-3">500MB of 1GB storage used</p>
+                                            <div className="flex flex-col space-y-1">
+                                                <p className="text-[16px] text-black">Want to clean up space?</p>
+                                                <div className="bg-[#B3B3B3] h-[1px]"/>
+                                                <div className="flex flex-row">
+                                                    <p className="text-[16px] text-black w-3/4">Demographics data</p>
+                                                    <button>
+                                                        <Image
+                                                            src={deleteIcon}
+                                                            width={18}
+                                                            height={18}
+                                                            alt="delete Icon"
+                                                            className="py-0.5"
+                                                            onClick={() => setShowStorageCancel(true)}
+                                                        />
+                                                    </button>
+                                                </div>
+                                                <div className="bg-[#B3B3B3] h-[1px]"/>
+                                                <p className="text-[16px] text-black">Inventory Data</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end items-start w-1/4">
+                                            <button>
+                                                <Image
+                                                    src={crossIcon}
+                                                    width={18}
+                                                    height={18}
+                                                    alt="cross Icon"
+                                                    className=""
+                                                    onClick={() => setShowStorageModal(false)}
+                                                />
+                                            </button>
+                                        </div>
+                                    </div>
+                                        
+                                    {showStorageCancel &&
+                                        <div className="flex flex-col justify-center items-center">
+                                            <div className="flex flex-col pt-2">
+                                                <p className="text-[24px] font-crimson">Confirm you want to clear the data from:</p>
+                                            </div>
+                                            <div className = "flex flex-row space-x-2">
+                                                <input 
+                                                id="default-checkbox" 
+                                                type="checkbox" 
+                                                className="w-6 h-6 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                                                checked={checkedDelete}
+                                                onChange={() => setCheckedDelete(!checkedDelete)}
+                                                />
+                                                <p className="text-[24px] font-crimson">Demographics</p>
+                                            </div>
+
+                                                <button
+                                                    className="flex text-gray hover:bg-white font-serif w-[117px] height-[46px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                                                    onClick={() => setShowStorageCancel(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
                 {/* Pass the correctly typed demographics data to DemographicsSpreadsheet */}
