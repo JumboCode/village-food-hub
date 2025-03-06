@@ -49,37 +49,32 @@ const Categories: React.FC = () => {
     const selectedCategoryData = categoriesData[selectedCategory] || [];
 
     const handleDelete = async () => {
-        if (!categoryName) return;
-        if (!itemName) return;
-
-        if (!selectedCategoryData) {
-            console.log("nothing in selected Category data")
-        }
-        const deleteItem = selectedCategoryData.map(([itemName]) => ({
-            itemName, categoryName, 
-        }));
-
+        if (!categoryName) return; // Must have a category name
+      
+        // Prepare payload:
+        // If itemName is empty, this will delete all records with the categoryName.
+        // Otherwise, it will delete the specific pair.
+        const payload = { name: categoryName, itemName: itemName || "" };
+      
         try {
-            for (const item of deleteItem) {
-            const response = await fetch("/api/categories", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({data: item}),
-            });
-
-            if (!response.ok) {
-                throw new Error("Error fetching categories data.");
-            }
-        }
-            refreshPage();
-            console.log("Deleted successfully!");
-            closeModal();
+          const response = await fetch("../api/categories", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+      
+          if (!response.ok) {
+            throw new Error("Error deleting records.");
+          }
+          console.log("Deleted successfully!");
+          closeModal();
+          refreshPage();
         } catch (error) {
-            console.error(error);
+          console.error(error);
         }
-    };
+    };      
 
 
     // Fetch categories data on component mount

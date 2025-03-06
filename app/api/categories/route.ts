@@ -62,7 +62,15 @@ async function deleteCategory(data: {
             }
         }
         });
-    }
+}
+
+async function deleteCategoriesByName(name: string) {
+    return await prisma.categories.deleteMany({
+        where: {
+            name: name
+        }
+    });
+}
     
 // POST
 export async function POST(req: NextRequest) {
@@ -128,38 +136,41 @@ export async function PUT(
 
 
 // DELETE 
-export async function DELETE(
-    req: NextRequest
-) {
-    
+export async function DELETE(req: NextRequest) {
     try {
-        const { data } = await req.json();
-        if (!("itemName" in data)) {
-            return NextResponse.json( 
-                { response: "Missing item name" },
-                { status: 400 }
-            )
-        }
-        if (!("categoryName" in data)) {
-            return NextResponse.json( 
-                { response: "Missing name" },
-                { status: 400 }
-            )
-        }
-        
+      const parsed = await req.json();
+      // Allow for either { data: { name, itemName } } or direct payload { name, itemName }
+      const data = parsed.data ?? parsed;
+  
+      // Validate that categoryName exists.
+      if (!("name" in data)) {
+        return NextResponse.json(
+          { response: "Missing category name" },
+          { status: 400 }
+        );
+      }
+  
+      // Check if itemName exists and is non-empty.
+      if ("itemName" in data && data.itemName && data.itemName.trim() !== "") {
+        // Delete the specific category/item pair.
         const item = await deleteCategory({
-            itemName: data.itemName, 
-            name: data.categoryName
-        })
-        return NextResponse.json(item, {status : 200})
+          itemName: data.itemName,
+          name: data.name
+        });
+        return NextResponse.json(item, { status: 200 });
+      } else {
+        // Delete all records with the given category name.
+        const result = await deleteCategoriesByName(data.name);
+        return NextResponse.json(result, { status: 200 });
+      }
     } catch (error) {
-        console.log(error)
-        return NextResponse.json( 
-            { response : "Failed to delete record" },
-            { status : 500 }
-        )
+      console.log(error);
+      return NextResponse.json(
+        { response: "Failed to delete record" },
+        { status: 500 }
+      );
     }
-}
+}  
 
 interface CategoryRecord {
     itemName: string;
