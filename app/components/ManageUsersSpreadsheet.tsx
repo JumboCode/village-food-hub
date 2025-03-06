@@ -1,15 +1,32 @@
 import React from "react";
+import { useState } from "react";
 import Image from 'next/image';
 import editIcon from '@app/images/edit.png';
 import deleteIcon from '@app/images/delete.png';
 import arrowsIcon from "@app/images/upAndDownArrows.png";
+import EditUserModal from "@app/components/EditUserModal";
+
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
 }
 
+
 export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [] }) => {
     console.log("manageUsersItems:", manageUsersItems);
+
+    const [showModal, setShowModal] = useState(false); 
+    const [selectedUser, setSelectedUser] = useState<string[] | null>(null);
+
+    const openModal = (userData: string[]) => {
+        setSelectedUser(userData);
+        setShowModal(true);
+    }
+    
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedUser(null);
+    }
 
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
@@ -75,7 +92,11 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                     height={18}
                                     alt="edit Icon"
                                     className=""
+                                    onClick={() => openModal(String(item[0]), String(item[1]))}
                                 />
+                                {showModal && selectedUser && (
+                    <EditUserModal userData={selectedUser} onClose={closeModal} />
+                            )}
                                 <Image
                                     src={deleteIcon}
                                     width={18}
