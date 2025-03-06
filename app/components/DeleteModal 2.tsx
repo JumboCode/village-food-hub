@@ -6,11 +6,10 @@ import { ButtonCancel, ButtonDelete } from '@app/components/SurveyButtons';
 interface DeleteModalProps {
   userName: string;
   closeModal: () => void;
-  handleDelete: () => void; 
+  handleDelete: (arg: string) => void; 
 }
 
-const DeleteUserModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleDelete}) => {
-// const DeleteUserModal: React.FC = () => {
+const DeleteModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleDelete}) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
       <div
@@ -19,12 +18,14 @@ const DeleteUserModal: React.FC<DeleteModalProps> = ({ userName, closeModal, han
                    pt-8 shadow-lg rounded-lg"
       >
         <div className="flex flex-col">
-          <p className="flex justify-center text-[28px] crimson-bold">Are you sure you want to delete</p>
-       
+          <p className="flex justify-center text-[28px] crimson-bold">Are you sure you</p>
+          <p className="flex justify-center text-[28px] crimson-bold">
+            want to delete
+          </p>
           <p className="flex justify-center text-[28px] crimson-bold">
            {userName} ?
           </p>
-          <p className='flex justify-center text-[18px] crimson-bold text-red-100'>This action cannot be undone</p>
+          {/* TODO: get row data to display name*/}
         </div>
         <div className="flex flex-row justify-around pt-8">
           <ButtonCancel onClick={closeModal} />
@@ -37,5 +38,4 @@ const DeleteUserModal: React.FC<DeleteModalProps> = ({ userName, closeModal, han
   );
 };
 
-export default DeleteUserModal;
-
+export default DeleteModal;
