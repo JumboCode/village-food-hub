@@ -186,3 +186,7 @@ function validDemographic(record: DemographicRecord): boolean {
         return false;
     }
 }
+
+export async function getStorageSize() {
+    
+}
