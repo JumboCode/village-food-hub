@@ -116,28 +116,30 @@ export async function PUT(req: NextRequest) {
 
 
 export async function DELETE(req: NextRequest) {
+  const username = req.nextUrl.searchParams.get('username');
+  
   try {
 
     const data = await req.json();
-    const { userId } = data;
+    const username = data; 
 
     const client = await clerkClient(); 
 
 
-    const userList = await client.users.getUserList({ limit: 100});
+    const userList = await client.users.getUserList();
     const users = userList.data;
-    const isAdmin = users.filter(
-      user => user.publicMetadata?.role == 'admin' && user.publicMetadata?.userId != userId); 
-    
-    if (isAdmin.length === 0){
 
-    await client.users.deleteUser(userId); 
-      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModa: true}, {status: 403}); 
+    const isAdmin = users.filter(
+      user => user.publicMetadata?.role == 'blah' && user.publicMetadata?.username != username); 
+    
+    if (isAdmin.length === 0) {
+      await client.users.deleteUser(username); 
+      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModal: true}, {status: 403}); 
     }
 
-    await client.users.deleteUser(userId); 
+    return NextResponse.json(isAdmin.length)
     
-    return NextResponse.json({message: 'User deleted successfully', success: true}, {status: 200})
+    // return NextResponse.json({message: 'User deleted successfully', success: true}, {status: 200})
 
   } catch (error) {
       console.error(error)

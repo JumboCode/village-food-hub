@@ -38,6 +38,10 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         setShowAdminModal(true);
     }
 
+    const closeAdminModal = (): void => {
+        setShowAdminModal(false);
+    }
+
     const refreshPage = () => {
         window.location.reload();
     };
@@ -53,27 +57,47 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
 
             console.log("trying to delete user", username);
 
-            const response = await fetch('/../api/users', {
-                method: 'DELETE', 
-                body: JSON.stringify({username})
+            // GET USER  ID 
+            const response = await fetch('/../api/users/', {
+                method: 'GET', 
+                // body: JSON.stringify({username})
             })
-
             const result = await response.json()
 
-            if (response.ok) {
-                console.log("User deleted successfully")
-                refreshPage();
-                setShowModal(false);
-            } else {
-                if (result.showAdminModal) {
-                    setShowAdminModal(true);
-                }
-            }
+            console.log(result)
+
+            const user = result.filter(
+                user => user.publicMetadatausername === username
+            );
+
+            console.log(user.id)
+
+            // if (user.ok) {
+            //     const userid = user.id
+            // }
+            // MAKE CALL TO DELETE USING THE USERID
+
+            // const response = await fetch('/../api/users', {
+            //     method: 'DELETE', 
+            //     body: JSON.stringify({username})
+            // })
+
+
+            // if (response.ok) {
+            //     if (result.showAdminModal) {
+            //         setShowAdminModal(true);
+            //         return; 
+            //     }
+            // }
          
         } catch (error) {
             console.error('User not deleted: ', error);
            
         }
+
+        closeModal(); 
+        closeAdminModal(); 
+        // refreshPage();
 
     };
     
