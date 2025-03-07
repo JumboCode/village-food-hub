@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import deleteIcon from "@app/images/delete.png";
@@ -6,11 +6,28 @@ import editIcon from "@app/images/edit.png";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 
+// --- Types and Interfaces ---
+
+// Props for the CategoriesSpreadsheet component.
 interface CategoriesSpreadsheetProps {
   categoryName: string;
   categoryItems: (string | number)[][];
-  loadData: any;
+  loadData: () => Promise<void>;
 }
+
+// Define a type for a raw inventory item (as returned by the API in deletion functions).
+interface RawInventoryItem {
+  itemName: string;
+  units: string;
+  // add other fields as needed
+}
+
+// Define the structure of the API response when fetching inventory for deletion.
+interface InventoryResponse {
+  data: RawInventoryItem[];
+}
+
+// --- Component Start ---
 
 const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   categoryName = "",
@@ -19,21 +36,22 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 }) => {
   // SORTING functionality
   const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
-    const [topSorted, setTopSorted] = useState(true);
+  const [topSorted, setTopSorted] = useState(true);
 
-    useEffect(() => {
-        setSortedItems([...categoryItems]);
-    }, [categoryItems]);
+  useEffect(() => {
+    setSortedItems([...categoryItems]);
+  }, [categoryItems]);
 
-    const sortAlphabetically = () => {
-        const sortedList = [...sortedItems].sort((a,b) =>
-            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+  const sortAlphabetically = () => {
+    const sortedList = [...sortedItems].sort((a, b) =>
+      topSorted
+        ? a[0].toString().localeCompare(b[0].toString())
+        : b[0].toString().localeCompare(a[0].toString())
     );
-    
     setSortedItems(sortedList);
     setTopSorted(!topSorted);
-  }
-  
+  };
+
   // EDIT functionality
   const [showEditModal, setShowEditModal] = useState(false);
   const [currItemName, setItemName] = useState("");
@@ -43,7 +61,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [modalCategory, setModalCategory] = useState("");
   const [modalItem, setModalItem] = useState<(string | number)[]>([]);
-  const [modalItemIndex, setModalItemIndex] = useState(-1);
+  // Removed modalItemIndex because it's not used.
   const [itemWarning, setItemWarning] = useState(false);
   const [unitWarning, setUnitWarning] = useState(-1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
@@ -101,10 +119,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           `Error editing category with server response: ${response.status}`
         );
       } else {
-        // Refresh automatically after a successful edit.
-        if (typeof loadData === "function") {
-          await loadData();
-        }
+        await loadData();
       }
       closeModal();
     } catch (error) {
@@ -123,13 +138,12 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setIsDeleteModalVisible(true);
     setModalCategory(catName);
     setModalItem(item);
-    setModalItemIndex(index);
+    // Removed setting modalItemIndex as it is unused.
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalVisible(false);
     setModalCategory("");
-    setModalItemIndex(-1);
     setItemWarning(false);
     setUnitWarning(-1);
     setDeleteConfirmation(false);
@@ -141,11 +155,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     closeDeleteModal();
   
     // First, fetch inventory data.
-    let inventoryData: any = null;
+    let inventoryData: InventoryResponse | null = null;
     try {
       const invResponse = await fetch("../api/inventory");
       if (invResponse.ok) {
-        inventoryData = await invResponse.json();
+        inventoryData = (await invResponse.json()) as InventoryResponse;
         console.log("Fetched inventory data:", inventoryData);
       } else {
         console.error("Failed to fetch inventory data; status:", invResponse.status);
@@ -166,7 +180,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
         let exists = false;
         if (inventoryData && inventoryData.data) {
           exists = inventoryData.data.some(
-            (invItem: any) =>
+            (invItem: RawInventoryItem) =>
               invItem.itemName === modalItem[0] &&
               invItem.units.trim() === unit.trim()
           );
@@ -207,11 +221,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     }
   
     setDeleteConfirmation(true);
-    if (typeof loadData === "function") {
-      await loadData();
-    } else {
-      console.error("loadData is not a function");
-    }
+    await loadData();
   };  
 
   // Deletes a single unit from an item.
@@ -225,9 +235,9 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       try {
         const inventoryCheck = await fetch("../api/inventory");
         if (inventoryCheck.ok) {
-          const inventoryData = await inventoryCheck.json();
+          const inventoryData = (await inventoryCheck.json()) as InventoryResponse;
           const exists = inventoryData.data.some(
-            (invItem: any) =>
+            (invItem: RawInventoryItem) =>
               invItem.itemName === modalItem[0] &&
               invItem.units.trim() === unit.trim()
           );
@@ -273,12 +283,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       }
   
       // Refresh data.
-      if (typeof loadData === "function") {
-        const newData = await loadData();
-        setTimeout(() => setIsDeleteModalVisible(false), 500);
-      } else {
-        console.error("loadData is not a function");
-      }
+      await loadData();
+      setTimeout(() => setIsDeleteModalVisible(false), 500);
     }
   };  
 
@@ -292,7 +298,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
-                  {/* Sorting button from the 100‑internal‑view‑sorting branch */}
+                  {/* Sorting button */}
                   <button onClick={() => sortAlphabetically()}>
                     <TiArrowUnsorted />
                   </button>
@@ -349,7 +355,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           </tbody>
         </table>
       </div>
-
 
       {/* Delete Modal */}
       {isDeleteModalVisible && (
@@ -432,7 +437,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               {modalItem[1]
                 .toString()
                 .split(", ")
-                .map((item, index) => (
+                .map((unitItem, index) => (
                   <div key={index} className="flex flex-col justify-center space-y-3">
                     {unitWarning === index && (
                       <div className="flex flex-row items-center space-x-1">
@@ -484,7 +489,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                         <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
                           unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"
                         }`}>
-                          {item}
+                          {unitItem}
                         </p>
                       </div>
                       <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
@@ -511,7 +516,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                                   </p>
                                 </div>
                               </button>
-                              <button onClick={() => deleteUnit(item)}>
+                              <button onClick={() => deleteUnit(unitItem)}>
                                 <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
                                   <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">
                                     Delete
