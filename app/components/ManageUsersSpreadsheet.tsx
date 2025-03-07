@@ -92,10 +92,10 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                     height={18}
                                     alt="edit Icon"
                                     className=""
-                                    onClick={() => openModal(String(item[0]), String(item[1]))}
+                                    onClick={() => openModal(item)}
                                 />
                                 {showModal && selectedUser && (
-                    <EditUserModal userData={selectedUser} onClose={closeModal} />
+                    <EditUserModal userData={selectedUser} closeModal={closeModal} />
                             )}
                                 <Image
                                     src={deleteIcon}
