@@ -13,57 +13,58 @@ import arrow from '@app/images/arrow.png';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
 
-const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: boolean) => void, setNextDisabled: (disabled: boolean) => void, receive: boolean, donate: boolean }> = ({ onChange, setNextDisabled, receive, donate }) => {
+interface Details {
+  name: string;
+  address: string;
+  householdSize: number;
+}
 
-  // storing the translations
+// -------------------- CustomerAction --------------------
+const CustomerAction: React.FC<{ 
+  onChange: (receiveValue: boolean, donateValue: boolean) => void; 
+  setNextDisabled: (disabled: boolean) => void; 
+  receive: boolean; 
+  donate: boolean; 
+}> = ({ onChange, setNextDisabled, receive, donate }) => {
   const [translations, setTranslations] = useState([
     "Select all the actions you plan to do today. ",
     " Receive ",
     " Donate ",
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultTranslations = [
+          "Select all the actions you plan to do today. ",
+          " Receive ",
+          " Donate ",
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
-      try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Select all the actions you plan to do today. ",
-            " Receive ",
-            " Donate ",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
-          }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
-      }
-  }
-
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const isRChecked = e.target.checked;
-    onChange(isRChecked, donate);
+    onChange(e.target.checked, donate);
   };
 
   const handleDonate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const isDChecked = e.target.checked;
-    onChange(receive, isDChecked);
+    onChange(receive, e.target.checked);
   };
 
   useEffect(() => {
@@ -107,80 +108,67 @@ const CustomerAction: React.FC<{ onChange: (receiveValue: boolean, donateValue: 
   );
 };
 
-// Phone Number Module
-const PhoneNumber: React.FC<{ value: string, onChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ value, onChange, setNextDisabled }) => {
+// -------------------- PhoneNumber --------------------
+const PhoneNumber: React.FC<{ 
+  value: string; 
+  onChange: (value: string) => void; 
+  setNextDisabled: (disabled: boolean) => void; 
+}> = ({ value, onChange, setNextDisabled }) => {
+  const [translations, setTranslations] = useState(["Phone Number"]);
 
-  // storing the translations
-  const [translations, setTranslations] = useState([
-    "Phone Number",
-  ]);
-
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
-  }, []);
-
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
       try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Phone Number",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
+        const defaultTranslations = ["Phone Number"];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
           }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
       }
-  }
+    })();
+  }, []);
 
   const [phoneNumber, setPhoneNumber] = useState<string>(value);
 
   const handlePhoneNumberChange = (newValue: string | undefined) => {
-    const value = newValue || "";
-    setPhoneNumber(value);
-    onChange(value);
+    const val = newValue || "";
+    setPhoneNumber(val);
+    onChange(val);
   };
 
   useEffect(() => {
-    // Remove any country code prefix (e.g., +1, +44, etc.)
     const phoneNumberWithoutCountryCode = phoneNumber.replace(/^\+\d+/, '');
     setNextDisabled(phoneNumberWithoutCountryCode === "");
   }, [phoneNumber, setNextDisabled]);
 
   return (
     <div className="flex flex-col justify-center items-center py-10">
-        <div className="flex flex-col items-center w-full max-w-lg font-crimson">
-            <p className="text-[36px] font-bold mb-8">{translations[0]} <span className="text-red">*</span></p>
-            <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
-        </div>
+      <div className="flex flex-col items-center w-full max-w-lg font-crimson">
+        <p className="text-[36px] font-bold mb-8">{translations[0]} <span className="text-red">*</span></p>
+        <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
+      </div>
     </div>
   );
 };
 
-
-interface Details {
-  name: string;
-  address: string;
-  householdSize: number;
+// -------------------- Changes --------------------
+interface ChangesProps {
+  value: string;
+  onChange: (newValue: string) => void;
+  setNextDisabled: (disabled: boolean) => void;
+  details: Details;
 }
-// Information Changed Module
-const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, setNextDisabled: (disabled: boolean) => void, details: Details }> = ({ value, onChange, setNextDisabled, details }) => {
-
-  // storing the translations
+const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, details }) => {
   const [translations, setTranslations] = useState([
     "Has your information changed? ",
     "Name:",
@@ -188,41 +176,33 @@ const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, s
     "Household size:",
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultTranslations = [
+          "Has your information changed? ",
+          "Name:",
+          "Address:",
+          "Household size:",
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
-      try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Has your information changed? ",
-            "Name:",
-            "Address:",
-            "Household size:",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
-          }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
-      }
-  }
-  
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
   const handleYesNoChange = (newValue: string) => {
@@ -247,49 +227,46 @@ const Changes: React.FC<{ value: string, onChange: (newValue: string) => void, s
   );
 };
 
-// Full Name
-const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (value: string) => void, onLastNameChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled }) => {
-
-  // storing the translations
+// -------------------- Name --------------------
+interface NameProps {
+  firstName: string;
+  lastName: string;
+  onFirstNameChange: (value: string) => void;
+  onLastNameChange: (value: string) => void;
+  setNextDisabled: (disabled: boolean) => void;
+}
+const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled }) => {
   const [translations, setTranslations] = useState([
     "Full Name",
     "First Name",
     "Last Name",
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
-  }, []);
-
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
       try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Full Name",
-            "First Name",
-            "Last Name",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
+        const defaultTranslations = [
+          "Full Name",
+          "First Name",
+          "Last Name",
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
           }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
       }
-  }
+    })();
+  }, []);
 
   const [firstNameState, setFirstNameState] = useState<string>(firstName);
   const [lastNameState, setLastNameState] = useState<string>(lastName);
@@ -313,7 +290,6 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
       <div className="flex flex-col items-center w-full">
         <p className="text-[36px] font-bold mb-4">{translations[0]}</p>
       </div>
-
       <div>
         <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
         <input
@@ -324,7 +300,6 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
           required
         />
       </div>
-
       <div>
         <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
         <input
@@ -339,10 +314,19 @@ const Name: React.FC<{ firstName: string, lastName: string, onFirstNameChange: (
   );
 };
 
-// Address
-const Address: React.FC<{ line1: string, city: string, state: string, zip: string, onAddressLineChange: (value: string) => void, onCityChange: (value: string) => void, onStateChange: (value: string) => void, onZipChange: (value: string) => void, setNextDisabled: (disabled: boolean) => void }> = ({ line1, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
-
-  // storing the translations
+// -------------------- Address --------------------
+interface AddressProps {
+  line1: string;
+  city: string;
+  state: string;
+  zip: string;
+  onAddressLineChange: (value: string) => void;
+  onCityChange: (value: string) => void;
+  onStateChange: (value: string) => void;
+  onZipChange: (value: string) => void;
+  setNextDisabled: (disabled: boolean) => void;
+}
+const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
   const [translations, setTranslations] = useState([
     "Address",
     "Address Line",
@@ -351,42 +335,34 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
     "Zip Code",
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultTranslations = [
+          "Address",
+          "Address Line",
+          "City",
+          "State",
+          "Zip Code",
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
-      try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Address",
-            "Address Line",
-            "City",
-            "State",
-            "Zip Code",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
-          }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
-      }
-  }
-  
   const [line, setLine] = useState<string>(line1);
   const [cityState, setCityState] = useState<string>(city);
   const [stateState, setStateState] = useState<string>(state);
@@ -421,7 +397,6 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
       <div className="flex flex-col items-center w-full">
         <p className="text-[36px] font-bold mb-4">{translations[0]}</p>
       </div>
-
       <div className="w-2/3">
         <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
         <input
@@ -432,7 +407,6 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
           required
         />
       </div>
-
       <div className='flex flex-row w-2/3 justify-between gap-2'>
         <div className='flex-1 mr-3'>
           <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
@@ -469,50 +443,39 @@ const Address: React.FC<{ line1: string, city: string, state: string, zip: strin
   );
 };
 
-// Household Size
-const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) => void, setSubmitDisabled: (disabled: boolean) => void }> = ({ value, onChange, setSubmitDisabled }) => {
+// -------------------- HouseholdSize --------------------
+const HouseholdSize: React.FC<{ 
+  value: number; 
+  onChange: (value: number | null) => void; 
+  setSubmitDisabled: (disabled: boolean) => void; 
+}> = ({ value, onChange, setSubmitDisabled }) => {
+  const [translations, setTranslations] = useState(["Household Size"]);
 
-  // storing the translations
-  const [translations, setTranslations] = useState([
-    "Household Size",
-  ]);
-
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
-  }, []);
-
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
       try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Household Size",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
+        const defaultTranslations = ["Household Size"];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
           }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
       }
-  }
+    })();
+  }, []);
 
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
   const handleSizeChange = (value: string) => {
-    // If the selected value is "10+", set it to 11 for the backend
     const sizeValue = value === "10+" ? 11 : value === "" ? null : Number(value);
     setSelectedSize(value);
     onChange(sizeValue);
@@ -532,68 +495,63 @@ const HouseholdSize: React.FC<{ value: number, onChange: (value: number | null) 
   );
 };
 
+// -------------------- CustomerDonor --------------------
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
-
-  // storing the translations
   const [translations, setTranslations] = useState([
     "We have a demographic survey that is optional.",
     "Would you like to fill it out?",
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultTranslations = [
+          "We have a demographic survey that is optional.",
+          "Would you like to fill it out?",
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
-      try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "We have a demographic survey that is optional.",
-            "Would you like to fill it out?",
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
-          }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
-      }
-  }
-
   return (
-      <div className="font-crimson">
-        {/* Central text */}
-        <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
-            {translations[0]}  
-        </div>
-        <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
-            {translations[1]}
-        </div>
-        {/* Next Button */}
-        <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
-            <YesProceed onClick={() => onChange(true)}/>
-            <NoDone onClick={() => onChange(false)}/>
-        </div>
+    <div className="font-crimson">
+      <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
+        {translations[0]}
       </div>
+      <div className="text-black crimson-bold flex pt-5 text-4xl content-center justify-center text-center">
+        {translations[1]}
+      </div>
+      <div className="flex pt-[100px] crimson-regular text-2xl content-center justify-center space-x-20">
+        <YesProceed onClick={() => onChange(true)}/>
+        <NoDone onClick={() => onChange(false)}/>
+      </div>
+    </div>
   );
 };
 
+// -------------------- Confirmation --------------------
+interface NewResponse {
+  phoneNumber: string;
+  name: string;
+  address: string;
+  householdSize: number | null;
+  lastVisitDate: string;
+}
 const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
-
-  // storing the translations
   const [translations, setTranslations] = useState([
     "Household size:",
     "THANK YOU FOR VISITING!",
@@ -605,54 +563,38 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     "Return home"
   ]);
 
-  // when navigating to this page
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    translateText(language === '' ? 'en' : language);
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultTranslations = [
+          "Household size:",
+          "THANK YOU FOR VISITING!",
+          "Village Food Hub will be able to grow with your help!",
+          "Your Information",
+          "Full Name:",
+          "Phone Number:",
+          "Address:",
+          "Return home"
+        ];
+        const newTranslations = [...defaultTranslations];
+        if (language !== "en") {
+          for (let i = 0; i < defaultTranslations.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const translationArray = data[0] as string[][];
+            newTranslations[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setTranslations(newTranslations);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
-  // function to translate the text with API calls
-  const translateText = async (language: any) => {
-      try {
-          // Reset back to english to avoid lost in translation after resets
-          let newTranslations = [
-            "Household size:",
-            "THANK YOU FOR VISITING!",
-            "Village Food Hub will be able to grow with your help!",
-            "Your Information",
-            "Full Name:",
-            "Phone Number:",
-            "Address:",
-            "Return home"
-          ]
-
-          // if the language is not english, translate it
-          if (language !== 'en') {
-              for (let i = 0; i < translations.length; i++) {
-                  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(translations[i])}`;
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  newTranslations[i] = data[0].map((t: any[]): any => t[0]).join('');
-              }
-          }
-              
-          // store the translations
-          setTranslations(newTranslations);
-
-      } catch (e) {
-          console.error(e);
-      }
-  }
-
-  const [newRecord, setNewRecord] = useState<newResponse | null>(null);
-
-  interface newResponse {
-    phoneNumber: string;
-    name: string;
-    address: string;
-    householdSize: number | null;
-    lastVisitDate: string;
-  }
+  const [newRecord, setNewRecord] = useState<NewResponse | null>(null);
 
   const fetchNewRecord = async () => {
     try {
@@ -660,18 +602,13 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const newResponses: newResponse[] = await response.json();
-
-      // Filter for records matching the phone number
+      const newResponses: NewResponse[] = await response.json();
       const matchedRecords = newResponses.filter(
         (record) => record.phoneNumber === phoneNumber
       );
-
-      // Sort by `lastVisitDate` to get the latest record
       const latestRecord = matchedRecords.sort((a, b) =>
         new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
       )[0];
-
       console.log("Latest Record:", latestRecord);
       setNewRecord(latestRecord || null);
     } catch (error) {
@@ -680,41 +617,31 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
   };
 
   useEffect(() => {
-    fetchNewRecord();
-  }, [])
+    (async () => {
+      await fetchNewRecord();
+    })();
+  }, []);
 
   return (
     <div className="background-white font-black">
       <div className="font-crimson flex flex-col items-center text-black">
         <h1 className="font-bold text-[36px] mt-12">{translations[1]}</h1>
-        <p className="font-bold text-[36px] mt-6 mb-2">
-          {translations[2]}
-        </p>
+        <p className="font-bold text-[36px] mt-6 mb-2">{translations[2]}</p>
         <div className="flex col-2 items-center mt-8">
           <div className="flex flex-row mx-10 content-start text-[30px] break-all">
             <div className="flex flex-col">
               <div className="text-[30px]">{translations[3]}</div>
               <div className="text-[21px] mt-1">
-                {translations[4]}{" "}
-                <span className="text-[24px]" style={{ color: "#828282" }}>
-                  {newRecord?.name}
-                </span>
+                {translations[4]} <span className="text-[24px]" style={{ color: "#828282" }}>{newRecord?.name}</span>
               </div>
               <div className="text-[21px] mt-1">
-                {translations[5]}{" "}
-                <span className="text-[24px]" style={{ color: "#828282" }}>
-                  {newRecord?.phoneNumber}
-                </span>
+                {translations[5]} <span className="text-[24px]" style={{ color: "#828282" }}>{newRecord?.phoneNumber}</span>
               </div>
               <div className="text-[21px] mt-1">
-                {translations[6]}{" "}
-                <span className="text-[24px]" style={{ color: "#828282" }}>
-                  {newRecord?.address}
-                </span>
+                {translations[6]} <span className="text-[24px]" style={{ color: "#828282" }}>{newRecord?.address}</span>
               </div>
               <div className="text-[21px] mt-1">
-                {translations[0]}{" "}
-                <span className="text-[24px]" style={{ color: "#828282" }}>
+                {translations[0]} <span className="text-[24px]" style={{ color: "#828282" }}>
                   {newRecord?.householdSize === 11 ? "10+" : newRecord?.householdSize}
                 </span>
               </div>
@@ -727,7 +654,8 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
         <div className="mt-10 mb-15">
           <button
             className="bg-purple hover:bg-dark-purple text-white font-bold py-4 px-11 rounded-full text-[28px] flex my-15"
-            onClick={() => window.location.href = "../welcome-page"}>
+            onClick={() => window.location.href = "../welcome-page"}
+          >
             {translations[7]}
             <div className="relative bottom-0 left-5">
               <Image src={arrow} alt="arrow" width={42} height={42} />
@@ -739,7 +667,26 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
   );
 };
 
-
+// -------------------- DemographicsSurvey (Main) --------------------
+interface SurveyResponse {
+  phoneNumber: string;
+  takeCount: number;
+  donateCount: number;
+  changes: string;
+  name: {
+    firstName: string;
+    lastName: string;
+  };
+  address: {
+    line1: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  householdSize: number | null;
+  lastVisitDate: Date;
+  previousVisitDates: Date[];
+}
 
 const DemographicsSurvey: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'action' | 'donor' | 'phoneNum' | 'changes' | 'name' | 'address' | 'houseSize' | 'confirmation'>('action');
@@ -755,12 +702,11 @@ const DemographicsSurvey: React.FC = () => {
     householdSize: 0,
   });
 
-  // For routing
   const [receive, setReceive] = useState(false);
   const [donate, setDonate] = useState(false);
 
   const updateAction = (receiveValue: boolean, donateValue: boolean) => {
-    setResponses((prev) => ({ ...prev, receive: receiveValue, donate: donateValue}));
+    setResponses((prev) => ({ ...prev, receive: receiveValue, donate: donateValue }));
     setReceive(receiveValue);
     setDonate(donateValue);
   };
@@ -772,93 +718,67 @@ const DemographicsSurvey: React.FC = () => {
       router.push('/unsaved-thank-you');
     }
   };
-  
-  // For disabling empty inputs
+
   const [nextDisabled, setNextDisabled] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const updatePhoneNumber = (value: string) => {
     setResponses((prev) => ({ ...prev, phoneNumber: value }));
   };
-  
+
   const updateChanges = (value: string) => {
     setResponses((prev) => ({ ...prev, changes: value }));
   };
-  
+
   const updateName = (field: 'firstName' | 'lastName', value: string) => {
     setResponses((prev) => ({
       ...prev,
       name: { ...prev.name, [field]: value },
     }));
   };
-  
+
   const updateAddress = (field: 'line1' | 'city' | 'state' | 'zip', value: string) => {
     setResponses((prev) => ({
       ...prev,
       address: { ...prev.address, [field]: value },
     }));
   };
-  
+
   const updateHouseholdSize = (value: number | null) => {
     setResponses((prev) => ({ ...prev, householdSize: value ?? 0 }));
   };
 
   const [prevRecord, setPrevRecord] = useState<SurveyResponse | null>(null);
 
-  interface SurveyResponse {
-    phoneNumber: string;
-    takeCount: number;
-    donateCount: number;
-    changes: string;
-    name: {
-      firstName: string;
-      lastName: string;
-    };
-    address: {
-      line1: string;
-      city: string;
-      state: string;
-      zip: string;
-    };
-    householdSize: number | null;
-    lastVisitDate: Date; // TODO: should eventually get rid of this because we have previousVisitDates now
-    previousVisitDates: Date[];
-  }
-
   const fetchPrevRecord = async () => {
     try {
-        const response = await fetch("../api/demographics", { method: "GET" });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const surveyResponses: SurveyResponse[] = await response.json();
-        console.log("Fetched responses:", surveyResponses);
-        //console.log("the responses: ", responses);
-
-        const filteredRecord = surveyResponses.find(
-            (response) => response.phoneNumber === responses.phoneNumber
-        );
-
-        console.log("Filtered Record:", filteredRecord);
-        setPrevRecord(filteredRecord || null);
-        return filteredRecord || null;
+      const response = await fetch("../api/demographics", { method: "GET" });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const surveyResponses: SurveyResponse[] = await response.json();
+      console.log("Fetched responses:", surveyResponses);
+      const filteredRecord = surveyResponses.find(
+        (response) => response.phoneNumber === responses.phoneNumber
+      );
+      console.log("Filtered Record:", filteredRecord);
+      setPrevRecord(filteredRecord || null);
+      return filteredRecord || null;
     } catch (error) {
-        console.error("Error fetching responses:", error);
-        setPrevRecord(null);
-        return null;
+      console.error("Error fetching responses:", error);
+      setPrevRecord(null);
+      return null;
     }
   };
 
   useEffect(() => {
     if (responses.phoneNumber) {
-        fetchPrevRecord();
+      fetchPrevRecord();
     }
   }, [responses.phoneNumber]);
 
-
   const handleNextClick = async () => {
     if (nextDisabled) return;
-
     switch (currentStep) {
       case 'action':
         if (!responses.receive) {
@@ -869,34 +789,23 @@ const DemographicsSurvey: React.FC = () => {
         break;
       case 'phoneNum':
         if (!responses.phoneNumber) {
-            console.error("Phone number is missing before fetching records.");
-            return;
+          console.error("Phone number is missing before fetching records.");
+          return;
         }
-    
-        const record = await fetchPrevRecord();  // Wait for fetch
+        const record = await fetchPrevRecord();
         console.log("Fetched record before transition:", record);
-    
         if (record !== null) {
-            setCurrentStep('changes');
+          setCurrentStep('changes');
         } else {
-            setCurrentStep('name');
+          setCurrentStep('name');
         }
         break;
-      // case 'phoneNum':
-      //   const record = await fetchPrevRecord();
-      //   if (record !== null) {
-      //     setCurrentStep('changes');
-      //   } else {
-      //     setCurrentStep('name');
-      //   }
-      //   break;
       case 'changes':
-        if (responses.changes == "yes") {
+        if (responses.changes === "yes") {
           setCurrentStep('name');
         } else {
           handleSubmit();
           setCurrentStep('confirmation');
-          // router.push('/saved-thank-you');
         }
         break;
       case 'name':
@@ -959,119 +868,86 @@ const DemographicsSurvey: React.FC = () => {
   const handleSubmit = async () => {
     console.log('Survey Responses:', responses);
     console.log("Previous record before submission:", prevRecord);
-
     if (!responses.phoneNumber) {
-        console.error("Error: Phone number is required.");
-        return;
+      console.error("Error: Phone number is required.");
+      return;
     }
-
     const currentDate = new Date();
-
     const recordData = {
-        phoneNumber: responses.phoneNumber,
-        takeCount: responses.receive ? 1 : 0,
-        donateCount: responses.donate ? 1 : 0,
-        name: `${responses.name.firstName} ${responses.name.lastName}`,
-        address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
-        householdSize: responses.householdSize,
-        lastVisitDate: responses.receive ? currentDate : null,
-        previousVisitDates: [currentDate],
+      phoneNumber: responses.phoneNumber,
+      takeCount: responses.receive ? 1 : 0,
+      donateCount: responses.donate ? 1 : 0,
+      name: `${responses.name.firstName} ${responses.name.lastName}`,
+      address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
+      householdSize: responses.householdSize,
+      lastVisitDate: responses.receive ? currentDate : null,
+      previousVisitDates: [currentDate],
     };
-
     console.log("Record data for submission:", recordData);
-
     try {
-        if (prevRecord) {
-            // Ensure previous record has required fields
-            const updatedRecordData = {
-                ...prevRecord,
-                phoneNumber: responses.phoneNumber,
-                takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
-                donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
-                name: responses.changes == "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
-                address: responses.changes == "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
-                householdSize: responses.changes == "yes" ? responses.householdSize : prevRecord.householdSize,
-                lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
-                previousVisitDates: Array.isArray(prevRecord.previousVisitDates) 
-                  ? [...prevRecord.previousVisitDates, currentDate] 
-                  : [currentDate],
-            };
-
-            console.log("Updated record data for PUT request:", updatedRecordData);
-
-            const updateResponse = await fetch("/api/demographics", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedRecordData),
-            });
-
-            if (!updateResponse.ok) {
-                throw new Error(`Failed to update record: ${await updateResponse.text()}`);
-            }
-
-            console.log("Record updated successfully.");
-        } else {
-            console.log("Creating a new record...");
-
-            const createResponse = await fetch("/api/demographics", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(recordData),
-            });
-
-            if (!createResponse.ok) {
-                throw new Error(`Failed to create record: ${await createResponse.text()}`);
-            }
-
-            console.log("Record created successfully.");
+      if (prevRecord) {
+        const updatedRecordData = {
+          ...prevRecord,
+          phoneNumber: responses.phoneNumber,
+          takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
+          donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
+          name: responses.changes === "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
+          address: responses.changes === "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
+          householdSize: responses.changes === "yes" ? responses.householdSize : prevRecord.householdSize,
+          lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
+          previousVisitDates: Array.isArray(prevRecord.previousVisitDates)
+            ? [...prevRecord.previousVisitDates, currentDate]
+            : [currentDate],
+        };
+        console.log("Updated record data for PUT request:", updatedRecordData);
+        const updateResponse = await fetch("/api/demographics", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedRecordData),
+        });
+        if (!updateResponse.ok) {
+          throw new Error(`Failed to update record: ${await updateResponse.text()}`);
         }
-
-        setCurrentStep("confirmation");
+        console.log("Record updated successfully.");
+      } else {
+        console.log("Creating a new record...");
+        const createResponse = await fetch("/api/demographics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(recordData),
+        });
+        if (!createResponse.ok) {
+          throw new Error(`Failed to create record: ${await createResponse.text()}`);
+        }
+        console.log("Record created successfully.");
+      }
+      setCurrentStep("confirmation");
     } catch (error) {
-        console.error("Error submitting survey:", error);
+      console.error("Error submitting survey:", error);
     }
-};
+  };
 
-   
   const [showModal, setShowModal] = useState(false);
-  
-  const openModal = (): void => {
-    setShowModal(true);
-  };
-
-  const closeModal = (): void => {
-    setShowModal(false);
-  };
+  const openModal = (): void => setShowModal(true);
+  const closeModal = (): void => setShowModal(false);
 
   const getProgress = () => {
     switch (currentStep) {
-      case 'action':
-        return 0;
-      case 'donor':
-        return 10;
-      case 'phoneNum':
-        return 16.67;
-      case 'changes':
-        return 33.33;
-      case 'name':
-        return 50;
-      case 'address':
-        return 66.67;
-      case 'houseSize':
-        return 83.33;
-      case 'confirmation':
-        return 100;
-      default:
-        return 0;
+      case 'action': return 0;
+      case 'donor': return 10;
+      case 'phoneNum': return 16.67;
+      case 'changes': return 33.33;
+      case 'name': return 50;
+      case 'address': return 66.67;
+      case 'houseSize': return 83.33;
+      case 'confirmation': return 100;
+      default: return 0;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Banner */}
       <DemographicsSurveyBanner />
-
-      {/* Progress Bar */}
       {currentStep !== 'confirmation' && (
         <>
           <div className="flex py-10 pl-[100px] pr-[100px] items-center">
@@ -1081,44 +957,58 @@ const DemographicsSurvey: React.FC = () => {
               {`${getProgress().toFixed(0)}%`}
             </div>
           </div>
-      {/* Back and Exit Buttons */}
-      <div className="flex flex-row h-full w-full justify-between px-32">
-        <ButtonBack onClick={handleBackClick} />
-        {/* <ButtonExit /> */}
-        <div>
-          <ButtonExit onClick={openModal} />
-          {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
-        </div>
-      </div>
-      </>
-    )}
-
-      {/* Modules */}
+          <div className="flex flex-row h-full w-full justify-between px-32">
+            <ButtonBack onClick={handleBackClick} />
+            <div>
+              <ButtonExit onClick={openModal} />
+              {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
+            </div>
+          </div>
+        </>
+      )}
       <div className='w-full'>
         {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
-        {currentStep === 'changes' && (<Changes
-                                          value={responses.changes}
-                                          onChange={updateChanges}
-                                          setNextDisabled={setNextDisabled}
-                                          details={prevRecord}
-                                        />
-                                      )}
-        {currentStep === 'name' && <Name firstName={responses.name.firstName} lastName={responses.name.lastName} onFirstNameChange={(value) => updateName('firstName', value)}
-                                          onLastNameChange={(value) => updateName('lastName', value)} 
-                                          setNextDisabled={setNextDisabled} />}
-        {currentStep === 'address' && <Address line1={responses.address.line1} city={responses.address.city} state={responses.address.state} zip={responses.address.zip}
-                                                onAddressLineChange={(value) => updateAddress('line1', value)}
-                                                onCityChange={(value) => updateAddress('city', value)}
-                                                onStateChange={(value) => updateAddress('state', value)}
-                                                onZipChange={(value) => updateAddress('zip', value)} 
-                                                setNextDisabled={setNextDisabled} />}
-        {currentStep === 'houseSize' && <HouseholdSize value={responses.householdSize} onChange={updateHouseholdSize} 
-                                                       setSubmitDisabled={setSubmitDisabled} />}
+        {currentStep === 'changes' && (
+          <Changes
+            value={responses.changes}
+            onChange={updateChanges}
+            setNextDisabled={setNextDisabled}
+            details={prevRecord || { name: '', address: '', householdSize: 0 }}
+          />
+        )}
+        {currentStep === 'name' && 
+          <Name 
+            firstName={responses.name.firstName} 
+            lastName={responses.name.lastName} 
+            onFirstNameChange={(value) => updateName('firstName', value)}
+            onLastNameChange={(value) => updateName('lastName', value)} 
+            setNextDisabled={setNextDisabled} 
+          />
+        }
+        {currentStep === 'address' && 
+          <Address 
+            line1={responses.address.line1} 
+            city={responses.address.city} 
+            state={responses.address.state} 
+            zip={responses.address.zip}
+            onAddressLineChange={(value) => updateAddress('line1', value)}
+            onCityChange={(value) => updateAddress('city', value)}
+            onStateChange={(value) => updateAddress('state', value)}
+            onZipChange={(value) => updateAddress('zip', value)} 
+            setNextDisabled={setNextDisabled} 
+          />
+        }
+        {currentStep === 'houseSize' && 
+          <HouseholdSize 
+            value={responses.householdSize} 
+            onChange={updateHouseholdSize} 
+            setSubmitDisabled={setSubmitDisabled} 
+          />
+        }
         {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber}/>}
       </div>
-
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>
         {(() => {
           if (currentStep === 'houseSize') {

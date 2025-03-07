@@ -209,7 +209,7 @@ const InternalViewInventoryPage: React.FC = () => {
   
   const handleApplyFilters = (selectedCategories: string[]) => {
 
-    let itemsToDisplay = [];
+    const itemsToDisplay = [];
 
     for (const item of inventory) {
        if (selectedCategories.includes(item[1] as string)) {
@@ -242,10 +242,10 @@ const InternalViewInventoryPage: React.FC = () => {
   useEffect(() => {
 
       // filters the demographic's phone numbers, names, and addresses separately
-      let nameIndices = inventory?.map((item) => item[0].toString().toUpperCase().includes(searchInput.toUpperCase())) || [];
+      const nameIndices = inventory?.map((item) => item[0].toString().toUpperCase().includes(searchInput.toUpperCase())) || [];
       
       const demoLength = inventory?.length || 0;
-      let filteredInventory = [];
+      const filteredInventory = [];
 
       // loops over the inventory and adds the ones that match the filter
       for (let i = 0; i < demoLength; i++) {

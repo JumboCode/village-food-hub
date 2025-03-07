@@ -60,7 +60,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         setShowModal(true);
         setSelectedData(data); 
         setName(name)
-      };
+    };
     
       const closeModal = (): void => {
         setShowModal(false);
@@ -187,7 +187,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
             </tbody>
             </table>
         </div>
-
     )
-
 }
+
+export default DemographicsSpreadsheet;
