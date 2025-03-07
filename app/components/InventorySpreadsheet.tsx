@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import deleteIcon from '@app/images/delete.png';
 import downloadIcon from "@app/images/download.png";
 import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
+import { TiArrowUnsorted } from "react-icons/ti";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 import QuantityModal from "@app/components/QuantityModal";
 
@@ -56,7 +56,44 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setCurrCategoryName(category);
     };
 
+    const [sortedItems, setSortedItems] = useState<(string | number)[][]>(inventoryItems);
+    const [topSorted, setTopSorted] = useState(true);
+    const [quantityAscending, setQuantityAscending] = useState(true);
+    const [DateAscending, setDateAscending] = useState(false);
 
+    useEffect(() => {
+        setSortedItems([...inventoryItems]);
+    }, [inventoryItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+    );
+    
+        setSortedItems(sortedList);
+        setTopSorted(!topSorted);
+    }
+
+    const sortQuantity= () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            quantityAscending ?  Number(b[2]) - Number(a[2]) : Number(a[2]) - Number(b[2])
+    );
+        setSortedItems(sortedList);
+        setQuantityAscending(!quantityAscending);
+    }
+
+    const sortDate = () => {
+    
+        const sortedList = [...sortedItems].sort((a, b) => {
+            const dateA = new Date(a[4]); 
+            const dateB = new Date(b[4]);
+    
+            return DateAscending ? dateB.getTime() - dateA.getTime(): dateA.getTime() - dateB.getTime();
+        });
+        
+        setSortedItems(sortedList);
+        setDateAscending(!DateAscending); 
+    };
     
     const handleClick = () => {
         console.log('Button clicked');
@@ -178,134 +215,142 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
     return (
         <div className="relative overflow-x-auto crimson-regular font-crimson">
-            <table className="table-auto w-full">
-                <thead className="font-crimson border- crimson-regular border-separate content-start">
-                    <tr className="bg-dark-blue text-white text-lg align-left ">
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Item Name</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Category</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Quantity</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Units</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-                    {inventoryItems.map((item, index) => (
-                        <tr key={index} className="py-2">
-                            {item.map((data, subIndex) => (
-                                <td
-                                    key={subIndex}
-                                    className={`border-collapse border-zinc-200 border-2 py-2 px-3 ${subIndex === item.length - 1 ? 'hidden' : ''}`}
-                                >
-                                    {data}
-                                </td>
-                            ))}
-                            <td
-                                key={`actions-${index}`}
-                                className="flex row justify-around border-collapse border-zinc-300 border-2 border-y-1 py-2 px-3"
-                            >
-                                <Image
-                                    src={editIcon}
-                                    width={18}
-                                    height={18}
-                                    alt="edit Icon"
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                        openQuantityModal(
-                                            String(inventoryItems[index][0]),
-                                            String(inventoryItems[index][3]), 
-                                            String(inventoryItems[index][1]), 
-                                        )
-                                    }
-                                />
-                                <Image
-                                    src={deleteIcon}
-                                    width={18}
-                                    height={18}
-                                    alt="delete Icon"
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                        openModal(
-                                            String(inventoryItems[index][0]),
-                                            String(inventoryItems[index][3]), 
-                                        )
-                                    }
-                                />
-                                {showModal && (
-                                    <DeleteInventoryModal
-                                        itemName={String(itemName)}
-                                        units={String(units)}
-                                        closeModal={closeModal}
-                                        handleDelete={handleDelete}
-                                    />
-                                )}
-                                {showQuantityModal && (
-                                    <QuantityModal
-                                        itemName={(String(itemName))}
-                                        units={(String(units))}
-                                        closeModal={closeQuantityModal}
-                                        handleUpdate={handleUpdateQuantity}
-                                        categoryName={String(currCategoryName)}
-                                    />
-                                )}
-                                <button onClick={() => downloadCSV(item)}>
-                                    <Image
-                                        src={downloadIcon}
-                                        width={18}
-                                        height={18}
-                                        alt="download Icon"
-                                        className=""
-                                    />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+          <table className="table-auto w-full">
+            <thead className="font-crimson border-crimson-regular border-separate content-start">
+              <tr className="bg-dark-blue text-white text-lg align-left">
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Item Name</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                    <Image
+                      src={arrowsIcon}
+                      width={15}
+                      height={15}
+                      alt="arrows Icon"
+                      className=""
+                    />
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Category</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                    <Image
+                      src={arrowsIcon}
+                      width={15}
+                      height={15}
+                      alt="arrows Icon"
+                      className=""
+                    />
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Quantity</p>
+                    <button onClick={sortQuantity}>
+                      <TiArrowUnsorted />
+                    </button>
+                    <Image
+                      src={arrowsIcon}
+                      width={15}
+                      height={15}
+                      alt="arrows Icon"
+                      className=""
+                    />
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Units</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                    <Image
+                      src={arrowsIcon}
+                      width={15}
+                      height={15}
+                      alt="arrows Icon"
+                      className=""
+                    />
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Last Updated</p>
+                    <button onClick={sortDate}>
+                      <TiArrowUnsorted />
+                    </button>
+                    <Image
+                      src={arrowsIcon}
+                      width={15}
+                      height={15}
+                      alt="arrows Icon"
+                      className=""
+                    />
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson">
+              {sortedItems.map((item, index) => (
+                <tr key={index} className="py-2">
+                  {item.map((data, subIndex) => (
+                    <td
+                      key={subIndex}
+                      className={`border-collapse border-zinc-200 border-2 py-2 px-3 ${
+                        subIndex === item.length - 1 ? "hidden" : ""
+                      }`}
+                    >
+                      {data}
+                    </td>
+                  ))}
+                  <td className="flex row justify-around border-collapse border-zinc-300 border-2 py-2 px-3">
+                    <Image
+                      src={editIcon}
+                      width={18}
+                      height={18}
+                      alt="edit Icon"
+                      className="cursor-pointer"
+                      onClick={() =>
+                        openModal(
+                          String(sortedItems[index][0]),
+                          String(sortedItems[index][1])
+                        )
+                      }
+                    />
+                    <button
+                      onClick={() =>
+                        openDeleteModal(categoryName, sortedItems[index], index)
+                      }
+                    >
+                      <Image
+                        src={deleteIcon}
+                        width={18}
+                        height={18}
+                        alt="delete Icon"
+                      />
+                    </button>
+                    {showEditModal && (
+                      <EditModal
+                        itemNameOld={currItemName}
+                        initialUnits={currUnits}
+                        closeModal={closeModal}
+                        handleSave={handleSave}
+                        selectedCategory={categoryName}
+                      />
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
     );
 };

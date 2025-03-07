@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import deleteIcon from "@app/images/delete.png";
 import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
 import EditModal from "@app/components/EditModal";
+import { TiArrowUnsorted } from "react-icons/ti";
 
 interface CategoriesSpreadsheetProps {
   categoryName: string;
@@ -17,6 +17,23 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   categoryItems = [],
   loadData,
 }) => {
+  // SORTING functionality
+  const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
+    const [topSorted, setTopSorted] = useState(true);
+
+    useEffect(() => {
+        setSortedItems([...categoryItems]);
+    }, [categoryItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
+    );
+    
+    setSortedItems(sortedList);
+    setTopSorted(!topSorted);
+  }
+  
   // EDIT functionality
   const [showEditModal, setShowEditModal] = useState(false);
   const [currItemName, setItemName] = useState("");
@@ -273,12 +290,24 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           <thead className="font-crimson crimson-regular content-start">
             <tr className="bg-dark-blue text-white text-lg align-left">
               <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
+                  {/* Sorting button from the 100‑internal‑view‑sorting branch */}
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
+                  {/* Also show the arrow image from the dev branch */}
                   <Image src={arrowsIcon} width={10} height={6} alt="arrows Icon" />
                 </div>
               </th>
-              <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
+              <th className="border-r-2 border-slate-400 py-2 px-3">
+                <div className="flex flex-row justify-between items-center">
+                  <p>Units</p>
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
+                </div>
+              </th>
               <th className="py-2 px-3">Actions</th>
             </tr>
           </thead>
@@ -322,6 +351,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           </tbody>
         </table>
       </div>
+
 
       {/* Delete Modal */}
       {isDeleteModalVisible && (

@@ -17,7 +17,7 @@ interface CategoryData {
 }
 
 const Categories: React.FC = () => {
-  // State variables (unchanged)
+  // State variables
   const [categoriesData, setCategoriesData] = useState<CategoryData>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showTable, setShowTable] = useState(false);
@@ -30,6 +30,8 @@ const Categories: React.FC = () => {
   const [showEmptyError, setShowEmptyError] = useState(false);
   const [showRetrievalError, setShowRetrievalError] = useState(false);
   const [units, setUnits] = useState<string[]>([]);
+  const [updateScreen, setUpdateScreen] = useState(false);
+
   // Delete modal state
   const [showModal, setShowModal] = useState(false);
   const [selectedData, setSelectedData] = useState<string | null>(null);

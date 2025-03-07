@@ -2,8 +2,8 @@
 import React, {useState, useEffect} from "react";
 import Image from 'next/image';
 import deleteIcon from '@app/images/delete.png';
-import arrowsIcon from "@app/images/upAndDownArrows.png";
 import DeleteModal from "@app/components/DeleteModal";
+import { TiArrowUnsorted } from "react-icons/ti";
 
 
 interface DemographicsSpreadsheetProps {
@@ -15,6 +15,45 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
     const [showModal, setShowModal] = useState(false);
     const [selectedData, setSelectedData] = useState<string | null>(null);
     const [name, setName] = useState<string | null>(null);
+
+    const [sortedItems, setSortedItems] = useState<(string | number)[][][][]>([]);
+    const [topSorted, setTopSorted] = useState(true);
+    const [quantityAscending, setQuantityAscending] = useState(true);
+    const [DateAscending, setDateAscending] = useState(false);
+    
+    useEffect(() => {
+        setSortedItems([...demographicsItems]);
+    }, [demographicsItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            topSorted ? a[2][0].localeCompare(b[2][0].toString()) : b[2][0].localeCompare(a[2][0].toString())
+    );
+        setSortedItems(sortedList);
+        setTopSorted(!topSorted);
+    }
+
+    const sortQuantity= (index: number) => {
+        const sortedList = [...sortedItems].sort((a,b) =>
+            quantityAscending ?  Number(b[index]) - Number(a[index]) : Number(a[index]) - Number(b[index]) 
+
+    );
+        console.log(sortedItems)
+        setSortedItems(sortedList);
+        setQuantityAscending(!quantityAscending);
+    }
+
+    const sortDate = () => {
+        const sortedList = [...sortedItems].sort((a, b) => {
+            const dateA = new Date(a[0]); 
+            const dateB = new Date(b[0]);
+    
+            return DateAscending ? dateB.getTime() - dateA.getTime(): dateA.getTime() - dateB.getTime();
+        });
+        
+        setSortedItems(sortedList);
+        setDateAscending(!DateAscending); 
+    };
     
 
     const openModal = (data: string, name: string) => {
@@ -65,14 +104,11 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
                         <p>Date</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                    </th>
+                        <button onClick={() => sortDate()}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="font-[20px] flex flex-row justify-between">
                         <p>Phone Number</p>
@@ -81,12 +117,9 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="font-[20px] flex flex-row justify-between">
                         <p>Name</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortAlphabetically()}>
+                            <TiArrowUnsorted />
+                        </button>
                         </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -97,41 +130,32 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
                         <p>House Size</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                    </th>
-                    <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                        <button onClick={() => sortQuantity(4)}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
                         <p>Received</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                    </th>
+                        <button onClick={() => sortQuantity(5)}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
                     <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
                         <p>Donated</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
-                    </th>
+                        <button onClick={() => sortQuantity(6)}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
                 <th className="font-[20px] border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
                 </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-            {demographicsItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
                         <tr key={index} className="py-2">
                             {item.map((data, subIndex) => (
                                 <td
