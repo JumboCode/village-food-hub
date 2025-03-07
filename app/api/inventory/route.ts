@@ -206,16 +206,16 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const body = await req.json();
-    const { itemName, units } = body.data;
-
+    // Use 'deleteItem' from the request as the itemName
+    const itemName = body.deleteItem;
+    const { units } = body;
     if (!itemName || !units) {
-      return NextResponse.json({ message: 'Missing itemName or units'}, { status: 400 });
+      return NextResponse.json({ message: 'Missing itemName or units' }, { status: 400 });
     }
-
     const result = await deleteInventoryItem({ itemName, units });
     return NextResponse.json({ message: 'OK', result }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: 'Unexpected Error'}, { status: 500 });
+    console.error("Inventory DELETE error:", error);
+    return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
   }
 }

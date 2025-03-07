@@ -122,53 +122,80 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   // Deletes the entire row (item) from both inventory and categories.
   const deleteItem = async () => {
     closeDeleteModal();
-
-    // Delete from inventory for each unit.
-    modalItem[1]
+  
+    // First, fetch inventory data.
+    let inventoryData: any = null;
+    try {
+      const invResponse = await fetch("../api/inventory");
+      if (invResponse.ok) {
+        inventoryData = await invResponse.json();
+        console.log("Fetched inventory data:", inventoryData);
+      } else {
+        console.error("Failed to fetch inventory data; status:", invResponse.status);
+      }
+    } catch (e) {
+      console.error("Error fetching inventory data:", e);
+    }
+  
+    // Convert modalItem[1] (units) into an array.
+    const unitsArray = modalItem[1]
       .toString()
       .split(", ")
-      .forEach(async (unit) => {
-        try {
-          await fetch("../api/inventory", {
-            method: "DELETE",
-            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-          }).then((response) => {
-            if (!response.ok) {
-              throw new Error(
-                `Deleting item from inventory error; status: ${response.status}`
-              );
-            }
-            return response.json();
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-    // Delete the entire item from categories.
-    try {
-      await fetch("../api/categories", {
-        method: "DELETE",
-        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Deleting item from categories error; status: ${response.status}`
+      .filter((u) => u.trim() !== "");
+  
+    // For each unit, check if an inventory record exists. If it does, then delete.
+    for (const unit of unitsArray) {
+      try {
+        let exists = false;
+        if (inventoryData && inventoryData.data) {
+          exists = inventoryData.data.some(
+            (invItem: any) =>
+              invItem.itemName === modalItem[0] &&
+              invItem.units.trim() === unit.trim()
           );
         }
-        return response.json();
-      });
-    } catch (e) {
-      console.error(e);
+        if (exists) {
+          console.log(`Inventory record exists for unit "${unit}"; attempting deletion.`);
+          const invDeleteResponse = await fetch("../api/inventory", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
+          });
+          console.log(`Inventory deletion response for unit "${unit}":`, invDeleteResponse.status);
+          if (!invDeleteResponse.ok) {
+            console.error(`Error deleting inventory record for unit "${unit}"; status: ${invDeleteResponse.status}`);
+          }
+        } else {
+          console.info(`No inventory record found for unit "${unit}"; skipping inventory deletion.`);
+        }
+      } catch (e) {
+        console.error("Error during inventory deletion for unit:", unit, e);
+      }
     }
-
+  
+    // Now, delete the entire item from the categories database.
+    try {
+      const catDeleteResponse = await fetch("../api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
+      });
+      console.log("Categories deletion response status:", catDeleteResponse.status);
+      if (!catDeleteResponse.ok) {
+        throw new Error(`Deleting item from categories error; status: ${catDeleteResponse.status}`);
+      }
+      await catDeleteResponse.json();
+    } catch (e) {
+      console.error("Error deleting category record:", e);
+    }
+  
     setDeleteConfirmation(true);
     if (typeof loadData === "function") {
       await loadData();
     } else {
       console.error("loadData is not a function");
     }
-  };
+  };  
 
   // Deletes a single unit from an item.
   const deleteUnit = async (unit: string) => {
@@ -232,15 +259,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       if (typeof loadData === "function") {
         const newData = await loadData();
         setTimeout(() => setIsDeleteModalVisible(false), 500);
-        setTimeout(
-          () =>
-            openDeleteModal(
-              modalCategory,
-              newData[modalCategory][modalItemIndex],
-              modalItemIndex
-            ),
-          1000
-        );
       } else {
         console.error("loadData is not a function");
       }
