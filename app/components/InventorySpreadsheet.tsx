@@ -3,7 +3,7 @@ import Image from 'next/image';
 import deleteIcon from '@app/images/delete.png';
 import downloadIcon from "@app/images/download.png";
 import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
+import { TiArrowUnsorted } from "react-icons/ti";
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
@@ -114,63 +114,40 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
-                            <button onClick={() => sortAlphabetically()}>
-                                <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                </Image>
-                            </button>
-                        </div>
-                    </th>
-                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
-                        <p>Category</p>
                         <button onClick={() => sortAlphabetically()}>
-                            <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                            </Image>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
+                    </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
-                        <button onClick={() => sortQuantity()}>
+                    <div className="flex flex-row justify-between">
+                            <p>Category</p>
+                            <button onClick={() => sortAlphabetically()}>
+                                <TiArrowUnsorted />
+                            </button>
+                    </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                    <div className="flex flex-row justify-between">
                         <p>Quantity</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortQuantity()}>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
+                    </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
+                    <div className="flex flex-row justify-between">
                         <p>Units</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                        </div>
+                        <button onClick={() => sortAlphabetically()}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="flex flex-row justify-between">
                     <p>Last Updated</p>
                     <button onClick={sortDate}>
-                        <Image 
-                            src={arrowsIcon}
-                            width={15}
-                            height={15}
-                            alt="arrows Icon"
-                        />
+                        <TiArrowUnsorted />
                     </button>
                 </div>
             </th>

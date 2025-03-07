@@ -2,8 +2,8 @@
 import React, {useState, useEffect} from "react";
 import Image from 'next/image';
 import deleteIcon from '@app/images/delete.png';
-import arrowsIcon from "@app/images/upAndDownArrows.png";
 import DeleteModal from "@app/components/DeleteModal";
+import { TiArrowUnsorted } from "react-icons/ti";
 
 
 interface DemographicsSpreadsheetProps {
@@ -103,17 +103,12 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <tr className="bg-dark-blue text-white text-lg align-left ">
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
-                        <button onClick={() => sortDate()}>
                         <p>Date</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortDate()}>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
-                    </th>
+                    </div>
+                </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                 <div className="font-[20px] flex flex-row justify-between">
                         <p>Phone Number</p>
@@ -123,12 +118,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 <div className="font-[20px] flex flex-row justify-between">
                         <p>Name</p>
                         <button onClick={() => sortAlphabetically()}>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                            <TiArrowUnsorted />
                         </button>
                         </div>
                 </th>
@@ -139,43 +129,28 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
-                        <button onClick={() => sortQuantity(4)}>
                         <p>House Size</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
-                                    </button>
-                        </div>
-                    </th>
-                    <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                        <button onClick={() => sortQuantity(4)}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
-                        <button onClick={() => sortQuantity(5)}>
                         <p>Received</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortQuantity(5)}>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
-                    </th>
+                    </div>
+                </th>
                     <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
-                        <button onClick={() => sortQuantity(6)}>
                         <p>Donated</p>
-                        <Image src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className="">
-                                    </Image>
+                        <button onClick={() => sortQuantity(6)}>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
-                    </th>
+                    </div>
+                </th>
                 <th className="font-[20px] border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
                 </tr>
             </thead>

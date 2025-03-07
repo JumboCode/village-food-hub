@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Image from 'next/image';
-import deleteIcon from '../images/delete.png';
-import editIcon from "../images/edit.png";
-import arrowsIcon from "../images/upAndDownArrows.png";
+import deleteIcon from '@app/images/delete.png';
+import editIcon from "@app/images/edit.png";
+import { TiArrowUnsorted } from "react-icons/ti";
 
 interface CategoriesSpreadsheetProps {
     categoryItems: (string | number)[][];
@@ -34,16 +34,18 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({ categoryI
                     <div className="flex flex-row justify-between">
                         <p>Item Name</p>
                         <button onClick={() => sortAlphabetically()}>
-                            <Image src={arrowsIcon}
-                                        width={10}
-                                        height={6}
-                                        alt="arrows Icon"
-                                        className="">
-                            </Image>
+                            <TiArrowUnsorted />
                         </button>
-                        </div>
-                    </th>
-                <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
+                    </div>
+                </th>
+                <th className="border-r-2 border-slate-400 py-2 px-3">
+                    <div className="flex flex-row justify-between">
+                        <p>Units</p>
+                        <button onClick={() => sortAlphabetically()}>
+                            <TiArrowUnsorted />
+                        </button>
+                    </div>
+                </th>
                 <th className=" py-2 px-3">Actions</th>
                 </tr>
             </thead>
