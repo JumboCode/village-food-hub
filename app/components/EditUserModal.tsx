@@ -46,18 +46,21 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userData, closeModal, han
     phoneNumber,
   };
 
+  console.log('Request Data:', requestData);
+
+
       try {
         const response = await fetch("/api/users", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ data: requestData
-            }),
+            body: JSON.stringify(requestData),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.error('API Error Response:', errorData); 
             throw new Error(`Failed to update user: ${response.statusText}`);
         }
         const result = await response.json();
