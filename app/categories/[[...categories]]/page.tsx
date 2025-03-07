@@ -10,35 +10,108 @@ import UnitBoxes from '@app/components/UnitBoxes';
 import deleteIcon from '@app/images/delete.png';
 import editIcon from '@app/images/edit.png';
 import addIcon from '@app/images/Vector.png';
+import DeleteCategoryModal from "@app/components/DeleteCategoryModal";
 
 interface CategoryData {
   [key: string]: [string, string][];
 }
 
 const Categories: React.FC = () => {
-  // State definitions (unchanged)
+  // State variables from fullstack/111-delete-a-category branch plus dev additions.
   const [categoriesData, setCategoriesData] = useState<CategoryData>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showTable, setShowTable] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string>(''); // (currently not used)
   const [categoryName, setCategoryName] = useState("");
-  const [editCategoryName, setEditCategoryName] = useState("");
-  const [showDuplicateError, setShowDuplicateError] = useState(false);
   const [itemName, setItemName] = useState("");
   const [showEmptyError, setShowEmptyError] = useState(false);
   const [showRetrievalError, setShowRetrievalError] = useState(false);
   const [units, setUnits] = useState<string[]>([]);
+  // Delete category modal states:
+  const [showModal, setShowModal] = useState(false);
+  const [selectedData, setSelectedData] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
 
-  // Fetch categories data on component mount.
-  useEffect(() => {
-    loadCategoriesData();
-  }, []);
+  // Open delete category modal.
+  const openModal = (categoryName: string, itemName: string) => {
+    console.log("openModal called with categoryName:", categoryName, "itemName:", itemName);
+    setShowModal(true);
+    setCategoryName(categoryName);
+    setItemName(itemName);
+  };
 
-  // Fetch categories data from the API.
-  // We filter out records that have an empty item name AND empty units.
+  const closeModal = (): void => {
+    setShowModal(false);
+    setName(null);
+  };
+
+  // Get data for the selected category.
+  const selectedCategoryData = categoriesData[selectedCategory] || [];
+
+  // DELETE logic: if itemName exists and is non-empty, delete that specific record;
+  // otherwise, delete all records for that category.
+  const handleDelete = async () => {
+    console.log("handleDelete triggered");
+    console.log("categoryName:", categoryName);
+    console.log("itemName:", itemName);
+    const payload = { name: categoryName, itemName: itemName ? itemName : "" };
+    console.log("DELETE payload:", payload);
+
+    try {
+      if (itemName && itemName.trim() !== "") {
+        console.log("Deleting specific record for:", payload);
+        const response = await fetch("../api/categories", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        console.log("Response status:", response.status);
+        if (!response.ok) {
+          throw new Error("Error deleting specific record.");
+        }
+        const resData = await response.json();
+        console.log("Deletion response data:", resData);
+      } else {
+        console.log("Deleting all records for category:", categoryName);
+        const result = await deleteCategoriesByName(categoryName);
+        console.log("deleteCategoriesByName response:", result);
+      }
+      refreshPage();
+      console.log("Deleted successfully!");
+      closeModal();
+    } catch (error) {
+      console.error("Error in handleDelete:", error);
+    }
+  };
+
+  // Helper for deleting all records by category name.
+  async function deleteCategoriesByName(name: string) {
+    console.log("deleteCategoriesByName called with:", name);
+    try {
+      const response = await fetch("../api/categories", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, itemName: "" }),
+      });
+      if (!response.ok) {
+        throw new Error("Error deleting categories by name.");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error in deleteCategoriesByName:", error);
+      throw error;
+    }
+  }
+
+  // Fetch categories data.
   const loadCategoriesData = async () => {
     try {
       const response = await fetch("/api/categories");
@@ -47,9 +120,7 @@ const Categories: React.FC = () => {
       const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
         const catName = record.name;
         const trimmedItemName = record.itemName.trim();
-        // Filter units so that only non-empty strings remain.
         const validUnits = (record.units || []).map(u => u.trim()).filter(u => u !== "");
-        // Only add record if itemName is non-empty or there is at least one unit.
         if (trimmedItemName !== "" || validUnits.length > 0) {
           if (!acc[catName]) {
             acc[catName] = [];
@@ -67,18 +138,25 @@ const Categories: React.FC = () => {
     }
   };
 
-  // Handle category selection change.
+  useEffect(() => {
+    (async () => {
+      try {
+        await loadCategoriesData();
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    })();
+  }, []);
+
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
     setShowTable(true);
   };
 
-  // Open modal to add a new category.
   const categoryButtonClicked = () => {
     setShowCategoryModal(true);
   };
 
-  // Close modal and reset error states.
   const cancelButtonClicked = () => {
     setShowCategoryModal(false);
     setShowEmptyError(false);
@@ -87,12 +165,10 @@ const Categories: React.FC = () => {
     setShowDuplicateError(false);
   };
 
-  // Open modal to add a new item.
   const itemButtonClicked = () => {
     setShowItemModal(true);
   };
 
-  // Reload data after modals close.
   useEffect(() => {
     if (!showItemModal) {
       loadCategoriesData();
@@ -146,7 +222,6 @@ const Categories: React.FC = () => {
   };
 
   // Save a new item for the selected category.
-  // Requires both a non-empty item name and at least one unit.
   const saveCategories = async () => {
     try {
       const trimmedItemName = itemName.trim();
@@ -161,14 +236,12 @@ const Categories: React.FC = () => {
         name: selectedCategory.trim(),
         units: validUnits
       };
-  
       console.log("Sending payload:", payload);
       const response = await fetch("../api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
       if (!response.ok) {
         console.log("Server error response:", response);
       }
@@ -192,7 +265,6 @@ const Categories: React.FC = () => {
       try {
         const response = await fetch("../api/categories");
         const categories = await response.json();
- 
         const nameExists = categories.some((category) => 
           category.name === editCategoryName
         );
@@ -254,6 +326,34 @@ const Categories: React.FC = () => {
                     value={selectedCategory}
                   />
                 </div>
+                {showTable && (
+                  <>
+                    {/* Delete and Edit Icons */}
+                    <Image
+                      src={deleteIcon}
+                      width={18}
+                      height={18}
+                      alt="delete Icon"
+                      className="m-4 ml-6 mt-2"
+                      onClick={() => openModal(String(selectedCategory), String(selectedCategoryData[0]?.[0] || ""))}
+                    />
+                    {showModal && (
+                      <DeleteCategoryModal 
+                        categoryName={String(selectedCategory)}
+                        itemName={String(itemName)}
+                        closeModal={closeModal}
+                        handleDelete={handleDelete}
+                      />
+                    )}
+                    <Image
+                      src={editIcon}
+                      width={18}
+                      height={18}
+                      alt="edit Icon"
+                      className="m-2 mb-3.5"
+                    />
+                  </>
+                )}
               </div>
               <div className="flex justify-end w-full">
                 {showTable && (
@@ -315,12 +415,12 @@ const Categories: React.FC = () => {
               />
             </div>
             {showEmptyError && (
-              <p className="text-red text-center mb-4">
+              <p className="text-red-600 text-center mb-4">
                 Please enter an item name and at least one unit.
               </p>
             )}
             {showRetrievalError && (
-              <p className="text-red text-center mb-4">
+              <p className="text-red-600 text-center mb-4">
                 Failed to add item.
               </p>
             )}

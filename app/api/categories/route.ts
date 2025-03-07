@@ -35,18 +35,20 @@ async function updateCategory(data: {
   return await prisma.categories.update({
     where: {
       itemName_name: {
-        itemName: data.oldItemName, // locate record using the original item name
+        itemName: data.oldItemName, // use old value to locate record
         name: data.name,
       },
     },
     data: {
-      itemName: data.itemName, // update to new value
+      itemName: data.itemName,       // update to new value
       units: data.units,
     },
   });
 }
 
 async function deleteCategory(data: { itemName: string; name: string }) {
+  // Basic delete for a specific category/item pair.
+  console.log("deleteCategory called with:", data);
   const { itemName, name } = data;
   return await prisma.categories.delete({
     where: {
@@ -54,6 +56,16 @@ async function deleteCategory(data: { itemName: string; name: string }) {
         itemName: itemName,
         name: name,
       },
+    },
+  });
+}
+
+async function deleteCategoriesByName(name: string) {
+  // Deletes all records for a given category.
+  console.log("deleteCategoriesByName called with:", name);
+  return await prisma.categories.deleteMany({
+    where: {
+      name: name,
     },
   });
 }
@@ -102,10 +114,7 @@ export async function PUT(req: NextRequest) {
     // Validate required keys using our flexible validCategory function and ensure oldItemName is present.
     if (!validCategory(data) || !data.oldItemName) {
       console.log("Invalid category data:", data);
-      return NextResponse.json(
-        { response: "Invalid data format" },
-        { status: 400 }
-      );
+      return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
     }
 
     const updatedCategory = await updateCategory({
@@ -115,46 +124,48 @@ export async function PUT(req: NextRequest) {
       units: data.units,
     });
 
-    // (Optional) Update inventory records here if needed.
+    // (Optional: update inventory records if needed)
 
     return NextResponse.json(updatedCategory, { status: 200 });
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { response: "Failed to update entry" },
-      { status: 500 }
-    );
+    return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
   }
 }
 
 // DELETE
+// This version supports two scenarios:
+// 1. If data.itemName exists and is non-empty, delete that specific record.
+// 2. Otherwise, delete all records for the given category name.
 export async function DELETE(req: NextRequest) {
   try {
-    const data = await req.json();
-    if (!("itemName" in data)) {
-      return NextResponse.json(
-        { response: "Missing item name" },
-        { status: 400 }
-      );
-    }
+    const parsed = await req.json();
+    // Allow for either { data: { name, itemName } } or direct payload { name, itemName }
+    const data = parsed.data ?? parsed;
+    console.log("DELETE payload received:", data);
+
     if (!("name" in data)) {
-      return NextResponse.json(
-        { response: "Missing name" },
-        { status: 400 }
-      );
+      console.log("Missing category name in payload:", data);
+      return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
-    const item = await deleteCategory({
-      itemName: data.itemName,
-      name: data.name,
-    });
-    return NextResponse.json(item, { status: 200 });
+    if ("itemName" in data && data.itemName && data.itemName.trim() !== "") {
+      // Delete the specific category/item pair.
+      console.log("Deleting specific category/item pair:", data);
+      const item = await deleteCategory({
+        itemName: data.itemName,
+        name: data.name,
+      });
+      return NextResponse.json(item, { status: 200 });
+    } else {
+      // Delete all records with the given category name.
+      console.log("Deleting all records for category:", data.name);
+      const result = await deleteCategoriesByName(data.name);
+      return NextResponse.json(result, { status: 200 });
+    }
   } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      { response: "Failed to delete record" },
-      { status: 500 }
-    );
+    console.log("Error in DELETE:", error);
+    return NextResponse.json({ response: "Failed to delete record" }, { status: 500 });
   }
 }
 
@@ -172,28 +183,3 @@ function validCategory(record: CategoryRecord): boolean {
     typeof record.name === "string"
   );
 }
-
-// function validCategory(record : CategoryRecord): boolean {
-
-//     try {
-//         const fields = new Set<string>([
-//             "itemName",
-//             "units",
-//             "name",
-//           ]);
-        
-//         const keys = Object.keys(record)
-//         if (keys.length !== fields.size) return false
-
-//         let fieldsMatch = true
-//         keys.forEach( (field: string) => {
-//             if (!fields.has(field)) fieldsMatch = false
-//             fields.delete(field)
-//         })        
-//         return fieldsMatch
-        
-//     } catch (error) {
-//         console.log(error)
-//         return false
-//     }
-// }
