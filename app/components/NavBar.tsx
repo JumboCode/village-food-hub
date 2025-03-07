@@ -141,9 +141,9 @@ export default function NavBar() {
             >
               {loggedInUser}
               {isDropdownOpen ? (
-                <TiArrowSortedDown className="ml-2" />
+                <TiArrowSortedDown className="ml-2 transition-transform duration-300" />
               ) : (
-                <TiArrowSortedUp className="ml-2" />
+                <TiArrowSortedUp className="ml-2 transform rotate-90 scale-y-[-1] transition-transform duration-300 hover:rotate-0" />
               )}
             </button>
             {/* Dropdown Menu */}

@@ -296,8 +296,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                   <button onClick={() => sortAlphabetically()}>
                     <TiArrowUnsorted />
                   </button>
-                  {/* Also show the arrow image from the dev branch */}
-                  <Image src={arrowsIcon} width={10} height={6} alt="arrows Icon" />
                 </div>
               </th>
               <th className="border-r-2 border-slate-400 py-2 px-3">

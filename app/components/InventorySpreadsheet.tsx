@@ -224,13 +224,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     <button onClick={sortAlphabetically}>
                       <TiArrowUnsorted />
                     </button>
-                    <Image
-                      src={arrowsIcon}
-                      width={15}
-                      height={15}
-                      alt="arrows Icon"
-                      className=""
-                    />
                   </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -239,13 +232,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     <button onClick={sortAlphabetically}>
                       <TiArrowUnsorted />
                     </button>
-                    <Image
-                      src={arrowsIcon}
-                      width={15}
-                      height={15}
-                      alt="arrows Icon"
-                      className=""
-                    />
                   </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -254,13 +240,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     <button onClick={sortQuantity}>
                       <TiArrowUnsorted />
                     </button>
-                    <Image
-                      src={arrowsIcon}
-                      width={15}
-                      height={15}
-                      alt="arrows Icon"
-                      className=""
-                    />
                   </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -269,13 +248,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     <button onClick={sortAlphabetically}>
                       <TiArrowUnsorted />
                     </button>
-                    <Image
-                      src={arrowsIcon}
-                      width={15}
-                      height={15}
-                      alt="arrows Icon"
-                      className=""
-                    />
                   </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -284,13 +256,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     <button onClick={sortDate}>
                       <TiArrowUnsorted />
                     </button>
-                    <Image
-                      src={arrowsIcon}
-                      width={15}
-                      height={15}
-                      alt="arrows Icon"
-                      className=""
-                    />
                   </div>
                 </th>
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
@@ -337,15 +302,24 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                         alt="delete Icon"
                       />
                     </button>
-                    {showEditModal && (
-                      <EditModal
-                        itemNameOld={currItemName}
-                        initialUnits={currUnits}
-                        closeModal={closeModal}
-                        handleSave={handleSave}
-                        selectedCategory={categoryName}
-                      />
+                    {showQuantityModal && (
+                        <QuantityModal
+                            itemName={(String(itemName))}
+                            units={(String(units))}
+                            closeModal={closeQuantityModal}
+                            handleUpdate={handleUpdateQuantity}
+                            categoryName={String(currCategoryName)}
+                        />
                     )}
+                    <button onClick={() => downloadCSV(item)}>
+                        <Image
+                            src={downloadIcon}
+                            width={18}
+                            height={18}
+                            alt="download Icon"
+                            className=""
+                        />
+                    </button>
                   </td>
                 </tr>
               ))}
