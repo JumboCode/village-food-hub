@@ -21,9 +21,7 @@ interface DemographicsRecord {
 const demographicsData: DemographicsRecord[] = [];
 
 // make a new modal 
-
 function getDemographics() {
-    
     try {
         return fetch("/../api/demographics", { method: 'GET' })
         .then((response) => {
@@ -35,22 +33,17 @@ function getDemographics() {
             return data;
         })
         .then((demographicsData) => {
-
-                const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
-                    const arr = [record.lastVisitDate.split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
-                    return arr;
-                });
-
-                return rearrangedData;
+            const rearrangedData = demographicsData.map((record: DemographicsRecord) => {
+                const arr = [record.lastVisitDate.split('T')[0], record.phoneNumber, record.name, record.address, record.householdSize, record.takeCount, record.donateCount];
+                return arr;
             });
-
+            return rearrangedData;
+        });
     } catch (error) {
         console.error(error);
         return Promise.resolve([]);
     }
-        
 }
-
 
 const InternalViewDemographicsPage: React.FC = () => {
     // Define the state to store demographics data with an appropriate type
@@ -74,20 +67,18 @@ const InternalViewDemographicsPage: React.FC = () => {
         setShowModal(false);
     };
     
-
     const handleRunReport = (startDate: Date, endDate: Date) => {
         downloadCSV(startDate, endDate);
     };
 
-    const filterDate = (data:DemographicsRecord[], startDate: Date, endDate: Date) => {
+    const filterDate = (data: DemographicsRecord[], startDate: Date, endDate: Date) => {
         if (!startDate || !endDate) {
-            return[];
+            return [];
         }
         
         return data
         .map((record) => {
             let visitCount = 0;
-
             if (record.previousVisitDates && Array.isArray(record.previousVisitDates)) {
                 visitCount = record.previousVisitDates
                     .map(dateStr => new Date(dateStr)) 
@@ -95,12 +86,10 @@ const InternalViewDemographicsPage: React.FC = () => {
                         const visitDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
                         const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
-
                         return visitDate >= start && visitDate <= end;
                     })
                     .length;
             }
-
             return {
                 ...record,
                 visitCount, 
@@ -146,25 +135,23 @@ const InternalViewDemographicsPage: React.FC = () => {
 
     // when the search input is changed, refilter
     useEffect(() => {
-
         // filters the demographic's phone numbers, names, and addresses separately
-        let phoneNumberIndices = demographics?.map((item) => item[1].toUpperCase().includes(searchInput.toUpperCase())) || [];
-        let nameIndices = demographics?.map((item) => item[2].toUpperCase().includes(searchInput.toUpperCase())) || [];
-        let addressIndices = demographics?.map((item) => item[3].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const phoneNumberIndices = demographics?.map((item) => item[1].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const nameIndices = demographics?.map((item) => item[2].toUpperCase().includes(searchInput.toUpperCase())) || [];
+        const addressIndices = demographics?.map((item) => item[3].toUpperCase().includes(searchInput.toUpperCase())) || [];
 
         const demoLength = demographics?.length || 0;
-        let filteredDemographics = [];
-
+        const filteredDemographicsArray = [];
         // loops over the demographics and adds the ones that match the filter
         for (let i = 0; i < demoLength; i++) {
             if (phoneNumberIndices[i] || nameIndices[i] || addressIndices[i]) {
-                filteredDemographics.push(demographics![i]);
+                filteredDemographicsArray.push(demographics![i]);
             }
         }
         
         // stores the filtered demographics
-        setFilteredDemographics(filteredDemographics);
-    }, [searchInput])
+        setFilteredDemographics(filteredDemographicsArray);
+    }, [searchInput, demographics]);
 
     return (
         <div>
