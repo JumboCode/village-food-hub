@@ -23,6 +23,7 @@
     "@prisma/client": "^6.1.0",
     "@types/react-router": "^5.1.20",
     "@vitalets/google-translate-api": "^9.2.1",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "flowbite": "^2.5.2",
     "google-translate-api-x": "^10.7.2",

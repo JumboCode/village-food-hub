@@ -71,7 +71,7 @@ const DateRangeModal: React.FC<DateRangeModalProps> = ({ closeModal, onRunReport
   const [endDate, setEndDate] = useState<Date>(new Date());
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-[-100px] flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="g-modal-gray font-crimson fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-8 shadow-lg rounded-lg bg-white p-6 pt-4 border-2 border-[#7EB672]">
         <div className="text-[32px] font-crimson mb-2">Date Range</div>
         <div className="flex flex-row gap-x-4">
