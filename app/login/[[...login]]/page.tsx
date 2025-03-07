@@ -21,6 +21,12 @@ const LoginPage: React.FC = () => {
   const [showTypeResentCode, setShowTypeResentCode] = useState(false);
   const [showTypeNewPassword, setShowTypeNewPassword] = useState(false);
   const [showResetSuccess, setShowResetSuccess] = useState(false);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [errorMsg, setErrorMsg] = useState('\u00A0');
 
   // for password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -84,9 +90,19 @@ const LoginPage: React.FC = () => {
   };
 
   // handler function to send a code for resetting a password
-  const handleSendCode = () => {
-    setShowTypeEmail(false);
-    setShowTypeCode(true);
+  const handleSendCode = async () => {
+    setErrorMsg('\u00A0')
+    try {  console.log(email);
+      const response = await signIn
+        ?.create({
+          strategy: 'reset_password_email_code',
+          identifier: email,
+        })
+      setShowTypeEmail(false);
+      setShowTypeCode(true);
+    } catch (error : any) { 
+      setErrorMsg("Couldn't find your account")
+    }
   };
 
   // Removed handleSubmitCode as it was not used
@@ -105,10 +121,32 @@ const LoginPage: React.FC = () => {
   };
 
   // handler function to enter in the new password
-  const handleNewPassSubmit = () => {
-    setShowTypeNewPassword(false);
-    setShowResetSuccess(true);
-  };
+  const handleNewPassSubmit = async () => {
+    setErrorMsg('\u00A0')
+    try {
+      if (newPassword.trim() == confirmPassword.trim()) {
+        await signIn
+          ?.attemptFirstFactor({
+            strategy: 'reset_password_email_code',
+            code,
+            password: newPassword,
+          })
+        setShowTypeNewPassword(false);
+        setShowResetSuccess(true);
+      } else {
+        setErrorMsg("Passwords must match")
+      }
+    } catch (error : any) {
+      switch (error.errors[0].code) {
+        case 'form_password_pwned':
+          setErrorMsg("Password too weak")
+          break
+        default:
+          setErrorMsg(error.errors[0].longMessage)
+      }
+
+    }
+    };
 
   // handler function that redirects to WelcomeBack
   const handleLogin = () => {
@@ -254,10 +292,11 @@ const LoginPage: React.FC = () => {
               <div className="pt-5">
                 <label className="block mb-2 text-2xl text-white">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   id="password-reset"
                   className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                   placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />    
               </div>
@@ -266,6 +305,7 @@ const LoginPage: React.FC = () => {
                 <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleSendCode}>
                   Send Code
                 </Button>
+                <div className="text-white mt-10px">{errorMsg}</div>
               </div>
             </div>
           </div>
@@ -299,6 +339,7 @@ const LoginPage: React.FC = () => {
                     className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                     placeholder="Reset Code"
                     required
+                    onChange={(e) => setCode(e.target.value)}
                   />    
                 </div>
                 {/* Resend Buttons */}
@@ -371,7 +412,7 @@ const LoginPage: React.FC = () => {
         ) : null}
 
         {showTypeNewPassword ? (
-          <div>
+          <div className="size-auto">
             {/* Reset Password prompt */}
             <div className="text-5xl text-white py-8">Reset Password</div>
             {/* new password input */}
@@ -383,6 +424,7 @@ const LoginPage: React.FC = () => {
                 className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                 placeholder="Username"
                 required
+                onChange={(e) => setNewPassword(e.target.value)}
               />
             </div>
             {/* confirm new password Input */}
@@ -394,6 +436,7 @@ const LoginPage: React.FC = () => {
                 className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                 placeholder="Password"
                 required
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />    
             </div>
             {/* submit new password button */}
@@ -401,6 +444,7 @@ const LoginPage: React.FC = () => {
               <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleNewPassSubmit}>
                 Submit
               </Button>
+            <div className="text-white w-full mt-2">{errorMsg}</div>
             </div>
           </div>
         ) : null}
