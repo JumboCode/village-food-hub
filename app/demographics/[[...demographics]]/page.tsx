@@ -189,8 +189,9 @@ const InternalViewDemographicsPage: React.FC = () => {
     const getBytes = async () => {
         const bytes = await fetchNeonData();
         const mb = Number((bytes / (1024*1024)).toFixed(1));
-        const percent = mb / 1000;
-        console.log(mb, percent)
+        // Calculate percent as (used MB / 1000 MB) * 100
+        const percent = Number(((mb / 1000) * 100).toFixed(1));
+        console.log(mb, percent);
         setStorageUsed(mb);
         setStoragePercent(percent);
     }
@@ -208,25 +209,27 @@ const InternalViewDemographicsPage: React.FC = () => {
                             placeholder={"Search by name, phone number, or address..."}
                         />
                         <RunReportButton onClick={openModal} />
-                        {/* bar showing storage used */}
-                        <button className = "flex flex-col justify-center items-center w-[60px] space-y-[-5px]" onClick={() => setShowStorageModal(true)}>
-                            <ProgressBar progress={50}/>
-                            <ProgressBar progress={50}/>
-                            <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} {"MB"}</p>
+                        {/* Button showing storage used with dynamic progress */}
+                        <button 
+                            className="flex flex-col justify-center items-center w-[60px] space-y-[-5px]" 
+                            onClick={() => setShowStorageModal(true)}
+                        >
+                            <ProgressBar progress={storagePercent}/>
+                            <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
                         </button>
                         {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} /> }
-
+                        
                         {showStorageModal && 
                             <div className="fixed inset-[-100px] flex items-center justify-center bg-opacity-50 bg-black z-50">
                                 <div className={`flex flex-col w-[455px] border-2 ${showStorageCancel ? "border-[#EB2B0C]" : "border-[#7EB672]"} bg-white z-50 rounded-[7px] px-7 py-5`}>
                                     <div className="flex flex-row justify-center">
-                                    <div className="flex flex-col w-3/4">
+                                        <div className="flex flex-col w-3/4">
                                             <p className="font-crimson text-[32px]">{`Storage (${storagePercent}% full)`}</p>
                                             <div className="flex w-full h-full">
                                                 <ProgressBar progress={storagePercent}/>
                                             </div>
                                             <p className="font-crimson text-[24px] text-[#828282] pb-3">
-                                                {storageUsed}{"MB of 1GB storage used"}
+                                                {storageUsed} MB of 1GB storage used
                                             </p>
                                             <div className="flex flex-col space-y-1">
                                                 <p className="text-[16px] text-black">Want to clean up space?</p>
@@ -259,7 +262,6 @@ const InternalViewDemographicsPage: React.FC = () => {
                                                     width={18}
                                                     height={18}
                                                     alt="cross Icon"
-                                                    className=""
                                                     onClick={() => {
                                                         setShowStorageModal(false);
                                                         setShowStorageCancel(false);
@@ -276,11 +278,11 @@ const InternalViewDemographicsPage: React.FC = () => {
                                             </div>
                                             <div className="flex flex-row space-x-4 w-full h-full justify-start items-center pb-2">
                                                 <input 
-                                                id="default-checkbox" 
-                                                type="checkbox" 
-                                                className="w-6 h-6 border-[#828282] border-[1px] rounded checked:bg-light-green text-3xl"
-                                                checked={checkedDelete}
-                                                onChange={() => setCheckedDelete(!checkedDelete)}
+                                                    id="default-checkbox" 
+                                                    type="checkbox" 
+                                                    className="w-6 h-6 border-[#828282] border-[1px] rounded checked:bg-light-green text-3xl"
+                                                    checked={checkedDelete}
+                                                    onChange={() => setCheckedDelete(!checkedDelete)}
                                                 />
                                                 <p className="text-[24px] font-crimson">Demographics</p>
                                             </div>
@@ -297,11 +299,11 @@ const InternalViewDemographicsPage: React.FC = () => {
                                                 {checkedDelete && 
                                                     <div>
                                                         <button
-                                                        className="flex items-center text-white bg-red hover:bg-dark-red font-serif w-[100px] h-[40px] rounded-[8px] border-[1px] text-[20px] justify-center"
-                                                        onClick={() => console.log("just pressed delete")}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                            className="flex items-center text-white bg-red hover:bg-dark-red font-serif w-[100px] h-[40px] rounded-[8px] border-[1px] text-[20px] justify-center"
+                                                            onClick={() => console.log("just pressed delete")}
+                                                        >
+                                                            Delete
+                                                        </button>
                                                     </div>
                                                 }
                                             </div>
