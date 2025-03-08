@@ -29,7 +29,6 @@ const Categories: React.FC = () => {
   const [showEmptyError, setShowEmptyError] = useState(false);
   const [showRetrievalError, setShowRetrievalError] = useState(false);
   const [units, setUnits] = useState<string[]>([]);
-  const [name, setName] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showDuplicateError, setShowDuplicateError] = useState(false);
@@ -44,7 +43,6 @@ const Categories: React.FC = () => {
 
   const closeModal = (): void => {
     setShowModal(false);
-    setName(null);
   };
 
   // Load categories data from the API, filtering out records with both empty itemName and units.
@@ -253,12 +251,6 @@ const Categories: React.FC = () => {
     }
   };
 
-  interface InventoryItem {
-    itemName: string;
-    categoryName: string;
-    units: string[];
-  }
-
   // Define selectedCategoryData once.
   const selectedCategoryData = categoriesData[selectedCategory] || [];
 
@@ -280,9 +272,9 @@ const Categories: React.FC = () => {
         try {
           const invResponse = await fetch("/api/inventory");
           if (invResponse.ok) {
-            const invData = await invResponse.json();
+            const invData: { data: InventoryItem[] } = await invResponse.json();
             const exists = invData.data.some(
-              (invItem: any) => invItem.itemName === itemName
+              (invItem: InventoryItem) => invItem.itemName === itemName
             );
             if (exists) {
               console.log("Inventory record exists; attempting inventory deletion.");
