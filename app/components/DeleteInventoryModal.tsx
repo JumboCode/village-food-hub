@@ -27,7 +27,7 @@ const DeleteInventoryModal: React.FC<DeleteModalProps> = ({ itemName, units, clo
               </button>
               <button
                 className="flex bg-red hover:bg-dark-red text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-dark-red text-[20px] justify-center"
-                onClick={handleDelete}
+                onClick={() => handleDelete(itemName)}
               >
                 Delete
               </button>

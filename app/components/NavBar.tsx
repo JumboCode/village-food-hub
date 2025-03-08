@@ -29,7 +29,7 @@ export default function NavBar() {
   // console.log("session: ", session);
 
   const { user } = useUser();
-  console.log("user: ", user);
+  // console.log("user: ", user);
   if(user?.firstName && user.lastName && loggedInUser == "") {
     setLoggedInUser(user?.firstName + " " + user?.lastName);
     if(user.publicMetadata.role == "admin") {

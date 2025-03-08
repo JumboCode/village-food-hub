@@ -92,19 +92,12 @@ async function updateInventoryItem(data: {
   });
 }
 
-async function deleteInventoryItem(data: {
-  itemName: string;
-  units: string;
-}) {
-  const { itemName, units } = data;
-
-  return await prisma.inventory.delete({
+async function deleteInventoryItem(data: { itemName: string; units: string }) {
+  return await prisma.inventory.deleteMany({
     where: {
-      itemName_units: {
-        itemName: itemName,
-        units: units,
-      }
-    }
+      itemName: data.itemName,
+      units: data.units,
+    },
   });
 }
 
@@ -212,13 +205,18 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const body = await req.json();
-    // Use 'deleteItem' from the request as the itemName
-    const itemName = body.deleteItem;
-    const { units } = body;
+
+    // Ensure proper destructuring
+    const { itemName, units } = body;
+
+    // Validate input
     if (!itemName || !units) {
       return NextResponse.json({ message: 'Missing itemName or units' }, { status: 400 });
     }
+
+    // Proceed with deletion
     const result = await deleteInventoryItem({ itemName, units });
+
     return NextResponse.json({ message: 'OK', result }, { status: 200 });
   } catch (_error) {
     console.error("Inventory DELETE error:", _error);

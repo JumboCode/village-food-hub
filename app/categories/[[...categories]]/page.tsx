@@ -282,15 +282,15 @@ const Categories: React.FC = () => {
           if (invResponse.ok) {
             const invData = await invResponse.json();
             const exists = invData.data.some(
-              (invItem: InventoryItem) => invItem.itemName === itemName
+              (invItem: any) => invItem.itemName === itemName
             );
             if (exists) {
               console.log("Inventory record exists; attempting inventory deletion.");
               const invDeleteResponse = await fetch("/api/inventory", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ data: { itemName, units: units.join(', ') } }),
-              });
+                body: JSON.stringify({ itemName, units: units.join(', ') }),
+              });              
               console.log("Inventory deletion response status:", invDeleteResponse.status);
             } else {
               console.log("No inventory record found; skipping inventory deletion.");
@@ -330,7 +330,7 @@ const Categories: React.FC = () => {
         const result = await response.json();
         console.log("deleteCategoriesByName response:", result);
       }
-      refreshPage();
+      refreshPage(); 
       console.log("Deleted successfully!");
       closeModal();
     } catch (error) {

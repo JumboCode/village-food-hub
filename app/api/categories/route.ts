@@ -60,9 +60,17 @@ async function deleteCategory(data: { itemName: string; name: string }) {
   });
 }
 
-async function deleteCategoriesByName(name: string) {
-  // Deletes all records for a given category.
-  console.log("deleteCategoriesByName called with:", name);
+async function deleteInventoryItemsByCategoryName(name: string) {
+  console.log("Deleting all records for category:", name);
+
+  // First, delete related inventory items
+  await prisma.inventory.deleteMany({
+    where: {
+      categoryName: name,
+    },
+  });
+
+  // Then delete the category itself
   return await prisma.categories.deleteMany({
     where: {
       name: name,
@@ -124,8 +132,6 @@ export async function PUT(req: NextRequest) {
       units: data.units,
     });
 
-    // (Optional: update inventory records if needed)
-
     return NextResponse.json(updatedCategory, { status: 200 });
   } catch (error) {
     console.log(error);
@@ -140,32 +146,48 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const parsed = await req.json();
-    // Allow for either { data: { name, itemName } } or direct payload { name, itemName }
     const data = parsed.data ?? parsed;
+
     console.log("DELETE payload received:", data);
 
-    if (!("name" in data)) {
-      console.log("Missing category name in payload:", data);
+    if (!data.name || typeof data.name !== "string") {
+      console.log("Error: Missing category name in DELETE request.");
       return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
-    if ("itemName" in data && data.itemName && data.itemName.trim() !== "") {
-      // Delete the specific category/item pair.
+    if (data.itemName && typeof data.itemName === "string" && data.itemName.trim() !== "") {
+      // Case 1: Delete a specific category/item pair
       console.log("Deleting specific category/item pair:", data);
       const item = await deleteCategory({
         itemName: data.itemName,
         name: data.name,
       });
-      return NextResponse.json(item, { status: 200 });
+
+      // Also delete the item from inventory
+      await prisma.inventory.deleteMany({
+        where: {
+          itemName: data.itemName,
+          categoryName: data.name,
+        },
+      });
+
+      return NextResponse.json({ response: "Item deleted successfully", data: item }, { status: 200 });
     } else {
-      // Delete all records with the given category name.
+      // Case 2: Delete all records for the given category name + related inventory items
       console.log("Deleting all records for category:", data.name);
+      
+      // First delete inventory items associated with this category
+      await prisma.inventory.deleteMany({
+        where: { categoryName: data.name },
+      });
+
+      // Then delete categories
       const result = await deleteCategoriesByName(data.name);
-      return NextResponse.json(result, { status: 200 });
+      return NextResponse.json({ response: "Category and related items deleted successfully", data: result }, { status: 200 });
     }
   } catch (error) {
-    console.log("Error in DELETE:", error);
-    return NextResponse.json({ response: "Failed to delete record" }, { status: 500 });
+    console.error("Error in DELETE:", error);
+    return NextResponse.json({ response: "Failed to delete record", error: error.message }, { status: 500 });
   }
 }
 
