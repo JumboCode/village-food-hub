@@ -144,7 +144,7 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ data: items }, { status: 200 });
 
     } catch (_error) {
-      console.error("PATCH Error:", error);
+      console.error("PATCH Error:", _error);
       return NextResponse.json({ data: "Failed to update inventory items" }, { status: 500 });
     }
 }
@@ -164,6 +164,7 @@ export async function POST(req: NextRequest) {
         { status: 201 }
       );
     } catch (_error) {
+      console.error("POST Error:", _error);
       return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
     }
 }
@@ -173,7 +174,7 @@ export async function GET() {
     const result = await getInventoryItems();
     return NextResponse.json({ data: result }, { status: 200 });
   } catch (_error) {
-    console.error("GET Error:", error);
+    console.error("GET Error:", _error);
     return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
   }
 }
@@ -203,7 +204,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'OK', data: result }, { status: 200 });
   } catch (_error) {
     console.error(_error);
-    console.error("PUT Error:", error);
+    console.error("PUT Error:", _error);
     return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
   }
 }
