@@ -137,11 +137,11 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
         setViewProfileMode(false);
     }
     
-    const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>, fieldType: string) => {
         setChangeMade(true);
         console.log("CHANGE HANDLED")
         if (setProfileData) {
-            setProfileData(prev => ({ ...prev, firstName: e.target.value }));
+            setProfileData(prev => ({ ...prev, [fieldType]: e.target.value }));
         }
     }
     
@@ -163,7 +163,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.firstName}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "firstName")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -177,7 +177,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.lastName}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "lastName")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -193,7 +193,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.username}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "username")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         // In edit and view modes, username should not be editable.
@@ -208,7 +208,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.role}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "role")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -224,7 +224,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.pronouns}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "pronouns")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -238,7 +238,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.phoneNumber}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "phoneNumber")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
@@ -254,7 +254,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     </label>
                     <input
                         value={profileData.emailAddress}
-                        onChange={(e) => handleChangeMade(e)}
+                        onChange={(e) => handleChangeMade(e, "emailAddress")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         // In edit and view modes, email should not be editable.
