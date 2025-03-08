@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ButtonCancel, ButtonSave } from "@app/components/SurveyButtons";
 import UnitBoxes from "@app/components/UnitBoxes";
 import addIcon from "@app/images/Vector.png";
 
@@ -77,13 +76,13 @@ const EditModal: React.FC<EditModalProps> = ({
         </div>
         <div className="flex w-full justify-center space-x-[15px] items-center">
             <button
-                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[36px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border-[1px] pt-1 border-gray text-[20px] justify-center"
                 onClick={closeModal}
             >
                 Cancel
             </button>
             <button
-                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[175px] h-[36px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[175px] h-[40px] pt-1 rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                 onClick={onSave}
             >
                 Save Changes

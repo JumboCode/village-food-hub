@@ -19,7 +19,6 @@ interface CategoriesSpreadsheetProps {
 interface RawInventoryItem {
   itemName: string;
   units: string;
-  // add other fields as needed
 }
 
 // Define the structure of the API response when fetching inventory for deletion.
@@ -316,7 +315,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
             </tr>
           </thead>
           <tbody className="bg-slate-50 font-crimson crimson-regular">
-            {categoryItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
               <tr key={index} className="py-2">
                 {item.map((data, subIndex) => (
                   <td key={subIndex} className="border-r-2 border-slate-200 py-2 px-3">
