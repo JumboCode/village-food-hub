@@ -5,11 +5,11 @@ interface FetchedItem {
 }
 
 interface NameDropdownProps {
-  options: string[];
+  options?: string[];
   onSelect?: (selected: string) => void;
   fetchUrl?: string;
   filterName: string;
-  currentDropdown: string;
+  currentDropdown?: string;
   disabled?: boolean;
   filterValue?: string;
 }

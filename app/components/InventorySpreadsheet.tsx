@@ -33,14 +33,14 @@ function formatDate(date: string | Date): string {
 }
 
 export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
-    const [showModal, setShowModal] = useState(false);
+    // State for quantity update modal
+    const [showQuantityModal, setShowQuantityModal] = useState(false); 
+    // State for delete modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // Shared item details
     const [itemName, setItemName] = useState<string | null>(null);
     const [units, setUnits] = useState<string | null>(null);
     const [currCategoryName, setCurrCategoryName] = useState<string | null>(null);
-
-
-    const [showQuantityModal, setShowQuantityModal] = useState(false); 
-
 
     const closeQuantityModal = (): void => {
         setShowQuantityModal(false);
@@ -56,6 +56,19 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setCurrCategoryName(category);
     };
 
+    const closeDeleteModal = (): void => {
+        setShowDeleteModal(false);
+        setItemName(null);
+        setUnits(null);
+    };
+
+    const openDeleteModal = (item: (string | number)[]) => {
+        // Assuming column 0 is the item name and column 3 is the units
+        setShowDeleteModal(true);
+        setItemName(String(item[0]));
+        setUnits(String(item[3]));
+    };
+
     const [sortedItems, setSortedItems] = useState<(string | number)[][]>(inventoryItems);
     const [topSorted, setTopSorted] = useState(true);
     const [quantityAscending, setQuantityAscending] = useState(true);
@@ -66,55 +79,44 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     }, [inventoryItems]);
 
     const sortAlphabetically = () => {
-        const sortedList = [...sortedItems].sort((a,b) =>
-            topSorted ? a[0].localeCompare(b[0].toString()) : b[0].localeCompare(a[0].toString())
-    );
+        const sortedList = [...sortedItems].sort((a, b) =>
+            topSorted 
+                ? a[0].toString().localeCompare(b[0].toString()) 
+                : b[0].toString().localeCompare(a[0].toString())
+        );
     
         setSortedItems(sortedList);
         setTopSorted(!topSorted);
-    }
+    };
 
-    const sortQuantity= () => {
-        const sortedList = [...sortedItems].sort((a,b) =>
-            quantityAscending ?  Number(b[2]) - Number(a[2]) : Number(a[2]) - Number(b[2])
-    );
+    const sortQuantity = () => {
+        const sortedList = [...sortedItems].sort((a, b) =>
+            quantityAscending 
+                ? Number(b[2]) - Number(a[2]) 
+                : Number(a[2]) - Number(b[2])
+        );
         setSortedItems(sortedList);
         setQuantityAscending(!quantityAscending);
-    }
+    };
 
     const sortDate = () => {
-    
         const sortedList = [...sortedItems].sort((a, b) => {
             const dateA = new Date(a[4]); 
             const dateB = new Date(b[4]);
     
-            return DateAscending ? dateB.getTime() - dateA.getTime(): dateA.getTime() - dateB.getTime();
+            return DateAscending 
+                ? dateB.getTime() - dateA.getTime() 
+                : dateA.getTime() - dateB.getTime();
         });
         
         setSortedItems(sortedList);
         setDateAscending(!DateAscending); 
     };
-    
-    const handleClick = () => {
-        console.log('Button clicked');
-    };
-    
-    const openModal = (itemName: string, units: string) => {
-        setShowModal(true);
-        setItemName(itemName);
-        setUnits(units);
-    };
 
-    const closeModal = (): void => {
-        setShowModal(false);
-        setItemName(null);
-        setUnits(null);
-    };
-    
     const refreshPage = () => {
         window.location.reload();
     };
-    
+
     const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: number, categoryName: string) => {
         if (!itemName || !units) return;
 
@@ -124,7 +126,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             quantity: Number(quantityChange),
             units,
             lastUpdated: new Date(),
-        }
+        };
         try {
             const response = await fetch("/../api/inventory", {
                 method: "PUT",
@@ -134,7 +136,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 body: JSON.stringify({
                     ...updatedData,
                     quantity: quantityChange,
-                  }),
+                }),
             });
             if (!response.ok) {
                 throw new Error("Error updating inventory data.");
@@ -146,33 +148,29 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         } catch (error) {
             console.log(error);
             closeQuantityModal();
-
         }
     };
 
     const handleDelete = async () => {
         if (!itemName || !units) return;
-        const deleteItem = { itemName, units };
-
         try {
-            const response = await fetch("/../api/inventory", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ data: deleteItem }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Error fetching inventory data.");
-            }
-            refreshPage();
-            console.log("Deleted successfully!");
-            closeModal();
+          const response = await fetch("/api/inventory", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ deleteItem: itemName, units }),
+          });
+          if (!response.ok) {
+            throw new Error("Error fetching inventory data.");
+          }
+          refreshPage();
+          console.log("Deleted successfully!");
+          closeDeleteModal();
         } catch (error) {
-            console.error(error);
+          console.error(error);
         }
-    };
+    };      
 
     const downloadCSV = (item: (string | number)[]) => {
         console.log(item);
@@ -193,7 +191,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
         const headers = ["date", "quantity-change", "action-of-change"];
         const rows = [
-            headers.join(","), 
+            headers.join(","),
             ...historyRecords.map((record: InventoryHistoryRecord) =>
                 [
                     formatDate(record.date),
@@ -277,6 +275,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     </td>
                   ))}
                   <td className="flex row justify-around border-collapse border-zinc-300 border-2 py-2 px-3">
+                    {/* Edit Icon: Opens the QuantityModal */}
                     <Image
                       src={editIcon}
                       width={18}
@@ -284,17 +283,15 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                       alt="edit Icon"
                       className="cursor-pointer"
                       onClick={() =>
-                        openModal(
+                        openQuantityModal(
                           String(sortedItems[index][0]),
+                          String(sortedItems[index][3]),
                           String(sortedItems[index][1])
                         )
                       }
                     />
-                    <button
-                      onClick={() =>
-                        openDeleteModal(categoryName, sortedItems[index], index)
-                      }
-                    >
+                    {/* Delete Icon: Opens the DeleteInventoryModal */}
+                    <button onClick={() => openDeleteModal(sortedItems[index])}>
                       <Image
                         src={deleteIcon}
                         width={18}
@@ -302,10 +299,11 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                         alt="delete Icon"
                       />
                     </button>
+                    {/* Quantity Modal */}
                     {showQuantityModal && (
                         <QuantityModal
-                            itemName={(String(itemName))}
-                            units={(String(units))}
+                            itemName={String(itemName)}
+                            units={String(units)}
                             closeModal={closeQuantityModal}
                             handleUpdate={handleUpdateQuantity}
                             categoryName={String(currCategoryName)}
@@ -317,7 +315,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                             width={18}
                             height={18}
                             alt="download Icon"
-                            className=""
                         />
                     </button>
                   </td>
@@ -325,6 +322,15 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               ))}
             </tbody>
           </table>
+          {/* Delete Inventory Modal */}
+          {showDeleteModal && (
+              <DeleteInventoryModal
+                itemName={String(itemName)}
+                units={String(units)}
+                closeModal={closeDeleteModal}
+                handleDelete={handleDelete}
+              />
+          )}
         </div>
     );
 };

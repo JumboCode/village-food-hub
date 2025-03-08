@@ -211,14 +211,14 @@ const Categories: React.FC = () => {
       try {
         const response = await fetch("../api/categories");
         const categories = await response.json();
-        const nameExists = categories.some((category) => 
+        const nameExists = categories.some((category: { name: string }) => 
           category.name === editCategoryName
         );
         if (nameExists && editCategoryName !== selectedCategory) {
           setShowDuplicateError(true);
           return;
         }
-        const oldCategories = categories.filter((category) => 
+        const oldCategories = categories.filter((category: { name: string }) => 
           category.name === selectedCategory
         );
         if (!oldCategories) {
@@ -353,7 +353,6 @@ const Categories: React.FC = () => {
                     fetchUrl="/api/categories"
                     filterName="name"
                     onSelect={handleCategoryChange}
-                    value={selectedCategory}
                   />
                 </div>
                 {showTable && (
