@@ -251,6 +251,12 @@ const Categories: React.FC = () => {
     }
   };
 
+  interface InventoryItem {
+    itemName: string;
+    categoryName: string;
+    units: string[];
+  }  
+
   // Define selectedCategoryData once.
   const selectedCategoryData = categoriesData[selectedCategory] || [];
 
@@ -443,12 +449,12 @@ const Categories: React.FC = () => {
               />
             </div>
             {showEmptyError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center mb-4">
                 Please enter an item name and at least one unit.
               </p>
             )}
             {showRetrievalError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center mb-4">
                 Failed to add item.
               </p>
             )}
@@ -471,41 +477,49 @@ const Categories: React.FC = () => {
       )}
       {showCategoryModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
-            <p className="text-center text-[32px] font-bold pb-[15px]">Category Name</p>
-            <div className="flex w-full justify-center items-center pb-[30px]">
-              <input
-                type="text"
-                onChange={(e) => setCategoryName(e.target.value)}
-                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
-              />
-            </div>
+        <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green relative">
+          <p className="text-center text-[32px] pb-[15px] text-light-green">Category Name</p>
+      
+          {/* Input Field */}
+          <div className="flex w-full justify-center items-center pb-[20px]">
+            <input
+              type="text"
+              onChange={(e) => setCategoryName(e.target.value)}
+              className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+            />
+          </div>
+      
+          {/* Error Messages */}
+          <div className="absolute top-[135px] left-0 right-0 flex flex-col items-center h-[20px]">
             {showEmptyError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center">
                 Please enter a category name.
               </p>
             )}
             {showRetrievalError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center">
                 Category name already exists.
               </p>
             )}
-            <div className="flex w-full justify-center space-x-[15px] mt-2 items-center">
-              <button
-                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={cancelButtonClicked}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={saveButtonClicked}
-              >
-                Save
-              </button>
-            </div>
+          </div>
+      
+          {/* Buttons */}
+          <div className="absolute bottom-[20px] left-0 right-0 flex justify-center space-x-[15px]">
+            <button
+              className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+              onClick={cancelButtonClicked}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+              onClick={saveButtonClicked}
+            >
+              Save
+            </button>
           </div>
         </div>
+      </div>      
       )}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -519,12 +533,12 @@ const Categories: React.FC = () => {
               />
             </div>
             {showEmptyError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center mb-4">
                 Please enter a category name.
               </p>
             )}
             {showDuplicateError && (
-              <p className="text-red-600 text-center mb-4">
+              <p className="text-red text-center mb-4">
                 Category already exists.
               </p>
             )}

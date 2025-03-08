@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@mui/material';
 import Image from 'next/image';
 import headerLogo from '@app/images/headerLogo.png';
 import irlPantry from '@app/images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
-import { useSignIn, useAuth } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -41,6 +41,11 @@ const LoginPage: React.FC = () => {
     if (!username || !password) {
       if (!username) setUsernameError(true);
       if (!password) setPasswordError(true);
+      return;
+    }
+
+    if (!signIn) { // Prevents calling 'signIn.create' if 'signIn' is undefined
+      console.error("Clerk signIn is not initialized.");
       return;
     }
 

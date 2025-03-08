@@ -4,14 +4,11 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import Image from "next/image";
 import whiteOutlineLogo from "@app/images/headerLogo.png";
-import dropArrow from "@app/images/Vector.png";
 import initials from "@app/images/group2.png";
 import face from "@app/images/Frame6.png";
 import settings from "@app/images/Frame7.png";
 import icon from "@app/images/Frame8.png";
-import downArrow2 from "@app/images/downArrow.png";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
-import { PrismaClient, Prisma } from "@prisma/client";
 
 // Clerk
 import { useClerk, useUser } from "@clerk/nextjs";

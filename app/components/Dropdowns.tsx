@@ -37,10 +37,10 @@ export function NameDropdown({
         const itemNames = fetchedItems.map((item: FetchedItem) => item[filterName] as string);
 
         const filteredItems = filterValue
-        ? fetchedItems
-            .filter((item: FetchedItem) => item[filterName] === filterValue)
-            .flatMap((item: FetchedItem) => item[currentDropdown] as string[])
-        : itemNames;
+            ? fetchedItems
+                .filter((item: FetchedItem) => item[filterName] === filterValue)
+                .flatMap((item: FetchedItem) => (currentDropdown ? (item[currentDropdown] as string[] ?? []) : []))
+            : itemNames;
 
         // Exclude empty or whitespace-only items.
         const nonEmptyItems = filteredItems.filter(

@@ -53,8 +53,8 @@ const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-20">
-      <div className="w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
-        <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2 crimson-bold">Edit Item</div>
+      <div className="w-[450px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green pl-4">
+        <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Edit Item</div>
         <div className="flex flex-col mb-[30px] font-crimson">
           <div className="flex mb-2">
             <div className="text-[28px] w-24 ml-[5%]">Name</div>
@@ -71,7 +71,7 @@ const EditModal: React.FC<EditModalProps> = ({
             initialUnits={newUnits}
           />
           {errorMessage && (
-            <p className="text-red-600 text-center mt-2">{errorMessage}</p>
+            <p className="text-red text-center mt-2">{errorMessage}</p>
           )}
         </div>
         <div className="flex w-full justify-center space-x-[15px] items-center">

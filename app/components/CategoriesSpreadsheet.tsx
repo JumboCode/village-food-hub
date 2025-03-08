@@ -359,7 +359,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       {isDeleteModalVisible && (
         <div className="flex absolute top-0 left-0 justify-center items-center w-full h-full z-20 bg-black bg-opacity-50">
           <div className="flex flex-col justify-center space-y-3 w-[470px] py-[30px] px-[36px] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50">
-            <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C]">
+            <p className="text-[32px] font-crimson text-[#EB2B0C]">
               Delete Menu
             </p>
             {itemWarning && (

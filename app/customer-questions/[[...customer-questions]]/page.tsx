@@ -10,8 +10,8 @@ import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
 import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
-import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
+import useSWR from 'swr';
 
 interface Details {
   name: string;
@@ -488,7 +488,18 @@ const HouseholdSize: React.FC<{
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">{translations[0]} <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} filterName="size"/>
+        <select
+          className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray"
+          value={selectedSize}
+          onChange={(e) => handleSizeChange(e.target.value)}
+        >
+          <option value="" disabled></option>
+          {sizes.map((size, index) => (
+            <option key={index} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
         </div>
       </div>
     </div>
@@ -975,7 +986,15 @@ const DemographicsSurvey: React.FC = () => {
             value={responses.changes}
             onChange={updateChanges}
             setNextDisabled={setNextDisabled}
-            details={prevRecord || { name: '', address: '', householdSize: 0 }}
+            details={
+              prevRecord
+                ? {
+                    name: `${prevRecord.name.firstName} ${prevRecord.name.lastName}`,
+                    address: `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`,
+                    householdSize: prevRecord.householdSize ?? 0,
+                  }
+                : { name: '', address: '', householdSize: 0 }
+            }            
           />
         )}
         {currentStep === 'name' && 

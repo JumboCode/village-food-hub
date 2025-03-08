@@ -96,7 +96,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     setLastName(userData.lastName || "");
                     setUsername(userData.username || "");
                     
-                    const email = userData.emailAddresses[0].emailAddress
+                    const email = userData.emailAddresses?.length ? userData.emailAddresses[0].emailAddress : "";
                     setEmailAddress(email);
                       
                     setPronouns(userData.publicMetadata?.pronouns || "");

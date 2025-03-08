@@ -182,13 +182,14 @@ export async function DELETE(req: NextRequest) {
       });
 
       // Then delete categories
-      const result = await deleteCategoriesByName(data.name);
+      const result = await deleteInventoryItemsByCategoryName(data.name);
       return NextResponse.json({ response: "Category and related items deleted successfully", data: result }, { status: 200 });
     }
   } catch (error) {
     console.error("Error in DELETE:", error);
-    return NextResponse.json({ response: "Failed to delete record", error: error.message }, { status: 500 });
-  }
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ response: "Failed to delete record", error: errorMessage }, { status: 500 });
+  }  
 }
 
 interface CategoryRecord {

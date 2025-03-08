@@ -26,6 +26,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "flowbite": "^2.5.2",
+    "framer-motion": "^12.4.10",
     "google-translate-api-x": "^10.7.2",
     "jquery": "^3.7.1",
     "jquery-ui-dist": "^1.13.3",
