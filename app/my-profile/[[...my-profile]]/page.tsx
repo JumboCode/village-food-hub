@@ -9,7 +9,9 @@ import { useUser } from '@clerk/nextjs';
 
 const MyProfilePage: React.FC = () => {
     const [showEditProfileView, setShowEditProfileView] = useState(false);
-    
+    const [unsavedChanges, setUnsavedChanges] = useState(false);
+    const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+
     // Store profile data in parent
     const [profileData, setProfileData] = useState({
         firstName: "",
@@ -23,11 +25,18 @@ const MyProfilePage: React.FC = () => {
     });
     const { user } = useUser();
 
+    const handleUnsaved = () => {
+        // setUnsavedChanges(true);
+        if (unsavedChanges) { // && eventlistener on NavBar buttons clicked
+            setShowUnsavedModal(true);
+            console.log("show modal here!")
+        }
+    }
+
     // This function will be called when "Save Changes" is pressed.
     const handleSaveChange = async () => {
-        
         const updatedData = {
-          userId: user?.id, // Ensure you have the user id here from Clerk.
+          userId: user?.id, 
           firstName: profileData.firstName,
           lastName: profileData.lastName,
           pronouns: profileData.pronouns,
@@ -38,7 +47,7 @@ const MyProfilePage: React.FC = () => {
       
         try {
           const response = await fetch("/api/users", {
-            method: "PUT", // Or if you added the handler in your existing route, use "/api/users"
+            method: "PUT", 
             headers: {
               "Content-Type": "application/json",
             },
@@ -95,7 +104,7 @@ const MyProfilePage: React.FC = () => {
             <div>
                 <div className="p-[80px] pt-[50px]">
                     <p className="font-crimson text-[40px] mb-[20px]"> My Profile</p>
-                        <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData}/>
+                        <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
                     <div>
                     <div className="flex flex-row justify-between">
                         <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
