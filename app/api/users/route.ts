@@ -116,33 +116,42 @@ export async function PUT(req: NextRequest) {
 
 
 export async function DELETE(req: NextRequest) {
-  const username = req.nextUrl.searchParams.get('username');
-  
-  try {
+    try {
 
+    // Get username and id 
     const data = await req.json();
-    const username = data; 
+    const {username, id} = data; 
+    if (!id) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
 
     const client = await clerkClient(); 
 
-
+    // check how many admins are remaining
     const userList = await client.users.getUserList();
-    const users = userList.data;
+    const allUsers = userList.data;
 
-    const isAdmin = users.filter(
-      user => user.publicMetadata?.role == 'blah' && user.publicMetadata?.username != username); 
+    const userToDelete = allUsers.find(user => user.id === id)
+    if (!userToDelete) {
+      return NextResponse.json( {error: 'User Not Found'}, {status: 403})
+    }
     
+    const isAdmin = allUsers.filter(
+      user => user.publicMetadata?.role === 'Admin' && user.publicMetadata?.username != username); 
+    
+    // if there is at least one admin w/o the same username 
     if (isAdmin.length === 0) {
-      await client.users.deleteUser(username); 
-      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModal: true}, {status: 403}); 
+      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModal: true }, {status: 403}); 
+
     }
 
-    return NextResponse.json(isAdmin.length)
+    // make call to delete 
+    let user = await client.users.deleteUser(id); 
+    return new Response(JSON.stringify(user))
     
-    // return NextResponse.json({message: 'User deleted successfully', success: true}, {status: 200})
-
   } catch (error) {
       console.error(error)
-      return NextResponse.json({ error: 'User not deleted' }, {status: 500})
+      return NextResponse.json({ error: 'Error deleting user' })
   }
+
 }

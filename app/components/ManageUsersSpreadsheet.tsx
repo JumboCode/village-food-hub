@@ -12,12 +12,18 @@ interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
 }
 
+interface ClerkUser {
+    id?: string;
+    username?: string;
+  }
+
 export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [] }) => {
     console.log("manageUsersItems:", manageUsersItems);
     const [showModal, setShowModal] = useState(false);
     const [firstName, setFirstName] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string | null>(null);
-    const [username, setUsername] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null); // might be unused
+    const [allUsers, setAllUsers] = useState<string[][]>([]);
     const [showAdminModal, setShowAdminModal] = useState(false);
 
     const openModal = (firstName: string, lastName: string, username: string) => {
@@ -27,18 +33,20 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         setUsername(username); 
     };
 
-    const closeModal = (): void => {
+    const closeModal = () => {
         setShowModal(false);
         setFirstName(null);
         setLastName(null);
         setUsername(null); 
     };
 
-    const openAdminModal = (): void => {
+    const openAdminModal = () => {
+        console.log("Cannot delete last Admin")
         setShowAdminModal(true);
+        setShowModal(false);
     }
 
-    const closeAdminModal = (): void => {
+    const closeAdminModal = () => {
         setShowAdminModal(false);
     }
 
@@ -57,38 +65,53 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
 
             console.log("trying to delete user", username);
 
-            // GET USER  ID 
-            const response = await fetch('/../api/users/', {
+            const res = await fetch('/../api/users/', {
                 method: 'GET', 
-                // body: JSON.stringify({username})
             })
-            const result = await response.json()
-
-            console.log(result)
-
-            const user = result.filter(
-                user => user.publicMetadatausername === username
-            );
-
-            console.log(user.id)
-
-            // if (user.ok) {
-            //     const userid = user.id
-            // }
-            // MAKE CALL TO DELETE USING THE USERID
-
-            // const response = await fetch('/../api/users', {
-            //     method: 'DELETE', 
-            //     body: JSON.stringify({username})
-            // })
+            const data = await res.json()
 
 
-            // if (response.ok) {
-            //     if (result.showAdminModal) {
-            //         setShowAdminModal(true);
-            //         return; 
-            //     }
-            // }
+            if (data?.data) {
+                const formattedUsers: string[][] = data.data.map((user: ClerkUser) => [
+                    user.id || "N/A",
+                    user.username || "N/A",
+                  
+                  ]);
+                  setAllUsers(formattedUsers);
+            }
+
+            const deleteUser = allUsers.find(user => user[1] == username)
+            const id = deleteUser ? deleteUser[0] : null;
+
+
+            const payload = {
+                username: username, 
+                id: id
+            }
+
+            console.log('payload:', payload)
+
+            const response = await fetch('/../api/users', {
+                method: 'DELETE', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+
+            // const result = await response.json()
+
+            if (response.ok) {
+                // if (result.showAdminModal) {
+                //     openAdminModal();
+                //     return; 
+                // }
+
+                if (response.headers.get('X-Show-Admin-Modal') === 'true') {
+                    openAdminModal();
+                    return;
+                }
+            }
          
         } catch (error) {
             console.error('User not deleted: ', error);
