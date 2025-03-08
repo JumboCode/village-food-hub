@@ -55,16 +55,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     };
 
     const handleDelete = async () => {
-        // Check that there's enough admins:
-        // Try to delete user
-        if (!username) return;
-
-
-    
         try {
-
-            console.log("trying to delete user", username);
-
             const res = await fetch('/../api/users/', {
                 method: 'GET', 
             })
@@ -81,15 +72,11 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             }
 
             const deleteUser = allUsers.find(user => user[1] == username)
-            const id = deleteUser ? deleteUser[0] : null;
-
 
             const payload = {
                 username: username, 
-                id: id
+                id: deleteUser ? deleteUser[0] : null
             }
-
-            console.log('payload:', payload)
 
             const response = await fetch('/../api/users', {
                 method: 'DELETE', 
@@ -99,20 +86,16 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 body: JSON.stringify(payload)
             })
 
-            // const result = await response.json()
+            const result = await response.json()
 
+            // Open new modal if requireed
             if (response.ok) {
-                // if (result.showAdminModal) {
-                //     openAdminModal();
-                //     return; 
-                // }
-
-                if (response.headers.get('X-Show-Admin-Modal') === 'true') {
+                if (result.showAdminModal) {
                     openAdminModal();
-                    return;
+                    return; 
                 }
+
             }
-         
         } catch (error) {
             console.error('User not deleted: ', error);
            
@@ -120,7 +103,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
 
         closeModal(); 
         closeAdminModal(); 
-        // refreshPage();
+        refreshPage();
 
     };
     

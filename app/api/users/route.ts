@@ -135,23 +135,24 @@ export async function DELETE(req: NextRequest) {
     if (!userToDelete) {
       return NextResponse.json( {error: 'User Not Found'}, {status: 403})
     }
-    
-    const isAdmin = allUsers.filter(
-      user => user.publicMetadata?.role === 'Admin' && user.publicMetadata?.username != username); 
-    
-    // if there is at least one admin w/o the same username 
-    if (isAdmin.length === 0) {
-      return NextResponse.json( {error: 'Cannot delete the last admin', showAdminModal: true }, {status: 403}); 
 
+    const remainingAdmins = allUsers.filter (
+      user => user.publicMetadata?.role == 'Admin' && 
+      user.id !== id
+    )
+
+    // If there is at least one admin remaining, delete the user
+    if (remainingAdmins.length >= 1) {
+      let user = await client.users.deleteUser(id); 
+      return new Response(JSON.stringify(user))
+    } else {
+      return NextResponse.json({error: 'Cannot delete the last admin', showAdminModal: true }, {status: 400}); 
     }
 
-    // make call to delete 
-    let user = await client.users.deleteUser(id); 
-    return new Response(JSON.stringify(user))
+    
     
   } catch (error) {
-      console.error(error)
-      return NextResponse.json({ error: 'Error deleting user' })
+    return NextResponse.json({ error: 'Error deleting user' })
   }
 
 }
