@@ -3,39 +3,27 @@
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import welcomeScreenBG from '@app/images/welcome-screen-background.png';
+import whiteOutlineLogo from '@app/images/headerLogo.png';
 import welcomeBWLogo from '@app/images/welcome-bw-logo.png';
 import { useRouter } from 'next/navigation';
 
 const DEFAULT_TRANSLATIONS = [
     "Welcome to Village Food Hub!",
-    "Please fill out this quick demographic survey",
-    "each visit",
-    "to help us grow and reach more people in the community!",
+    "Please fill out this quick demographic survey each visit to help us grow and reach more people in the community!",
     "Choose Language",
     "English",
     "Spanish",
-    "Click to Complete the Demographic Survey",
     "Start Demographic Survey →",
 ];
 
 const WelcomePage: React.FC = () => {
     const router = useRouter();
-    const startSurvey = () => {
-        router.push('/customer-questions');
-    };
-
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [language, setLanguage] = useState<string>('en');
+    const startSurvey = () => router.push('/customer-questions');
+    
+    const [language, setLanguage] = useState('en');
     const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS);
+    const [loading, setLoading] = useState(true);
 
-    // Added loading state to ensure language is set before render
-    const [loading, setLoading] = useState(true); 
-
-    const clickDropdown = () => {
-        setDropdownOpen(!dropdownOpen);
-    };
-
-    // Define a type for the translation tuple returned by the API.
     type TranslationTuple = [string, ...unknown[]];
 
     const translateText = async (lang: string) => {
@@ -70,14 +58,13 @@ const WelcomePage: React.FC = () => {
         const savedLanguage = localStorage.getItem("language") || 'en';
         setLanguage(savedLanguage);
         translateText(savedLanguage);
-        setLoading(false); 
+        setLoading(false);
     }, []);
 
     useEffect(() => {
-        if (!loading) { 
+        if (!loading) {
             localStorage.setItem("language", language);
             translateText(language);
-            setDropdownOpen(false);  
         }
     }, [language, loading]);
 
@@ -86,66 +73,43 @@ const WelcomePage: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen bg-[#24593D] font-crimson text-white">
-            <div className="h-1/4 w-full text-center content-center text-7xl crimson-bold">
-                {translations[0]}
-            </div>
-            <div className="flex flex-row h-full w-full">
-                <div className="flex bg-gray-300 w-full">
-                    <Image
-                        src={welcomeScreenBG}
-                        width={628}
-                        height={193}
-                        alt="welcome BW Logo"
-                        className="flex h-4/5 w-1/2 absolute"
-                    />
-                    <div className="flex w-full justify-center items-center">
-                        <div className="flex h-3/4 w-2/5 text-black text-center absolute bg-white text-[2.5rem]">
-                            <div className="box-content p-6 pt-14">
-                                <span className="font-bold">{translations[1]}</span>
-                                <br />
-                                &nbsp;<span className="font-bold text-[#7EB672]">{translations[2]}</span>
-                                &nbsp;<span>{translations[3]}</span>
-                            </div>
-                            <Image
-                                src={welcomeBWLogo}
-                                width={628}
-                                height={193}
-                                alt="welcome BW Logo"
-                                className="flex w-full absolute bottom-0"
-                            />
-                        </div>
-                    </div>
+        <div className="flex flex-col h-screen font-crimson">
+            <div className="grid grid-cols-[1fr_6fr] w-full h-[160px] bg-banner-green shadow-xl items-center px-10">
+                <div className="flex items-center">
+                    <Image src={whiteOutlineLogo} alt="logo" width={160} height={130} />
                 </div>
-                <div className="flex flex-col bg-white justify-center items-center p-10 pt-14 w-full space-y-10">
-                    <div className="flex flex-row absolute top-[220px] space-x-5">
-                        <div className="text-black text-3xl crimson">{translations[4]}</div>
-                        <div className="w-[200px] h-[35px] flex-col">
-                            <button
-                                className="w-full h-full text-white bg-white hover:bg-modal-gray border-2 border-modal-gray font-medium rounded-lg text-sm text-center inline-flex items-center"
-                                type="button"
-                                onClick={clickDropdown}
-                            >
-                                <div className="font-bold text-black pl-4">
-                                    {language === 'en' ? translations[5] : translations[6]}
-                                </div>
-                            </button>
-                            {dropdownOpen && (
-                                <div className="absolute top-[35px] text-black w-[200px] border-x-2 border-modal-gray rounded">
-                                    <button className="h-[35px] w-full hover:bg-[#ebf9e9]" onClick={() => setLanguage('en')}>
-                                        <p className="h-full w-full pt-[5px]">{translations[5]}</p>
-                                    </button>
-                                    <button className="h-[35px] w-full hover:bg-[#ebf9e9]" onClick={() => setLanguage('es')}>
-                                        <p className="h-full w-full pt-[5px]">{translations[6]}</p>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                <div className="flex justify-center">
+                    <h1 className={`${language === 'es' ? 'text-[48px] pl-6' : 'text-[60px]'} font-crimson font-bold text-white text-center`}>
+                        {translations[0]}
+                    </h1>
+                </div>
+            </div>
+            <div className="flex flex-col flex-grow bg-white p-20 max-w-6xl w-full mx-auto text-center shadow-lg">
+                <div className="flex items-center justify-center space-x-4 mb-10">
+                    <span className="text-3xl font-semibold text-black text-[42px] pr-4">{translations[2]}:</span>
+                    <button
+                        className={`px-10 py-4 rounded-full text-[24px] font-bold border-2 transition-all ${language === 'en' ? 'bg-light-green text-white' : 'bg-white text-dark-green border-dark-green'}`}
+                        onClick={() => setLanguage('en')}
+                    >
+                        {translations[3]}
+                    </button>
+                    <button
+                        className={`px-10 py-4 rounded-full text-[24px] font-bold border-2 transition-all ${language === 'es' ? 'bg-light-green text-white' : 'bg-white text-dark-green border-dark-green'}`}
+                        onClick={() => setLanguage('es')}
+                    >
+                        {translations[4]}
+                    </button>
+                </div>
+                <div className="flex flex-col flex-grow bg-white p-16 max-w-4xl w-full mx-auto text-center border-2 border-light-green rounded-3xl">
+                    <div className="text-3xl text-black mb-8">
+                        <p className="text-[48px]">{translations[1]}</p>
                     </div>
-                    <div className="text-center text-black text-4xl crimson-bold">{translations[7]}</div>
-                    <div className="justify-center items-center pb-20">
-                        <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8" onClick={startSurvey}>
-                            {translations[8]}
+                    <div className="mt-12">
+                        <button 
+                            className="bg-[#7EB672] text-white text-3xl px-14 py-4 rounded-full shadow-lg hover:bg-dark-green transition-all"
+                            onClick={startSurvey}
+                        >
+                            <p className="text-[36px]">{translations[5]}</p>
                         </button>
                     </div>
                 </div>
