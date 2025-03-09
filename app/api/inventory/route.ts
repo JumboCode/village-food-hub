@@ -204,22 +204,32 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const body = await req.json();
+      const body = await req.json();
+      const { itemName, units } = body;
 
-    // Ensure proper destructuring
-    const { itemName, units } = body;
+      if (!itemName || !units) {
+          return NextResponse.json({ message: "Missing itemName or units" }, { status: 400 });
+      }
 
-    // Validate input
-    if (!itemName || !units) {
-      return NextResponse.json({ message: 'Missing itemName or units' }, { status: 400 });
-    }
+      // Check if the inventory item exists before deleting
+      const existingItem = await prisma.inventory.findFirst({
+          where: { itemName, units },
+      });
 
-    // Proceed with deletion
-    const result = await deleteInventoryItem({ itemName, units });
+      if (!existingItem) {
+          return NextResponse.json({ message: "Inventory item not found" }, { status: 404 });
+      }
 
-    return NextResponse.json({ message: 'OK', result }, { status: 200 });
-  } catch (_error) {
-    console.error("Inventory DELETE error:", _error);
-    return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
+      // Delete the inventory item
+      const result = await prisma.inventory.deleteMany({
+          where: { itemName, units },
+      });
+
+      console.log(`Deleted ${result.count} inventory records for "${itemName}" with unit "${units}"`);
+      return NextResponse.json({ message: "Inventory item deleted successfully" }, { status: 200 });
+
+  } catch (error) {
+      console.error("Inventory DELETE error:", error);
+      return NextResponse.json({ message: "Unexpected Error", error: error.message }, { status: 500 });
   }
 }

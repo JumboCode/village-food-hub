@@ -227,63 +227,63 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const deleteUnit = async (unit: string) => {
     setUnitWarning(-1);
   
+    // Check if this is the last unit
     if (modalItem[1].toString().split(", ").length === 1) {
       setLastUnitWarning(true);
-    } else {
-      // First, check if the item with the given unit exists in the inventory.
-      try {
-        const inventoryCheck = await fetch("../api/inventory");
-        if (inventoryCheck.ok) {
-          const inventoryData = (await inventoryCheck.json()) as InventoryResponse;
-          const exists = inventoryData.data.some(
-            (invItem: RawInventoryItem) =>
-              invItem.itemName === modalItem[0] &&
-              invItem.units.trim() === unit.trim()
-          );
-          if (exists) {
-            // If exists, delete from inventory.
-            await fetch("../api/inventory", {
-              method: "DELETE",
-              body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-            });
-          } else {
-            console.info("No inventory record found for unit:", unit);
-          }
-        } else {
-          console.error("Failed to GET inventory data; status:", inventoryCheck.status);
-        }
-      } catch (error) {
-        console.error("Error checking inventory:", error);
-      }
+      return;
+    }
   
-      // Now, delete the unit from categories.
-      try {
-        const newUnits = modalItem[1]
-          .toString()
-          .split(", ")
-          .filter((elt) => elt !== unit);
-        const categoryResponse = await fetch("../api/categories", {
-          method: "PUT",
-          body: JSON.stringify({
-            oldItemName: modalItem[0],
-            itemName: modalItem[0],
-            name: modalCategory,
-            units: newUnits,
-          }),
+    try {
+      // Step 1: Fetch inventory to check if this unit exists
+      const inventoryResponse = await fetch("../api/inventory");
+      if (!inventoryResponse.ok) throw new Error("Failed to fetch inventory");
+  
+      const inventoryData = (await inventoryResponse.json()) as InventoryResponse;
+      const inventoryItemsToDelete = inventoryData.data.filter(
+        (invItem) =>
+          invItem.itemName === modalItem[0] && invItem.units.trim() === unit.trim()
+      );
+  
+      // Step 2: Delete all matching inventory records for this unit
+      for (const inventoryItem of inventoryItemsToDelete) {
+        await fetch("../api/inventory", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemName: inventoryItem.itemName, units: unit }),
         });
-        if (!categoryResponse.ok) {
-          throw new Error(
-            `Deleting unit from categories error; status: ${categoryResponse.status}`
-          );
-        }
-        await categoryResponse.json();
-      } catch (e) {
-        console.error(e);
       }
   
-      // Refresh data.
+      console.log(`Deleted ${inventoryItemsToDelete.length} inventory items using unit "${unit}"`);
+  
+      // Step 3: Update the category to remove the deleted unit
+      const updatedUnits = modalItem[1]
+        .toString()
+        .split(", ")
+        .filter((elt) => elt !== unit);
+  
+      const categoryResponse = await fetch("../api/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldItemName: modalItem[0],
+          itemName: modalItem[0],
+          name: modalCategory,
+          units: updatedUnits,
+        }),
+      });
+  
+      if (!categoryResponse.ok) {
+        throw new Error(`Deleting unit from categories error; status: ${categoryResponse.status}`);
+      }
+  
+      await categoryResponse.json();
+      console.log(`Unit "${unit}" removed from category "${modalCategory}"`);
+  
+      // Refresh data
       await loadData();
-      setTimeout(() => setIsDeleteModalVisible(false), 500);
+      setIsDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting unit:", error);
     }
   };  
 

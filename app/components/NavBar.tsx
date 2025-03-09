@@ -12,44 +12,39 @@ import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 
 // Clerk
 import { useClerk, useUser } from "@clerk/nextjs";
-//import { currentUser } from '@clerk/nextjs/server'
 
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  // const [loggedInUser, setLoggedInUser] = useState("");
   const router = useRouter();
   const { signOut } = useClerk();
+  const { user, isLoaded } = useUser();
 
-  // const { isLoaded, session, isSignedIn } = useSession();
-  // console.log("session: ", session);
-
-  const { user } = useUser();
-  // console.log("user: ", user);
-  if(user?.firstName && user.lastName && loggedInUser == "") {
-    setLoggedInUser(user?.firstName + " " + user?.lastName);
-    if(user.publicMetadata.role == "admin") {
-      setIsAdmin(true);
+  useEffect(() => {
+    if (isLoaded && user) {
+      setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
+      setIsAdmin(user.publicMetadata?.role === "Admin");
+    } else {
+      setLoggedInUser("");
+      setIsAdmin(false);
     }
-  }
+  }, [isLoaded, user]);
 
-  // useEffect(() => {
-  //   // (async () => {
-  //     try {
-  //       const { isLoaded, user } = useUser();
-  //       // let user : String = "";
-  //       //const user = await currentUser();
-  //       console.log("logged in user: ", user);
-  //       // setLoggedInUser(user);
-  //     } catch (err) {
-  //       console.log(err);
-  //   };
-  // }, []);
+  console.log("User:", user?.firstName, user?.lastName);
 
   const handleSignOut = async () => {
-    signOut({ redirectUrl: "/" });
-    console.log("Sign out successful");
+    try {
+      await signOut();
+      console.log("Sign out successful");
+
+      setLoggedInUser(""); 
+      setIsAdmin(false);
+      
+      router.push("/login");
+    } catch (error) {
+      console.error("Error during sign-out:", error);
+    }
   };
 
   const handleDemographics = () => {
@@ -80,6 +75,9 @@ export default function NavBar() {
 
   return (
     <>
+    {!isLoaded ? (
+        <p className="text-white text-xl text-center p-4">Loading...</p>
+      ) : (
       <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
         {/* Logo Section */}
         <div className="flex-shrink-0 mr-8">
@@ -172,6 +170,7 @@ export default function NavBar() {
           </div>
         </div>
       </div>
-    </>
-  );
+   )}
+   </>
+ );
 }

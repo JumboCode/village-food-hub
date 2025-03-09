@@ -119,22 +119,51 @@ export async function PUT(req: NextRequest) {
     const data = await req.json();
     console.log("Received data in API:", data);
 
-    // Validate required keys using our flexible validCategory function and ensure oldItemName is present.
     if (!validCategory(data) || !data.oldItemName) {
       console.log("Invalid category data:", data);
       return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
     }
 
+    const { oldItemName, itemName, name, units, oldCategoryName, newCategoryName } = data;
+
+    // Step 1: Update category
     const updatedCategory = await updateCategory({
-      oldItemName: data.oldItemName,
-      itemName: data.itemName,
-      name: data.name,
-      units: data.units,
+      oldItemName,
+      itemName,
+      name,
+      units,
     });
 
-    return NextResponse.json(updatedCategory, { status: 200 });
+    // Step 2: Update inventory records if the category name changes
+    if (oldCategoryName && newCategoryName && oldCategoryName !== newCategoryName) {
+      console.log(`Updating inventory items from category "${oldCategoryName}" to "${newCategoryName}"`);
+      
+      await prisma.inventory.updateMany({
+        where: { categoryName: oldCategoryName },
+        data: { categoryName: newCategoryName },
+      });
+    }
+
+    // Step 3: Update inventory records if units are changed
+    const existingInventoryItems = await prisma.inventory.findMany({
+      where: { itemName: oldItemName },
+    });
+
+    for (const inventoryItem of existingInventoryItems) {
+      const updatedUnits = units.includes(inventoryItem.units) ? inventoryItem.units : units[0];
+
+      await prisma.inventory.updateMany({
+        where: { itemName: oldItemName, units: inventoryItem.units },
+        data: { itemName, units: updatedUnits },
+      });
+    }
+
+    return NextResponse.json(
+      { response: "Category and inventory items updated successfully", updatedCategory },
+      { status: 200 }
+    );
   } catch (error) {
-    console.log(error);
+    console.log("Error in PUT:", error);
     return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
   }
 }
@@ -163,7 +192,7 @@ export async function DELETE(req: NextRequest) {
         name: data.name,
       });
 
-      // Also delete the item from inventory
+      // 🚀 Delete inventory items associated with this category item
       await prisma.inventory.deleteMany({
         where: {
           itemName: data.itemName,
@@ -176,14 +205,24 @@ export async function DELETE(req: NextRequest) {
       // Case 2: Delete all records for the given category name + related inventory items
       console.log("Deleting all records for category:", data.name);
       
-      // First delete inventory items associated with this category
+      // Step 1: Find all inventory items that belong to this category
+      const inventoryItems = await prisma.inventory.findMany({
+        where: { categoryName: data.name },
+      });
+
+      // Step 2: Delete inventory items associated with this category
       await prisma.inventory.deleteMany({
         where: { categoryName: data.name },
       });
 
-      // Then delete categories
+      // Step 3: Delete categories
       const result = await deleteInventoryItemsByCategoryName(data.name);
-      return NextResponse.json({ response: "Category and related items deleted successfully", data: result }, { status: 200 });
+
+      return NextResponse.json({
+        response: "Category and related items deleted successfully",
+        deletedInventoryItems: inventoryItems,
+        data: result
+      }, { status: 200 });
     }
   } catch (error) {
     console.error("Error in DELETE:", error);

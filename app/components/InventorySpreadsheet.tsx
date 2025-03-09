@@ -152,24 +152,28 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };
 
     const handleDelete = async () => {
-        if (!itemName || !units) return;
-        try {
+      if (!itemName || !units) return;
+  
+      try {
           const response = await fetch("/api/inventory", {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ deleteItem: itemName, units }),
+              method: "DELETE",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ itemName, units }),
           });
+  
           if (!response.ok) {
-            throw new Error("Error fetching inventory data.");
+              const errorMessage = await response.json();
+              throw new Error(`Error deleting inventory: ${errorMessage.message}`);
           }
-          refreshPage();
-          console.log("Deleted successfully!");
+  
+          console.log(`Deleted inventory item: ${itemName} (${units})`);
           closeDeleteModal();
-        } catch (error) {
-          console.error(error);
-        }
+          refreshPage();
+      } catch (error) {
+          console.error("Inventory delete failed:", error);
+      }
     };      
 
     const downloadCSV = (item: (string | number)[]) => {
