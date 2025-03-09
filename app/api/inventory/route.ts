@@ -229,7 +229,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ message: "Inventory item deleted successfully" }, { status: 200 });
 
   } catch (error) {
-      console.error("Inventory DELETE error:", error);
-      return NextResponse.json({ message: "Unexpected Error", error: error.message }, { status: 500 });
+    console.error("Inventory DELETE error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ message: "Unexpected Error", error: errorMessage }, { status: 500 });
   }
 }

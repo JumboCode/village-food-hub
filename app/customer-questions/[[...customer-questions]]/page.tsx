@@ -993,10 +993,14 @@ const DemographicsSurvey: React.FC = () => {
               name: typeof prevRecord?.name === "string" 
                 ? prevRecord.name 
                 : prevRecord?.name 
-                    ? `${prevRecord.name.firstName} ${prevRecord.name.lastName}` 
-                    : "N/A",            
-              address: prevRecord?.address || "N/A",
-              householdSize: prevRecord?.householdSize === 11 ? "10+" : prevRecord?.householdSize ?? "N/A",
+                ? `${prevRecord.name.firstName} ${prevRecord.name.lastName}` 
+                : "N/A",            
+              address: typeof prevRecord?.address === "string"
+                ? prevRecord.address
+                : prevRecord?.address
+                ? `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`
+                : "N/A",                  
+                householdSize: prevRecord?.householdSize === 11 ? 10 : prevRecord?.householdSize ?? 0,
             }}             
           />
         )}
