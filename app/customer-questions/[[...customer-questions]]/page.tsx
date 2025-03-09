@@ -218,11 +218,11 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">{translations[0]} <span className="text-red">*</span></p>
-        <p className="text-[20px] font-bold mb-4">
-          <div className="mb-2">{translations[1]} <span className="font-normal">{details.name}</span></div>
-          <div className="mb-2">{translations[2]} <span className="font-normal">{details.address}</span></div>
-          <div>{translations[3]} <span className="font-normal">{details.householdSize}</span></div>
-        </p>
+        <div className="text-[20px] font-bold mb-4">
+          <p>{translations[1]} <span className="font-normal">{details.name}</span></p>
+          <p>{translations[2]} <span className="font-normal">{details.address}</span></p>
+          <p>{translations[3]} <span className="font-normal">{details.householdSize}</span></p>
+        </div>
 
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
@@ -990,7 +990,11 @@ const DemographicsSurvey: React.FC = () => {
             onChange={updateChanges}
             setNextDisabled={setNextDisabled}
             details={{
-              name: prevRecord?.name || "N/A",
+              name: typeof prevRecord?.name === "string" 
+                ? prevRecord.name 
+                : prevRecord?.name 
+                    ? `${prevRecord.name.firstName} ${prevRecord.name.lastName}` 
+                    : "N/A",            
               address: prevRecord?.address || "N/A",
               householdSize: prevRecord?.householdSize === 11 ? "10+" : prevRecord?.householdSize ?? "N/A",
             }}             
