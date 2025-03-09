@@ -28,11 +28,10 @@ interface ProfileViewProps {
         phoneNumber: string;
         password: string;
       }>>;
-      setUnsavedChanges?:React.Dispatch<React.SetStateAction<boolean>
-      >
+      setUnsavedChanges?: React.Dispatch<React.SetStateAction<boolean>>
   }
   
-const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData }) => {
+const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData, setUnsavedChanges }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
     
@@ -138,8 +137,13 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
     }
     
     const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>, fieldType: string) => {
-        setChangeMade(true);
-        console.log("CHANGE HANDLED")
+        console.log("here");
+        // setChangeMade(true);
+        if (setUnsavedChanges) {
+            setUnsavedChanges(true);
+            console.log('Unsaved Changes: true');
+        }
+        // console.log("CHANGE HANDLED")
         if (setProfileData) {
             setProfileData(prev => ({ ...prev, [fieldType]: e.target.value }));
         }

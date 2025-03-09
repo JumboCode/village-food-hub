@@ -55,15 +55,33 @@ export default function NavBar() {
   };
 
   const handleDemographics = () => {
-    router.push("/demographics");
+    const event = new CustomEvent("demographicsClicked", {
+      detail: {intendedPage: "/demographics"}
+    });
+    console.log("demographics dispatch sent");
+    document.dispatchEvent(event);
+
+    //router.push("/demographics");
   };
 
   const handleInventory = () => {
-    router.push("/inventory");
+    const event = new CustomEvent("inventoryClicked", {
+      detail: {intendedPage: "/inventory"}
+    });
+    document.dispatchEvent(event);
+
+    console.log("inventory dispatch sent");
+    //router.push("/inventory");
   };
 
   const handleCategories = () => {
-    router.push("/categories");
+    const event = new CustomEvent("categoriesClicked", {
+      detail: {intendedPage: "/categories"}
+    });
+    console.log("categories dispatch sent");
+    document.dispatchEvent(event);
+    
+    //router.push("/categories");
   };
 
   const handleManageUsers = () => {
@@ -79,6 +97,7 @@ export default function NavBar() {
   useEffect(() => {
     setCurrentPath(window.location.pathname);
   }, []);
+
 
   return (
     <>

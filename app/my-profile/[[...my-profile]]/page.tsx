@@ -1,16 +1,21 @@
 "use client"
 import ProfileView from "@app/components/ProfileView";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import NavBar from "@app/components/NavBar";
 import Image from 'next/image';
 import deleteIcon from '@app/images/deleteIcon.svg';
 import pencilIcon from '@app/images/pencil.svg';
 import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal'
 
 const MyProfilePage: React.FC = () => {
+    const router = useRouter();
+    
     const [showEditProfileView, setShowEditProfileView] = useState(false);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
     const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+    const [destinationPage, setDestinationPage] = useState("");
 
     // Store profile data in parent
     const [profileData, setProfileData] = useState({
@@ -24,14 +29,40 @@ const MyProfilePage: React.FC = () => {
         password: ""
     });
     const { user } = useUser();
-
-    const handleUnsaved = () => {
-        // setUnsavedChanges(true);
-        if (unsavedChanges) { // && eventlistener on NavBar buttons clicked
-            setShowUnsavedModal(true);
-            console.log("show modal here!")
+    const initialRender = useRef(true);
+    
+    useEffect(() => {
+        if (initialRender.current) {
+            initialRender.current = false;
+            return;
         }
-    }
+        
+        const handleNavItemClicked = (e: Event) => {
+            // get dispatched event from NavBar
+            const customEvent = e as CustomEvent;
+            let destPage = customEvent.detail.intendedPage;
+            
+            // if there are unsaved changes, and a NavBar item is clicked, show modal
+            if (unsavedChanges) { 
+                setDestinationPage(destPage);
+                setShowUnsavedModal(true);
+            } else {
+                router.push(destPage);
+            }
+        }
+        
+        document.addEventListener("demographicsClicked", handleNavItemClicked);
+        document.addEventListener("inventoryClicked", handleNavItemClicked);
+        document.addEventListener("categoriesClicked", handleNavItemClicked);
+        
+        // Cleanup the event listener on unmount
+        return () => {
+          document.removeEventListener("demographicsClicked", handleNavItemClicked);
+          document.removeEventListener("inventoryClicked", handleNavItemClicked);
+          document.removeEventListener("categoriesClicked", handleNavItemClicked);
+        };
+      }, [unsavedChanges]);
+
 
     // This function will be called when "Save Changes" is pressed.
     const handleSaveChange = async () => {
@@ -44,6 +75,7 @@ const MyProfilePage: React.FC = () => {
           phoneNumber: profileData.phoneNumber,
         };
         setShowEditProfileView(false);
+        setUnsavedChanges(false);
       
         try {
           const response = await fetch("/api/users", {
@@ -64,7 +96,6 @@ const MyProfilePage: React.FC = () => {
           console.error("Error updating user data:", error);
         }
       };
-
   
     function handleEditProfileView() {
         setShowEditProfileView(true);
@@ -73,7 +104,10 @@ const MyProfilePage: React.FC = () => {
     function handleCancelProfileView() {
         setShowEditProfileView(false);
     }
-
+    
+    const handleCloseModal = () => {
+        setShowUnsavedModal(false);
+    }
     
     return (
         <div>
@@ -81,10 +115,10 @@ const MyProfilePage: React.FC = () => {
             {showEditProfileView ? (
             <div>
                 <div className="p-[80px] pt-[50px]">
-
+                    {showUnsavedModal && (<ProfileUnsavedModal closeUnsavedModal={handleCloseModal} redirectPage={destinationPage}/>)}
                     <p className="font-crimson text-[40px] mb-[20px]"> Edit Profile</p>
                     <ProfileView visible={showEditProfileView} mode="edit" onCancel={handleCancelProfileView} 
-                        profileData={profileData} setProfileData={setProfileData}/>
+                        profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
                     <div>
                     <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px]"
                         onClick={handleSaveChange}
@@ -104,7 +138,7 @@ const MyProfilePage: React.FC = () => {
             <div>
                 <div className="p-[80px] pt-[50px]">
                     <p className="font-crimson text-[40px] mb-[20px]"> My Profile</p>
-                        <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
+                        <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData}/>
                     <div>
                     <div className="flex flex-row justify-between">
                         <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
