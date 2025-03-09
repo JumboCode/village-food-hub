@@ -11,7 +11,8 @@ interface NameDropdownProps {
   filterName: string;
   currentDropdown?: string;
   disabled?: boolean;
-  filterValue?: string;
+  filterValue?: string; 
+  defaultValue?: string;
 }
 
 export function NameDropdown({
@@ -22,9 +23,11 @@ export function NameDropdown({
   currentDropdown,
   disabled,
   filterValue,
+  defaultValue
 }: NameDropdownProps) {
   const [items, setItems] = useState<string[]>(options);
-
+  const [selected, setSelected] = useState<string>(defaultValue || "");
+ 
   useEffect(() => {
     async function fetchItems() {
       if (!fetchUrl) return; // Prevents fetching if fetchUrl is not provided
@@ -48,6 +51,11 @@ export function NameDropdown({
         );
 
         setItems(Array.from(new Set(nonEmptyItems)));
+
+        // Ensure previously selected value is retained if available
+        if (defaultValue && nonEmptyItems.includes(defaultValue)) {
+          setSelected(defaultValue);
+        }
       } catch (error) {
         console.error('Failed to fetch items', error);
       }
@@ -59,8 +67,11 @@ export function NameDropdown({
   return (
     <select
       className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray"
-      defaultValue=""
-      onChange={(e) => onSelect(e.target.value)}
+      value={selected}
+      onChange={(e) => {
+        setSelected(e.target.value);
+        onSelect(e.target.value);
+      }}
       disabled={disabled}
     >
       <option disabled value=""/>
