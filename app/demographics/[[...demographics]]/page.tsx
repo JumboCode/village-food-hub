@@ -136,6 +136,7 @@ const InternalViewDemographicsPage: React.FC = () => {
 
   const handleRunReport = (startDate: Date, endDate: Date) => {
     downloadCSV(startDate, endDate);
+    setShowModal(false)
   };
 
   // States and logic for the storage modal remain unchanged
