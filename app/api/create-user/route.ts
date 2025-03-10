@@ -39,10 +39,11 @@ export async function POST(req: NextRequest) {
 
 export async function createClerksUser(user: ClerkUser) {
     try {
-        const validRoles = ['admin', 'staff', 'volunteer', 'customer'];
-        const lowerCaseRole = user.role.toLowerCase();
+        const validRoles = ['Admin', 'Staff', 'Volunteer', 'Customer'];
+        const role = user.role.charAt(0).toUpperCase() + user.role.substring(1)
+        console.log(role)
         
-        if (!validRoles.includes(lowerCaseRole)) {
+        if (!validRoles.includes(role)) {
             return NextResponse.json(
                 { error: 'Role must be one of: admin, staff, volunteer, customer' },
                 { status: 400 }
@@ -60,7 +61,7 @@ export async function createClerksUser(user: ClerkUser) {
             }],
             publicMetadata: { 
                 pronouns: user.pronouns, 
-                role: user.role, 
+                role: role, 
                 phoneNumber: user.phoneNumber 
             }
         };
