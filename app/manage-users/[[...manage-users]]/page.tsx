@@ -1,11 +1,12 @@
-"use client"
-import React, { useEffect, useState } from "react";
+'use client'
+import React, { useState } from "react";
+import useSWR from "swr";
 import NavBar from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
 import { NewUserButton } from "@app/components/InternalViewButtons";
 import ProfileView from "@app/components/ProfileView";
 
-// Define a type for the structure of each user record from the API
+// Define a type for the structure of each user record from the API.
 interface ClerkUser {
   firstName?: string;
   lastName?: string;
@@ -18,41 +19,44 @@ interface ClerkUser {
   emailAddresses?: { emailAddress: string }[];
 }
 
+// Define a fetcher function that retrieves and formats the users.
+const fetchUsers = async (url: string): Promise<string[][]> => {
+  const res = await fetch(url, { method: 'GET' });
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  const data = await res.json();
+  if (data?.data) {
+    const formattedUsers: string[][] = data.data.map((user: ClerkUser) => [
+      user.firstName || "N/A",
+      user.lastName || "N/A",
+      user.publicMetadata?.pronouns || "N/A",
+      user.username || "N/A",
+      user.emailAddresses?.[0]?.emailAddress || "N/A",
+      user.publicMetadata?.role || "N/A",
+      user.publicMetadata?.phoneNumber || "N/A",
+    ]);
+    return formattedUsers;
+  }
+  return [];
+};
+
 const InternalViewManageUsersPage: React.FC = () => {
-  const [users, setUsers] = useState<string[][]>([]);
+  // Use SWR to fetch users. SWR will cache and revalidate data automatically.
+  const { data: users, error, mutate } = useSWR("/api/users", fetchUsers);
+
+  // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
   const [createUserError, setCreateUserError] = useState("\u00A0");
   
   const [profileData, setProfileData] = useState({
-      firstName: "",
-      lastName: "",
-      username: "",
-      emailAddress: "",
-      pronouns: "",
-      role: "",
-      phoneNumber: "",
-      password: ""
+    firstName: "",
+    lastName: "",
+    username: "",
+    emailAddress: "",
+    pronouns: "",
+    role: "",
+    phoneNumber: "",
+    password: ""
   });
-
-  useEffect(() => {
-    fetch("../api/users", { method: 'GET' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.data) {
-          const formattedUsers: string[][] = data.data.map((user: ClerkUser) => [
-            user.firstName || "N/A",
-            user.lastName || "N/A",
-            user.publicMetadata?.pronouns || "N/A",
-            user.username || "N/A",
-            user.emailAddresses?.[0]?.emailAddress || "N/A",
-            user.publicMetadata?.role || "N/A",
-            user.publicMetadata?.phoneNumber || "N/A",
-          ]);
-          setUsers(formattedUsers);
-        }
-      })
-      .catch((err) => console.error("Error fetching users:", err));
-  }, []);
 
   function handleProfileView() {
     setShowCreateProfileView(true);
@@ -166,7 +170,18 @@ const InternalViewManageUsersPage: React.FC = () => {
                 <NewUserButton onClick={handleProfileView} />
               </div>
             </div>
-            <ManageUsersSpreadsheet manageUsersItems={users} />
+            {error && (
+              <div className="text-center text-red-600">
+                Error loading users.
+              </div>
+            )}
+            {users ? (
+              <ManageUsersSpreadsheet manageUsersItems={users} />
+            ) : (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                Loading users…
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -11,8 +11,18 @@ import { useSignIn, useAuth } from "@clerk/nextjs";
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const { signIn, setActive } = useSignIn();
-  // Removed isSignedIn and userId since they are not used:
-  // const { isSignedIn, userId } = useAuth();
+  const { isSignedIn, signOut, isLoaded } = useAuth();
+  const [hasSignedOut, setHasSignedOut] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (isSignedIn && !hasSignedOut) {
+      signOut().then(() => {
+        console.log("User successfully signed out.");
+        setHasSignedOut(true);
+      }).catch(err => console.error("Sign-out error:", err));
+    }
+  }, [isSignedIn, signOut, isLoaded, hasSignedOut]);
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -32,7 +42,8 @@ const LoginPage: React.FC = () => {
   // error handling states
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  // Removed emptyUsernameError and emptyPasswordError as they are not used
+  const [emptyUsernameError, setEmptyUsernameError] = useState(false)
+  const [emptyPasswordError, setEmptyPasswordError] = useState(false)
 
   const handleSignIn = async () => {
     setUsernameError(false);
@@ -44,10 +55,13 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    if (!signIn) {
+      console.error("Clerk signIn is not initialized.");
+      return;
+    }
+
     try {
-      // Sign-in flow
       const result = await signIn.create({ identifier: username, password });
-      console.log(username);
       if (result.status === "complete") {
         console.log("Sign in successful");
         await setActive({ session: result.createdSessionId });

@@ -4,21 +4,21 @@ import React from 'react';
 import { ButtonCancel, ButtonDelete } from '@app/components/SurveyButtons';
 
 interface DeleteModalProps {
+  categoryName: string;
   itemName: string;
-  units: string;
   closeModal: () => void;
   handleDelete: (arg: string) => void; 
 }
 
-const DeleteInventoryModal: React.FC<DeleteModalProps> = ({ itemName, units, closeModal, handleDelete}) => {
+const DeleteCategoryModal: React.FC<DeleteModalProps> = ({ categoryName, closeModal, handleDelete}) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-20">
-        <div className="h-[260px] w-[400px] bg-[#FFFFFF] font-crimson
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+        <div className="h-[220px] w-[400px] bg-[#FFFFFF] font-crimson
                         fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                        pt-8 shadow-lg rounded-lg justify-items-center
+                        pt-5 shadow-lg rounded-lg justify-items-center
                         border-[2px] border-red" >
-            <p className="flex w-[80%] justify-center text-center text-[28px] text-red crimson-bold">Are you sure you want to delete {itemName} with unit {units}?</p>
-            <div className="flex w-full justify-center space-x-[15px] items-center pt-8">
+            <p className="flex w-[80%] justify-center text-center text-[28px] crimson-bold text-red pt-2">Are you sure you want to delete {categoryName} ?</p>
+            <div className="flex w-full justify-center space-x-[15px] items-center pt-10">
               <button
                 className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
                 onClick={closeModal}
@@ -27,7 +27,7 @@ const DeleteInventoryModal: React.FC<DeleteModalProps> = ({ itemName, units, clo
               </button>
               <button
                 className="flex bg-red hover:bg-dark-red text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-dark-red text-[20px] justify-center"
-                onClick={() => handleDelete(itemName)}
+                onClick={() => handleDelete(categoryName)}
               >
                 Delete
               </button>
@@ -37,4 +37,4 @@ const DeleteInventoryModal: React.FC<DeleteModalProps> = ({ itemName, units, clo
   );
 };
 
-export default DeleteInventoryModal;
+export default DeleteCategoryModal;
