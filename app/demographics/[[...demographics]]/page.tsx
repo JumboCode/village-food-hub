@@ -8,6 +8,7 @@ import DateRangeModal from "@app/components/DateRangeModal";
 import ProgressBar from "@app/components/ProgressBar";
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
+import { MdDeleteOutline } from "react-icons/md";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
