@@ -394,15 +394,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               </div>
               <div className={`flex w-[25%] ${!itemWarning ? "justify-end" : "justify-center"} items-center pr-1`}>
                 {!itemWarning ? (
-                  <button onClick={() => setItemWarning(true)}>
-                    <Image
-                      src={deleteIcon}
-                      width={18}
-                      height={18}
-                      alt="delete Icon"
-                      className="h-4/5"
-                    />
-                  </button>
+                  <MdDeleteOutline
+                      size={24}
+                      className="cursor-pointer"
+                      onClick={() => setItemWarning(true)}
+                  />
                 ) : (
                   <div className="flex flex-col">
                     <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
@@ -491,15 +487,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                       </div>
                       <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
                         {unitWarning !== index ? (
-                          <button onClick={() => setUnitWarning(index)}>
-                            <Image
-                              src={deleteIcon}
-                              width={18}
-                              height={18}
-                              alt="delete Icon"
-                              className="h-4/5"
-                            />
-                          </button>
+                          <MdDeleteOutline
+                              size={24}
+                              className="cursor-pointer"
+                              onClick={() => setUnitWarning(index)}
+                          />
                         ) : (
                           <div className="flex flex-col">
                             <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
