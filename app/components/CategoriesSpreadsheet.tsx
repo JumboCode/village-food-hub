@@ -1,22 +1,56 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import deleteIcon from "@app/images/delete.png";
 import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
 import EditModal from "@app/components/EditModal";
+import { TiArrowUnsorted } from "react-icons/ti";
 
+// --- Types and Interfaces ---
+
+// Props for the CategoriesSpreadsheet component.
 interface CategoriesSpreadsheetProps {
   categoryName: string;
   categoryItems: (string | number)[][];
-  loadData: any;
+  loadData: () => Promise<void>;
 }
+
+// Define a type for a raw inventory item (as returned by the API in deletion functions).
+interface RawInventoryItem {
+  itemName: string;
+  units: string;
+}
+
+// Define the structure of the API response when fetching inventory for deletion.
+interface InventoryResponse {
+  data: RawInventoryItem[];
+}
+
+// --- Component Start ---
 
 const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   categoryName = "",
   categoryItems = [],
   loadData,
 }) => {
+  // SORTING functionality
+  const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
+  const [topSorted, setTopSorted] = useState(true);
+
+  useEffect(() => {
+    setSortedItems([...categoryItems]);
+  }, [categoryItems]);
+
+  const sortAlphabetically = () => {
+    const sortedList = [...sortedItems].sort((a, b) =>
+      topSorted
+        ? a[0].toString().localeCompare(b[0].toString())
+        : b[0].toString().localeCompare(a[0].toString())
+    );
+    setSortedItems(sortedList);
+    setTopSorted(!topSorted);
+  };
+
   // EDIT functionality
   const [showEditModal, setShowEditModal] = useState(false);
   const [currItemName, setItemName] = useState("");
@@ -26,14 +60,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [modalCategory, setModalCategory] = useState("");
   const [modalItem, setModalItem] = useState<(string | number)[]>([]);
-  const [modalItemIndex, setModalItemIndex] = useState(-1);
+  // Removed modalItemIndex because it's not used.
   const [itemWarning, setItemWarning] = useState(false);
   const [unitWarning, setUnitWarning] = useState(-1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [lastUnitWarning, setLastUnitWarning] = useState(false);
 
   // ---------- EDIT FUNCTIONS ----------
-  // Opens the edit modal and prepopulates with the item name and its units (parsed from a comma‐separated string)
+  // Opens the edit modal, prepopulating with the item name and parsed units (from a comma-separated string)
   const openModal = (itemName: string, unitsStr: string) => {
     setShowEditModal(true);
     setItemName(itemName);
@@ -50,11 +84,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setCurrUnits([]);
   };
 
-  // handleSave accepts four parameters:
+  // handleSave sends a PUT payload with:
   // - oldItemName (original item name),
-  // - newItemName (updated item name),
-  // - updatedUnits (array of updated units),
-  // - and categoryName (passed consistently from props)
+  // - itemName (new/updated item name),
+  // - name (category name, passed consistently),
+  // - and units (an array of updated units)
   const handleSave = async (
     oldItemName: string,
     newItemName: string,
@@ -83,6 +117,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
         console.log(
           `Error editing category with server response: ${response.status}`
         );
+      } else {
+        await loadData();
       }
       closeModal();
     } catch (error) {
@@ -92,7 +128,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   };
 
   // ---------- DELETION FUNCTIONS ----------
-  // Open the delete modal for an entire row
+  // Opens the delete modal for an entire row.
   const openDeleteModal = (
     catName: string,
     item: (string | number)[],
@@ -101,151 +137,155 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setIsDeleteModalVisible(true);
     setModalCategory(catName);
     setModalItem(item);
-    setModalItemIndex(index);
+    // Removed setting modalItemIndex as it is unused.
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalVisible(false);
     setModalCategory("");
-    setModalItemIndex(-1);
     setItemWarning(false);
     setUnitWarning(-1);
     setDeleteConfirmation(false);
     setLastUnitWarning(false);
   };
 
-  // Delete the entire row (item) from both inventory and categories.
+  // Deletes the entire row (item) from both inventory and categories.
   const deleteItem = async () => {
     closeDeleteModal();
-
-    // Deleting from inventory: for each unit in the row
-    modalItem[1]
+  
+    // First, fetch inventory data.
+    let inventoryData: InventoryResponse | null = null;
+    try {
+      const invResponse = await fetch("../api/inventory");
+      if (invResponse.ok) {
+        inventoryData = (await invResponse.json()) as InventoryResponse;
+        console.log("Fetched inventory data:", inventoryData);
+      } else {
+        console.error("Failed to fetch inventory data; status:", invResponse.status);
+      }
+    } catch (e) {
+      console.error("Error fetching inventory data:", e);
+    }
+  
+    // Convert modalItem[1] (units) into an array.
+    const unitsArray = modalItem[1]
       .toString()
       .split(", ")
-      .forEach(async (unit) => {
-        try {
-          await fetch("../api/inventory", {
-            method: "DELETE",
-            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-          }).then((response) => {
-            if (!response.ok) {
-              throw new Error(
-                `Deleting item from inventory error; status: ${response.status}`
-              );
-            }
-            return response.json();
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-    // Deleting from categories
-    try {
-      await fetch("../api/categories", {
-        method: "DELETE",
-        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Deleting item from categories error; status: ${response.status}`
+      .filter((u) => u.trim() !== "");
+  
+    // For each unit, check if an inventory record exists. If it does, then delete.
+    for (const unit of unitsArray) {
+      try {
+        let exists = false;
+        if (inventoryData && inventoryData.data) {
+          exists = inventoryData.data.some(
+            (invItem: RawInventoryItem) =>
+              invItem.itemName === modalItem[0] &&
+              invItem.units.trim() === unit.trim()
           );
         }
-        return response.json();
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
-    setDeleteConfirmation(true);
-    if (typeof loadData === "function") {
-      await loadData();
-    } else {
-      console.error("loadData is not a function");
-    }
-  };
-
-  // Delete a single unit from an item.
-  const deleteUnit = async (unit: string) => {
-    setUnitWarning(-1);
-
-    if (modalItem[1].toString().split(", ").length === 1) {
-      setLastUnitWarning(true);
-    } else {
-      // Delete from inventory
-      try {
-        const inventoryResponse = await fetch("../api/inventory", {
-          method: "DELETE",
-          body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-        });
-
-        if (!inventoryResponse.ok) {
-          if (inventoryResponse.status === 500) {
-            console.warn("Received 500 from inventory deletion; ignoring error.");
-          } else {
-            const responseText = await inventoryResponse.text();
-            let errorData = {};
-            try {
-              errorData = responseText ? JSON.parse(responseText) : {};
-            } catch (parseError) {
-              console.error("Error parsing inventory error response:", parseError);
-            }
-            throw new Error(
-              `Deleting unit from inventory error; status: ${inventoryResponse.status}`
-            );
+        if (exists) {
+          console.log(`Inventory record exists for unit "${unit}"; attempting deletion.`);
+          const invDeleteResponse = await fetch("../api/inventory", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
+          });
+          console.log(`Inventory deletion response for unit "${unit}":`, invDeleteResponse.status);
+          if (!invDeleteResponse.ok) {
+            console.error(`Error deleting inventory record for unit "${unit}"; status: ${invDeleteResponse.status}`);
           }
         } else {
-          await inventoryResponse.json();
+          console.info(`No inventory record found for unit "${unit}"; skipping inventory deletion.`);
         }
       } catch (e) {
-        console.warn("Error during inventory deletion (ignored):", e);
-      }
-
-      // Delete unit from categories.
-      // For unit deletion, we use a PUT payload that includes oldItemName (set equal to itemName) because the primary key remains unchanged.
-      try {
-        const newUnits = modalItem[1]
-          .toString()
-          .split(", ")
-          .filter((elt) => elt !== unit);
-
-        await fetch("../api/categories", {
-          method: "PUT",
-          body: JSON.stringify({
-            oldItemName: modalItem[0],
-            itemName: modalItem[0],
-            name: modalCategory,
-            units: newUnits,
-          }),
-        }).then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `Deleting unit from categories error; status: ${response.status}`
-            );
-          }
-          return response.json();
-        });
-      } catch (e) {
-        console.error(e);
-      }
-
-      if (typeof loadData === "function") {
-        const newData = await loadData();
-        setTimeout(() => setIsDeleteModalVisible(false), 500);
-        setTimeout(
-          () =>
-            openDeleteModal(
-              categoryName,
-              newData[categoryName][modalItemIndex],
-              modalItemIndex
-            ),
-          1000
-        );
-      } else {
-        console.error("loadData is not a function");
+        console.error("Error during inventory deletion for unit:", unit, e);
       }
     }
-  };
+  
+    // Now, delete the entire item from the categories database.
+    try {
+      const catDeleteResponse = await fetch("../api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
+      });
+      console.log("Categories deletion response status:", catDeleteResponse.status);
+      if (!catDeleteResponse.ok) {
+        throw new Error(`Deleting item from categories error; status: ${catDeleteResponse.status}`);
+      }
+      await catDeleteResponse.json();
+    } catch (e) {
+      console.error("Error deleting category record:", e);
+    }
+  
+    setDeleteConfirmation(true);
+    await loadData();
+  };  
+
+  // Deletes a single unit from an item.
+  const deleteUnit = async (unit: string) => {
+    setUnitWarning(-1);
+  
+    // Check if this is the last unit
+    if (modalItem[1].toString().split(", ").length === 1) {
+      setLastUnitWarning(true);
+      return;
+    }
+  
+    try {
+      // Step 1: Fetch inventory to check if this unit exists
+      const inventoryResponse = await fetch("../api/inventory");
+      if (!inventoryResponse.ok) throw new Error("Failed to fetch inventory");
+  
+      const inventoryData = (await inventoryResponse.json()) as InventoryResponse;
+      const inventoryItemsToDelete = inventoryData.data.filter(
+        (invItem) =>
+          invItem.itemName === modalItem[0] && invItem.units.trim() === unit.trim()
+      );
+  
+      // Step 2: Delete all matching inventory records for this unit
+      for (const inventoryItem of inventoryItemsToDelete) {
+        await fetch("../api/inventory", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemName: inventoryItem.itemName, units: unit }),
+        });
+      }
+  
+      console.log(`Deleted ${inventoryItemsToDelete.length} inventory items using unit "${unit}"`);
+  
+      // Step 3: Update the category to remove the deleted unit
+      const updatedUnits = modalItem[1]
+        .toString()
+        .split(", ")
+        .filter((elt) => elt !== unit);
+  
+      const categoryResponse = await fetch("../api/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldItemName: modalItem[0],
+          itemName: modalItem[0],
+          name: modalCategory,
+          units: updatedUnits,
+        }),
+      });
+  
+      if (!categoryResponse.ok) {
+        throw new Error(`Deleting unit from categories error; status: ${categoryResponse.status}`);
+      }
+  
+      await categoryResponse.json();
+      console.log(`Unit "${unit}" removed from category "${modalCategory}"`);
+  
+      // Refresh data
+      await loadData();
+      setIsDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting unit:", error);
+    }
+  };  
 
   return (
     <>
@@ -255,22 +295,27 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           <thead className="font-crimson crimson-regular content-start">
             <tr className="bg-dark-blue text-white text-lg align-left">
               <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
-                  <Image
-                    src={arrowsIcon}
-                    width={10}
-                    height={6}
-                    alt="arrows Icon"
-                  />
+                  {/* Sorting button */}
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
                 </div>
               </th>
-              <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
+              <th className="border-r-2 border-slate-400 py-2 px-3">
+                <div className="flex flex-row justify-between items-center">
+                  <p>Units</p>
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
+                </div>
+              </th>
               <th className="py-2 px-3">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-slate-50 font-crimson crimson-regular">
-            {categoryItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
               <tr key={index} className="py-2">
                 {item.map((data, subIndex) => (
                   <td key={subIndex} className="border-r-2 border-slate-200 py-2 px-3">
@@ -284,7 +329,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                     height={18}
                     alt="edit Icon"
                     className="cursor-pointer"
-                    // Pass both item name and its associated units (assumed to be in the second column)
                     onClick={() =>
                       openModal(
                         String(categoryItems[index][0]),
@@ -293,12 +337,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                     }
                   />
                   <button onClick={() => openDeleteModal(categoryName, item, index)}>
-                    <Image
-                      src={deleteIcon}
-                      width={18}
-                      height={18}
-                      alt="delete Icon"
-                    />
+                    <Image src={deleteIcon} width={18} height={18} alt="delete Icon" />
                   </button>
                   {showEditModal && (
                     <EditModal
@@ -319,8 +358,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       {/* Delete Modal */}
       {isDeleteModalVisible && (
         <div className="flex absolute top-0 left-0 justify-center items-center w-full h-full z-20 bg-black bg-opacity-50">
-          <div className="flex flex-col justify-center space-y-3 w-[533px] py-[20px] px-[27px] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50">
-            <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C]">
+          <div className="flex flex-col justify-center space-y-3 w-[470px] py-[30px] px-[36px] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50">
+            <p className="text-[32px] font-crimson text-[#EB2B0C]">
               Delete Menu
             </p>
             {itemWarning && (
@@ -339,13 +378,13 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                     d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
                   />
                 </svg>
-                <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">
+                <p className="font-crimson font-bold text-[#EB2B0C] text-[14px]">
                   All inventory entries with this item will be deleted.
                 </p>
               </div>
             )}
             <div className="flex flex-row w-full justify-center items-center">
-              <p className="text-[32px] flex w-[15%] font-crimson crimson-semibold justify-center items-center">
+              <p className="text-[28px] flex w-[15%] font-crimson crimson-semibold justify-center items-center">
                 Item
               </p>
               <div className="flex w-[60%] px-[30px]">
@@ -394,103 +433,106 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
             {/* Map of Units */}
             <div>
-              {modalItem[1].toString().split(", ").map((item, index) => (
-                <div key={index} className="flex flex-col justify-center space-y-3">
-                  {unitWarning === index && (
-                    <div className="flex flex-row items-center space-x-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="2"
-                        stroke="#EB2B0C"
-                        className="size-6 pb-[1px]"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                        />
-                      </svg>
-                      <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">
-                        All inventory entries with this unit will be deleted.
-                      </p>
-                    </div>
-                  )}
-                  {lastUnitWarning && (
-                    <div className="flex flex-row items-center space-x-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="2"
-                        stroke="#EB2B0C"
-                        className="size-6 pb-[1px]"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                        />
-                      </svg>
-                      <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">
-                        Cannot delete the last unit of an item.
-                      </p>
-                    </div>
-                  )}
-                  <div className="flex flex-row w-full justify-center items-center pb-3">
-                    <p className="text-[32px] w-[15%] flex justify-center items-center font-crimson crimson-semibold">
-                      Units
-                    </p>
-                    <div className="flex w-[60%] px-[30px]">
-                      <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
-                        unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"
-                      }`}>
-                        {item}
-                      </p>
-                    </div>
-                    <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
-                      {unitWarning !== index ? (
-                        <button onClick={() => setUnitWarning(index)}>
-                          <Image
-                            src={deleteIcon}
-                            width={18}
-                            height={18}
-                            alt="delete Icon"
-                            className="h-4/5"
+              {modalItem[1]
+                .toString()
+                .split(", ")
+                .map((unitItem, index) => (
+                  <div key={index} className="flex flex-col justify-center space-y-3">
+                    {unitWarning === index && (
+                      <div className="flex flex-row items-center space-x-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="#EB2B0C"
+                          className="size-6 pb-[1px]"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
                           />
-                        </button>
-                      ) : (
-                        <div className="flex flex-col">
-                          <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
-                            Are you sure?
-                          </p>
-                          <div className="flex flex-row space-x-2">
-                            <button onClick={() => setUnitWarning(-1)}>
-                              <div className="w-[65px] h-[25px] rounded-[8px] border-[#828282] border-[1px]">
-                                <p className="font-crimson text-[#828282] text-[16px] crimson-semibold">
-                                  Cancel
-                                </p>
-                              </div>
-                            </button>
-                            <button onClick={() => deleteUnit(item)}>
-                              <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
-                                <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">
-                                  Delete
-                                </p>
-                              </div>
-                            </button>
+                        </svg>
+                        <p className="font-crimson font-bold text-[#EB2B0C] text-[16px]">
+                          All inventory entries with this unit will be deleted.
+                        </p>
+                      </div>
+                    )}
+                    {lastUnitWarning && (
+                      <div className="flex flex-row items-center space-x-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="#EB2B0C"
+                          className="size-6 pb-[1px]"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                          />
+                        </svg>
+                        <p className="font-crimson font-bold text-[#EB2B0C] text-[20px]">
+                          Cannot delete the last unit of an item.
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex flex-row w-full justify-center items-center pb-3">
+                      <p className="text-[28px] w-[15%] flex justify-center items-center font-crimson crimson-semibold">
+                        Units
+                      </p>
+                      <div className="flex w-[60%] px-[30px]">
+                        <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
+                          unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"
+                        }`}>
+                          {unitItem}
+                        </p>
+                      </div>
+                      <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
+                        {unitWarning !== index ? (
+                          <button onClick={() => setUnitWarning(index)}>
+                            <Image
+                              src={deleteIcon}
+                              width={18}
+                              height={18}
+                              alt="delete Icon"
+                              className="h-4/5"
+                            />
+                          </button>
+                        ) : (
+                          <div className="flex flex-col">
+                            <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
+                              Are you sure?
+                            </p>
+                            <div className="flex flex-row space-x-2">
+                              <button onClick={() => setUnitWarning(-1)}>
+                                <div className="w-[65px] h-[25px] rounded-[8px] border-[#828282] border-[1px]">
+                                  <p className="font-crimson text-[#828282] text-[16px] crimson-semibold">
+                                    Cancel
+                                  </p>
+                                </div>
+                              </button>
+                              <button onClick={() => deleteUnit(unitItem)}>
+                                <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
+                                  <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">
+                                    Delete
+                                  </p>
+                                </div>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="flex justify-center items-center">
               <button
-                className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282]"
+                className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282] hover:bg-light-gray"
                 onClick={() => closeDeleteModal()}
               >
                 <p className="text-[#828282] text-[24px] font-crimson">

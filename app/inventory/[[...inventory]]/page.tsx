@@ -1,14 +1,10 @@
 'use client';
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
 import NavBar from '@app/components/NavBar';
 
-
-interface FetchedCategory {
-    [key: string]: string | string[];
-} 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -17,41 +13,43 @@ function formatDate(date: Date): string {
   return `${month}/${day}/${year}`;
 }
 
-// Define the structure of the inventory data
-interface InventoryItem {
-  [key: string]: string | number | Date | JSON; // Dynamic fields, but for simplicity assuming string, number or Date
+// Define the structure of the inventory data item.
+// Here each inventory item is represented as an array.
+type InventoryItem = (string | number)[];
+
+// Define the structure of the raw inventory object returned by the API.
+interface InventoryRaw {
+  itemName: string;
+  categoryName: string;
+  quantity: number;
+  units: string;
+  lastUpdated: string;
+  history: unknown;
 }
 
-async function getInventory(): Promise<InventoryItem[]> {
-    try {
-      const response = await fetch("/../api/inventory", { method: 'GET' });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const jsonData = await response.json();
-      const data = jsonData.data;
-  
-      if (!Array.isArray(data)) {
-        console.log("not an array");
-        return [];
-      }
-      
-      const listOfLists = data.map((object: InventoryItem) => {
-            const { itemName, categoryName, quantity, units, lastUpdated, history } = object;
-            const formattedDate = lastUpdated ? formatDate(new Date(lastUpdated as string)) : "";
-            // Convert history to a string (preserves JSON structure but keeps it as a list value)
-            const historyString = history ? JSON.stringify(history) : "";
-            // Return a list instead of an object
-            return [itemName, categoryName, quantity, units, formattedDate, historyString];
-        });
-
-        console.log("List of Lists:", listOfLists);
-        return listOfLists;
-
-        } catch (error) {
-          console.error(error);
-          return [];
-    }
+// SWR fetcher function to fetch and transform inventory data.
+const fetchInventory = async (url: string): Promise<InventoryItem[]> => {
+  const response = await fetch(url, { method: "GET" });
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  const jsonData = await response.json();
+  const data = jsonData.data;
+  if (!Array.isArray(data)) {
+    console.log("not an array");
+    return [];
   }
+  const listOfLists = data.map((object: InventoryRaw) => {
+    const { itemName, categoryName, quantity, units, lastUpdated, history } = object;
+    const formattedDate = lastUpdated ? formatDate(new Date(lastUpdated)) : "";
+    const historyString = history ? JSON.stringify(history) : "";
+    return [itemName, categoryName, quantity, units, formattedDate, historyString];
+  });
+  return listOfLists;
+};
 
+// Define a type for the fetched category objects.
+interface FetchedCategory {
+  [key: string]: string | string[];
+}
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -62,6 +60,7 @@ interface FilterModalProps {
   fetchUrl?: string;
   filterName: string;
   filterValue?: string;
+  initialSelectedCategories: string[];
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
@@ -70,12 +69,18 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onApply,
   onReset,
   onClose,
-  fetchUrl, 
-  filterName, 
-  filterValue
+  fetchUrl,
+  filterName,
+  filterValue,
+  initialSelectedCategories
 }) => {
   const [Categories, setCategories] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialSelectedCategories);
+
+  // Update local state if the parent's selected filters change.
+  useEffect(() => {
+    setSelectedCategories(initialSelectedCategories);
+  }, [initialSelectedCategories]);
 
   const handleCheckboxChange = (category: string, checked: boolean) => {
     setSelectedCategories((prev: string[]) => {
@@ -87,44 +92,39 @@ const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen) {
-      setSelectedCategories([]);
-    }
-  }, [isOpen]);
-
-
-  useEffect(() => {
     async function fetchCategories() {
       try {
-        const response = await fetch(fetchUrl || ''); 
+        const response = await fetch(fetchUrl || '');
         if (response.ok) {
-            const fetchedCategories: FetchedCategory[] = await response.json(); 
-            const categoryNames = fetchedCategories.map((item)  => item[filterName] as string); 
-            
-            const filteredItems = filterValue
-                ? fetchedCategories 
+          const fetchedCategories: FetchedCategory[] = await response.json();
+          const categoryNames = fetchedCategories.map((item) => item[filterName] as string);
+          
+          const filteredItems = filterValue
+            ? fetchedCategories
                 .filter((category) => category[filterName] === filterValue)
-                .flatMap((category) => categoriesList && Array.isArray(category[categoriesList]) ? category[categoriesList] : [])            
-                : categoryNames; 
+                .flatMap((category) => categoriesList && Array.isArray(category[categoriesList]) ? category[categoriesList] : [])
+            : categoryNames;
 
-                const uniqueItemName: string[] = Array.from(new Set(filteredItems));
-                setCategories(uniqueItemName);
-                
-              } else {
-            throw new Error('Failed to fetch categories')
+          const uniqueItemName: string[] = Array.from(new Set(filteredItems));
+          setCategories(uniqueItemName);
+        } else {
+          throw new Error('Failed to fetch categories');
         }
-
       } catch (error) {
-          console.error('Failed to fetch categories', error)
+        console.error('Failed to fetch categories', error);
       }
     }
-
     if (fetchUrl) {
-        fetchCategories();
+      fetchCategories();
     }
-  }, [fetchUrl, filterName, filterValue, categoriesList])
+  }, [fetchUrl, filterName, filterValue, categoriesList]);
 
   const handleApply = () => {
+    // If no filters are checked, treat it as cancel and simply close the modal.
+    if (selectedCategories.length === 0) {
+      onClose();
+      return;
+    }
     onApply(selectedCategories);
   };
 
@@ -159,9 +159,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     onChange={(e) => handleCheckboxChange(category, e.target.checked)}
                     className="w-4 h-4"
                   />
-                  <p className="text-lg cursor-pointer">
-                    {category}
-                  </p>
+                  <p className="text-lg cursor-pointer">{category}</p>
                 </div>
               ))
             ) : (
@@ -192,99 +190,92 @@ const FilterModal: React.FC<FilterModalProps> = ({
 };
 
 const InternalViewInventoryPage: React.FC = () => {
-    const [inventory, setInventory] = useState<InventoryItem[]>([]); // Array of inventory items
-    const [displayInventory, setDisplayInventory] = useState<InventoryItem[]>([])
-    const [FilterModalOpen, setFilterModalOpen] = useState(false);
+  // Use SWR to fetch the inventory data.
+  const { data: inventory, error } = useSWR("/../api/inventory", fetchInventory);
 
-    useEffect(() => {
-        getInventory()
-          .then((items: InventoryItem[]) => {
-            setInventory(items);
-            setFilteredInventory(items);
-            setDisplayInventory(items);
-          });
-      }, []);
+  // Local state for search input, applied filters, and modal state.
+  const [searchInput, setSearchInput] = useState('');
+  const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-
-  
-  const handleApplyFilters = (selectedCategories: string[]) => {
-
-    const itemsToDisplay = [];
-
-    for (const item of inventory) {
-       if (selectedCategories.includes(item[1] as string)) {
-          itemsToDisplay.push(item)
-       }
-
-    console.log(selectedCategories)
+  // Derive filtered inventory using useMemo.
+  const filteredInventory = useMemo(() => {
+    if (!inventory) return [];
+    let filtered = inventory;
+    if (appliedFilters.length > 0) {
+      filtered = filtered.filter(item =>
+        appliedFilters.includes(item[1] as string)
+      );
     }
-    
-    setDisplayInventory(itemsToDisplay);
+    if (searchInput.trim() !== "") {
+      filtered = filtered.filter(item =>
+        String(item[0]).toUpperCase().includes(searchInput.toUpperCase())
+      );
+    }
+    return filtered;
+  }, [inventory, appliedFilters, searchInput]);
+
+  // Handlers for the filter modal.
+  const handleApplyFilters = (selectedCategories: string[]) => {
+    if (selectedCategories.length === 0) {
+      setFilterModalOpen(false);
+      return;
+    }
+    setAppliedFilters(selectedCategories);
     setFilterModalOpen(false);
   };
 
   const handleResetFilters = () => {
-    console.log("Filters reset");
-    setDisplayInventory(inventory)
+    setAppliedFilters([]);
     setFilterModalOpen(false);
-
   };
 
   const handleCloseModal = () => {
     setFilterModalOpen(false);
-  }
+  };
 
-  // states for the search bar
-  const [searchInput, setSearchInput] = useState('');
-  const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>([]);
-
-  // when the search input is changed, refilter
-  useEffect(() => {
-
-      // filters the demographic's phone numbers, names, and addresses separately
-      const nameIndices = inventory?.map((item) => item[0].toString().toUpperCase().includes(searchInput.toUpperCase())) || [];
-      
-      const demoLength = inventory?.length || 0;
-      const filteredInventory = [];
-
-      // loops over the inventory and adds the ones that match the filter
-      for (let i = 0; i < demoLength; i++) {
-          if (nameIndices[i]) {
-              filteredInventory.push(inventory![i]);
-          }
-      }
-      
-      // stores the filtered inventory
-      setFilteredInventory(filteredInventory);
-  }, [searchInput])
-
-  return (    
+  return (
     <div>
-      <NavBar/>
+      <NavBar />
       <div className="px-10">
         <div className="flex flex-row justify-between mt-10 mb-6">
           <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
             Inventory
           </div>
-          
           <div className="flex flex-row items-center">
             <SearchBar 
-            input={searchInput}
-            setInput={setSearchInput}
-            placeholder={"Search by item name..."}
+              input={searchInput}
+              setInput={setSearchInput}
+              placeholder={"Search by item name..."}
             />
             <FilterButton onClick={() => setFilterModalOpen(prev => !prev)} />
             <FilterModal
-                isOpen={FilterModalOpen}
-                onApply={handleApplyFilters}
-                onReset={handleResetFilters}
-                onClose={handleCloseModal}
-                fetchUrl="/api/categories"
-                filterName="name"
+              isOpen={filterModalOpen}
+              onApply={handleApplyFilters}
+              onReset={handleResetFilters}
+              onClose={handleCloseModal}
+              fetchUrl="/api/categories"
+              filterName="name"
+              initialSelectedCategories={appliedFilters}
             />
           </div>
         </div>
-        <InventorySpreadsheet inventoryItems={filteredInventory} />
+        {error && (
+          <div className="text-center text-red-600">
+            Error loading inventory.
+          </div>
+        )}
+        {inventory ? (
+          filteredInventory.length > 0 ? (
+            <InventorySpreadsheet inventoryItems={filteredInventory} />
+          ) : (
+            <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+              {appliedFilters.length > 0 
+                ? `There are currently no items under the category ${appliedFilters.join(', ')} in the inventory database.` 
+                : "There are currently no items in the inventory database."}
+            </div>
+          )
+        ) : null}
       </div>
     </div>
   );
