@@ -60,6 +60,51 @@ const InternalViewManageUsersPage: React.FC = () => {
     setShowCreateProfileView(true);
   }
 
+  async function createUser() {
+    setCreateUserError("\u00A0");
+    
+    const trimmedData = {
+        firstName: profileData.firstName.trim(),
+        lastName: profileData.lastName.trim(),
+        username: profileData.username.trim(),
+        emailAddress: profileData.emailAddress.trim(),
+        pronouns: profileData.pronouns.trim(),
+        role: profileData.role.trim(),
+        phoneNumber: profileData.phoneNumber.trim(),
+        password: profileData.password.trim()
+    };
+    
+    if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
+        !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
+        !trimmedData.phoneNumber || !trimmedData.password) {
+        setCreateUserError("Please enter all required fields");
+        return;
+    }
+
+    try {
+        // Make POST request to create user API endpoint
+        const response = await fetch("../../api/users", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(trimmedData)
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+            setShowCreateProfileView(false);
+            await mutate();
+        } else {
+            setCreateUserError(data.error || "Error creating user");
+        }
+    } catch (error) {
+        // Handle any network or unexpected errors
+        console.error("Error creating user:", error);
+        setCreateUserError("An unexpected error occurred. Please try again.");
+    }
+}
+
   function handleCancelProfileView() {
     setShowCreateProfileView(false);
   }
