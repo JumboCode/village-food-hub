@@ -45,6 +45,8 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
+  const [createUserError, setCreateUserError] = useState("\u00A0");
+  
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -62,6 +64,8 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   async function createUser() {
     setCreateUserError("\u00A0");
+
+    console.log("Creating user with data:", profileData);
     
     const trimmedData = {
         firstName: profileData.firstName.trim(),
@@ -73,6 +77,8 @@ const InternalViewManageUsersPage: React.FC = () => {
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
+
+    console.log("Trimmed Data:", trimmedData);
     
     if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
         !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
@@ -94,6 +100,19 @@ const InternalViewManageUsersPage: React.FC = () => {
         const data = await response.json();
         if (response.ok) {
             setShowCreateProfileView(false);
+            
+            // reset fields
+            setProfileData({
+              firstName: "",
+              lastName: "",
+              username: "",
+              emailAddress: "",
+              pronouns: "",
+              role: "",
+              phoneNumber: "",
+              password: ""
+          });
+
             await mutate();
         } else {
             setCreateUserError(data.error || "Error creating user");
@@ -106,6 +125,7 @@ const InternalViewManageUsersPage: React.FC = () => {
 }
 
   function handleCancelProfileView() {
+    setCreateUserError("\u00A0")
     setShowCreateProfileView(false);
   }
 
@@ -115,19 +135,24 @@ const InternalViewManageUsersPage: React.FC = () => {
       {showCreateProfileView ? (
         <div>
           <div className="p-[80px] pt-[50px]">
-            <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
-            <ProfileView
-              visible={showCreateProfileView}
-              mode="create"
-              onCancel={handleCancelProfileView}
-              profileData={profileData}
+            <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
+            <ProfileView 
+                visible={showCreateProfileView} 
+                mode="create" 
+                onCancel={handleCancelProfileView} 
+                profileData={profileData}
+                setProfileData={setProfileData}
             />
+            <div>{createUserError}</div>
             <div>
-              <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]">
+              <button 
+                className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
+                onClick={createUser}
+              >
                 Create
               </button>
               <button 
-                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] border-[2px] border-gray"
+                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
                 onClick={handleCancelProfileView}
               >
                 Cancel
