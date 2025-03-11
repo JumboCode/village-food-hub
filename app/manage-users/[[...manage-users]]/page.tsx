@@ -45,8 +45,6 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
-  const [createUserError, setCreateUserError] = useState("\u00A0");
-  
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -107,9 +105,7 @@ const InternalViewManageUsersPage: React.FC = () => {
     }
 }
 
-
   function handleCancelProfileView() {
-    setCreateUserError("\u00A0")
     setShowCreateProfileView(false);
   }
 
@@ -119,24 +115,19 @@ const InternalViewManageUsersPage: React.FC = () => {
       {showCreateProfileView ? (
         <div>
           <div className="p-[80px] pt-[50px]">
-            <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
-            <ProfileView 
-                visible={showCreateProfileView} 
-                mode="create" 
-                onCancel={handleCancelProfileView} 
-                profileData={profileData}
-                setProfileData={setProfileData}
+            <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
+            <ProfileView
+              visible={showCreateProfileView}
+              mode="create"
+              onCancel={handleCancelProfileView}
+              profileData={profileData}
             />
-            <div>{createUserError}</div>
             <div>
-              <button 
-                className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
-                onClick={createUser}
-              >
+              <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]">
                 Create
               </button>
               <button 
-                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
+                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] border-[2px] border-gray"
                 onClick={handleCancelProfileView}
               >
                 Cancel

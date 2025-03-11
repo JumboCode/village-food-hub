@@ -31,8 +31,6 @@ interface ProfileViewProps {
   }
   
 const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData }) => {
-
-
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
     
@@ -92,6 +90,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                 if (response.ok) {
                     const result = await response.json();
                     const userData = result.data[0];
+                    console.log("userData: ", userData)
 
                     setFirstName(userData.firstName || "");
                     setLastName(userData.lastName || "");
@@ -261,8 +260,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                         Password <span className="text-red">*</span>
                     </label>
                     <input
-                        value={profileData.password}
-                        onChange={(e) => setProfileData && setProfileData(prev => ({ ...prev, password: e.target.value }))}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder=""
