@@ -15,7 +15,7 @@ const DeleteUserModal: React.FC<DeleteModalProps> = ({ userName, closeModal, han
       <div
         className="h-[260px] w-[450px] bg-modal-gray font-crimson
                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                   pt-8 shadow-lg rounded-lg"
+                   pt-8 shadow-lg rounded-lg border-2 border-red"
       >
         <div className="flex flex-col">
           <p className="flex justify-center text-[28px] crimson-bold">Are you sure you want to delete</p>
