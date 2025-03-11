@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import deleteIcon from "@app/images/delete.png";
-import editIcon from "@app/images/edit.png";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 
 // --- Types and Interfaces ---
 
@@ -323,11 +322,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                   </td>
                 ))}
                 <td className="flex row justify-around py-2 px-3">
-                  <Image
-                    src={editIcon}
-                    width={18}
-                    height={18}
-                    alt="edit Icon"
+                  <MdOutlineEdit
+                    size={24}
                     className="cursor-pointer"
                     onClick={() =>
                       openModal(
@@ -336,9 +332,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                       )
                     }
                   />
-                  <button onClick={() => openDeleteModal(categoryName, item, index)}>
-                    <Image src={deleteIcon} width={18} height={18} alt="delete Icon" />
-                  </button>
+                  <MdDeleteOutline 
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => openDeleteModal(categoryName, item, index)}
+                  />
                   {showEditModal && (
                     <EditModal
                       itemNameOld={currItemName}

@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Image from 'next/image';
-import editIcon from '@app/images/edit.png';
-import deleteIcon from '@app/images/delete.png';
-import arrowsIcon from "@app/images/upAndDownArrows.png";
+import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import DeleteUserModal from "@app/components/DeleteUserModal";
 import EditUserModal from "@app/components/EditUserModal";
 
@@ -18,7 +17,7 @@ interface ClerkUser {
     publicMetadata?: {
         role?: string;
     };
-  }
+}
 
 export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [] }) => {
     console.log("manageUsersItems:", manageUsersItems);
@@ -30,6 +29,9 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<ClerkUser | null>(null);
+    const [sortedItems, setSortedItems] = useState<string[][]>([]);
+    const [topSorted, setTopSorted] = useState<boolean>(false);
+
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -52,6 +54,19 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         };
         fetchUsers();
     }, []);
+
+    const sortAlphabetically = () => {
+        if (!allUsers.length) return; // Ensure users are loaded before sorting
+    
+        const sortedList = [...allUsers].sort((a, b) =>
+            topSorted
+                ? a[0].toString().localeCompare(b[0].toString())
+                : b[0].toString().localeCompare(a[0].toString())
+        );
+    
+        setSortedItems(sortedList);
+        setTopSorted(!topSorted);
+    };
 
     const isLastAdmin = (username: string): boolean => {
         const selected = allUsers.find(user => user[1] === username);
@@ -209,12 +224,42 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         <table className="table-auto w-full">
                 <thead className="font-crimson border-crimson-regular border-separate content-start">
                     <tr className="bg-dark-blue text-white text-lg align-left">
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">First Name</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Name</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Pronouns</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Username</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Email</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Role</th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            First Name
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            Last Name
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th> 
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            Pronouns
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            Username
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            Email
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            Role
+                            <button onClick={sortAlphabetically} className="ml-2">
+                                <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                            </button>
+                        </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Phone Number</th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
                     </tr>
@@ -225,26 +270,20 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                             {item.map((data, subIndex) => (
                                 <td
                                     key={subIndex}
-                                    className="border-collapse border-zinc-200 border-2 border-y-1 py-2 px-3"
+                                    className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
                                 >
                                     {data}
                                 </td>
                             ))}
-                            <td className="border-collapse border-zinc-200 border-2 border-y-1 py-2 px-3 text-center">
-                                <span className="inline-flex justify-center gap-3">
-                                    <Image
-                                        src={editIcon}
-                                        width={18}
-                                        height={18}
-                                        alt="edit Icon"
+                            <td className="border-collapse border-zinc-200 border-2 border-y-1 px-4 text-center">
+                                <span className="inline-flex justify-center gap-4">
+                                    <MdOutlineEdit
+                                        size={24}
                                         onClick={() => openEditModal(item[0], item[1], item[3], item[5])} 
                                         className="cursor-pointer"
                                     />
-                                    <Image
-                                        src={deleteIcon}
-                                        width={18}
-                                        height={18}
-                                        alt="delete Icon"
+                                    <MdDeleteOutline
+                                        size={24}
                                         onClick={() => openDeleteModal(item[0], item[1], item[3], item[5])}
                                         className="cursor-pointer"
                                     />
