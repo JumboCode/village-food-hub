@@ -6,8 +6,9 @@ import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal";
 import ProgressBar from "@app/components/ProgressBar";
-import deleteIcon from '@app/images/delete.png';
-import crossIcon from '@app/images/cross-svgrepo-com.svg';
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
+// import deleteIcon from '@app/images/delete.png';
+// import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 
 // Define a type for the structure of each record returned by the API
@@ -200,22 +201,16 @@ const InternalViewDemographicsPage: React.FC = () => {
                       <div className="flex flex-col space-y-1">
                         <p className="text-[16px] text-black">Want to clean up space?</p>
                         <div className="bg-[#B3B3B3] h-[1px]" />
-                        <div className="flex flex-row">
-                          <p className="text-[16px] text-black w-3/4">Demographics data</p>
-                          <button>
-                            <Image
-                              src={deleteIcon}
-                              width={18}
-                              height={18}
-                              alt="delete Icon"
-                              className="py-0.5"
-                              onClick={() => {
-                                console.log("in here");
-                                fetchNeonData();
-                                setShowStorageCancel(true);
-                              }}
-                            />
-                          </button>
+                          <div className="flex flex-row">
+                            <p className="text-[16px] text-black w-3/4">Demographics data</p>
+                              <MdDeleteOutline
+                                size={18}
+                                onClick={() => {
+                                  fetchNeonData();
+                                  setShowStorageCancel(true);
+                                }}
+                                className="py-0.5"
+                              />
                         </div>
                         <div className="bg-[#B3B3B3] h-[1px]" />
                         <p className="text-[16px] text-black">Inventory Data</p>
