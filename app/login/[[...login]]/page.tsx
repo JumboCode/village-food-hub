@@ -294,7 +294,7 @@ const LoginPage: React.FC = () => {
                 <input
                   type="email"
                   id="password-reset"
-                  className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                  className="w-full text-white bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                   placeholder="Email"
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -336,7 +336,7 @@ const LoginPage: React.FC = () => {
                   <input
                     type="text"
                     id="reset-code"
-                    className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                    className="w-full bg-gray bg-opacity-30 text-white border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                     placeholder="Reset Code"
                     required
                     onChange={(e) => setCode(e.target.value)}
