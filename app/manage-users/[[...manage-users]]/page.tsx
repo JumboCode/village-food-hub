@@ -45,8 +45,6 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
-  const [createUserError, setCreateUserError] = useState("\u00A0");
-  
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -62,71 +60,7 @@ const InternalViewManageUsersPage: React.FC = () => {
     setShowCreateProfileView(true);
   }
 
-  async function createUser() {
-    setCreateUserError("\u00A0");
-    
-    const trimmedData = {
-        firstName: profileData.firstName.trim(),
-        lastName: profileData.lastName.trim(),
-        username: profileData.username.trim(),
-        emailAddress: profileData.emailAddress.trim(),
-        pronouns: profileData.pronouns.trim(),
-        role: profileData.role.trim(),
-        phoneNumber: profileData.phoneNumber.trim(),
-        password: profileData.password.trim()
-    };
-    
-    if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
-        !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
-        !trimmedData.phoneNumber || !trimmedData.password) {
-        setCreateUserError("Please enter all required fields");
-        return;
-    }
-
-    try {
-        // Make POST request to create user API endpoint
-        const response = await fetch("../../api/create-user", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(trimmedData)
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-            setShowCreateProfileView(false);
-            
-            //  refresh the users list
-            fetch("../api/users", { method: 'GET' })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data?.data) {
-                  const formattedUsers = data.data.map((user) => [
-                    user.firstName || "N/A",
-                    user.lastName || "N/A",
-                    user.publicMetadata?.pronouns || "N/A",
-                    user.username || "N/A",
-                    user.emailAddresses?.[0]?.emailAddress || "N/A",
-                    user.publicMetadata?.role || "N/A",
-                    user.publicMetadata?.phoneNumber || "N/A",
-                  ]);
-                  setUsers(formattedUsers);
-                }
-              });
-        } else {
-            setCreateUserError(data.error || "Error creating user");
-        }
-    } catch (error) {
-        // Handle any network or unexpected errors
-        console.error("Error creating user:", error);
-        setCreateUserError("An unexpected error occurred. Please try again.");
-    }
-}
-
-
   function handleCancelProfileView() {
-    setCreateUserError("\u00A0")
     setShowCreateProfileView(false);
   }
 
@@ -136,24 +70,19 @@ const InternalViewManageUsersPage: React.FC = () => {
       {showCreateProfileView ? (
         <div>
           <div className="p-[80px] pt-[50px]">
-            <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
-            <ProfileView 
-                visible={showCreateProfileView} 
-                mode="create" 
-                onCancel={handleCancelProfileView} 
-                profileData={profileData}
-                setProfileData={setProfileData}
+            <p className="font-crimson text-[40px] mb-[20px]"> Create Profile</p>
+            <ProfileView
+              visible={showCreateProfileView}
+              mode="create"
+              onCancel={handleCancelProfileView}
+              profileData={profileData}
             />
-            <div>{createUserError}</div>
             <div>
-              <button 
-                className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
-                onClick={createUser}
-              >
+              <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] mr-[30px]">
                 Create
               </button>
               <button 
-                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
+                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[40px] border-[2px] border-gray"
                 onClick={handleCancelProfileView}
               >
                 Cancel
