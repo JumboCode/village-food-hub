@@ -152,3 +152,52 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Get username and id
+    const data = await req.json();
+    const { id } = data;
+
+    if (!id) {
+      console.error("Missing userId in DELETE request");
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const client = await clerkClient();
+
+    // fetch user directly using Clerk API
+    const userToDelete = await client.users.getUser(id);
+
+    if (!userToDelete) {
+      console.error("User Not Found:", id);
+      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+    }
+
+    console.log("User Found:", userToDelete);
+
+    // check how many admins are remaining
+    if (userToDelete.publicMetadata?.role === "Admin") {
+      const adminUsers = await client.users.getUserList({
+        limit: 2, // fetch only 2 admins to check if there’s at least one other
+        query: { role: "Admin" },
+      });
+
+      if (adminUsers.length <= 1) {
+        console.error("Cannot delete the last admin");
+        return NextResponse.json(
+          { error: "Cannot delete the last admin", showAdminModal: true },
+          { status: 400 }
+        );
+      }
+    }
+
+    // delete the user
+    await client.users.deleteUser(id);
+
+    return NextResponse.json({ message: "User deleted successfully" }, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json({ error: "Error deleting user" }, { status: 500 });
+  }
+}
