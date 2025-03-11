@@ -43,10 +43,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userData, closeModal, han
 
   return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="w-[412px] bg-[#FFFFFF] font-crimson justify-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+          <div className="h-[320px] w-[400px] bg-[#FFFFFF] font-crimson justify-center py-[25px] shadow-lg rounded-[7px] border-[2px] border-light-green">
               <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Edit Role</div>
               <div className="flex flex-col mb-[30px] font-crimson">
-                  <div className="flex mb-2">
+                  <div className="flex my-4">
                       <div className="text-[32px] w-24 ml-[5%] gap-4">Name</div>
                       <input
                           type="text"

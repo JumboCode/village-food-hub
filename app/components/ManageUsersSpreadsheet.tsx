@@ -139,6 +139,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                     height={18}
                                     alt="edit Icon"
                                     onClick={() => openModal(item[0], item[1], item[3])} 
+                                    className="cursor-pointer"
                                 />
                                 <Image
                                     src={deleteIcon}
