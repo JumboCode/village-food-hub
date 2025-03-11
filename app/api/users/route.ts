@@ -43,53 +43,93 @@ export async function GET(req: NextRequest) {
   }
 }
 
+
+interface ClerkUser {
+  firstName: string,
+  lastName: string,
+  username: string,
+  emailAddress: string,
+  pronouns: string,
+  role: string,
+  phoneNumber: string,
+  password: string
+}
+
 /* 
  * Inserts a new user into the database.
  * Expects the request body to be JSON with the fields: username, password,
  * firstName, lastName, pronouns, role, emailAddress & phoneNumber.
  */
 export async function POST(req: NextRequest) {
-  const client = await clerkClient();
   try {
-    const data = await req.json();
-    console.log('Received data:', data);
+    // check that user data is valid
+    const newUser = await req.json()
+    return await createClerksUser(newUser)
 
-    // Check for all required fields
-    if (
-      !('username' in data &&
-        'password' in data &&
-        'firstName' in data &&
-        'lastName' in data &&
-        'pronouns' in data &&
-        'emailAddress' in data &&
-        'phoneNumber' in data &&
-        'role' in data)
-    ) {
-      return new NextResponse('Error: Missing required fields', { status: 400 });
-    }
+  } catch (error) {
+      console.error("Full error object:", error);
 
-    // Create the user with Clerk API
-    const user = await client.users.createUser({
-      username: data.username,
-      password: data.password,
-      emailAddress: [data.emailAddress],
-      firstName: data.firstName,
-      lastName: data.lastName,
-      publicMetadata: {
-        pronouns: data.pronouns,
-        role: data.role,
-        phoneNumber: data.phoneNumber,
-      },
-    });
+      // Specifically log the errors array if it exists
+      if (error.errors && Array.isArray(error.errors)) {
+          console.error("Error details:");
+          error.errors.forEach((err, index) => {
+              console.error(`Error ${index + 1}:`, err);
+          });
+      }
 
-    return NextResponse.json(user);
-  } catch (error: unknown) {
-    console.error('Error creating user:', error);
-    let errorMessage = 'An unknown error occurred';
-    if (isClerkError(error)) {
-      errorMessage = error.errors[0]?.longMessage || errorMessage;
-    }
-    return new NextResponse('Error: ' + errorMessage, { status: 500 });
+      return NextResponse.json(
+          { error: 'Error creating user', details: error.errors || error.message || 'Unknown error' }, 
+          { status: 400 }
+      );
+  }
+}
+
+export async function createClerksUser(user: ClerkUser) {
+  try {
+      const validRoles = ['Admin', 'Staff', 'Volunteer', 'Customer'];
+      const role = user.role.charAt(0).toUpperCase() + user.role.substring(1)
+      console.log(role)
+
+      if (!validRoles.includes(role)) {
+          return NextResponse.json(
+              { error: 'Role must be one of: admin, staff, volunteer, customer' },
+              { status: 400 }
+          );
+      }
+
+      const userData = {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          password: user.password,
+          emailAddress: [user.emailAddress],
+          publicMetadata: { 
+              pronouns: user.pronouns, 
+              role: role, 
+              phoneNumber: user.phoneNumber 
+          }
+      };
+
+      const client = await clerkClient();
+      const newUser = await client.users.createUser(userData);
+
+      return NextResponse.json({ message: 'User created', newUser });
+  } catch (error) {  
+      // clerk will reject a user with a weak password      
+      if (error.errors && Array.isArray(error.errors)) {
+          const pwnedError = error.errors.find(err => err.code === 'form_password_pwned');
+          if (pwnedError) {
+              return NextResponse.json(
+                  { error: 'Please use a stronger password' }, 
+                  { status: 400 }
+              );
+          }
+      }
+
+      return NextResponse.json(
+          { error: 'Error creating new user', details: error.message || 'Unknown error' }, 
+          { status: 400 }
+      );
   }
 }
 

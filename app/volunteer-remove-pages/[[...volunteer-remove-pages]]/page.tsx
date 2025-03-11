@@ -171,7 +171,6 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             setSelectedCategory(selected);
             setItemToRemove({ ...itemToRemove, categoryName: selected }); 
           }}
-          value={itemToRemove.categoryName}
         />
       </div>
       <div className="font-bold text-[20px]">
