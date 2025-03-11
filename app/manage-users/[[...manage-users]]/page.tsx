@@ -85,7 +85,7 @@ const InternalViewManageUsersPage: React.FC = () => {
 
     try {
         // Make POST request to create user API endpoint
-        const response = await fetch("../../api/create-user", {
+        const response = await fetch("../../api/users", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,24 +96,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         const data = await response.json();
         if (response.ok) {
             setShowCreateProfileView(false);
-            
-            //  refresh the users list
-            fetch("../api/users", { method: 'GET' })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data?.data) {
-                  const formattedUsers = data.data.map((user) => [
-                    user.firstName || "N/A",
-                    user.lastName || "N/A",
-                    user.publicMetadata?.pronouns || "N/A",
-                    user.username || "N/A",
-                    user.emailAddresses?.[0]?.emailAddress || "N/A",
-                    user.publicMetadata?.role || "N/A",
-                    user.publicMetadata?.phoneNumber || "N/A",
-                  ]);
-                  setUsers(formattedUsers);
-                }
-              });
+            await mutate();
         } else {
             setCreateUserError(data.error || "Error creating user");
         }
