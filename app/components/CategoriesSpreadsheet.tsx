@@ -1,22 +1,55 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import deleteIcon from "@app/images/delete.png";
-import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
 import EditModal from "@app/components/EditModal";
+import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 
+// --- Types and Interfaces ---
+
+// Props for the CategoriesSpreadsheet component.
 interface CategoriesSpreadsheetProps {
   categoryName: string;
   categoryItems: (string | number)[][];
-  loadData: any;
+  loadData: () => Promise<void>;
 }
+
+// Define a type for a raw inventory item (as returned by the API in deletion functions).
+interface RawInventoryItem {
+  itemName: string;
+  units: string;
+}
+
+// Define the structure of the API response when fetching inventory for deletion.
+interface InventoryResponse {
+  data: RawInventoryItem[];
+}
+
+// --- Component Start ---
 
 const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   categoryName = "",
   categoryItems = [],
   loadData,
 }) => {
+  // SORTING functionality
+  const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
+  const [topSorted, setTopSorted] = useState(true);
+
+  useEffect(() => {
+    setSortedItems([...categoryItems]);
+  }, [categoryItems]);
+
+  const sortAlphabetically = () => {
+    const sortedList = [...sortedItems].sort((a, b) =>
+      topSorted
+        ? a[0].toString().localeCompare(b[0].toString())
+        : b[0].toString().localeCompare(a[0].toString())
+    );
+    setSortedItems(sortedList);
+    setTopSorted(!topSorted);
+  };
+
   // EDIT functionality
   const [showEditModal, setShowEditModal] = useState(false);
   const [currItemName, setItemName] = useState("");
@@ -26,7 +59,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [modalCategory, setModalCategory] = useState("");
   const [modalItem, setModalItem] = useState<(string | number)[]>([]);
-  const [modalItemIndex, setModalItemIndex] = useState(-1);
+  // Removed modalItemIndex because it's not used.
   const [itemWarning, setItemWarning] = useState(false);
   const [unitWarning, setUnitWarning] = useState(-1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
@@ -84,10 +117,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           `Error editing category with server response: ${response.status}`
         );
       } else {
-        // Refresh automatically after a successful edit.
-        if (typeof loadData === "function") {
-          await loadData();
-        }
+        await loadData();
       }
       closeModal();
     } catch (error) {
@@ -106,13 +136,12 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setIsDeleteModalVisible(true);
     setModalCategory(catName);
     setModalItem(item);
-    setModalItemIndex(index);
+    // Removed setting modalItemIndex as it is unused.
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalVisible(false);
     setModalCategory("");
-    setModalItemIndex(-1);
     setItemWarning(false);
     setUnitWarning(-1);
     setDeleteConfirmation(false);
@@ -122,128 +151,138 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   // Deletes the entire row (item) from both inventory and categories.
   const deleteItem = async () => {
     closeDeleteModal();
-
-    // Delete from inventory for each unit.
-    modalItem[1]
+  
+    // First, fetch inventory data.
+    let inventoryData: InventoryResponse | null = null;
+    try {
+      const invResponse = await fetch("../api/inventory");
+      if (invResponse.ok) {
+        inventoryData = (await invResponse.json()) as InventoryResponse;
+        console.log("Fetched inventory data:", inventoryData);
+      } else {
+        console.error("Failed to fetch inventory data; status:", invResponse.status);
+      }
+    } catch (e) {
+      console.error("Error fetching inventory data:", e);
+    }
+  
+    // Convert modalItem[1] (units) into an array.
+    const unitsArray = modalItem[1]
       .toString()
       .split(", ")
-      .forEach(async (unit) => {
-        try {
-          await fetch("../api/inventory", {
-            method: "DELETE",
-            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-          }).then((response) => {
-            if (!response.ok) {
-              throw new Error(
-                `Deleting item from inventory error; status: ${response.status}`
-              );
-            }
-            return response.json();
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-    // Delete the entire item from categories.
-    try {
-      await fetch("../api/categories", {
-        method: "DELETE",
-        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Deleting item from categories error; status: ${response.status}`
+      .filter((u) => u.trim() !== "");
+  
+    // For each unit, check if an inventory record exists. If it does, then delete.
+    for (const unit of unitsArray) {
+      try {
+        let exists = false;
+        if (inventoryData && inventoryData.data) {
+          exists = inventoryData.data.some(
+            (invItem: RawInventoryItem) =>
+              invItem.itemName === modalItem[0] &&
+              invItem.units.trim() === unit.trim()
           );
         }
-        return response.json();
+        if (exists) {
+          console.log(`Inventory record exists for unit "${unit}"; attempting deletion.`);
+          const invDeleteResponse = await fetch("../api/inventory", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
+          });
+          console.log(`Inventory deletion response for unit "${unit}":`, invDeleteResponse.status);
+          if (!invDeleteResponse.ok) {
+            console.error(`Error deleting inventory record for unit "${unit}"; status: ${invDeleteResponse.status}`);
+          }
+        } else {
+          console.info(`No inventory record found for unit "${unit}"; skipping inventory deletion.`);
+        }
+      } catch (e) {
+        console.error("Error during inventory deletion for unit:", unit, e);
+      }
+    }
+  
+    // Now, delete the entire item from the categories database.
+    try {
+      const catDeleteResponse = await fetch("../api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
       });
+      console.log("Categories deletion response status:", catDeleteResponse.status);
+      if (!catDeleteResponse.ok) {
+        throw new Error(`Deleting item from categories error; status: ${catDeleteResponse.status}`);
+      }
+      await catDeleteResponse.json();
     } catch (e) {
-      console.error(e);
+      console.error("Error deleting category record:", e);
     }
-
+  
     setDeleteConfirmation(true);
-    if (typeof loadData === "function") {
-      await loadData();
-    } else {
-      console.error("loadData is not a function");
-    }
-  };
+    await loadData();
+  };  
 
   // Deletes a single unit from an item.
   const deleteUnit = async (unit: string) => {
     setUnitWarning(-1);
   
+    // Check if this is the last unit
     if (modalItem[1].toString().split(", ").length === 1) {
       setLastUnitWarning(true);
-    } else {
-      // First, check if the item with the given unit exists in the inventory.
-      try {
-        const inventoryCheck = await fetch("../api/inventory");
-        if (inventoryCheck.ok) {
-          const inventoryData = await inventoryCheck.json();
-          const exists = inventoryData.data.some(
-            (invItem: any) =>
-              invItem.itemName === modalItem[0] &&
-              invItem.units.trim() === unit.trim()
-          );
-          if (exists) {
-            // If exists, delete from inventory.
-            await fetch("../api/inventory", {
-              method: "DELETE",
-              body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
-            });
-          } else {
-            console.info("No inventory record found for unit:", unit);
-          }
-        } else {
-          console.error("Failed to GET inventory data; status:", inventoryCheck.status);
-        }
-      } catch (error) {
-        console.error("Error checking inventory:", error);
-      }
+      return;
+    }
   
-      // Now, delete the unit from categories.
-      try {
-        const newUnits = modalItem[1]
-          .toString()
-          .split(", ")
-          .filter((elt) => elt !== unit);
-        const categoryResponse = await fetch("../api/categories", {
-          method: "PUT",
-          body: JSON.stringify({
-            oldItemName: modalItem[0],
-            itemName: modalItem[0],
-            name: modalCategory,
-            units: newUnits,
-          }),
+    try {
+      // Step 1: Fetch inventory to check if this unit exists
+      const inventoryResponse = await fetch("../api/inventory");
+      if (!inventoryResponse.ok) throw new Error("Failed to fetch inventory");
+  
+      const inventoryData = (await inventoryResponse.json()) as InventoryResponse;
+      const inventoryItemsToDelete = inventoryData.data.filter(
+        (invItem) =>
+          invItem.itemName === modalItem[0] && invItem.units.trim() === unit.trim()
+      );
+  
+      // Step 2: Delete all matching inventory records for this unit
+      for (const inventoryItem of inventoryItemsToDelete) {
+        await fetch("../api/inventory", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemName: inventoryItem.itemName, units: unit }),
         });
-        if (!categoryResponse.ok) {
-          throw new Error(
-            `Deleting unit from categories error; status: ${categoryResponse.status}`
-          );
-        }
-        await categoryResponse.json();
-      } catch (e) {
-        console.error(e);
       }
   
-      // Refresh data.
-      if (typeof loadData === "function") {
-        const newData = await loadData();
-        setTimeout(() => setIsDeleteModalVisible(false), 500);
-        setTimeout(
-          () =>
-            openDeleteModal(
-              modalCategory,
-              newData[modalCategory][modalItemIndex],
-              modalItemIndex
-            ),
-          1000
-        );
-      } else {
-        console.error("loadData is not a function");
+      console.log(`Deleted ${inventoryItemsToDelete.length} inventory items using unit "${unit}"`);
+  
+      // Step 3: Update the category to remove the deleted unit
+      const updatedUnits = modalItem[1]
+        .toString()
+        .split(", ")
+        .filter((elt) => elt !== unit);
+  
+      const categoryResponse = await fetch("../api/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldItemName: modalItem[0],
+          itemName: modalItem[0],
+          name: modalCategory,
+          units: updatedUnits,
+        }),
+      });
+  
+      if (!categoryResponse.ok) {
+        throw new Error(`Deleting unit from categories error; status: ${categoryResponse.status}`);
       }
+  
+      await categoryResponse.json();
+      console.log(`Unit "${unit}" removed from category "${modalCategory}"`);
+  
+      // Refresh data
+      await loadData();
+      setIsDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting unit:", error);
     }
   };  
 
@@ -255,17 +294,27 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           <thead className="font-crimson crimson-regular content-start">
             <tr className="bg-dark-blue text-white text-lg align-left">
               <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
-                  <Image src={arrowsIcon} width={10} height={6} alt="arrows Icon" />
+                  {/* Sorting button */}
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
                 </div>
               </th>
-              <th className="border-r-2 border-slate-400 py-2 px-3">Units</th>
+              <th className="border-r-2 border-slate-400 py-2 px-3">
+                <div className="flex flex-row justify-between items-center">
+                  <p>Units</p>
+                  <button onClick={() => sortAlphabetically()}>
+                    <TiArrowUnsorted />
+                  </button>
+                </div>
+              </th>
               <th className="py-2 px-3">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-slate-50 font-crimson crimson-regular">
-            {categoryItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
               <tr key={index} className="py-2">
                 {item.map((data, subIndex) => (
                   <td key={subIndex} className="border-r-2 border-slate-200 py-2 px-3">
@@ -273,11 +322,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                   </td>
                 ))}
                 <td className="flex row justify-around py-2 px-3">
-                  <Image
-                    src={editIcon}
-                    width={18}
-                    height={18}
-                    alt="edit Icon"
+                  <MdOutlineEdit
+                    size={24}
                     className="cursor-pointer"
                     onClick={() =>
                       openModal(
@@ -286,9 +332,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                       )
                     }
                   />
-                  <button onClick={() => openDeleteModal(categoryName, item, index)}>
-                    <Image src={deleteIcon} width={18} height={18} alt="delete Icon" />
-                  </button>
+                  <MdDeleteOutline 
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => openDeleteModal(categoryName, item, index)}
+                  />
                   {showEditModal && (
                     <EditModal
                       itemNameOld={currItemName}
@@ -386,7 +434,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               {modalItem[1]
                 .toString()
                 .split(", ")
-                .map((item, index) => (
+                .map((unitItem, index) => (
                   <div key={index} className="flex flex-col justify-center space-y-3">
                     {unitWarning === index && (
                       <div className="flex flex-row items-center space-x-1">
@@ -438,7 +486,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                         <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
                           unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"
                         }`}>
-                          {item}
+                          {unitItem}
                         </p>
                       </div>
                       <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
@@ -465,7 +513,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                                   </p>
                                 </div>
                               </button>
-                              <button onClick={() => deleteUnit(item)}>
+                              <button onClick={() => deleteUnit(unitItem)}>
                                 <div className="w-[65px] h-[25px] rounded-[8px] bg-[#EB2B0C]">
                                   <p className="font-crimson text-[#FFFFFF] text-[16px] crimson-semibold">
                                     Delete

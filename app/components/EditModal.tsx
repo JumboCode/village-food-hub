@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ButtonCancel, ButtonSave } from "@app/components/SurveyButtons";
 import UnitBoxes from "@app/components/UnitBoxes";
 import addIcon from "@app/images/Vector.png";
 
@@ -54,7 +53,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-20">
-      <div className="w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+      <div className="w-[450px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green pl-4">
         <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Edit Item</div>
         <div className="flex flex-col mb-[30px] font-crimson">
           <div className="flex mb-2">
@@ -72,18 +71,18 @@ const EditModal: React.FC<EditModalProps> = ({
             initialUnits={newUnits}
           />
           {errorMessage && (
-            <p className="text-red-600 text-center mt-2">{errorMessage}</p>
+            <p className="text-red text-center mt-2">{errorMessage}</p>
           )}
         </div>
         <div className="flex w-full justify-center space-x-[15px] items-center">
             <button
-                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[36px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border-[1px] pt-1 border-gray text-[20px] justify-center"
                 onClick={closeModal}
             >
                 Cancel
             </button>
             <button
-                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[175px] h-[36px] rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
+                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[175px] h-[40px] pt-1 rounded-[8px] border-[1px] border-gray text-[20px] justify-center"
                 onClick={onSave}
             >
                 Save Changes
