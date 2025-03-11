@@ -4,6 +4,7 @@ import Image from "next/image";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
+import deleteIcon from "@app/images/deleteIcon.svg"
 
 // --- Types and Interfaces ---
 
