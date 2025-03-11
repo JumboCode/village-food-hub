@@ -113,46 +113,51 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-
-
 export async function DELETE(req: NextRequest) {
-    try {
-
-    // Get username and id 
+  try {
+    // Get username and id
     const data = await req.json();
-    const {username, id} = data; 
+    const { id } = data;
+
     if (!id) {
+      console.error("Missing userId in DELETE request");
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    const client = await clerkClient(); 
+    const client = await clerkClient();
+
+    // fetch user directly using Clerk API
+    const userToDelete = await client.users.getUser(id);
+
+    if (!userToDelete) {
+      console.error("User Not Found:", id);
+      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+    }
+
+    console.log("User Found:", userToDelete);
 
     // check how many admins are remaining
-    const userList = await client.users.getUserList();
-    const allUsers = userList.data;
+    if (userToDelete.publicMetadata?.role === "Admin") {
+      const adminUsers = await client.users.getUserList({
+        limit: 2, // fetch only 2 admins to check if there’s at least one other
+        query: { role: "Admin" },
+      });
 
-    const userToDelete = allUsers.find(user => user.id === id)
-    if (!userToDelete) {
-      return NextResponse.json( {error: 'User Not Found'}, {status: 403})
+      if (adminUsers.length <= 1) {
+        console.error("Cannot delete the last admin");
+        return NextResponse.json(
+          { error: "Cannot delete the last admin", showAdminModal: true },
+          { status: 400 }
+        );
+      }
     }
 
-    const remainingAdmins = allUsers.filter (
-      user => user.publicMetadata?.role == 'Admin' && 
-      user.id !== id
-    )
+    // delete the user
+    await client.users.deleteUser(id);
 
-    // If there is at least one admin remaining, delete the user
-    if (remainingAdmins.length >= 1) {
-      let user = await client.users.deleteUser(id); 
-      return new Response(JSON.stringify(user))
-    } else {
-      return NextResponse.json({error: 'Cannot delete the last admin', showAdminModal: true }, {status: 400}); 
-    }
-
-    
-    
+    return NextResponse.json({ message: "User deleted successfully" }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Error deleting user' })
+    console.error("Error deleting user:", error);
+    return NextResponse.json({ error: "Error deleting user" }, { status: 500 });
   }
-
 }

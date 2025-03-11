@@ -10,11 +10,10 @@ interface DeleteModalProps {
 }
 
 const DeleteUserModal: React.FC<DeleteModalProps> = ({ userName, closeModal, handleDelete}) => {
-// const DeleteUserModal: React.FC = () => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
       <div
-        className="h-[260px] w-[400px] bg-modal-gray font-crimson
+        className="h-[260px] w-[450px] bg-modal-gray font-crimson
                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                    pt-8 shadow-lg rounded-lg"
       >

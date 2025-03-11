@@ -1,12 +1,11 @@
+'use client';
+
 import React, {useState, useEffect} from "react";
 import Image from 'next/image';
 import editIcon from '@app/images/edit.png';
 import deleteIcon from '@app/images/delete.png';
 import arrowsIcon from "@app/images/upAndDownArrows.png";
 import DeleteUserModal from "@app/components/DeleteUserModal";
-// import { NextRequest, NextResponse } from 'next/server';
-// import { clerkClient } from '@clerk/nextjs/server';
-// import { constants } from "node:buffer";
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
@@ -56,55 +55,58 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
 
     const handleDelete = async () => {
         try {
-            const res = await fetch('/../api/users/', {
-                method: 'GET', 
-            })
-            const data = await res.json()
-
-
-            if (data?.data) {
-                const formattedUsers: string[][] = data.data.map((user: ClerkUser) => [
-                    user.id || "N/A",
-                    user.username || "N/A",
-                  
-                  ]);
-                  setAllUsers(formattedUsers);
+            if (!username) {
+                console.error("No username provided for deletion");
+                return;
             }
-
-            const deleteUser = allUsers.find(user => user[1] == username)
-
-            const payload = {
-                username: username, 
-                id: deleteUser ? deleteUser[0] : null
+    
+            // fetch user list
+            const res = await fetch("/api/users", { method: "GET" });
+            const data = await res.json();
+    
+            console.log("Full users data received:", data.data);
+    
+            if (!data?.data || data.data.length === 0) {
+                console.error("Error: No users found in the database");
+                return;
             }
-
-            const response = await fetch('/../api/users', {
-                method: 'DELETE', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-
-            const result = await response.json()
-
-            // Open new modal if requireed
+    
+            // find user by username
+            const deleteUser = data.data.find((user: ClerkUser) => user.username === username);
+    
+            if (!deleteUser) {
+                console.error("User not found:", username);
+                return;
+            }
+    
+            console.log("Deleting user:", deleteUser);
+    
+            // send DELETE request
+            const response = await fetch("/api/users", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: deleteUser.id })
+            });
+    
+            const result = await response.json();
+            console.log("Delete Response:", result);
+    
             if (response.ok) {
+                console.log("User deleted successfully:", result);
                 if (result.showAdminModal) {
                     openAdminModal();
-                    return; 
+                    return;
                 }
-
+            } else {
+                console.error("Error deleting user:", result.error);
             }
         } catch (error) {
-            console.error('User not deleted: ', error);
-           
+            console.error("User deletion failed:", error);
         }
-
-        closeModal(); 
-        closeAdminModal(); 
+    
+        closeModal();
+        closeAdminModal();
         refreshPage();
-
     };
     
     return(
@@ -177,41 +179,46 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                                     width={18}
                                     height={18}
                                     alt="delete Icon"
-                                    className=""
+                                    className="cursor-pointer"
                                     onClick={() => openModal((String(manageUsersItems[index][0])), (String(manageUsersItems[index][1])), (String(manageUsersItems[index][3])))}
                                     />
-
-                                {showModal && <DeleteUserModal userName={String(firstName) + " " + String(lastName)} closeModal={closeModal} handleDelete={handleDelete}/> }
-                                {showAdminModal && 
-                                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
-                                 <div
-                                   className="h-[260px] w-[400px] bg-modal-gray font-crimson
-                                              fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                                              pt-8 shadow-lg rounded-lg"
-                                 >
-                                   <div className="flex flex-col">
-                                    <p className="flex justify-center text-[28px] crimson-bold">The system has to have at least one admin.</p>
-                                
-                                    
-                                    <p className='flex justify-center text-[18px] crimson-bold text-green-100'>Your account was not deleted</p>
-                                   </div>
-                                   <div className="flex flex-row justify-around pt-8">
-
-                                   <button 
-                                            className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
-                                            onClick={() => (setShowAdminModal(false))}
-                                        >
-                                            { "Okay" }
-                                        </button>
-                                    </div>
-                                 </div>
-                               </div>
-                               }
                             </td>
                         </tr>
                     ))}
             </tbody>
             </table>
+            {showModal && (
+                <DeleteUserModal
+                    userName={`${firstName} ${lastName}`}
+                    closeModal={closeModal}
+                    handleDelete={handleDelete}
+                />
+            )}
+            {showAdminModal && 
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+                <div
+                className="h-[260px] w-[400px] bg-modal-gray font-crimson
+                            fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                            pt-8 shadow-lg rounded-lg"
+                >
+                <div className="flex flex-col">
+                <p className="flex justify-center text-[28px] crimson-bold">The system has to have at least one admin.</p>
+            
+                
+                <p className='flex justify-center text-[18px] crimson-bold text-green-100'>Your account was not deleted</p>
+                </div>
+                <div className="flex flex-row justify-around pt-8">
+
+                <button 
+                        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
+                        onClick={() => (setShowAdminModal(false))}
+                    >
+                        { "Okay" }
+                    </button>
+                </div>
+                </div>
+            </div>
+            }
         </div>
     )
 }
