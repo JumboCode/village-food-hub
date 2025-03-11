@@ -60,18 +60,16 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 return;
             }
     
-            // fetch user list
+            // Fetch all users
             const res = await fetch("/api/users", { method: "GET" });
             const data = await res.json();
-    
-            console.log("Full users data received:", data.data);
     
             if (!data?.data || data.data.length === 0) {
                 console.error("Error: No users found in the database");
                 return;
             }
     
-            // find user by username
+            // Find the user to be deleted
             const deleteUser = data.data.find((user: ClerkUser) => user.username === username);
     
             if (!deleteUser) {
@@ -79,9 +77,20 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 return;
             }
     
+            // Check the number of remaining admins
+            const adminUsers = data.data.filter((user: ClerkUser) => user.publicMetadata?.role === "Admin");
+    
+            console.log(`Number of admins remaining: ${adminUsers.length}`);
+    
+            if (adminUsers.length <= 1 && deleteUser.publicMetadata?.role === "Admin") {
+                console.log("Cannot delete the last admin - Showing modal");
+                openAdminModal();
+                return; // Prevent deletion from proceeding
+            }
+    
             console.log("Deleting user:", deleteUser);
     
-            // send DELETE request
+            // Send DELETE request to backend
             const response = await fetch("/api/users", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
@@ -93,21 +102,15 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     
             if (response.ok) {
                 console.log("User deleted successfully:", result);
-                if (result.showAdminModal) {
-                    openAdminModal();
-                    return;
-                }
+                closeModal();
+                refreshPage();
             } else {
                 console.error("Error deleting user:", result.error);
             }
         } catch (error) {
             console.error("User deletion failed:", error);
         }
-    
-        closeModal();
-        closeAdminModal();
-        refreshPage();
-    };
+    };     
     
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
@@ -195,25 +198,22 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 />
             )}
             {showAdminModal && 
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
-                <div
-                className="h-[260px] w-[400px] bg-modal-gray font-crimson
-                            fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                            pt-8 shadow-lg rounded-lg"
-                >
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+                <div className="h-[220px] w-[450px] bg-modal-gray font-crimson fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-8 shadow-lg rounded-lg">
                 <div className="flex flex-col">
-                <p className="flex justify-center text-[28px] crimson-bold">The system has to have at least one admin.</p>
-            
-                
-                <p className='flex justify-center text-[18px] crimson-bold text-green-100'>Your account was not deleted</p>
+                    <p className="flex justify-center text-[28px] crimson-bold px-12">
+                    The system must have at least one admin.
+                    </p>
+                    <p className="flex justify-center text-[18px] crimson-bold text-green-100">
+                    Your account was not deleted.
+                    </p>
                 </div>
-                <div className="flex flex-row justify-around pt-8">
-
-                <button 
-                        className="bg-light-green hover:bg-dark-green text-white font-serif py-3 px-8 rounded-full text-[20px]"
-                        onClick={() => (setShowAdminModal(false))}
+                <div className="flex flex-row justify-around">
+                    <button 
+                    className="bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full text-[20px]"
+                    onClick={() => setShowAdminModal(false)}
                     >
-                        { "Okay" }
+                    OK
                     </button>
                 </div>
                 </div>
