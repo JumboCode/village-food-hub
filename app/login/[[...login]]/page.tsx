@@ -7,6 +7,7 @@ import headerLogo from '@app/images/headerLogo.png';
 import irlPantry from '@app/images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
 import { useSignIn, useAuth } from "@clerk/nextjs";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -106,7 +107,8 @@ const LoginPage: React.FC = () => {
   // handler function to send a code for resetting a password
   const handleSendCode = async () => {
     setErrorMsg('\u00A0')
-    try {  console.log(email);
+    try {  
+      console.log(email);
       const response = await signIn
         ?.create({
           strategy: 'reset_password_email_code',
@@ -115,7 +117,7 @@ const LoginPage: React.FC = () => {
       setShowTypeEmail(false);
       setShowTypeCode(true);
     } catch (error : any) { 
-      setErrorMsg("Couldn't find your account")
+      setErrorMsg("Account with entered email not found.")
     }
   };
 
@@ -128,10 +130,36 @@ const LoginPage: React.FC = () => {
   };
 
   // handler function to finish resetting a password
-  const handleResetSubmit = () => {
-    setShowTypeCode(false);
-    setShowTypeResentCode(false);
-    setShowTypeNewPassword(true);
+  const handleResetSubmit = async () => {
+    setErrorMsg('\u00A0'); // Reset error message
+
+    if (!code.trim()) {
+        setErrorMsg("Reset code cannot be empty.");
+        return;
+    }
+
+    try {
+        const result = await signIn?.attemptFirstFactor({
+            strategy: 'reset_password_email_code',
+            code,
+        });
+
+        if (result.status === "needs_new_password") {
+            setShowTypeCode(false);
+            setShowTypeNewPassword(true);
+        } else {
+            setErrorMsg("Invalid or expired reset code. Please try again.");
+        }
+    } catch (error: any) {
+        console.log("Reset code error:", error);
+
+        // Handle invalid reset codes without throwing an error
+        if (error.errors && Array.isArray(error.errors)) {
+            setErrorMsg(error.errors[0]?.longMessage || "Invalid reset code. Please try again.");
+        } else {
+            setErrorMsg("An error occurred. Please try again.");
+        }
+    }
   };
 
   // handler function to enter in the new password
@@ -166,6 +194,24 @@ const LoginPage: React.FC = () => {
   const handleLogin = () => {
     setShowResetSuccess(false);
     setShowWelcomeBack(true);
+  };
+
+  const handleGoBack = () => {
+    setErrorMsg('\u00A0');
+
+    if (showTypeEmail) {
+        setShowTypeEmail(false);
+        setShowWelcomeBack(true);
+    } else if (showTypeCode) {
+        setShowTypeCode(false);
+        setShowTypeEmail(true);
+    } else if (showTypeResentCode) {
+        setShowTypeResentCode(false);
+        setShowTypeEmail(true);
+    } else if (showTypeNewPassword) {
+        setShowTypeNewPassword(false);
+        setShowTypeCode(true);
+    }
   };
 
   return (
@@ -299,8 +345,8 @@ const LoginPage: React.FC = () => {
               <div className="text-5xl text-white py-8">Reset Password</div>
               {/* Text */}
               <div className="py-5">
-                <label className="block mb-2 text-2xl text-white"> Please enter your email address so </label>
-                <label className="block mb-2 text-2xl text-white"> we can send you a reset code. </label>
+                <label className="block mb-2 text-xl text-white"> Please enter your email address so </label>
+                <label className="block mb-2 text-xl text-white"> we can send you a reset code. </label>
               </div>
               {/* Email Input */}
               <div className="pt-5">
@@ -319,8 +365,14 @@ const LoginPage: React.FC = () => {
                 <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleSendCode}>
                   Send Code
                 </Button>
-                <div className="text-white mt-10px">{errorMsg}</div>
+                <div className="text-[#ff8585] mt-10px">{errorMsg}</div>
               </div>
+              <Button 
+                  className="absolute text-neutral-300 text-lg font-crimson normal-case"
+                  onClick={handleGoBack}
+              >
+                <IoMdArrowRoundBack /> Back
+              </Button>
             </div>
           </div>
         ) : null}
@@ -341,8 +393,9 @@ const LoginPage: React.FC = () => {
                 <div className="text-5xl text-white py-8">Reset Password</div>
                 {/* Text */}
                 <div className="py-5">
-                  <label className="block mb-2 text-2xl text-white"> A code has been sent to your email, please</label>
-                  <label className="block mb-2 text-2xl text-white"> check and put in the code below.</label>
+                  <label className="block mb-2 text-xl text-white"> A code has been sent to your email, please</label>
+                  <label className="block mb-2 text-xl text-white"> check and put in the code below. It may take</label>
+                  <label className="block mb-2 text-xl text-white"> a few minutes for the code to send to your inbox.</label>
                 </div>
                 {/* Reset Code Input */}
                 <div className="pt-5">
@@ -359,7 +412,7 @@ const LoginPage: React.FC = () => {
                 {/* Resend Buttons */}
                 <div className="mt-[10px] mb-5">
                   <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case" onClick={handleResendCode}>
-                    Didn’t receive a code?
+                    Didn't receive a code?
                   </Button>
                   <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case font-bold" onClick={handleResendCode}>
                     Resend Code
@@ -369,6 +422,14 @@ const LoginPage: React.FC = () => {
                 <div className="pt-5">
                   <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
                     Submit
+                  </Button>
+                </div>
+                <div className="pt-5">
+                  <Button 
+                    className="absolute text-neutral-300 text-lg font-crimson normal-case"
+                    onClick={handleGoBack}
+                  >
+                    <IoMdArrowRoundBack /> Back
                   </Button>
                 </div>
               </div>
@@ -408,7 +469,7 @@ const LoginPage: React.FC = () => {
                 </div>
                 <div className="mt-[10px] mb-5">
                   <Button className="left-0 text-neutral-300 ml-[-10px] font-crimson normal-case" onClick={handleResendCode}>
-                    Didn’t receive a code?
+                    Didn't receive a code?
                   </Button>
                   <Button className="left-0 text-neutral-300 ml-[-10px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                     Resend Code
@@ -458,7 +519,7 @@ const LoginPage: React.FC = () => {
               <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleNewPassSubmit}>
                 Submit
               </Button>
-            <div className="text-white w-full mt-2">{errorMsg}</div>
+            <div className="text-[#ff8585] w-full mt-2">{errorMsg}</div>
             </div>
           </div>
         ) : null}
@@ -470,8 +531,8 @@ const LoginPage: React.FC = () => {
             <div className="text-5xl text-white py-8">Reset Password</div>
             {/* Text */}
             <div className="py-5">
-              <label className="block mb-2 text-2xl text-white">Your password has been successfully reset!</label>
-              <label className="block mb-2 text-2xl text-white">Return to login page to enter your account.</label>
+              <label className="block mb-2 text-xl text-white">Your password has been successfully reset!</label>
+              <label className="block mb-2 text-xl text-white">Return to login page to enter your account.</label>
             </div>
             {/* Login Button */}
             <div className="pt-5">
