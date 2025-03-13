@@ -13,8 +13,21 @@ async function createInventoryItem(data: {
   lastUpdated: Date;
   history?: Prisma.InputJsonValue;
 }) {
+  
+  const newHistory = 
+      {
+        itemName: data.itemName,
+        categoryName: data.categoryName,
+        units: data.units,
+        action: 'add',
+        quantityChanged: data.quantity,
+        date: data.lastUpdated,
+      };
+
   return await prisma.inventory.create({ 
-    data: { ...data }
+    data: { ...data,
+      history: newHistory as Prisma.InputJsonValue
+    }
   });
 }
 
