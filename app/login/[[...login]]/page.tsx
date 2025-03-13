@@ -14,18 +14,27 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const { signIn, setActive } = useSignIn();
   const { isSignedIn, signOut, isLoaded } = useAuth();
-  const [hasSignedOut, setHasSignedOut] = useState(false);
 
+  // Track logout & login states
+  const [hasLoggedOut, setHasLoggedOut] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginCompleted, setLoginCompleted] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (isSignedIn && !hasSignedOut) {
-      signOut().then(() => {
-        console.log("User successfully signed out.");
-        setHasSignedOut(true);
-      }).catch(err => console.error("Sign-out error:", err));
+
+    // If the user is already signed in and hasn't logged out, log them out first
+    if (isSignedIn && !hasLoggedOut && !loginCompleted) {
+      console.log("User is signed in on the login page, logging them out first...");
+
+      signOut()
+        .then(() => {
+          console.log("User successfully signed out. Ready for new login.");
+          setHasLoggedOut(true);
+        })
+        .catch(err => console.error("Error during sign-out:", err));
     }
-  }, [isSignedIn, signOut, isLoaded, hasSignedOut]);
+  }, [isSignedIn, signOut, isLoaded, hasLoggedOut, loginCompleted]);
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -80,6 +89,7 @@ const LoginPage: React.FC = () => {
     setPasswordError(false);
     setEmptyUsernameError(false);
     setEmptyPasswordError(false);
+    setIsLoggingIn(true);
 
     // Check if username or password is empty
     if (!username.trim()) {
@@ -90,6 +100,7 @@ const LoginPage: React.FC = () => {
     }
   
     if (!username.trim() || !password.trim()) {
+      setIsLoggingIn(false);
       if (!username) setUsernameError(true);
       if (!password) setPasswordError(true);
       return;
@@ -102,18 +113,28 @@ const LoginPage: React.FC = () => {
       if (result.status === "complete") {
         console.log("Sign in successful");
         await setActive({ session: result.createdSessionId });
-        if (username === "customer") {
-          router.push('/welcome-page');
-        } else if (username === "volunteer") {
-          router.push('/volunteer-landing');
-        } else {
-          router.push('/inventory');
-        }
+
+        console.log("Session is active, marking login as complete...");
+        setLoginCompleted(true);
+        setIsLoggingIn(false);
+
+        setTimeout(() => {
+          if (username === "customer") {
+            router.push('/welcome-page');
+          } else if (username === "volunteer") {
+            router.push('/volunteer-landing');
+          } else {
+            router.push('/inventory');
+          }
+        }, 1000);
       } else {
         console.log("Unexpected sign-in status. Please try again.");
+        setIsLoggingIn(false);
       }
     } catch (error: unknown) {
       console.log('Login error:', error);
+      setIsLoggingIn(false);
+      
       if (
         error &&
         typeof error === "object" &&
@@ -125,7 +146,7 @@ const LoginPage: React.FC = () => {
         if (firstError.longMessage && firstError.longMessage.includes("You're currently in single session mode")) {
           console.log("Single session mode error encountered. Signing out and retrying sign in...");
           await signOut();
-          setHasSignedOut(true);
+          setHasLoggedOut(true);
           // Retry sign in seamlessly
           return handleSignIn();
         }
