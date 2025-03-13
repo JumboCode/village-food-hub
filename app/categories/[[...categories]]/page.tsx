@@ -31,6 +31,7 @@ const Categories: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showDuplicateError, setShowDuplicateError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Open delete category modal.
   const openModal = (categoryName: string, itemName: string) => {
@@ -47,6 +48,7 @@ const Categories: React.FC = () => {
   // Load categories data from the API, filtering out records with both empty itemName and units.
   const loadCategoriesData = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/categories");
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -72,6 +74,8 @@ const Categories: React.FC = () => {
       return rearrangedData;
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -334,6 +338,15 @@ const Categories: React.FC = () => {
       console.error("Error in handleDelete:", error);
     }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        {/* Simple spinner using Tailwind classes */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2"></div>
+      </div>
+    );
+  }
 
   return (
     <div>

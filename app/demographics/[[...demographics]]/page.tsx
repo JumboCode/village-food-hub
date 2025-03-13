@@ -32,13 +32,17 @@ const fetcher = (url: string) =>
 // Neon fetch function remains the same
 async function fetchNeonData() {
   try {
+    // setIsLoading(true);
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data.storageSize.project.written_data_bytes;
   } catch (error) {
     console.error("Error fetching Neon data:", error);
-  }
+  } 
+  // finally {
+  //   setIsLoading(false);
+  // }
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
@@ -145,6 +149,7 @@ const InternalViewDemographicsPage: React.FC = () => {
   const [checkedDelete, setCheckedDelete] = useState(false);
   const [storageUsed, setStorageUsed] = useState(0);
   const [storagePercent, setStoragePercent] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Function to get storage bytes and update state
   const getBytes = async () => {
