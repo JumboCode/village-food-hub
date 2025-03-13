@@ -10,8 +10,8 @@ import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
 import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
-import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from '@app/components/ExitModal';
+import useSWR from 'swr';
 
 interface Details {
   name: string;
@@ -218,9 +218,12 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
         <p className="text-[36px] font-bold">{translations[0]} <span className="text-red">*</span></p>
-        <p className="text-[28px] font-bold mb-4">
-          ({translations[1]} {details.name}, {translations[2]} {details.address}, {translations[3]} {details.householdSize === 11 ? '10+' : details.householdSize})
-        </p>
+        <div className="text-[20px] font-bold mb-4">
+          <p>{translations[1]} <span className="font-normal">{details.name}</span></p>
+          <p>{translations[2]} <span className="font-normal">{details.address}</span></p>
+          <p>{translations[3]} <span className="font-normal">{details.householdSize}</span></p>
+        </div>
+
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
     </div>
@@ -488,7 +491,18 @@ const HouseholdSize: React.FC<{
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-10">{translations[0]} <span className="text-red">*</span></p>
         <div className="w-52">
-          <NameDropdown options={sizes} onSelect={handleSizeChange} value={selectedSize} filterName="size"/>
+        <select
+          className="select select-bordered w-full max-w-m -mt-10 rounded-xl border-light-gray"
+          value={selectedSize}
+          onChange={(e) => handleSizeChange(e.target.value)}
+        >
+          <option value="" disabled></option>
+          {sizes.map((size, index) => (
+            <option key={index} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
         </div>
       </div>
     </div>
@@ -975,7 +989,19 @@ const DemographicsSurvey: React.FC = () => {
             value={responses.changes}
             onChange={updateChanges}
             setNextDisabled={setNextDisabled}
-            details={prevRecord || { name: '', address: '', householdSize: 0 }}
+            details={{
+              name: typeof prevRecord?.name === "string" 
+                ? prevRecord.name 
+                : prevRecord?.name 
+                ? `${prevRecord.name.firstName} ${prevRecord.name.lastName}` 
+                : "N/A",            
+              address: typeof prevRecord?.address === "string"
+                ? prevRecord.address
+                : prevRecord?.address
+                ? `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`
+                : "N/A",                  
+                householdSize: prevRecord?.householdSize === 11 ? 10 : prevRecord?.householdSize ?? 0,
+            }}             
           />
         )}
         {currentStep === 'name' && 

@@ -7,12 +7,25 @@ import headerLogo from '@app/images/headerLogo.png';
 import irlPantry from '@app/images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
 import { useSignIn, useAuth } from "@clerk/nextjs";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // eye icons for password visibility
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const { signIn, setActive } = useSignIn();
-  // Removed isSignedIn and userId since they are not used:
-  // const { isSignedIn, userId } = useAuth();
+  const { isSignedIn, signOut, isLoaded } = useAuth();
+  const [hasSignedOut, setHasSignedOut] = useState(false);
+
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (isSignedIn && !hasSignedOut) {
+      signOut().then(() => {
+        console.log("User successfully signed out.");
+        setHasSignedOut(true);
+      }).catch(err => console.error("Sign-out error:", err));
+    }
+  }, [isSignedIn, signOut, isLoaded, hasSignedOut]);
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -21,6 +34,16 @@ const LoginPage: React.FC = () => {
   const [showTypeResentCode, setShowTypeResentCode] = useState(false);
   const [showTypeNewPassword, setShowTypeNewPassword] = useState(false);
   const [showResetSuccess, setShowResetSuccess] = useState(false);
+  const [showNewPasswordVisible, setShowNewPasswordVisible] = useState(false);
+  const [showConfirmPasswordVisible, setShowConfirmPasswordVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // frontend messages
+  const [errorMsg, setErrorMsg] = useState('\u00A0');
+  const [confirmationMsg, setConfirmationMsg] = useState('');
 
   // for password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -32,18 +55,46 @@ const LoginPage: React.FC = () => {
   // error handling states
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  // Removed emptyUsernameError and emptyPasswordError as they are not used
+  const [emptyUsernameError, setEmptyUsernameError] = useState(false)
+  const [emptyPasswordError, setEmptyPasswordError] = useState(false)
+
+  const handleGoBack = () => {
+    setErrorMsg('\u00A0');
+    if (showTypeEmail) {
+      setShowTypeEmail(false);
+      setShowWelcomeBack(true);
+    } else if (showTypeCode) {
+      setShowTypeCode(false);
+      setShowTypeEmail(true);
+    } else if (showTypeResentCode) {
+      setShowTypeResentCode(false);
+      setShowTypeCode(true);
+    } else if (showTypeNewPassword) {
+      setShowTypeNewPassword(false);
+      setShowTypeCode(true);
+    }
+  };
 
   const handleSignIn = async () => {
     setUsernameError(false);
     setPasswordError(false);
+    setEmptyUsernameError(false);
+    setEmptyPasswordError(false);
 
-    if (!username || !password) {
+    // Check if username or password is empty
+    if (!username.trim()) {
+      setEmptyUsernameError(true);
+    }
+    if (!password.trim()) {
+      setEmptyPasswordError(true);
+    }
+  
+    if (!username.trim() || !password.trim()) {
       if (!username) setUsernameError(true);
       if (!password) setPasswordError(true);
       return;
     }
-
+  
     try {
       // Sign-in flow
       const result = await signIn.create({ identifier: username, password });
@@ -67,15 +118,25 @@ const LoginPage: React.FC = () => {
         error &&
         typeof error === "object" &&
         "errors" in error &&
-        Array.isArray((error as { errors: unknown[] }).errors)
+        Array.isArray(error.errors)
       ) {
-        ((error as { errors: { code: string }[] }).errors).forEach((err) => {
+        const firstError = error.errors[0];
+        // Check if the error indicates single session mode
+        if (firstError.longMessage && firstError.longMessage.includes("You're currently in single session mode")) {
+          console.log("Single session mode error encountered. Signing out and retrying sign in...");
+          await signOut();
+          setHasSignedOut(true);
+          // Retry sign in seamlessly
+          return handleSignIn();
+        }
+        // Process other errors
+        error.errors.forEach((err: { code: string }) => {
           if (err.code === 'form_identifier_not_found') setUsernameError(true);
           if (err.code === 'form_password_incorrect') setPasswordError(true);
         });
       }
     }
-  };
+  };  
 
   // handler function to show the forgot password module
   const handleForgotPassword = () => {
@@ -84,30 +145,87 @@ const LoginPage: React.FC = () => {
   };
 
   // handler function to send a code for resetting a password
-  const handleSendCode = () => {
-    setShowTypeEmail(false);
-    setShowTypeCode(true);
+  const handleSendCode = async () => {
+    setErrorMsg('\u00A0')
+    try {  
+      console.log(email);
+      const response = await signIn
+        ?.create({
+          strategy: 'reset_password_email_code',
+          identifier: email,
+        })
+      console.log("Response:", response);
+      setShowTypeEmail(false);
+      setShowTypeCode(true);
+    } catch (error : unknown) { 
+      setErrorMsg("No account found with that email.")
+      if (error instanceof Error) {
+        console.log("Error:", error.message);
+      }
+    }
   };
 
-  // Removed handleSubmitCode as it was not used
-
   // handler function to resend the code for resetting a password
-  const handleResendCode = () => {
-    setShowTypeCode(false);
-    setShowTypeResentCode(true);
+  const handleResendCode = async () => {
+    setErrorMsg('\u00A0');
+    setConfirmationMsg('');
+
+    try {
+      console.log("Resending code to:", email);
+      await signIn
+        ?.create({
+          strategy: 'reset_password_email_code',
+          identifier: email,
+        });
+      setShowTypeCode(false);
+      setShowTypeResentCode(true);
+      setConfirmationMsg("A new reset code has been sent to your email.");
+    } catch (error : unknown) {
+      console.log("Error resending code:", error);
+      setErrorMsg("Error resending code. Please try again.");
+    }
   };
 
   // handler function to finish resetting a password
   const handleResetSubmit = () => {
+    if (!code.trim()) {
+      setErrorMsg("Reset code cannot be empty.");
+      return;
+    }
     setShowTypeCode(false);
     setShowTypeResentCode(false);
     setShowTypeNewPassword(true);
   };
 
-  // handler function to enter in the new password
-  const handleNewPassSubmit = () => {
-    setShowTypeNewPassword(false);
-    setShowResetSuccess(true);
+  // handler function to enter in the new password using the working approach
+  const handleNewPassSubmit = async () => {
+    setErrorMsg('\u00A0')
+    if (!code.trim()) {
+      setErrorMsg("Reset code cannot be empty.");
+      return;
+    }
+    try {
+      if (newPassword.trim() == confirmPassword.trim()) {
+        await signIn
+          ?.attemptFirstFactor({
+            strategy: 'reset_password_email_code',
+            code,
+            password: newPassword,
+          })
+        setShowTypeNewPassword(false);
+        setShowResetSuccess(true);
+      } else {
+        setErrorMsg("Passwords must match")
+      }
+    } catch (error : unknown) {
+      switch (error.errors[0].code) {
+        case 'form_password_pwned':
+          setErrorMsg("Password too weak")
+          break
+        default:
+          setErrorMsg(error.errors[0].longMessage)
+      }
+    }
   };
 
   // handler function that redirects to WelcomeBack
@@ -138,11 +256,11 @@ const LoginPage: React.FC = () => {
             <div className="py-5">
               <div className="flex justify-between text-l align-bottom">
                 <label className="block mb-2 text-2xl text-white">Username</label>
-                {usernameError && (
-                  <div style={{ color: '#ff8585' }} className="flexalign-bottom">
-                    Username not found
-                  </div>
-                )}
+                {emptyUsernameError ? (
+                    <div className="text-[#ff8585]">Username cannot be empty</div>
+                ) : usernameError ? (
+                    <div className="text-[#ff8585]">Username not found</div>
+                ) : null}
               </div>
               <input
                 type="text"
@@ -158,11 +276,11 @@ const LoginPage: React.FC = () => {
             <div className="pt-5">
               <div className="flex justify-between text-l align-bottom">
                 <label className="block mb-2 text-2xl text-white">Password</label>
-                {passwordError && (
-                  <div style={{ color: '#ff8585' }} className="flexalign-bottom">
-                    Incorrect Password
-                  </div>
-                )}
+                {emptyPasswordError ? (
+                    <div className="text-[#ff8585]">Password cannot be empty</div>
+                ) : passwordError ? (
+                    <div className="text-[#ff8585]">Incorrect password</div>
+                ) : null}
               </div>
               <input
                 id="password"
@@ -174,44 +292,11 @@ const LoginPage: React.FC = () => {
               />
 
               {/* Show / Hide Password */}
-              <div className="flex w-full justify-end mt-[-35px] pr-[10px] cursor-pointer">
+              <div className="flex w-full justify-end mt-[-34px] pr-[10px] cursor-pointer">
                 {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="white"
-                    className="size-6"
-                    onClick={() => setShowPassword(false)}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
+                  <FiEye className="w-5 h-5 text-white" onClick={() => setShowPassword(false)} />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="white"
-                    className="size-6"
-                    onClick={() => setShowPassword(true)}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
-                    />
-                  </svg>
+                  <FiEyeOff className="w-5 h-5 text-white" onClick={() => setShowPassword(true)} />
                 )}
               </div>
             </div>
@@ -225,7 +310,10 @@ const LoginPage: React.FC = () => {
           
             {/* Sign In Button */}
             <div className="mt-[35px]">
-              <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleSignIn}>
+              <Button 
+                className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" 
+                onClick={handleSignIn}
+              >
                 Sign In
               </Button>
             </div>
@@ -247,17 +335,18 @@ const LoginPage: React.FC = () => {
               <div className="text-5xl text-white py-8">Reset Password</div>
               {/* Text */}
               <div className="py-5">
-                <label className="block mb-2 text-2xl text-white"> Please enter your email address so </label>
-                <label className="block mb-2 text-2xl text-white"> we can send you a reset code. </label>
+                <label className="block mb-2 text-xl text-white"> Please enter your email address so </label>
+                <label className="block mb-2 text-xl text-white"> we can send you a reset code. </label>
               </div>
               {/* Email Input */}
               <div className="pt-5">
                 <label className="block mb-2 text-2xl text-white">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   id="password-reset"
-                  className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                  className="w-full bg-gray bg-opacity-30 text-white border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                   placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />    
               </div>
@@ -266,154 +355,184 @@ const LoginPage: React.FC = () => {
                 <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleSendCode}>
                   Send Code
                 </Button>
+                <div className="text-[#ff8585] mt-10px">{errorMsg}</div>
               </div>
+              <Button 
+                className="absolute text-neutral-300 text-lg font-crimson normal-case"
+                onClick={handleGoBack}
+              >
+                <IoMdArrowRoundBack /> Back
+              </Button>
             </div>
           </div>
         ) : null}
 
         {/* SHOW SEND CODE MODULE */}
         {showTypeCode ? (
-          <div>
-            <div className="flex w-full h-full col-span-2 justify-center items-center py-5">
-              <Image
-                src={headerLogo}
-                width={125}
-                height={125}
-                alt="header logo"
-                className="absolute top-0 left-0 pt-[30px] pl-5"
-              />
-              <div>
-                {/* Title */}
-                <div className="text-5xl text-white py-8">Reset Password</div>
-                {/* Text */}
-                <div className="py-5">
-                  <label className="block mb-2 text-2xl text-white"> A code has been sent to your email, please</label>
-                  <label className="block mb-2 text-2xl text-white"> check and put in the code below.</label>
-                </div>
-                {/* Reset Code Input */}
-                <div className="pt-5">
-                  <label className="block mb-2 text-2xl text-white">Reset Code</label>
-                  <input
-                    type="text"
-                    id="reset-code"
-                    className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
-                    placeholder="Reset Code"
-                    required
-                  />    
-                </div>
-                {/* Resend Buttons */}
-                <div className="mt-[10px] mb-5">
-                  <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case" onClick={handleResendCode}>
-                    Didn’t receive a code?
-                  </Button>
-                  <Button className="left-0 font-crimson text-neutral-300 ml-[-6px] normal-case font-bold" onClick={handleResendCode}>
+          <div className="flex w-full h-full col-span-2 justify-center items-center py-5">
+            <Image
+              src={headerLogo}
+              width={125}
+              height={125}
+              alt="header logo"
+              className="absolute top-0 left-0 pt-[30px] pl-5"
+            />
+            <div>
+              {/* Title */}
+              <div className="text-5xl text-white py-8">Reset Password</div>
+              {/* Text */}
+              <div className="py-5">
+                <label className="block mb-2 text-xl text-white"> A code has been sent to your email, please</label>
+                <label className="block mb-2 text-xl text-white"> check and put in the code below.</label>
+              </div>
+              {/* Reset Code Input */}
+              <div className="pt-5">
+                <label className="block mb-2 text-2xl text-white">Reset Code</label>
+                <input
+                  type="text"
+                  id="reset-code"
+                  className="w-full bg-gray bg-opacity-30 border-2 text-white rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                  placeholder="Reset Code"
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />    
+              </div>
+              {/* Resend Buttons */}
+              <div className="mt-[10px] mb-5">
+                <div className="left-0 text-neutral-300 ml-[6px] normal-case" onClick={handleResendCode}>
+                  Didn&apos;t receive a code?
+                  <Button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                     Resend Code
                   </Button>
                 </div>
-                {/* Submit Button */}
-                <div className="pt-5">
-                  <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
-                    Submit
-                  </Button>
-                </div>
               </div>
-            </div>
-          </div>
-        ) : null}
-
-        {/* SHOW RESET PASSWORD MODULE */}
-        {showTypeResentCode ? (
-          <div>
-            <div className="flex w-full h-full col-span-2 justify-center items-center py-5">
-              <Image
-                src={headerLogo}
-                width={125}
-                height={125}
-                alt="header logo"
-                className="absolute top-0 left-0 pt-[30px] pl-5"
-              />
-              <div>
-                {/* Reset password prompt */}
-                <div className="text-5xl text-white py-8">Reset Password</div>
-                {/* Text */}
-                <div className="py-5">
-                  <label className="block mb-2 text-2xl text-white"> A new code has been sent to your email,</label>
-                  <label className="block mb-2 text-2xl text-white"> please check and put in the code below.</label>
-                </div>
-                {/* Reset Code Input */}
-                <div className="pt-5">
-                  <label className="block mb-2 text-2xl text-white">Reset Code</label>
-                  <input
-                    type="text"
-                    id="reset-code"
-                    className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
-                    placeholder="Reset Code"
-                    required
-                  />    
-                </div>
-                <div className="mt-[10px] mb-5">
-                  <Button className="left-0 text-neutral-300 ml-[-10px] font-crimson normal-case" onClick={handleResendCode}>
-                    Didn’t receive a code?
-                  </Button>
-                  <Button className="left-0 text-neutral-300 ml-[-10px] normal-case font-crimson font-bold" onClick={handleResendCode}>
-                    Resend Code
-                  </Button>
-                </div>
-                {/* Submit Button */}
-                <div className="pt-5">
-                  <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
-                    Submit
-                  </Button>
-                </div>
+              {/* Submit Button */}
+              <div className="pt-5">
+                <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
+                  Submit
+                </Button>
               </div>
-            </div>
-          </div>
-        ) : null}
-
-        {showTypeNewPassword ? (
-          <div>
-            {/* Reset Password prompt */}
-            <div className="text-5xl text-white py-8">Reset Password</div>
-            {/* new password input */}
-            <div className="py-5">
-              <label className="block mb-2 text-2xl text-white">New Password</label>
-              <input
-                type="text"
-                id="username"
-                className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
-                placeholder="Username"
-                required
-              />
-            </div>
-            {/* confirm new password Input */}
-            <div className="pt-5">
-              <label className="block mb-2 text-2xl text-white">Confirm New Password</label>
-              <input
-                id="password"
-                type="text"
-                className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
-                placeholder="Password"
-                required
-              />    
-            </div>
-            {/* submit new password button */}
-            <div className="mt-[35px]">
-              <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleNewPassSubmit}>
-                Submit
+              <Button 
+                className="absolute text-neutral-300 text-lg font-crimson normal-case"
+                onClick={handleGoBack}
+              >
+                <IoMdArrowRoundBack /> Back
               </Button>
             </div>
           </div>
         ) : null}
 
-        {/* SHOW RESET SUCCESS */}
+        {/* SHOW RESENT CODE MODULE */}
+        {showTypeResentCode ? (
+          <div className="flex w-full h-full col-span-2 justify-center items-center py-5">
+            <Image
+              src={headerLogo}
+              width={125}
+              height={125}
+              alt="header logo"
+              className="absolute top-0 left-0 pt-[30px] pl-5"
+            />
+            <div>
+              {/* Reset password prompt */}
+              <div className="text-5xl text-white py-8">Reset Password</div>
+              {/* Text */}
+              <div className="py-5">
+                <label className="block mb-2 text-xl text-white"> A new code has been sent to your email,</label>
+                <label className="block mb-2 text-xl text-white"> please check and put in the code below.</label>
+              </div>
+              {/* Reset Code Input */}
+              <div className="pt-5">
+                <label className="block mb-2 text-2xl text-white">Reset Code</label>
+                <input
+                  type="text"
+                  id="reset-code"
+                  className="w-full bg-gray bg-opacity-30 border-2 text-white rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                  placeholder="Reset Code"
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />    
+              </div>
+              {/* Resend Buttons */}
+              <div className="mt-[10px] mb-5">
+                <div className="left-0 text-neutral-300 ml-[6px] normal-case" onClick={handleResendCode}>
+                  Didn&apos;t receive a code?
+                  <Button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
+                    Resend Code
+                  </Button>
+                </div>
+                {confirmationMsg && (
+                    <div className="text-[#85ff85] mt-2 ml-[6px]">{confirmationMsg}</div>
+                )}
+              </div>
+              {/* Submit Button */}
+              <div className="pt-5">
+                <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
+                  Submit
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* SHOW NEW PASSWORD MODULE */}
+        {showTypeNewPassword ? (
+          <div className="size-auto">
+            <div className="text-5xl text-white py-8">Reset Password</div>
+            {/* New Password Field */}
+            <div className="py-5 relative">
+              <label className="block mb-2 text-2xl text-white">New Password</label>
+              <input
+                type={showNewPasswordVisible ? "text" : "password"}
+                id="new-password"
+                className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                placeholder="New Password"
+                required
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pt-9 cursor-pointer">
+                {showNewPasswordVisible ? (
+                  <FiEye className="w-5 h-5 text-white" onClick={() => setShowNewPasswordVisible(false)} />
+                ) : (
+                  <FiEyeOff className="w-5 h-5 text-white" onClick={() => setShowNewPasswordVisible(true)} />
+                )}
+              </div>
+            </div>
+            {/* Confirm New Password Field */}
+            <div className="pt-5 relative">
+              <label className="block mb-2 text-2xl text-white">Confirm New Password</label>
+              <input
+                id="confirm-password"
+                type={showConfirmPasswordVisible ? "text" : "password"}
+                className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                placeholder="Confirm New Password"
+                required
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />    
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pt-14 cursor-pointer">
+                {showConfirmPasswordVisible ? (
+                  <FiEye className="w-5 h-5 text-white" onClick={() => setShowConfirmPasswordVisible(false)} />
+                ) : (
+                  <FiEyeOff className="w-5 h-5 text-white" onClick={() => setShowConfirmPasswordVisible(true)} />
+                )}
+              </div>
+            </div>
+            <div className="mt-[35px]">
+              <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleNewPassSubmit}>
+                Submit
+              </Button>
+              <div className="text-[#ff8585] w-full mt-2">{errorMsg}</div>
+            </div>
+          </div>
+        ) : null}
+
         {showResetSuccess ? (
           <div>
             {/* Reset password title */}
             <div className="text-5xl text-white py-8">Reset Password</div>
             {/* Text */}
             <div className="py-5">
-              <label className="block mb-2 text-2xl text-white">Your password has been successfully reset!</label>
-              <label className="block mb-2 text-2xl text-white">Return to login page to enter your account.</label>
+              <label className="block mb-2 text-xl text-white">Your password has been successfully reset!</label>
+              <label className="block mb-2 text-xl text-white">Return to login page to enter your account.</label>
             </div>
             {/* Login Button */}
             <div className="pt-5">
