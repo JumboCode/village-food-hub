@@ -139,6 +139,11 @@ const InternalViewDemographicsPage: React.FC = () => {
     setShowModal(false)
   };
 
+  const handleDelete = () => {
+    // TODO I don't know what to do :)
+    console.log("in handle delete")
+  }
+
   // States and logic for the storage modal remain unchanged
   const [showStorageModal, setShowStorageModal] = useState(false);
   const [showStorageCancel, setShowStorageCancel] = useState(false);
@@ -261,7 +266,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                           <div>
                             <button
                               className="flex items-center text-white bg-red hover:bg-dark-red font-serif w-[100px] h-[40px] rounded-[8px] border-[1px] text-[20px] justify-center"
-                              onClick={() => console.log("just pressed delete")}
+                              onClick={() => handleDelete()}
                             >
                               Delete
                             </button>
