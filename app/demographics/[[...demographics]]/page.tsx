@@ -6,10 +6,10 @@ import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal";
 import ProgressBar from "@app/components/ProgressBar";
-import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
-// import deleteIcon from '@app/images/delete.png';
-// import crossIcon from '@app/images/cross-svgrepo-com.svg';
+caimport deleteIcon from '@app/images/delete.png';
+import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
+import { MdDeleteOutline } from "react-icons/md";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -201,16 +201,17 @@ const InternalViewDemographicsPage: React.FC = () => {
                       <div className="flex flex-col space-y-1">
                         <p className="text-[16px] text-black">Want to clean up space?</p>
                         <div className="bg-[#B3B3B3] h-[1px]" />
-                          <div className="flex flex-row">
-                            <p className="text-[16px] text-black w-3/4">Demographics data</p>
-                              <MdDeleteOutline
-                                size={18}
-                                onClick={() => {
-                                  fetchNeonData();
-                                  setShowStorageCancel(true);
-                                }}
-                                className="py-0.5"
-                              />
+                        <div className="flex flex-row">
+                          <p className="text-[16px] text-black w-3/4">Demographics data</p>
+                          <MdDeleteOutline
+                              size={24}
+                              className="cursor-pointer"
+                              onClick={() => {
+                                console.log("in here");
+                                fetchNeonData();
+                                setShowStorageCancel(true);
+                              }}
+                          />
                         </div>
                         <div className="bg-[#B3B3B3] h-[1px]" />
                         <p className="text-[16px] text-black">Inventory Data</p>

@@ -3,8 +3,7 @@ import ProfileView from "@app/components/ProfileView";
 import React, { useState } from "react";
 import NavBar from "@app/components/NavBar";
 import Image from 'next/image';
-import deleteIcon from '@app/images/deleteIcon.svg';
-import pencilIcon from '@app/images/pencil.svg';
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import { useUser } from '@clerk/nextjs';
 
 const MyProfilePage: React.FC = () => {
@@ -101,22 +100,17 @@ const MyProfilePage: React.FC = () => {
                         <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
                                 onClick={handleEditProfileView}
                         > 
-                            <Image
-                                src={pencilIcon}
-                                alt="pencil button"
-                                className="mr-5"
-                                width={24}
-                                height={24}
+                            <MdOutlineEdit
+                                size={24}
+                                className="cursor-pointer mr-3"
                             />
                             Edit Profile
                         </button>
                         <button className="bg-red hover:bg-red text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] flex items-center justify-center">
-                            <Image
-                                src={deleteIcon}
-                                alt="search button"
-                                className="mr-2 ml-1"
-                                width={29}
-                                height={29}
+                            <MdDeleteOutline
+                                size={24}
+                                // TOOD: onClick
+                                className="cursor-pointer mr-3"
                             />
                             Delete Account
                         </button>

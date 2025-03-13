@@ -7,9 +7,7 @@ import { NameDropdown } from '@app/components/Dropdowns';
 import NavBar from '@app/components/NavBar';
 import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
 import UnitBoxes from '@app/components/UnitBoxes';
-import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
-// import deleteIcon from '@app/images/delete.png';
-// import editIcon from '@app/images/edit.png';
+import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 
@@ -356,27 +354,17 @@ const Categories: React.FC = () => {
                 </div>
                 {showTable && (
                   <>
-                    {/* <Image
-                      src={deleteIcon}
-                      width={18}
-                      height={18}
-                      alt="delete Icon"
-                      className="m-4 ml-6 mt-2 cursor-pointer"
-                      onClick={() =>
-                        openModal(
-                          String(selectedCategory),
-                          String(selectedCategoryData[0]?.[0] || "")
-                        )
-                      }
-                    /> */}
-                      <MdDeleteOutline
-                          size={18}
-                          onClick={() => openModal(
+                  <div className="flex items-center pl-4 space-x-4">
+                    <MdDeleteOutline
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          openModal(
                             String(selectedCategory),
                             String(selectedCategoryData[0]?.[0] || "")
-                          )}
-                          className="m-4 ml-6 mt-2 cursor-pointer"
-                      />
+                          )
+                        }
+                    />
                     {showModal && (
                       <DeleteCategoryModal
                         categoryName={String(selectedCategory)}
@@ -385,22 +373,14 @@ const Categories: React.FC = () => {
                         handleDelete={handleDelete}
                       />
                     )}
-                    <button onClick={editButtonClicked}>
-                      {/* <Image
-                        src={editIcon}
-                        width={18}
-                        height={18}
-                        alt="edit Icon"
-                        className="m-2 mb-3.5"
-                      /> */}
-                      <MdOutlineEdit
-                          size={18}
-                          // onClick={() => openEditModal(item[0], item[1], item[3], item[5])} 
-                          className="m-2 mb-3.5 cursor-pointer"
-                      />
-                    </button>
-                  </>
-                )}
+                    <MdOutlineEdit
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={editButtonClicked}
+                    />
+                  </div>
+                </>
+              )}
               </div>
               <div className="flex justify-end w-full">
                 {showTable && (

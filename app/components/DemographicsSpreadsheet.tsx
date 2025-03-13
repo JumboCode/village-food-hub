@@ -1,7 +1,6 @@
 "use client"
 import React, {useState, useEffect} from "react";
 import Image from 'next/image';
-import deleteIcon from '@app/images/delete.png';
 import DeleteDemographicsModal from "@app/components/DeleteDemographicsModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdDeleteOutline } from "react-icons/md";
