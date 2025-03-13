@@ -509,7 +509,7 @@ const HouseholdSize: React.FC<{
   );
 };
 
-// -------------------- CustomerDonor --------------------
+// -------------------- CustomerDonor -------------------- //
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
   const [translations, setTranslations] = useState([
     "We have a demographic survey that is optional.",
@@ -728,9 +728,7 @@ const DemographicsSurvey: React.FC = () => {
   const redirectDonor = (fillSurvey: boolean) => {
     if (fillSurvey) {
       setCurrentStep('phoneNum');
-    } else {
-      router.push('/unsaved-thank-you');
-    }
+    } 
   };
 
   const [nextDisabled, setNextDisabled] = useState(true);
