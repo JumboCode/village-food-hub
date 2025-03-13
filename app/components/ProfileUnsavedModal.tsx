@@ -19,12 +19,12 @@ const ProfileUnsavedModal: React.FC<ProfileUnsavedModalProps> = ({ closeUnsavedM
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div
-        className="h-[245px] w-[412px] bg-modal-gray font-crimson
+        className="h-[280px] w-[430px] bg-modal-gray font-crimson
                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                    pt-2 shadow-lg rounded-lg"
       >
         <div className="flex flex-col">
-          <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">Are you sure you want to leave without saving?</p>
+          <p className="flex justify-center text-[32px] crimson-semibold text-center leading-[1.4] p-6">Are you sure you want to leave without saving?</p>
           <p className="flex justify-center text-[24px] crimson-semibold text-[#EB2B0C] text-center">
             Your profile changes will not be saved!
           </p>
