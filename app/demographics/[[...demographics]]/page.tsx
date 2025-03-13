@@ -6,7 +6,6 @@ import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal";
 import ProgressBar from "@app/components/ProgressBar";
-caimport deleteIcon from '@app/images/delete.png';
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
