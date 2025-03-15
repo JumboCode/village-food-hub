@@ -37,18 +37,24 @@ const MyProfilePage: React.FC = () => {
         }
 
         const handleNavItemClicked = (e: Event) => {
-            // get dispatched event from NavBar
             const customEvent = e as CustomEvent;
             const destPage = customEvent.detail.intendedPage;
-
-            // if there are unsaved changes, and a NavBar item is clicked, show modal
+          
             if (unsavedChanges) { 
                 setDestinationPage(destPage);
                 setShowUnsavedModal(true);
+                window.preventNavigation = true; // Block navigation until confirmed
             } else {
+                window.preventNavigation = false; // Allow navigation
                 router.push(destPage);
             }
-        }
+        };
+
+        const confirmNavigation = () => {
+            setShowUnsavedModal(false);
+            window.preventNavigation = false;
+            router.push(destinationPage);
+        };
 
         document.addEventListener("demographicsClicked", handleNavItemClicked);
         document.addEventListener("inventoryClicked", handleNavItemClicked);

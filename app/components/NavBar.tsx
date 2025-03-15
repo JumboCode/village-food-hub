@@ -76,41 +76,20 @@ export default function NavBar() {
     }
   };
 
-  const handleDemographics = () => {
-    const event = new CustomEvent("demographicsClicked", {
-      detail: { intendedPage: "/demographics" }
-    });
+  const handleNavigation = (eventName, path) => {
+    // Dispatch event for external logic (like unsaved changes modal)
+    const event = new CustomEvent(eventName, { detail: { intendedPage: path } });
     document.dispatchEvent(event);
-    console.log("demographics dispatch sent");
-    // router.push("/demographics");
+  
+    // Wait briefly to check if an external listener is blocking the navigation
+    setTimeout(() => {
+      if (!window.preventNavigation) {
+        router.push(path);
+      } else {
+        console.log(`Navigation to ${path} was blocked due to unsaved changes.`);
+      }
+    }, 100);
   };  
-
-  const handleInventory = () => {
-    const event = new CustomEvent("inventoryClicked", {
-      detail: {intendedPage: "/inventory"}
-    });
-    document.dispatchEvent(event);
-    console.log("inventory dispatch sent");
-    //router.push("/inventory");
-  };
-
-  const handleCategories = () => {
-    const event = new CustomEvent("categoriesClicked", {
-      detail: {intendedPage: "/categories"}
-    });
-    console.log("categories dispatch sent");
-    document.dispatchEvent(event);
-    //router.push("/categories");
-  };
-
-  const handleManageUsers = () => {
-    const event = new CustomEvent("manageUsersClicked", {
-      detail: {intendedPage: "/manage-users"}
-    });
-    console.log("manage-users dispatch sent");
-    document.dispatchEvent(event);
-    // router.push("/manage-users");
-  };
 
   const handleMyProfile = () => {
     router.push("/my-profile");
@@ -123,7 +102,7 @@ export default function NavBar() {
   return (
     <>
       {!isLoaded ? (
-        <p className="text-white text-xl text-center p-4">Loading...</p>
+        <div className="text-white text-xl text-center p-4">Loading...</div>
       ) : (
         <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
           {/* Logo Section */}
@@ -139,7 +118,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => handleDemographics()}
+              onClick={() => handleNavigation("demographicsClicked", "/demographics")}
             >
               Demographics
             </button>
@@ -149,7 +128,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => handleInventory()}
+              onClick={() => handleNavigation("inventoryClicked", "/inventory")}
             >
               Inventory
             </button>
@@ -159,7 +138,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => handleCategories()}
+              onClick={() => handleNavigation("categoriesClicked", "/categories")}
             >
               Categories
             </button>
@@ -202,7 +181,7 @@ export default function NavBar() {
                     {isAdmin && (
                       <li
                         className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                        onClick={() => handleManageUsers()}
+                        onClick={() => handleNavigation("manageUsersClicked", "/manage-users")}
                       >
                         <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
                         Manage Users
@@ -210,7 +189,7 @@ export default function NavBar() {
                     )}
                     <li
                       className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={handleSignOut}
+                      onClick={() => handleNavigation("signOutClicked", "/login")}
                     >
                       <Image src={icon} alt="icon" width={24} height={24} className="mr-2" />
                       Sign Out
