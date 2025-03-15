@@ -39,7 +39,7 @@ const MyProfilePage: React.FC = () => {
         const handleNavItemClicked = (e: Event) => {
             // get dispatched event from NavBar
             const customEvent = e as CustomEvent;
-            let destPage = customEvent.detail.intendedPage;
+            const destPage = customEvent.detail.intendedPage;
 
             // if there are unsaved changes, and a NavBar item is clicked, show modal
             if (unsavedChanges) { 
