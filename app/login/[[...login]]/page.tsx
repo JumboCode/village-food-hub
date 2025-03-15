@@ -111,6 +111,11 @@ const LoginPage: React.FC = () => {
       if (!password) setPasswordError(true);
       return;
     }
+
+    if (username.includes('@')) {
+        setUsernameError(true);
+        return;
+    }
   
     try {
       // Sign-in flow
