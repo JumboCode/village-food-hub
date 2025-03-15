@@ -728,7 +728,9 @@ const DemographicsSurvey: React.FC = () => {
   const redirectDonor = (fillSurvey: boolean) => {
     if (fillSurvey) {
       setCurrentStep('phoneNum');
-    } 
+    } else {
+      router.push('/unsaved-thank-you');
+    }
   };
 
   const [nextDisabled, setNextDisabled] = useState(true);
