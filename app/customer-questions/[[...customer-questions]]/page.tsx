@@ -509,7 +509,7 @@ const HouseholdSize: React.FC<{
   );
 };
 
-// -------------------- CustomerDonor --------------------
+// -------------------- CustomerDonor -------------------- //
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
   const [translations, setTranslations] = useState([
     "We have a demographic survey that is optional.",
@@ -886,7 +886,7 @@ const DemographicsSurvey: React.FC = () => {
       console.error("Error: Phone number is required.");
       return;
     }
-    const currentDate = new Date();
+    let currentDate = new Date();
     const recordData = {
       phoneNumber: responses.phoneNumber,
       takeCount: responses.receive ? 1 : 0,
@@ -933,6 +933,7 @@ const DemographicsSurvey: React.FC = () => {
         if (!createResponse.ok) {
           throw new Error(`Failed to create record: ${await createResponse.text()}`);
         }
+        const data = createResponse.json()
         console.log("Record created successfully.");
       }
       setCurrentStep("confirmation");
