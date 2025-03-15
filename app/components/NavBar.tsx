@@ -41,18 +41,84 @@ export default function NavBar() {
   console.log("User:", user?.firstName, user?.lastName);
 
   const handleSignOut = async () => {
+    // Dispatch a custom event for external unsaved changes modal handling
+    const event = new CustomEvent("signOutClicked", {
+      detail: { intendedAction: "signOut" },
+    });
+    document.dispatchEvent(event);
+    console.log("signOut dispatch sent");
+
+    // Wait for confirmation from an external event listener
+    const confirmation = await new Promise((resolve) => {
+      const handleConfirm = (e) => {
+        document.removeEventListener("signOutConfirmed", handleConfirm);
+        resolve(e.detail?.confirmed);
+      };
+      document.addEventListener("signOutConfirmed", handleConfirm);
+    });
+
+    if (!confirmation) {
+      console.log("Sign out cancelled due to unsaved changes.");
+      return;
+    }
+
+    // Proceed with sign out
     try {
       await signOut();
       console.log("Sign out successful");
 
-      setLoggedInUser(""); 
+      setLoggedInUser("");
       setIsAdmin(false);
-      
+
       router.push("/login");
     } catch (error) {
       console.error("Error during sign-out:", error);
     }
   };
+
+  const handleDemographics = () => {
+    const event = new CustomEvent("demographicsClicked", {
+      detail: { intendedPage: "/demographics" }
+    });
+    document.dispatchEvent(event);
+    console.log("demographics dispatch sent");
+    // router.push("/demographics");
+  };  
+
+  const handleInventory = () => {
+    const event = new CustomEvent("inventoryClicked", {
+      detail: {intendedPage: "/inventory"}
+    });
+    document.dispatchEvent(event);
+    console.log("inventory dispatch sent");
+    //router.push("/inventory");
+  };
+
+  const handleCategories = () => {
+    const event = new CustomEvent("categoriesClicked", {
+      detail: {intendedPage: "/categories"}
+    });
+    console.log("categories dispatch sent");
+    document.dispatchEvent(event);
+    //router.push("/categories");
+  };
+
+  const handleManageUsers = () => {
+    const event = new CustomEvent("manageUsersClicked", {
+      detail: {intendedPage: "/manage-users"}
+    });
+    console.log("manage-users dispatch sent");
+    document.dispatchEvent(event);
+    // router.push("/manage-users");
+  };
+
+  const handleMyProfile = () => {
+    router.push("/my-profile");
+  };
+
+  useEffect(() => {
+    setCurrentPath(window.location.pathname);
+  }, []);
 
   return (
     <>
@@ -73,7 +139,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => router.push("/demographics")}
+              onClick={() => handleDemographics()}
             >
               Demographics
             </button>
@@ -83,7 +149,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => router.push("/inventory")}
+              onClick={() => handleInventory()}
             >
               Inventory
             </button>
@@ -93,7 +159,7 @@ export default function NavBar() {
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
               }`}
-              onClick={() => router.push("/categories")}
+              onClick={() => handleCategories()}
             >
               Categories
             </button>
@@ -128,7 +194,7 @@ export default function NavBar() {
                   <ul>
                     <li
                       className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={() => router.push("/my-profile")}
+                      onClick={() => handleMyProfile()}
                     >
                       <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
                       My Profile
@@ -136,7 +202,7 @@ export default function NavBar() {
                     {isAdmin && (
                       <li
                         className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                        onClick={() => router.push("/manage-users")}
+                        onClick={() => handleManageUsers()}
                       >
                         <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
                         Manage Users
