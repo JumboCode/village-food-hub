@@ -13,6 +13,12 @@ import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 // Clerk
 import { useClerk, useUser } from "@clerk/nextjs";
 
+declare global {
+  interface Window {
+    preventNavigation?: boolean;
+  }
+}
+  
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState("");
@@ -49,13 +55,15 @@ export default function NavBar() {
     console.log("signOut dispatch sent");
 
     // Wait for confirmation from an external event listener
-    const confirmation = await new Promise((resolve) => {
-      const handleConfirm = (e) => {
+    const confirmation = await new Promise<boolean>((resolve) => {
+      const handleConfirm = (event: Event) => {
+        const customEvent = event as CustomEvent<{ confirmed: boolean }>;
         document.removeEventListener("signOutConfirmed", handleConfirm);
-        resolve(e.detail?.confirmed);
+        resolve(customEvent.detail?.confirmed ?? false);
       };
+    
       document.addEventListener("signOutConfirmed", handleConfirm);
-    });
+    });    
 
     if (!confirmation) {
       console.log("Sign out cancelled due to unsaved changes.");
@@ -76,14 +84,12 @@ export default function NavBar() {
     }
   };
 
-  const handleNavigation = (eventName, path) => {
-    // Dispatch event for external logic (like unsaved changes modal)
+  const handleNavigation = (eventName: string, path: string) => {
     const event = new CustomEvent(eventName, { detail: { intendedPage: path } });
     document.dispatchEvent(event);
   
-    // Wait briefly to check if an external listener is blocking the navigation
     setTimeout(() => {
-      if (!window.preventNavigation) {
+      if (!("preventNavigation" in window) || !window.preventNavigation) {
         router.push(path);
       } else {
         console.log(`Navigation to ${path} was blocked due to unsaved changes.`);

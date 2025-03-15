@@ -91,6 +91,12 @@ const LoginPage: React.FC = () => {
     setEmptyPasswordError(false);
     setIsLoggingIn(true);
 
+    if (!signIn) {
+      console.error("signIn is undefined. Clerk may not be initialized yet.");
+      setIsLoggingIn(false);
+      return;
+    }
+
     // Check if username or password is empty
     if (!username.trim()) {
       setEmptyUsernameError(true);
@@ -238,15 +244,27 @@ const LoginPage: React.FC = () => {
       } else {
         setErrorMsg("Passwords must match")
       }
-    } catch (error : unknown) {
-      switch (error.errors[0].code) {
-        case 'form_password_pwned':
-          setErrorMsg("Password too weak")
-          break
-        default:
-          setErrorMsg(error.errors[0].longMessage)
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "errors" in error &&
+        Array.isArray((error as { errors?: unknown }).errors)
+      ) {
+        const firstError = (error as { errors: { code: string; longMessage?: string }[] }).errors[0];
+    
+        switch (firstError.code) {
+          case "form_password_pwned":
+            setErrorMsg("Password too weak");
+            break;
+          default:
+            setErrorMsg(firstError.longMessage || "An error occurred. Please try again.");
+        }
+      } else {
+        console.error("Unexpected error format:", error);
+        setErrorMsg("An unexpected error occurred.");
       }
-    }
+    }    
   };
 
   // handler function that redirects to WelcomeBack
