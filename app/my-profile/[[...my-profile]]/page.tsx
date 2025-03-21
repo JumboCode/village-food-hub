@@ -6,7 +6,6 @@ import Image from 'next/image';
 import deleteIcon from '@app/images/deleteIcon.svg';
 import pencilIcon from '@app/images/pencil.svg';
 import { useUser, useClerk, } from '@clerk/nextjs';
-import { clerkClient } from '@clerk/nextjs/server-cli-only';
 
 const MyProfilePage: React.FC = () => {
     const [showEditProfileView, setShowEditProfileView] = useState(false);
@@ -92,15 +91,9 @@ const MyProfilePage: React.FC = () => {
                         setShowDeleteFail(true);
                         setShowDeleteSuccess(false);
                         setShowDeleteModal(false);
-                    } else {
-                        // delete here! likely use user.id
-                        const { signOut } = useClerk();
-                        const client = await clerkClient();
-                        const response = await client.users.deleteUser(user?.id || "");
                         
-                        setShowDeleteFail(false);
-                        setShowDeleteSuccess(true);
-                        setShowDeleteModal(false);
+                    } else {
+                        deleteUser(user?.id || "");
                     }
                 } else {
                     console.error("Failed to update user data");
@@ -111,6 +104,45 @@ const MyProfilePage: React.FC = () => {
             console.error("Error updating user data:", error);
         }
     }
+
+    const deleteUser = async (id: String) => {
+        try {
+            if (!id && id !== "") {
+                console.error("No id provided for deletion");
+                return;
+            }
+    
+            // Send DELETE request to backend
+            const response = await fetch("/api/users", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id })
+            });
+    
+            const result = await response.json();
+            console.log("Delete Response:", result);
+    
+            if (response.ok) {
+                console.log("User deleted successfully:", result);
+                
+                const { signOut } = useClerk();
+                signOut({ redirectUrl: '/' });
+
+                setShowDeleteSuccess(true);
+                setShowDeleteFail(false);
+                setShowDeleteModal(false);
+                
+            } else {
+                console.error("Error deleting user:", result.error);
+                setShowDeleteFail(true);
+                setShowDeleteSuccess(false);
+                setShowDeleteModal(false);
+
+            }
+        } catch (error) {
+            console.error("User deletion failed:", error);
+        }
+    };     
     
     return (
         <div>

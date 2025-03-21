@@ -112,3 +112,16 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+// export async function DELETE(req: NextRequest) {
+//   try {
+
+//   } catch (error) {
+//     console.error("Error deleting user:", error);
+//     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+//   }
+// }
+
+
+// const client = await clerkClient();
+// const response = await client.users.deleteUser(user?.id || "");
