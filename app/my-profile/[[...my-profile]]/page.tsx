@@ -74,27 +74,27 @@ const MyProfilePage: React.FC = () => {
         try {
             await fetch("/api/users", {
                 method: "GET"
-            })
+            })  
             .then(async (response) => {
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(data)
+                    // // for (i = 0; i < data.data.length;)
+                    // let adminCount = 0;
+                    // data.data.forEach((user: any) => {
+                    //     if (user.publicMetadata.role === "Admin") { adminCount = adminCount + 1; }
+                    // })
+                    // console.log("count: " + adminCount)
 
-                    // for (i = 0; i < data.data.length;)
-                    let adminCount = 0;
-                    data.data.forEach((user: any) => {
-                        if (user.publicMetadata.role === "Admin") { adminCount = adminCount + 1; }
-                    })
-                    console.log("count: " + adminCount)
-
-                    console.log(user?.username)
-                    if (user?.username === "customer" || user?.username === "volunteer" || adminCount === 1) {
-                        setShowDeleteFail(true);
-                        setShowDeleteSuccess(false);
-                        setShowDeleteModal(false);
+                    // console.log(user?.username)
+                    // if (user?.username === "customer" || user?.username === "volunteer" || adminCount === 1) {
+                    //     setShowDeleteFail(true);
+                    //     setShowDeleteSuccess(false);
+                    //     setShowDeleteModal(false);
                         
-                    } else {
-                        deleteUser(user?.id || "");
-                    }
+                    // } else {
+                    //     deleteUser(user?.id || "");
+                    // }
                 } else {
                     console.error("Failed to update user data");
                 }
