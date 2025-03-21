@@ -5,7 +5,8 @@ import NavBar from "@app/components/NavBar";
 import Image from 'next/image';
 import deleteIcon from '@app/images/deleteIcon.svg';
 import pencilIcon from '@app/images/pencil.svg';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk, } from '@clerk/nextjs';
+import { clerkClient } from '@clerk/nextjs/server-cli-only';
 
 const MyProfilePage: React.FC = () => {
     const [showEditProfileView, setShowEditProfileView] = useState(false);
@@ -93,9 +94,10 @@ const MyProfilePage: React.FC = () => {
                         setShowDeleteModal(false);
                     } else {
                         // delete here! likely use user.id
-
+                        const { signOut } = useClerk();
                         const client = await clerkClient();
-                        const response = await clerkClient.users.deleteUser(userId)
+                        const response = await client.users.deleteUser(user?.id || "");
+                        
                         setShowDeleteFail(false);
                         setShowDeleteSuccess(true);
                         setShowDeleteModal(false);
