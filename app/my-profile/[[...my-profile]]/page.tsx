@@ -124,13 +124,14 @@ const MyProfilePage: React.FC = () => {
     
             if (response.ok) {
                 console.log("User deleted successfully:", result);
-                
-                const { signOut } = useClerk();
-                signOut({ redirectUrl: '/' });
 
                 setShowDeleteSuccess(true);
                 setShowDeleteFail(false);
                 setShowDeleteModal(false);
+                
+                setTimeout(() => {
+                    handleExit();
+                }, 10000);
                 
             } else {
                 console.error("Error deleting user:", result.error);
@@ -142,7 +143,12 @@ const MyProfilePage: React.FC = () => {
         } catch (error) {
             console.error("User deletion failed:", error);
         }
-    };     
+    };    
+    
+    const handleExit = () => {
+        const { signOut } = useClerk();
+        signOut({ redirectUrl: '/' });
+    }
     
     return (
         <div>
@@ -252,7 +258,7 @@ const MyProfilePage: React.FC = () => {
                         <div className="flex flex-row justify-center space-x-5 py-5 my-3">
                             <button 
                                 className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
-                                // onClick={() => handleRedirection(redirectPage)}
+                                onClick={() => handleExit()}
                             >
                                 Exit Now
                             </button>
