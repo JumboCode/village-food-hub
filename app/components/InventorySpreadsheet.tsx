@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from 'next/image';
-import deleteIcon from '@app/images/delete.png';
-import downloadIcon from "@app/images/download.png";
-import editIcon from "@app/images/edit.png";
-import arrowsIcon from "@app/images/upAndDownArrows.png";
+import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 import QuantityModal from "@app/components/QuantityModal";
 
@@ -33,14 +31,14 @@ function formatDate(date: string | Date): string {
 }
 
 export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inventoryItems = [] }) => {
-    const [showModal, setShowModal] = useState(false);
+    // State for quantity update modal
+    const [showQuantityModal, setShowQuantityModal] = useState(false); 
+    // State for delete modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // Shared item details
     const [itemName, setItemName] = useState<string | null>(null);
     const [units, setUnits] = useState<string | null>(null);
     const [currCategoryName, setCurrCategoryName] = useState<string | null>(null);
-
-
-    const [showQuantityModal, setShowQuantityModal] = useState(false); 
-
 
     const closeQuantityModal = (): void => {
         setShowQuantityModal(false);
@@ -56,28 +54,67 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setCurrCategoryName(category);
     };
 
-
-    
-    const handleClick = () => {
-        console.log('Button clicked');
-    };
-    
-    const openModal = (itemName: string, units: string) => {
-        setShowModal(true);
-        setItemName(itemName);
-        setUnits(units);
-    };
-
-    const closeModal = (): void => {
-        setShowModal(false);
+    const closeDeleteModal = (): void => {
+        setShowDeleteModal(false);
         setItemName(null);
         setUnits(null);
     };
+
+    const openDeleteModal = (item: (string | number)[]) => {
+        // Assuming column 0 is the item name and column 3 is the units
+        setShowDeleteModal(true);
+        setItemName(String(item[0]));
+        setUnits(String(item[3]));
+    };
+
+    const [sortedItems, setSortedItems] = useState<(string | number)[][]>(inventoryItems);
+    const [topSorted, setTopSorted] = useState(true);
+    const [quantityAscending, setQuantityAscending] = useState(true);
+    const [DateAscending, setDateAscending] = useState(false);
+
+    useEffect(() => {
+        setSortedItems([...inventoryItems]);
+    }, [inventoryItems]);
+
+    const sortAlphabetically = () => {
+        const sortedList = [...sortedItems].sort((a, b) =>
+            topSorted 
+                ? a[0].toString().localeCompare(b[0].toString()) 
+                : b[0].toString().localeCompare(a[0].toString())
+        );
     
+        setSortedItems(sortedList);
+        setTopSorted(!topSorted);
+    };
+
+    const sortQuantity = () => {
+        const sortedList = [...sortedItems].sort((a, b) =>
+            quantityAscending 
+                ? Number(b[2]) - Number(a[2]) 
+                : Number(a[2]) - Number(b[2])
+        );
+        setSortedItems(sortedList);
+        setQuantityAscending(!quantityAscending);
+    };
+
+    const sortDate = () => {
+        const sortedList = [...sortedItems].sort((a, b) => {
+            const dateA = new Date(a[4]); 
+            const dateB = new Date(b[4]);
+    
+            return DateAscending 
+                ? dateB.getTime() - dateA.getTime() 
+                : dateA.getTime() - dateB.getTime();
+        });
+        
+        setSortedItems(sortedList);
+        setDateAscending(!DateAscending); 
+    };
+
     const refreshPage = () => {
         window.location.reload();
     };
-    
+
     const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: number, categoryName: string) => {
         if (!itemName || !units) return;
 
@@ -87,7 +124,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             quantity: Number(quantityChange),
             units,
             lastUpdated: new Date(),
-        }
+        };
         try {
             const response = await fetch("/../api/inventory", {
                 method: "PUT",
@@ -97,7 +134,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 body: JSON.stringify({
                     ...updatedData,
                     quantity: quantityChange,
-                  }),
+                }),
             });
             if (!response.ok) {
                 throw new Error("Error updating inventory data.");
@@ -109,33 +146,33 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         } catch (error) {
             console.log(error);
             closeQuantityModal();
-
         }
     };
 
     const handleDelete = async () => {
-        if (!itemName || !units) return;
-        const deleteItem = { itemName, units };
-
-        try {
-            const response = await fetch("/../api/inventory", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ data: deleteItem }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Error fetching inventory data.");
-            }
-            refreshPage();
-            console.log("Deleted successfully!");
-            closeModal();
-        } catch (error) {
-            console.error(error);
-        }
-    };
+      if (!itemName || !units) return;
+  
+      try {
+          const response = await fetch("/api/inventory", {
+              method: "DELETE",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ itemName, units }),
+          });
+  
+          if (!response.ok) {
+              const errorMessage = await response.json();
+              throw new Error(`Error deleting inventory: ${errorMessage.message}`);
+          }
+  
+          console.log(`Deleted inventory item: ${itemName} (${units})`);
+          closeDeleteModal();
+          refreshPage();
+      } catch (error) {
+          console.error("Inventory delete failed:", error);
+      }
+    };      
 
     const downloadCSV = (item: (string | number)[]) => {
         console.log(item);
@@ -156,7 +193,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
         const headers = ["date", "quantity-change", "action-of-change"];
         const rows = [
-            headers.join(","), 
+            headers.join(","),
             ...historyRecords.map((record: InventoryHistoryRecord) =>
                 [
                     formatDate(record.date),
@@ -178,134 +215,119 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
     return (
         <div className="relative overflow-x-auto crimson-regular font-crimson">
-            <table className="table-auto w-full">
-                <thead className="font-crimson border- crimson-regular border-separate content-start">
-                    <tr className="bg-dark-blue text-white text-lg align-left ">
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Item Name</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Category</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Quantity</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                            <div className="flex flex-row justify-between">
-                                <p>Units</p>
-                                <Image
-                                    src={arrowsIcon}
-                                    width={15}
-                                    height={15}
-                                    alt="arrows Icon"
-                                    className=""
-                                />
-                            </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Last Updated</th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-                    {inventoryItems.map((item, index) => (
-                        <tr key={index} className="py-2">
-                            {item.map((data, subIndex) => (
-                                <td
-                                    key={subIndex}
-                                    className={`border-collapse border-zinc-200 border-2 py-2 px-3 ${subIndex === item.length - 1 ? 'hidden' : ''}`}
-                                >
-                                    {data}
-                                </td>
-                            ))}
-                            <td
-                                key={`actions-${index}`}
-                                className="flex row justify-around border-collapse border-zinc-300 border-2 border-y-1 py-2 px-3"
-                            >
-                                <Image
-                                    src={editIcon}
-                                    width={18}
-                                    height={18}
-                                    alt="edit Icon"
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                        openQuantityModal(
-                                            String(inventoryItems[index][0]),
-                                            String(inventoryItems[index][3]), 
-                                            String(inventoryItems[index][1]), 
-                                        )
-                                    }
-                                />
-                                <Image
-                                    src={deleteIcon}
-                                    width={18}
-                                    height={18}
-                                    alt="delete Icon"
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                        openModal(
-                                            String(inventoryItems[index][0]),
-                                            String(inventoryItems[index][3]), 
-                                        )
-                                    }
-                                />
-                                {showModal && (
-                                    <DeleteInventoryModal
-                                        itemName={String(itemName)}
-                                        units={String(units)}
-                                        closeModal={closeModal}
-                                        handleDelete={handleDelete}
-                                    />
-                                )}
-                                {showQuantityModal && (
-                                    <QuantityModal
-                                        itemName={(String(itemName))}
-                                        units={(String(units))}
-                                        closeModal={closeQuantityModal}
-                                        handleUpdate={handleUpdateQuantity}
-                                        categoryName={String(currCategoryName)}
-                                    />
-                                )}
-                                <button onClick={() => downloadCSV(item)}>
-                                    <Image
-                                        src={downloadIcon}
-                                        width={18}
-                                        height={18}
-                                        alt="download Icon"
-                                        className=""
-                                    />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+          <table className="table-auto w-full">
+            <thead className="font-crimson border-crimson-regular border-separate content-start">
+              <tr className="bg-dark-blue text-white text-lg align-left">
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Item Name</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Category</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Quantity</p>
+                    <button onClick={sortQuantity}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Units</p>
+                    <button onClick={sortAlphabetically}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Last Updated</p>
+                    <button onClick={sortDate}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson">
+              {sortedItems.map((item, index) => (
+                <tr key={index} className="py-2">
+                  {item.map((data, subIndex) => (
+                    <td
+                      key={subIndex}
+                      className={`border-collapse border-zinc-200 border-2 px-3 ${
+                        subIndex === item.length - 1 ? "hidden" : ""
+                      }`}
+                    >
+                      {data}
+                    </td>
+                  ))}
+                  <td className="border-collapse border-zinc-200 border-2 border-y-1 text-center">
+                    <span className="inline-flex justify-center gap-6">
+                      {/* Edit Icon: Opens the QuantityModal */}
+                      <MdOutlineEdit
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          openQuantityModal(
+                            String(sortedItems[index][0]),
+                            String(sortedItems[index][3]),
+                            String(sortedItems[index][1])
+                          )
+                        }
+                      />
+
+                      {/* Delete Icon: Opens the DeleteInventoryModal */}
+                      <MdDeleteOutline
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() => openDeleteModal(sortedItems[index])}
+                      />
+
+                      {/* Quantity Modal */}
+                      {showQuantityModal && (
+                          <QuantityModal
+                              itemName={String(itemName)}
+                              units={String(units)}
+                              closeModal={closeQuantityModal}
+                              handleUpdate={handleUpdateQuantity}
+                              categoryName={String(currCategoryName)}
+                          />
+                      )}
+                      <MdOutlineFileDownload
+                          size={24}
+                          className="cursor-pointer"
+                          onClick={() => downloadCSV(item)}
+                      />
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Delete Inventory Modal */}
+          {showDeleteModal && (
+              <DeleteInventoryModal
+                itemName={String(itemName)}
+                units={String(units)}
+                closeModal={closeDeleteModal}
+                handleDelete={handleDelete}
+              />
+          )}
         </div>
     );
 };

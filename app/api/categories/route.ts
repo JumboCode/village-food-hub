@@ -35,18 +35,20 @@ async function updateCategory(data: {
   return await prisma.categories.update({
     where: {
       itemName_name: {
-        itemName: data.oldItemName, // locate record using the original item name
+        itemName: data.oldItemName, // use old value to locate record
         name: data.name,
       },
     },
     data: {
-      itemName: data.itemName, // update to new value
+      itemName: data.itemName,       // update to new value
       units: data.units,
     },
   });
 }
 
 async function deleteCategory(data: { itemName: string; name: string }) {
+  // Basic delete for a specific category/item pair.
+  console.log("deleteCategory called with:", data);
   const { itemName, name } = data;
   return await prisma.categories.delete({
     where: {
@@ -54,6 +56,24 @@ async function deleteCategory(data: { itemName: string; name: string }) {
         itemName: itemName,
         name: name,
       },
+    },
+  });
+}
+
+async function deleteInventoryItemsByCategoryName(name: string) {
+  console.log("Deleting all records for category:", name);
+
+  // First, delete related inventory items
+  await prisma.inventory.deleteMany({
+    where: {
+      categoryName: name,
+    },
+  });
+
+  // Then delete the category itself
+  return await prisma.categories.deleteMany({
+    where: {
+      name: name,
     },
   });
 }
@@ -99,63 +119,116 @@ export async function PUT(req: NextRequest) {
     const data = await req.json();
     console.log("Received data in API:", data);
 
-    // Validate required keys using our flexible validCategory function and ensure oldItemName is present.
     if (!validCategory(data) || !data.oldItemName) {
       console.log("Invalid category data:", data);
-      return NextResponse.json(
-        { response: "Invalid data format" },
-        { status: 400 }
-      );
+      return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
     }
 
+    const { oldItemName, itemName, name, units, oldCategoryName, newCategoryName } = data;
+
+    // Step 1: Update category
     const updatedCategory = await updateCategory({
-      oldItemName: data.oldItemName,
-      itemName: data.itemName,
-      name: data.name,
-      units: data.units,
+      oldItemName,
+      itemName,
+      name,
+      units,
     });
 
-    // (Optional) Update inventory records here if needed.
+    // Step 2: Update inventory records if the category name changes
+    if (oldCategoryName && newCategoryName && oldCategoryName !== newCategoryName) {
+      console.log(`Updating inventory items from category "${oldCategoryName}" to "${newCategoryName}"`);
+      
+      await prisma.inventory.updateMany({
+        where: { categoryName: oldCategoryName },
+        data: { categoryName: newCategoryName },
+      });
+    }
 
-    return NextResponse.json(updatedCategory, { status: 200 });
-  } catch (error) {
-    console.log(error);
+    // Step 3: Update inventory records if units are changed
+    const existingInventoryItems = await prisma.inventory.findMany({
+      where: { itemName: oldItemName },
+    });
+
+    for (const inventoryItem of existingInventoryItems) {
+      const updatedUnits = units.includes(inventoryItem.units) ? inventoryItem.units : units[0];
+
+      await prisma.inventory.updateMany({
+        where: { itemName: oldItemName, units: inventoryItem.units },
+        data: { itemName, units: updatedUnits },
+      });
+    }
+
     return NextResponse.json(
-      { response: "Failed to update entry" },
-      { status: 500 }
+      { response: "Category and inventory items updated successfully", updatedCategory },
+      { status: 200 }
     );
+  } catch (error) {
+    console.log("Error in PUT:", error);
+    return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
   }
 }
 
 // DELETE
+// This version supports two scenarios:
+// 1. If data.itemName exists and is non-empty, delete that specific record.
+// 2. Otherwise, delete all records for the given category name.
 export async function DELETE(req: NextRequest) {
   try {
-    const data = await req.json();
-    if (!("itemName" in data)) {
-      return NextResponse.json(
-        { response: "Missing item name" },
-        { status: 400 }
-      );
-    }
-    if (!("name" in data)) {
-      return NextResponse.json(
-        { response: "Missing name" },
-        { status: 400 }
-      );
+    const parsed = await req.json();
+    const data = parsed.data ?? parsed;
+
+    console.log("DELETE payload received:", data);
+
+    if (!data.name || typeof data.name !== "string") {
+      console.log("Error: Missing category name in DELETE request.");
+      return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
-    const item = await deleteCategory({
-      itemName: data.itemName,
-      name: data.name,
-    });
-    return NextResponse.json(item, { status: 200 });
+    if (data.itemName && typeof data.itemName === "string" && data.itemName.trim() !== "") {
+      // Case 1: Delete a specific category/item pair
+      console.log("Deleting specific category/item pair:", data);
+      const item = await deleteCategory({
+        itemName: data.itemName,
+        name: data.name,
+      });
+
+      // 🚀 Delete inventory items associated with this category item
+      await prisma.inventory.deleteMany({
+        where: {
+          itemName: data.itemName,
+          categoryName: data.name,
+        },
+      });
+
+      return NextResponse.json({ response: "Item deleted successfully", data: item }, { status: 200 });
+    } else {
+      // Case 2: Delete all records for the given category name + related inventory items
+      console.log("Deleting all records for category:", data.name);
+      
+      // Step 1: Find all inventory items that belong to this category
+      const inventoryItems = await prisma.inventory.findMany({
+        where: { categoryName: data.name },
+      });
+
+      // Step 2: Delete inventory items associated with this category
+      await prisma.inventory.deleteMany({
+        where: { categoryName: data.name },
+      });
+
+      // Step 3: Delete categories
+      const result = await deleteInventoryItemsByCategoryName(data.name);
+
+      return NextResponse.json({
+        response: "Category and related items deleted successfully",
+        deletedInventoryItems: inventoryItems,
+        data: result
+      }, { status: 200 });
+    }
   } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      { response: "Failed to delete record" },
-      { status: 500 }
-    );
-  }
+    console.error("Error in DELETE:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ response: "Failed to delete record", error: errorMessage }, { status: 500 });
+  }  
 }
 
 interface CategoryRecord {
@@ -172,28 +245,3 @@ function validCategory(record: CategoryRecord): boolean {
     typeof record.name === "string"
   );
 }
-
-// function validCategory(record : CategoryRecord): boolean {
-
-//     try {
-//         const fields = new Set<string>([
-//             "itemName",
-//             "units",
-//             "name",
-//           ]);
-        
-//         const keys = Object.keys(record)
-//         if (keys.length !== fields.size) return false
-
-//         let fieldsMatch = true
-//         keys.forEach( (field: string) => {
-//             if (!fields.has(field)) fieldsMatch = false
-//             fields.delete(field)
-//         })        
-//         return fieldsMatch
-        
-//     } catch (error) {
-//         console.log(error)
-//         return false
-//     }
-// }

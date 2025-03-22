@@ -20,6 +20,7 @@ function isClerkError(error: unknown): error is ClerkError {
  * Expects a username to be provided as a query parameter.
  */
 export async function GET(req: NextRequest) {
+  // Await the client instance from clerkClient
   const client = await clerkClient();
   const searchParams = req.nextUrl.searchParams;
   const username = searchParams.get('username');
@@ -36,11 +37,23 @@ export async function GET(req: NextRequest) {
   queryFilters.limit = 500;
 
   try {
+    // Use the resolved client instance to get the user list
     const users = await client.users.getUserList(queryFilters);
     return NextResponse.json(users);
   } catch {
     return new NextResponse('Error: User not found', { status: 404 });
   }
+}
+
+interface ClerkUser {
+  firstName: string,
+  lastName: string,
+  username: string,
+  emailAddress: string,
+  pronouns: string,
+  role: string,
+  phoneNumber: string,
+  password: string
 }
 
 /* 
@@ -49,27 +62,43 @@ export async function GET(req: NextRequest) {
  * firstName, lastName, pronouns, role, emailAddress & phoneNumber.
  */
 export async function POST(req: NextRequest) {
-  const client = await clerkClient();
   try {
+    const client = await clerkClient();
+    if (!client || !client.users) {
+      console.error("Clerk Client is not initialized properly.");
+      return NextResponse.json(
+        { error: "Clerk Client is unavailable. Ensure Clerk is properly configured." },
+        { status: 500 }
+      );
+    }
+
+    // Parse request body
     const data = await req.json();
     console.log('Received data:', data);
 
-    // Check for all required fields
-    if (
-      !('username' in data &&
-        'password' in data &&
-        'firstName' in data &&
-        'lastName' in data &&
-        'pronouns' in data &&
-        'emailAddress' in data &&
-        'phoneNumber' in data &&
-        'role' in data)
-    ) {
-      return new NextResponse('Error: Missing required fields', { status: 400 });
+    // Ensure all required fields are provided
+    const requiredFields = ['username', 'password', 'firstName', 'lastName', 'pronouns', 'emailAddress', 'phoneNumber', 'role'];
+    for (const field of requiredFields) {
+      if (!data[field] || typeof data[field] !== 'string' || data[field].trim() === '') {
+        return NextResponse.json(
+          { error: `Missing or invalid field: ${field}` },
+          { status: 400 }
+        );
+      }
     }
 
-    // Create the user with Clerk API
-    const user = await client.users.createUser({
+    // Validate role
+    const validRoles = ['Admin', 'Staff', 'Volunteer', 'Customer'];
+    const role = data.role.charAt(0).toUpperCase() + data.role.substring(1);
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: `Invalid role. Must be one of: ${validRoles.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Create user data
+    const userData = {
       username: data.username,
       password: data.password,
       emailAddress: [data.emailAddress],
@@ -77,19 +106,27 @@ export async function POST(req: NextRequest) {
       lastName: data.lastName,
       publicMetadata: {
         pronouns: data.pronouns,
-        role: data.role,
+        role: role,
         phoneNumber: data.phoneNumber,
       },
-    });
+    };
 
-    return NextResponse.json(user);
+    console.log("Creating user in Clerk with:", userData);
+
+    // Create the user with Clerk API
+    const user = await client.users.createUser(userData);
+    return NextResponse.json({ message: 'User created successfully', user });
   } catch (error: unknown) {
-    console.error('Error creating user:', error);
+    console.error('Error creating user in Clerk:', error);
     let errorMessage = 'An unknown error occurred';
+
     if (isClerkError(error)) {
-      errorMessage = error.errors[0]?.longMessage || errorMessage;
+      errorMessage = error.errors.map(err => err.longMessage).join('; ') || errorMessage;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
     }
-    return new NextResponse('Error: ' + errorMessage, { status: 500 });
+
+    return NextResponse.json({ error: 'Error creating user', details: errorMessage }, { status: 500 });
   }
 }
 
@@ -113,15 +150,18 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// export async function DELETE(req: NextRequest) {
-//   try {
-
-//   } catch (error) {
-//     console.error("Error deleting user:", error);
-//     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-//   }
-// }
-
-
-// const client = await clerkClient();
-// const response = await client.users.deleteUser(user?.id || "");
+export async function DELETE(req: NextRequest) {
+  try {
+    const data = await req.json();
+    console.log('Received data:', data);
+    const id = data.id;
+    
+    const client = await clerkClient();
+    const user = await client.users.deleteUser(id);
+    return NextResponse.json({ message: 'User deleted successfully', user });
+    
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

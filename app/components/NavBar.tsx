@@ -1,80 +1,105 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import Image from 'next/image';
-import whiteOutlineLogo from '@app/images/headerLogo.png';
-import dropArrow from '@app/images/Vector.png';
-import initials from '@app/images/group2.png';
-import face from '@app/images/Frame6.png';
-import settings from '@app/images/Frame7.png';
-import icon from '@app/images/Frame8.png';
-import downArrow2 from '@app/images/downArrow.png';
-import { PrismaClient, Prisma } from '@prisma/client';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
+import Image from "next/image";
+import whiteOutlineLogo from "@app/images/headerLogo.png";
+import initials from "@app/images/group2.png";
+import face from "@app/images/Frame6.png";
+import settings from "@app/images/Frame7.png";
+import icon from "@app/images/Frame8.png";
+import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 
 // Clerk
-import { useClerk, useUser } from '@clerk/nextjs'
-//import { currentUser } from '@clerk/nextjs/server'
+import { useClerk, useUser } from "@clerk/nextjs";
 
+declare global {
+  interface Window {
+    preventNavigation?: boolean;
+  }
+}
+  
 export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  // const [loggedInUser, setLoggedInUser] = useState("");
+  const [currentPath, setCurrentPath] = useState("");
   const router = useRouter();
-  const { signOut } = useClerk()
+  const { signOut } = useClerk();
+  const { user, isLoaded } = useUser();
 
-  // const { isLoaded, session, isSignedIn } = useSession();
-  // console.log("session: ", session);
-
-  const { user } = useUser();
-  console.log("user: ", user);
-  if(user?.firstName && user.lastName && loggedInUser == "") {
-    setLoggedInUser(user?.firstName + " " + user?.lastName);
-    if(user.publicMetadata.role == "admin") {
-      setIsAdmin(true);
+  useEffect(() => {
+    if (isLoaded && user) {
+      setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
+      setIsAdmin(user.publicMetadata?.role === "Admin");
+    } else {
+      setLoggedInUser("");
+      setIsAdmin(false);
     }
-  }
+  }, [isLoaded, user]);
 
-  // useEffect(() => {
-  //   // (async () => {
-  //     try {
-  //       const { isLoaded, user } = useUser();
-  //       // let user : String = "";
-  //       //const user = await currentUser();
-  //       console.log("logged in user: ", user);
-  //       // setLoggedInUser(user);
-  //     } catch (err) {
-  //       console.log(err);
-  //   };
-  // }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentPath(window.location.pathname);
+    }
+  }, []);
+
+  console.log("User:", user?.firstName, user?.lastName);
 
   const handleSignOut = async () => {
-    signOut({ redirectUrl: '/' })
-    console.log("Sign out successful")
+    // Dispatch a custom event for external unsaved changes modal handling
+    const event = new CustomEvent("signOutClicked", {
+      detail: { intendedAction: "signOut" },
+    });
+    document.dispatchEvent(event);
+    console.log("signOut dispatch sent");
+
+    // Wait for confirmation from an external event listener
+    const confirmation = await new Promise<boolean>((resolve) => {
+      const handleConfirm = (event: Event) => {
+        const customEvent = event as CustomEvent<{ confirmed: boolean }>;
+        document.removeEventListener("signOutConfirmed", handleConfirm);
+        resolve(customEvent.detail?.confirmed ?? false);
+      };
+    
+      document.addEventListener("signOutConfirmed", handleConfirm);
+    });    
+
+    if (!confirmation) {
+      console.log("Sign out cancelled due to unsaved changes.");
+      return;
+    }
+
+    // Proceed with sign out
+    try {
+      await signOut();
+      console.log("Sign out successful");
+
+      setLoggedInUser("");
+      setIsAdmin(false);
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Error during sign-out:", error);
+    }
   };
 
-  const handleDemographics = () => {
-    router.push("/demographics");
-  };
-
-  const handleInventory = () => {
-    router.push("/inventory");
-  };
-
-  const handleCategories = () => {
-    router.push("/categories");
-  };
-
-  const handleManageUsers = () => {
-    router.push("/manage-users");
-  };
+  const handleNavigation = (eventName: string, path: string) => {
+    const event = new CustomEvent(eventName, { detail: { intendedPage: path } });
+    document.dispatchEvent(event);
   
+    setTimeout(() => {
+      if (!("preventNavigation" in window) || !window.preventNavigation) {
+        router.push(path);
+      } else {
+        console.log(`Navigation to ${path} was blocked due to unsaved changes.`);
+      }
+    }, 100);
+  };  
+
   const handleMyProfile = () => {
     router.push("/my-profile");
   };
-
-  const [currentPath, setCurrentPath] = useState("");
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
@@ -82,93 +107,106 @@ export default function NavBar() {
 
   return (
     <>
-      <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
-        {/* Logo Section */}
-        <div className="flex-shrink-0 mr-8">
-          <Image
-            src={whiteOutlineLogo}
-            alt="logo"
-            width={112}
-            height={91}
-          />
-        </div>
+      {!isLoaded ? (
+        <div className="text-white text-xl text-center p-4">Loading...</div>
+      ) : (
+        <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
+          {/* Logo Section */}
+          <div className="flex-shrink-0 mr-8">
+            <Image src={whiteOutlineLogo} alt="logo" width={112} height={91} />
+          </div>
 
-        {/* Navigation Links */}
-        <div className="flex space-x-10">
-          <button
-            className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${currentPath === '/demographics' ? 'bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30' : 'bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30'}`}
-            onClick={handleDemographics}
-          >
-            Demographics
-          </button>
-          <button
-            className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${currentPath === '/inventory' ? 'bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30' : 'bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30'}`}
-            onClick={handleInventory}
-          >
-            Inventory
-          </button>
-          <button
-            className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${currentPath === '/categories' ? 'bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30' : 'bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30'}`}
-            onClick={handleCategories}
-          >
-            Categories
-          </button>
-        </div>
-
-        <div className="absolute right-10 flex items-center space-x-4">
-          {/* User Initials */}
-          <Image
-            src={initials}
-            alt="initial_letters"
-            width={51}
-            height={51}
-            className="rounded-full"
-          />
-
-          {/* User Name and Dropdown */}
-          <div className="relative">
+          {/* Navigation Links */}
+          <div className="flex space-x-10">
             <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center text-[21px] font-crimson font-bold text-white"
+              className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${
+                currentPath === "/demographics"
+                  ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
+                  : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
+              }`}
+              onClick={() => handleNavigation("demographicsClicked", "/demographics")}
             >
-              {loggedInUser}
-              <Image
-                src={isDropdownOpen ? downArrow2 : dropArrow}
-                alt="drop-down-arrow"
-                width={isDropdownOpen ? 25 : 8.59}
-                height={isDropdownOpen ? 30 : 14.85}
-                className="ml-2"
-              />
+              Demographics
             </button>
-            {/* Dropdown Menu */}
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-7 bg-white rounded-md shadow-lg w-48 z-50">
-                <ul>
-                  <li className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={handleMyProfile}>
-                    <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
-                    My Profile
-                  </li>
-                  {isAdmin && (
-                  <li className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={handleManageUsers}
-                  >
-                    <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
-                    Manage Users
-                  </li>)}
-                  <li
-                    className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                    onClick={handleSignOut}
-                  >
-                    <Image src={icon} alt="icon" width={24} height={24} className="mr-2" />
-                    Sign Out
-                  </li>
-                </ul>
-              </div>
-            )}
+            <button
+              className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${
+                currentPath === "/inventory"
+                  ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
+                  : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
+              }`}
+              onClick={() => handleNavigation("inventoryClicked", "/inventory")}
+            >
+              Inventory
+            </button>
+            <button
+              className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${
+                currentPath === "/categories"
+                  ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
+                  : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
+              }`}
+              onClick={() => handleNavigation("categoriesClicked", "/categories")}
+            >
+              Categories
+            </button>
+          </div>
+
+          <div className="absolute right-10 flex items-center space-x-4">
+            {/* User Initials */}
+            <Image
+              src={initials}
+              alt="initial_letters"
+              width={51}
+              height={51}
+              className="rounded-full"
+            />
+
+            {/* User Name and Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center text-[21px] font-crimson font-bold text-white"
+              >
+                {loggedInUser}
+                {isDropdownOpen ? (
+                  <TiArrowSortedDown className="ml-2 transition-transform duration-300" />
+                ) : (
+                  <TiArrowSortedUp className="ml-2 transform rotate-90 scale-y-[-1] transition-transform duration-300 hover:rotate-0" />
+                )}
+              </button>
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-7 bg-white rounded-md shadow-lg w-48 z-50">
+                  <ul>
+                    <li
+                      className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                      onClick={() => handleMyProfile()}
+                    >
+                      <Image src={face} alt="logo" width={24} height={24} className="mr-2" />
+                      My Profile
+                    </li>
+                    {isAdmin && (
+                      <li
+                        className="flex items-center text-[21px] font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                        onClick={() => handleNavigation("manageUsersClicked", "/manage-users")}
+                      >
+                        <Image src={settings} alt="settings-logo" width={24} height={24} className="mr-2" />
+                        Manage Users
+                      </li>
+                    )}
+                    <li
+                      className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
+                      onClick={() => handleNavigation("signOutClicked", "/login")}
+                    >
+                      <Image src={icon} alt="icon" width={24} height={24} className="mr-2" />
+                      Sign Out
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

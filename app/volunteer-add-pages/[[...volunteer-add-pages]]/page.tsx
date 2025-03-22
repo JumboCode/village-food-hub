@@ -109,7 +109,7 @@ interface VolunteerAddDetailsModuleProps{
 }
 
 const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ itemToAdd, setItemToAdd, setNextDisabled }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(itemToAdd.categoryName || null);
 
   useEffect(() => {
     const { categoryName, itemName, quantity, units } = itemToAdd;
@@ -128,6 +128,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ i
             setSelectedCategory(selected);
             setItemToAdd({ ...itemToAdd, categoryName: selected });
           }}
+          defaultValue={itemToAdd.categoryName}
         />
       </div>
       <div className="font-bold text-[20px]">
@@ -141,6 +142,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ i
           }} 
           disabled={!selectedCategory} 
           filterValue={selectedCategory || ""}
+          defaultValue={itemToAdd.itemName}
         />
       </div>
       <div className="flex flex-row w-full justify-between">
@@ -167,6 +169,7 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ i
             }} 
             disabled={!itemToAdd.itemName} 
             filterValue={itemToAdd.itemName || ""}
+            defaultValue={itemToAdd.units}
           />
         </div>
       </div>
