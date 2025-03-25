@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@mui/material';
 import Image from 'next/image';
 import headerLogo from '@app/images/headerLogo.png';
 import irlPantry from '@app/images/irl_pantry.png';
@@ -20,11 +19,14 @@ const LoginPage: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginCompleted, setLoginCompleted] = useState(false);
 
-  useEffect(() => {
-    if (!isLoaded) return;
+  const [hasMounted, setHasMounted] = useState(false);
 
-    // If the user is already signed in and hasn't logged out, log them out first
-    if (isSignedIn && !hasLoggedOut && !loginCompleted) {
+  useEffect(() => {
+    if (!isLoaded || hasMounted || loginCompleted) return;
+
+    setHasMounted(true);
+
+    if (isSignedIn) {
       console.log("User is signed in on the login page, logging them out first...");
 
       signOut()
@@ -34,7 +36,8 @@ const LoginPage: React.FC = () => {
         })
         .catch(err => console.error("Error during sign-out:", err));
     }
-  }, [isSignedIn, signOut, isLoaded, hasLoggedOut, loginCompleted]);
+  }, [isLoaded, isSignedIn, hasMounted, loginCompleted, signOut]);
+
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -90,45 +93,39 @@ const LoginPage: React.FC = () => {
     setEmptyUsernameError(false);
     setEmptyPasswordError(false);
     setIsLoggingIn(true);
-
+  
     if (!signIn) {
       console.error("signIn is undefined. Clerk may not be initialized yet.");
       setIsLoggingIn(false);
       return;
     }
-
-    // Check if username or password is empty
-    if (!username.trim()) {
-      setEmptyUsernameError(true);
-    }
-    if (!password.trim()) {
-      setEmptyPasswordError(true);
-    }
+  
+    // Validate input
+    if (!username.trim()) setEmptyUsernameError(true);
+    if (!password.trim()) setEmptyPasswordError(true);
   
     if (!username.trim() || !password.trim()) {
       setIsLoggingIn(false);
-      if (!username) setUsernameError(true);
-      if (!password) setPasswordError(true);
       return;
     }
-
+  
     if (username.includes('@')) {
-        setUsernameError(true);
-        return;
+      setUsernameError(true);
+      setIsLoggingIn(false);
+      return;
     }
   
     try {
-      // Sign-in flow
       const result = await signIn.create({ identifier: username, password });
-      console.log(username);
+      console.log("Sign in successful");
+  
       if (result.status === "complete") {
-        console.log("Sign in successful");
         await setActive({ session: result.createdSessionId });
-
         console.log("Session is active, marking login as complete...");
         setLoginCompleted(true);
         setIsLoggingIn(false);
-
+  
+        // Navigate based on role/username
         setTimeout(() => {
           if (username === "customer") {
             router.push('/welcome-page');
@@ -139,30 +136,28 @@ const LoginPage: React.FC = () => {
           }
         }, 1000);
       } else {
-        console.log("Unexpected sign-in status. Please try again.");
+        console.warn("Unexpected sign-in status:", result.status);
         setIsLoggingIn(false);
       }
     } catch (error: unknown) {
-      console.log('Login error:', error);
+      console.error('Login error:', error);
       setIsLoggingIn(false);
-      
+  
       if (
         error &&
         typeof error === "object" &&
         "errors" in error &&
-        Array.isArray(error.errors)
+        Array.isArray((error as { errors?: unknown }).errors)
       ) {
-        const firstError = error.errors[0];
-        // Check if the error indicates single session mode
-        if (firstError.longMessage && firstError.longMessage.includes("You're currently in single session mode")) {
-          console.log("Single session mode error encountered. Signing out and retrying sign in...");
-          await signOut();
-          setHasLoggedOut(true);
-          // Retry sign in seamlessly
-          return handleSignIn();
+        const firstError = (error as { errors: { code: string; longMessage?: string }[] }).errors[0];
+  
+        if (firstError?.longMessage?.includes("You're currently in single session mode")) {
+          console.warn("Single session mode error. Please try again after sign out.");
+          return;
         }
-        // Process other errors
-        error.errors.forEach((err: { code: string }) => {
+  
+        // Specific error handling
+        (error as { errors: { code: string }[] }).errors.forEach((err) => {
           if (err.code === 'form_identifier_not_found') setUsernameError(true);
           if (err.code === 'form_password_incorrect') setPasswordError(true);
         });
@@ -347,19 +342,19 @@ const LoginPage: React.FC = () => {
 
             {/* Forgot Password Button */}
             <div className="mt-[10px] mb-5">
-              <Button className="font-crimson left-0 text-neutral-300 ml-[-6px] normal-case" onClick={handleForgotPassword}>
+              <button className="font-crimson left-0 text-neutral-300 ml-[6px] mt-2 normal-case" onClick={handleForgotPassword}>
                 Forgot Password?
-              </Button>
+              </button>
             </div>
           
             {/* Sign In Button */}
             <div className="mt-[35px]">
-              <Button 
-                className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" 
+              <button 
+                className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl py-2 rounded-md" 
                 onClick={handleSignIn}
               >
                 Sign In
-              </Button>
+              </button>
             </div>
           </div>
         ) : null}
@@ -396,17 +391,17 @@ const LoginPage: React.FC = () => {
               </div>
               {/* Send Code Button */}
               <div className="pt-5">
-                <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleSendCode}>
+                <button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl py-2 rounded-md" onClick={handleSendCode}>
                   Send Code
-                </Button>
+                </button>
                 <div className="text-[#ff8585] mt-10px">{errorMsg}</div>
               </div>
-              <Button 
-                className="absolute text-neutral-300 text-lg font-crimson normal-case"
+              <button 
+                className="absolute flex items-center gap-1 text-neutral-300 text-lg font-crimson normal-case"
                 onClick={handleGoBack}
               >
                 <IoMdArrowRoundBack /> Back
-              </Button>
+              </button>
             </div>
           </div>
         ) : null}
@@ -445,23 +440,23 @@ const LoginPage: React.FC = () => {
               <div className="mt-[10px] mb-5">
                 <div className="left-0 text-neutral-300 ml-[6px] normal-case" onClick={handleResendCode}>
                   Didn&apos;t receive a code?
-                  <Button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
+                  <button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                     Resend Code
-                  </Button>
+                  </button>
                 </div>
               </div>
-              {/* Submit Button */}
+              {/* Submit button */}
               <div className="pt-5">
-                <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
+                <button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl py-2 rounded-md mb-2" onClick={handleResetSubmit}>
                   Submit
-                </Button>
+                </button>
               </div>
-              <Button 
-                className="absolute text-neutral-300 text-lg font-crimson normal-case"
+              <button 
+                className="absolute flex items-center gap-1 text-neutral-300 text-lg font-crimson normal-case"
                 onClick={handleGoBack}
               >
                 <IoMdArrowRoundBack /> Back
-              </Button>
+              </button>
             </div>
           </div>
         ) : null}
@@ -500,19 +495,19 @@ const LoginPage: React.FC = () => {
               <div className="mt-[10px] mb-5">
                 <div className="left-0 text-neutral-300 ml-[6px] normal-case" onClick={handleResendCode}>
                   Didn&apos;t receive a code?
-                  <Button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
+                  <button className="left-0 text-[16px] text-neutral-300 ml-[6px] normal-case font-crimson font-bold" onClick={handleResendCode}>
                     Resend Code
-                  </Button>
+                  </button>
                 </div>
                 {confirmationMsg && (
                     <div className="text-[#85ff85] mt-2 ml-[6px]">{confirmationMsg}</div>
                 )}
               </div>
-              {/* Submit Button */}
+              {/* Submit button */}
               <div className="pt-5">
-                <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleResetSubmit}>
+                <button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl rounded-md py-2" onClick={handleResetSubmit}>
                   Submit
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -561,9 +556,9 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
             <div className="mt-[35px]">
-              <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleNewPassSubmit}>
+              <button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl rounded-md py-2" onClick={handleNewPassSubmit}>
                 Submit
-              </Button>
+              </button>
               <div className="text-[#ff8585] w-full mt-2">{errorMsg}</div>
             </div>
           </div>
@@ -580,9 +575,9 @@ const LoginPage: React.FC = () => {
             </div>
             {/* Login Button */}
             <div className="pt-5">
-              <Button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl" onClick={handleLogin}>
+              <button className="w-full normal-case font-crimson crimson-regular bg-light-green text-white text-xl rounded-md py-2" onClick={handleLogin}>
                 Log In
-              </Button>
+              </button>
             </div>
           </div>
         ) : null}

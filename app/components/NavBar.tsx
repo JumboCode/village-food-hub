@@ -151,15 +151,6 @@ export default function NavBar() {
           </div>
 
           <div className="absolute right-10 flex items-center space-x-4">
-            {/* User Initials */}
-            <Image
-              src={initials}
-              alt="initial_letters"
-              width={51}
-              height={51}
-              className="rounded-full"
-            />
-
             {/* User Name and Dropdown */}
             <div className="relative">
               <button
