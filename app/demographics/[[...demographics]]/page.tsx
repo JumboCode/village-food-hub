@@ -9,6 +9,7 @@ import ProgressBar from "@app/components/ProgressBar";
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
+import { $Enums } from "@prisma/client";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -139,10 +140,24 @@ const InternalViewDemographicsPage: React.FC = () => {
     setShowModal(false)
   };
 
-  const handleDelete = () => {
-    // TODO I don't know what to do :)
-    console.log("in handle delete")
-  }
+const handleDelete = async () => {
+    try {
+      for (const row of transformedDemographics) {
+        const phoneNumber = row[1];
+        const response = await fetch("../api/demographics", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber }),
+        });
+        if (!response.ok) {
+          console.error('Error Deleting Item, ${response.status}');
+        }
+      }
+      window.location.reload();
+    } catch (e) {
+      console.log("Error Deleting Category Items:", e);
+    }
+  };
 
   // States and logic for the storage modal remain unchanged
   const [showStorageModal, setShowStorageModal] = useState(false);
