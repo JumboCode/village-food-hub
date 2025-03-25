@@ -21,7 +21,6 @@ interface DemographicsRecord {
   donateCount: number;
   previousVisitDates: string[];
 }
-
 // A simple fetcher function for SWR
 const fetcher = (url: string) =>
   fetch(url).then((res) => {
@@ -32,7 +31,7 @@ const fetcher = (url: string) =>
 // Neon fetch function remains the same
 async function fetchNeonData() {
   try {
-    // setIsLoading(true);
+    //setIsLoading(true);
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
@@ -40,14 +39,22 @@ async function fetchNeonData() {
   } catch (error) {
     console.error("Error fetching Neon data:", error);
   } 
-  // finally {
-  //   setIsLoading(false);
-  // }
+   finally {
+     //setIsLoading(false);
+   }
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
   // Use SWR to fetch the raw demographics data
   const { data: demographicsRawData, error: demographicsError } = useSWR<DemographicsRecord[]>('/api/demographics', fetcher);
+
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    if (demographicsRawData) {
+      setIsLoading(false); // Set loading state to false when data is ready
+    }
+  }, [demographicsRawData]);
 
   // Transform raw data into the format expected by the spreadsheet:
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
@@ -67,7 +74,6 @@ const InternalViewDemographicsPage: React.FC = () => {
   // Local state for filtered data (based on search)
   const [filteredDemographics, setFilteredDemographics] = useState<string[][]>([]);
   const [searchInput, setSearchInput] = useState("");
-
   // Update filtered demographics when the search input or transformed data changes
   useEffect(() => {
     const filtered = transformedDemographics.filter((item) =>
@@ -149,7 +155,7 @@ const InternalViewDemographicsPage: React.FC = () => {
   const [checkedDelete, setCheckedDelete] = useState(false);
   const [storageUsed, setStorageUsed] = useState(0);
   const [storagePercent, setStoragePercent] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  
 
   // Function to get storage bytes and update state
   const getBytes = async () => {
@@ -166,6 +172,15 @@ const InternalViewDemographicsPage: React.FC = () => {
   useEffect(() => {
     getBytes();
   }, [demographicsRawData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        {/* Simple spinner using Tailwind classes */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2"></div>
+      </div>
+    );
+  }
 
   return (
     <div>

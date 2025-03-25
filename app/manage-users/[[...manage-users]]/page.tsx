@@ -177,9 +177,10 @@ const InternalViewManageUsersPage: React.FC = () => {
             {users ? (
               <ManageUsersSpreadsheet manageUsersItems={users} />
             ) : (
-              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-                Loading users…
-              </div>
+              <div className="flex justify-center items-center h-screen">
+        {/* Simple spinner using Tailwind classes */}
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2"></div>
+        </div>
             )}
           </div>
         </div>
