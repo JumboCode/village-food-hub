@@ -131,6 +131,7 @@ const WelcomePage: React.FC = () => {
                                 </div>
                             </button>
                             {dropdownOpen && (
+                                
                                 <div className="absolute top-[35px] text-black w-[200px] border-x-2 border-modal-gray rounded">
                                     <button className="h-[35px] w-full hover:bg-[#ebf9e9]" onClick={() => setLanguage('en')}>
                                         <p className="h-full w-full pt-[5px]">{translations[5]}</p>
