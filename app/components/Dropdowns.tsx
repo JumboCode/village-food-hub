@@ -27,7 +27,13 @@ export function NameDropdown({
 }: NameDropdownProps) {
   const [items, setItems] = useState<string[]>(options);
   const [selected, setSelected] = useState<string>(defaultValue || "");
- 
+
+  useEffect(() => {
+    if (defaultValue !== undefined) {
+      setSelected(defaultValue);
+    }
+  }, [defaultValue]);
+
   useEffect(() => {
     async function fetchItems() {
       if (!fetchUrl) return; // Prevents fetching if fetchUrl is not provided
