@@ -102,6 +102,7 @@ const MyProfilePage: React.FC = () => {
             setShowEditProfileView(false);
           } else {
             console.error("Failed to update user data");
+            setErrorMessage(result.error || "Failed to create user.");
           }
         } catch (error) {
           console.error("Error updating user data:", error);

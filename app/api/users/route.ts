@@ -117,11 +117,14 @@ export async function POST(req: NextRequest) {
     const user = await client.users.createUser(userData);
     return NextResponse.json({ message: 'User created successfully', user });
   } catch (error: unknown) {
-    console.error('Error creating user in Clerk:', error);
+    console.error('Error creating user in Clerk:', JSON.stringify(error, null, 2));
+
     let errorMessage = 'An unknown error occurred';
 
     if (isClerkError(error)) {
-      errorMessage = error.errors.map(err => err.longMessage).join('; ') || errorMessage;
+      console.error("Clerk error details:", error.errors);
+      const clerkMessage = error.errors[0]?.longMessage || "Unknown Clerk error.";
+      return NextResponse.json({ error: clerkMessage }, { status: 400 });
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
