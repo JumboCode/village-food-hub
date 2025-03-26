@@ -123,8 +123,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
             </div>
           )}
           <div className="flex justify-evenly font-crimson pt-4">
-            <button onClick={onReset} className="text-gray hover:text-black hover:bg-light-gray py-1.5 px-8 rounded-md text-[20px] border border-gray">Reset</button>
-            <button onClick={() => onApply(selectedCategories)} className="bg-light-green hover:bg-dark-green text-white px-8 py-1.5 rounded-md text-[20px]">Apply</button>
+            <button onClick={() => {
+                      onReset(); 
+                      onClose();
+                    }}  
+                    className="text-gray hover:text-black hover:bg-light-gray py-1.5 px-8 rounded-md text-[20px] border border-gray">Reset</button>
+            <button onClick={() => {
+                      onApply(selectedCategories); 
+                      onClose();
+                    }} 
+                    className="bg-light-green hover:bg-dark-green text-white px-8 py-1.5 rounded-md text-[20px]">Apply</button>
           </div>
         </div>
       </div>
