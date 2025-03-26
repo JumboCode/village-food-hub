@@ -40,14 +40,18 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setSortedItems([...categoryItems]);
   }, [categoryItems]);
 
-  const sortAlphabetically = () => {
+  const [sortColumn, setSortColumn] = useState<number>(0);
+
+  const sortAlphabetically = (columnIndex: number) => {
     const sortedList = [...sortedItems].sort((a, b) =>
       topSorted
-        ? a[0].toString().localeCompare(b[0].toString())
-        : b[0].toString().localeCompare(a[0].toString())
+        ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+        : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString())
     );
+
     setSortedItems(sortedList);
     setTopSorted(!topSorted);
+    setSortColumn(columnIndex);
   };
 
   // EDIT functionality
@@ -297,7 +301,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                 <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
                   {/* Sorting button */}
-                  <button onClick={() => sortAlphabetically()}>
+                  <button onClick={() => sortAlphabetically(0)}>
                     <TiArrowUnsorted />
                   </button>
                 </div>
@@ -305,7 +309,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               <th className="border-r-2 border-slate-400 py-2 px-3">
                 <div className="flex flex-row justify-between items-center">
                   <p>Units</p>
-                  <button onClick={() => sortAlphabetically()}>
+                  <button onClick={() => sortAlphabetically(1)}>
                     <TiArrowUnsorted />
                   </button>
                 </div>

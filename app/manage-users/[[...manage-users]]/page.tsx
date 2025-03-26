@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import NavBar from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
@@ -137,60 +137,27 @@ const InternalViewManageUsersPage: React.FC = () => {
   return (
     <div>
       <NavBar />
-      {showCreateProfileView ? (
-        <div>
-          <div className="p-[80px] pt-[50px]">
-            <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
-            <ProfileView 
-                visible={showCreateProfileView} 
-                mode="create" 
-                onCancel={handleCancelProfileView} 
-                profileData={profileData}
-                setProfileData={setProfileData}
-            />
-            <div className="text-red">{createUserError}</div>
-            <div>
-              <button 
-                className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
-                onClick={createUser}
-              >
-                Create
-              </button>
-              <button 
-                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
-                onClick={handleCancelProfileView}
-              >
-                Cancel
-              </button>
-            </div>
+      <div className="py-4 px-10">
+        <div className="flex flex-row justify-between mt-10 mb-6">
+          <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
+          <div className="flex flex-row">
+            <NewUserButton onClick={handleProfileView} />
           </div>
         </div>
-      ) : (
-        <div>
-          <div className="py-4 px-10">
-            <div className="flex flex-row justify-between mt-10 mb-6">
-              <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
-              <div className="flex flex-row">
-                <NewUserButton onClick={handleProfileView} />
-              </div>
-            </div>
-            {error && (
-              <div className="text-center text-red-600">
-                Error loading users.
-              </div>
-            )}
-            {users ? (
-              <ManageUsersSpreadsheet manageUsersItems={users} />
-            ) : (
-              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-                Loading users…
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+  
+        {showCreateProfileView ? (
+          <CreateProfileSection />
+        ) : error ? (
+          <div className="text-center text-red-600">Error loading users.</div>
+        ) : (
+          <ManageUsersSpreadsheet
+            manageUsersItems={users || []} // show empty until data is ready
+            isLoading={!users}
+          />
+        )}
+      </div>
     </div>
-  );
+  );  
 };
 
 export default InternalViewManageUsersPage;
