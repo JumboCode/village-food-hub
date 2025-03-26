@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@mui/material';
 import Image from 'next/image';
-import headerLogo from '@app/images/HeaderLogo 125x125.png';
+import headerLogo from '@app/images/non-blank headerLogo 125x125.png';
 import irlPantry from '@app/images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
 import { useSignIn, useAuth } from "@clerk/nextjs";
