@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import Image from "next/image";
 import whiteOutlineLogo from "@app/images/headerLogo.png";
-import initials from "@app/images/group2.png";
 import face from "@app/images/Frame6.png";
 import settings from "@app/images/Frame7.png";
 import icon from "@app/images/Frame8.png";
