@@ -2,13 +2,10 @@
 import ProfileView from "@app/components/ProfileView";
 import React, { useState, useEffect, useRef } from "react";
 import NavBar from "@app/components/NavBar";
-import Image from 'next/image';
-import deleteIcon from '@app/images/deleteIcon.svg';
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
-import { clerkClient } from '@clerk/nextjs/server';
 
 const MyProfilePage: React.FC = () => {
     const router = useRouter();
@@ -54,12 +51,6 @@ const MyProfilePage: React.FC = () => {
                 window.preventNavigation = false; // Allow navigation
                 router.push(destPage);
             }
-        };
-
-        const confirmNavigation = () => {
-            setShowUnsavedModal(false);
-            window.preventNavigation = false;
-            router.push(destinationPage);
         };
 
         document.addEventListener("demographicsClicked", handleNavItemClicked);
@@ -182,7 +173,7 @@ const MyProfilePage: React.FC = () => {
     }
 
     // function to call DELETE API
-    const deleteUser = async (id: String) => {
+    const deleteUser = async (id: string) => {
         try {
             // ensures id is a string
             if (!id && id !== "") {

@@ -46,15 +46,7 @@ async function fetchNeonData() {
 
 const InternalViewDemographicsPage: React.FC = () => {
   // Use SWR to fetch the raw demographics data
-  const { data: demographicsRawData, error: demographicsError } = useSWR<DemographicsRecord[]>('/api/demographics', fetcher);
-
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    if (demographicsRawData) {
-      setIsLoading(false); // Set loading state to false when data is ready
-    }
-  }, [demographicsRawData]);
+  const { data: demographicsRawData, error, isLoading } = useSWR('/api/demographics', fetcher);
 
   // Transform raw data into the format expected by the spreadsheet:
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
@@ -194,9 +186,8 @@ const handleDelete = async () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        {/* Simple spinner using Tailwind classes */}
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2"></div>
+      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
       </div>
     );
   }

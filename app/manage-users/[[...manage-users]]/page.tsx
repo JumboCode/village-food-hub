@@ -42,6 +42,7 @@ const fetchUsers = async (url: string): Promise<string[][]> => {
 const InternalViewManageUsersPage: React.FC = () => {
   // Use SWR to fetch users. SWR will cache and revalidate data automatically.
   const { data: users, error, mutate } = useSWR("/api/users", fetchUsers);
+  const isLoading = !users && !error;
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
@@ -118,7 +119,7 @@ const InternalViewManageUsersPage: React.FC = () => {
               password: ""
           });
 
-            await mutate();
+          await mutate(undefined, true);
         } else {
             setCreateUserError(data.error || "Error creating user");
         }
@@ -179,13 +180,14 @@ const InternalViewManageUsersPage: React.FC = () => {
                 Error loading users.
               </div>
             )}
-            {users ? (
-              <ManageUsersSpreadsheet manageUsersItems={users} />
+            {isLoading ? (
+              <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-600">Error loading users.</div>
             ) : (
-              <div className="flex justify-center items-center h-screen">
-        {/* Simple spinner using Tailwind classes */}
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2"></div>
-        </div>
+              <ManageUsersSpreadsheet manageUsersItems={users} />
             )}
           </div>
         </div>

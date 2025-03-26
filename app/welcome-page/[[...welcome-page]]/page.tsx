@@ -71,7 +71,7 @@ const WelcomePage: React.FC = () => {
         setLanguage(savedLanguage);
         translateText(savedLanguage);
         setLoading(false); 
-    }, []);
+    }, [translateText]);
 
     useEffect(() => {
         if (!loading) { 
@@ -79,7 +79,7 @@ const WelcomePage: React.FC = () => {
             translateText(language);
             setDropdownOpen(false);  
         }
-    }, [language, loading]);
+    }, [language, loading, translateText]);
 
     if (loading) {
         return null;

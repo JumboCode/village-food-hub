@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Image from 'next/image';
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
@@ -76,8 +75,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setSortedItems([...inventoryItems]);
     }, [inventoryItems]);
 
-    const [sortColumn, setSortColumn] = useState<number>(0);
-
     const sortAlphabetically = (columnIndex: number) => {
       const sortedList = [...sortedItems].sort((a, b) =>
         topSorted
@@ -87,7 +84,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
       setSortedItems(sortedList);
       setTopSorted(!topSorted);
-      setSortColumn(columnIndex);
     };
 
     const sortQuantity = () => {

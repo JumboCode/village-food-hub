@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
@@ -40,8 +39,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setSortedItems([...categoryItems]);
   }, [categoryItems]);
 
-  const [sortColumn, setSortColumn] = useState<number>(0);
-
   const sortAlphabetically = (columnIndex: number) => {
     const sortedList = [...sortedItems].sort((a, b) =>
       topSorted
@@ -51,7 +48,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
     setSortedItems(sortedList);
     setTopSorted(!topSorted);
-    setSortColumn(columnIndex);
   };
 
   // EDIT functionality
@@ -541,23 +537,23 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       {/* Confirmation Modal */}
       {deleteConfirmation && (
         <div className="flex absolute top-0 left-0 justify-center items-center w-full h-full z-20 bg-black bg-opacity-50">
-          <div className="flex flex-col justify-center space-y-3 w-[533px] py-[20px] px-[27px] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50">
-            <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C]">
-              Delete Menu
-            </p>
-            <p className="text-[32px] flex font-crimson crimson-semibold items-center justify-start">
-              {`${modalItem[0]} deleted.`}
-            </p>
-            <div className="flex justify-center items-center">
-              <button
-                className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282]"
-                onClick={() => closeDeleteModal()}
-              >
-                <p className="text-[#828282] text-[24px] font-crimson">
-                  Close
-                </p>
-              </button>
-            </div>
+          <div className="flex flex-col w-[533px] max-w-[90vw] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50 px-6 py-6 space-y-6">
+          <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C] break-words">
+            Delete Menu
+          </p>
+          <p className="text-[24px] font-crimson crimson-semibold break-words">
+            {`${modalItem[0]} deleted.`}
+          </p>
+          <div className="flex justify-center pt-4">
+            <button
+              className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282] hover:bg-light-gray"
+              onClick={() => closeDeleteModal()}
+            >
+              <p className="text-[#828282] text-[24px] font-crimson">
+                Close
+              </p>
+            </button>
+          </div>
           </div>
         </div>
       )}

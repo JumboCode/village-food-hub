@@ -99,11 +99,7 @@ export default function NavBar() {
   const handleMyProfile = () => {
     router.push("/my-profile");
   };
-
-  useEffect(() => {
-    setCurrentPath(window.location.pathname);
-  }, []);
-
+  
   return (
     <>
       {!isLoaded ? (
