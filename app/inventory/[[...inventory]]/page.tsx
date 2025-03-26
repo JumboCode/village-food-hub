@@ -191,6 +191,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
 const InternalViewInventoryPage: React.FC = () => {
   // Use SWR to fetch the inventory data.
+  const [isLoading, setIsLoading] = useState(true);
   const { data: inventory, error } = useSWR("/../api/inventory", fetchInventory);
 
   // Local state for search input, applied filters, and modal state.
@@ -212,6 +213,7 @@ const InternalViewInventoryPage: React.FC = () => {
         String(item[0]).toUpperCase().includes(searchInput.toUpperCase())
       );
     }
+    setIsLoading(false);
     return filtered;
   }, [inventory, appliedFilters, searchInput]);
 
@@ -233,6 +235,15 @@ const InternalViewInventoryPage: React.FC = () => {
   const handleCloseModal = () => {
     setFilterModalOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        {/* Simple spinner using Tailwind classes */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
