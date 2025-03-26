@@ -147,7 +147,7 @@ const PhoneNumber: React.FC<{
 
   useEffect(() => {
     const phoneNumberWithoutCountryCode = phoneNumber.replace(/^\+\d+/, '');
-    setNextDisabled(phoneNumberWithoutCountryCode === "");
+    setNextDisabled(phoneNumberWithoutCountryCode.length !== 11);
   }, [phoneNumber, setNextDisabled]);
 
   return (
@@ -386,12 +386,17 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
   };
 
   const handleZipChange = (value: string) => {
+    const zipCodeCheck = /^\d{5}$/;
+    if (zipCodeCheck.test(value)) {
+      setZipState(value);
+      onZipChange(value);
+    }
     setZipState(value);
     onZipChange(value);
   };
 
   useEffect(() => {
-    setNextDisabled(line === "" || cityState === "" || stateState === "" || zipState === "");
+    setNextDisabled(line === "" || cityState === "" || stateState === "" || zipState === "" || !/^\d{5}$/.test(zipState));
   }, [line, cityState, stateState, zipState, setNextDisabled]);
 
   return (
