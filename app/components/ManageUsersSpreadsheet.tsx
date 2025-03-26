@@ -200,7 +200,8 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             }
     
             console.log("Deleting user:", deleteUser);
-    
+            
+            console.log("id: " + deleteUser.id);
             // Send DELETE request to backend
             const response = await fetch("/api/users", {
                 method: "DELETE",
