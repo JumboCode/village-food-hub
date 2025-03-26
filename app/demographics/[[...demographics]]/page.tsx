@@ -197,7 +197,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                       <p className="font-crimson text-[24px] text-[#828282] pb-3">
                         {storageUsed} MB of 1GB storage used
                       </p>
-                      <div className="flex flex-col space-y-1">
+                      <div className="flex flex-col space-y-1 font-crimson">
                         <p className="text-[16px] text-black">Want to clean up space?</p>
                         <div className="bg-[#B3B3B3] h-[1px]" />
                         <div className="flex flex-row">

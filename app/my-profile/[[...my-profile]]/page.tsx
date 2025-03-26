@@ -31,6 +31,10 @@ const MyProfilePage: React.FC = () => {
     const initialRender = useRef(true);
 
     useEffect(() => {
+        window.preventNavigation = false;
+      }, []);      
+
+    useEffect(() => {
         if (initialRender.current) {
             initialRender.current = false;
             return;
@@ -72,6 +76,12 @@ const MyProfilePage: React.FC = () => {
         };
       }, [unsavedChanges]);
 
+      useEffect(() => {
+        if (!showEditProfileView && !unsavedChanges) {
+          window.preventNavigation = false;
+        }
+      }, [showEditProfileView, unsavedChanges]);      
+
     // This function will be called when "Save Changes" is pressed.
     const handleSaveChange = async () => {
         
@@ -85,7 +95,8 @@ const MyProfilePage: React.FC = () => {
         };
         setShowEditProfileView(false);
         setUnsavedChanges(false);
-      
+        window.preventNavigation = false;
+
         try {
           const response = await fetch("/api/users", {
             method: "PUT",
@@ -113,10 +124,14 @@ const MyProfilePage: React.FC = () => {
 
     function handleCancelProfileView() {
         setShowEditProfileView(false);
+        setUnsavedChanges(false);
+        window.preventNavigation = false;
     }
 
     const handleCloseModal = () => {
         setShowUnsavedModal(false);
+        setUnsavedChanges(false);
+        window.preventNavigation = false;
     }
 
     return (

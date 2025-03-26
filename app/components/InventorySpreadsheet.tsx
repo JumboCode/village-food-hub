@@ -76,15 +76,18 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setSortedItems([...inventoryItems]);
     }, [inventoryItems]);
 
-    const sortAlphabetically = () => {
-        const sortedList = [...sortedItems].sort((a, b) =>
-            topSorted 
-                ? a[0].toString().localeCompare(b[0].toString()) 
-                : b[0].toString().localeCompare(a[0].toString())
-        );
-    
-        setSortedItems(sortedList);
-        setTopSorted(!topSorted);
+    const [sortColumn, setSortColumn] = useState<number>(0);
+
+    const sortAlphabetically = (columnIndex: number) => {
+      const sortedList = [...sortedItems].sort((a, b) =>
+        topSorted
+          ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+          : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString())
+      );
+
+      setSortedItems(sortedList);
+      setTopSorted(!topSorted);
+      setSortColumn(columnIndex);
     };
 
     const sortQuantity = () => {
@@ -221,7 +224,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Item Name</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(0)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
@@ -229,7 +232,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Category</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(1)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
@@ -245,7 +248,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Units</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(3)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
