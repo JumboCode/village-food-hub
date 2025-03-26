@@ -45,17 +45,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-interface ClerkUser {
-  firstName: string,
-  lastName: string,
-  username: string,
-  emailAddress: string,
-  pronouns: string,
-  role: string,
-  phoneNumber: string,
-  password: string
-}
-
 /* 
  * Inserts a new user into the database.
  * Expects the request body to be JSON with the fields: username, password,

@@ -252,9 +252,7 @@ export async function DELETE(req: NextRequest) {
       }
 
       // Delete the inventory item
-      const result = await prisma.inventory.deleteMany({
-          where: { itemName, units },
-      });
+      const result = await deleteInventoryItem({ itemName, units });
 
       console.log(`Deleted ${result.count} inventory records for "${itemName}" with unit "${units}"`);
       return NextResponse.json({ message: "Inventory item deleted successfully" }, { status: 200 });

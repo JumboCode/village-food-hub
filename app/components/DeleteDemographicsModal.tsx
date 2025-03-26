@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { ButtonCancel, ButtonDelete } from '@app/components/SurveyButtons';
 
 interface DeleteDemographicModalProps {
   userName: string;

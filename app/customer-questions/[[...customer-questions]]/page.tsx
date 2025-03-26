@@ -11,7 +11,6 @@ import Image from 'next/image';
 import logo from '@app/images/logo.jpg';
 import arrow from '@app/images/arrow.png';
 import ExitModal from '@app/components/ExitModal';
-import useSWR from 'swr';
 
 interface Details {
   name: string;
@@ -634,7 +633,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     (async () => {
       await fetchNewRecord();
     })();
-  }, []);
+  }, [fetchNewRecord]);
 
   return (
     <div className="background-white font-black">

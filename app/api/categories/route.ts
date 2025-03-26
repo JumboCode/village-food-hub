@@ -167,17 +167,11 @@ export async function PUT(req: NextRequest) {
     if (isUpdatingItem || (units && Array.isArray(units))) {
       console.log("Updating item name or units...");
 
-      const updatedCategory = await prisma.categories.update({
-        where: {
-          itemName_name: {
-            itemName: oldItemName,
-            name,
-          },
-        },
-        data: {
-          itemName,
-          units,
-        },
+      const updatedCategory = await updateCategory({
+        oldItemName,
+        itemName,
+        name,
+        units,
       });
 
       // Sync inventory entries

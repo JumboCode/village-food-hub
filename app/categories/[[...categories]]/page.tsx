@@ -1,13 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import useSWR, { mutate } from "swr";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { NameDropdown } from '@app/components/Dropdowns';
 import NavBar from '@app/components/NavBar';
 import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
 import UnitBoxes from '@app/components/UnitBoxes';
-import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 
@@ -16,8 +16,33 @@ interface CategoryData {
 }
 
 const Categories: React.FC = () => {
+  const fetchCategories = async (): Promise<CategoryData> => {
+    const response = await fetch("/api/categories");
+    if (!response.ok) throw new Error("Failed to fetch categories");
+  
+    const raw = await response.json();
+    const rearrangedData = raw.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
+      const catName = record.name;
+      const trimmedItemName = record.itemName.trim();
+      const validUnits = (record.units || [])
+        .map(u => u.trim())
+        .filter(u => u !== "");
+  
+      if (trimmedItemName !== "" || validUnits.length > 0) {
+        if (!acc[catName]) acc[catName] = [];
+        const unitsString = validUnits.join(', ');
+        acc[catName].push([trimmedItemName, unitsString]);
+      }
+  
+      return acc;
+    }, {} as CategoryData);
+  
+    return rearrangedData;
+  };
+  
+  const { data: categoriesData, error, isLoading, mutate: mutateCategories } = useSWR("/api/categories", fetchCategories);
+
   // State variables
-  const [categoriesData, setCategoriesData] = useState<CategoryData>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showTable, setShowTable] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -31,7 +56,7 @@ const Categories: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showDuplicateError, setShowDuplicateError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   // Open delete category modal.
   const openModal = (categoryName: string, itemName: string) => {
@@ -44,50 +69,6 @@ const Categories: React.FC = () => {
   const closeModal = (): void => {
     setShowModal(false);
   };
-
-  // Load categories data from the API, filtering out records with both empty itemName and units.
-  const loadCategoriesData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/categories");
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      const rearrangedData = data.reduce((acc: CategoryData, record: { name: string, itemName: string, units: string[] }) => {
-        const catName = record.name;
-        const trimmedItemName = record.itemName.trim();
-        const validUnits = (record.units || [])
-          .map(u => u.trim())
-          .filter(u => u !== "");
-        // Only include record if either the item name or at least one unit is non-empty.
-        if (trimmedItemName !== "" || validUnits.length > 0) {
-          if (!acc[catName]) {
-            acc[catName] = [];
-          }
-          const unitsString = validUnits.join(', ');
-          acc[catName].push([trimmedItemName, unitsString]);
-        }
-        return acc;
-      }, {} as CategoryData);
-      setCategoriesData(rearrangedData);
-      console.log("rearrangedData:", rearrangedData);
-      return rearrangedData;
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await loadCategoriesData();
-      } catch (error) {
-        console.error("Error loading categories:", error);
-      }
-    })();
-  }, []);
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
@@ -118,13 +99,13 @@ const Categories: React.FC = () => {
 
   useEffect(() => {
     if (!showItemModal) {
-      loadCategoriesData();
+      mutateCategories();
     }
   }, [showItemModal]);
 
   useEffect(() => {
     if (!showCategoryModal) {
-      loadCategoriesData();
+      mutateCategories();
     }
   }, [showCategoryModal]);
 
@@ -135,15 +116,21 @@ const Categories: React.FC = () => {
   };
     
   const refreshCategories = async (newCategory: string = "") => {
-    const data = await loadCategoriesData();
-    if (newCategory && data && Object.keys(data).includes(newCategory)) {
+    const updated = await mutateCategories(undefined, true);
+  
+    if (
+      newCategory &&
+      updated &&
+      typeof updated === "object" &&
+      Object.keys(updated).includes(newCategory)
+    ) {
       setSelectedCategory(newCategory);
       setShowTable(true);
     } else {
       setSelectedCategory("");
       setShowTable(false);
     }
-  };
+  };  
   
   // Save new category.
   const saveButtonClicked = async () => {
@@ -169,15 +156,7 @@ const Categories: React.FC = () => {
         setShowRetrievalError(true);
         return;
       }
-  
-      // update state to include the new category
-      setCategoriesData((prev) => ({
-        ...prev,
-        [categoryName]: [],
-      }));
-  
-      setSelectedCategory(categoryName);
-      setShowTable(true);
+
       setShowCategoryModal(false);
       setShowRetrievalError(false);
 
@@ -220,7 +199,7 @@ const Categories: React.FC = () => {
         return;
       }
   
-      // ✅ Instead of refreshing, reload categories and reselect
+      // instead of refreshing, reload categories and reselect
       await loadCategoriesData();
       setSelectedCategory(payload.name); // ensure dropdown persists
       setShowTable(true); // ensure table stays visible
@@ -292,7 +271,7 @@ const Categories: React.FC = () => {
   }  
 
   // Define selectedCategoryData once.
-  const selectedCategoryData = categoriesData[selectedCategory] || [];
+  const selectedCategoryData = categoriesData?.[selectedCategory] || [];
 
   // handleDelete: if itemName is provided, delete that specific record; otherwise, delete all records for the category.
   const handleDelete = async () => {
@@ -371,9 +350,8 @@ const Categories: React.FC = () => {
   
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        {/* Simple spinner using Tailwind classes */}
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2"></div>
+      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
       </div>
     );
   }
@@ -452,7 +430,7 @@ const Categories: React.FC = () => {
                 <CategoriesSpreadsheet 
                   categoryName={selectedCategory}
                   categoryItems={categoriesData[selectedCategory] || []}
-                  loadData={loadCategoriesData}
+                  loadData={mutateCategories}
                 />
                 {selectedCategoryData.length === 0 && (
                   <p className="flex-center py-4 font-crimson text-[20px] text-center">

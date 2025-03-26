@@ -68,7 +68,7 @@ export function NameDropdown({
     }
 
     fetchItems();
-  }, [fetchUrl, filterName, filterValue, currentDropdown]);
+  }, [fetchUrl, filterName, filterValue, currentDropdown, defaultValue]);
 
   return (
     <select

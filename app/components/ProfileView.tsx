@@ -7,7 +7,6 @@ import { useUser } from '@clerk/nextjs';
 interface ProfileViewProps {
     visible: boolean;
     mode: string;
-    onCancel?: () => void;
     profileData: {
         firstName: string;
         lastName: string;
@@ -31,14 +30,14 @@ interface ProfileViewProps {
       setUnsavedChanges?: React.Dispatch<React.SetStateAction<boolean>>
   }
   
-const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData, setUnsavedChanges }) => {
+const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, setProfileData, setUnsavedChanges }) => {
     const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState("");
-    
     const [createProfileMode, setCreateProfileMode] = useState(false);
     const [editProfileMode, setEditProfileMode] = useState(false);
     const [viewProfileMode, setViewProfileMode] = useState(false);
+    const [error, setError] = useState("");
     
+    const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
@@ -46,13 +45,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
     const [pronouns, setPronouns] = useState("");
     const [role, setRole] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [error, setError] = useState("");
     const [changeMade, setChangeMade] = useState(false);
     
     const { user } = useUser();
     const clerkUsername = user?.username;
-    
-    
     
     useEffect(() => {
         if (mode === "create") {
@@ -82,6 +78,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
             console.log(error);
         }
     }, [mode]);
+
+    useEffect(() => {
+        if (error) console.log(error);
+    }, [error]);
     
     // Fetch user data from your API when the component mounts
     useEffect(() => {
@@ -129,12 +129,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
         if (mode !== "create") {
             fetchUserData();
         }
-    }, [mode, clerkUsername]);
-    
-    const handleEditProfileModeOn = () => {
-        setEditProfileMode(true);
-        setViewProfileMode(false);
-    }
+    }, [mode, clerkUsername, setProfileData]);
 
     const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>, fieldType: string) => {
         console.log("here");
@@ -155,7 +150,6 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
     
     const isView = viewProfileMode;
     const isEdit = editProfileMode;
-    const isCreate = createProfileMode;
       
     return (
         <div>

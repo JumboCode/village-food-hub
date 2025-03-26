@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import Image from 'next/image';
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import DeleteUserModal from "@app/components/DeleteUserModal";
@@ -32,7 +31,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     const [selectedUser, setSelectedUser] = useState<ClerkUser | null>(null);
     const [sortedItems, setSortedItems] = useState<string[][]>([]);
     const [topSorted, setTopSorted] = useState<boolean>(false);
-    const [sortColumn, setSortColumn] = useState<number>(0);
 
     useEffect(() => {
         setSortedItems(manageUsersItems);
@@ -69,7 +67,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
       
         setSortedItems(sorted);
         setTopSorted(!topSorted);
-        setSortColumn(columnIndex);
     };      
 
     const isLastAdmin = (username: string): boolean => {
