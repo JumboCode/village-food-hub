@@ -9,6 +9,7 @@ import EditUserModal from "@app/components/EditUserModal";
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
+    isLoading?: boolean;
 }
 
 interface ClerkUser {
@@ -19,7 +20,7 @@ interface ClerkUser {
     };
 }
 
-export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [] }) => {
+export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [], isLoading = false }) => {
     console.log("manageUsersItems:", manageUsersItems);
     const [firstName, setFirstName] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string | null>(null);
@@ -31,7 +32,11 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     const [selectedUser, setSelectedUser] = useState<ClerkUser | null>(null);
     const [sortedItems, setSortedItems] = useState<string[][]>([]);
     const [topSorted, setTopSorted] = useState<boolean>(false);
+    const [sortColumn, setSortColumn] = useState<number>(0);
 
+    useEffect(() => {
+        setSortedItems(manageUsersItems);
+      }, [manageUsersItems]);      
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -55,18 +60,17 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         fetchUsers();
     }, []);
 
-    const sortAlphabetically = () => {
-        if (!allUsers.length) return; // Ensure users are loaded before sorting
-    
-        const sortedList = [...allUsers].sort((a, b) =>
-            topSorted
-                ? a[0].toString().localeCompare(b[0].toString())
-                : b[0].toString().localeCompare(a[0].toString())
+    const sortAlphabetically = (columnIndex: number) => {
+        const sorted = [...sortedItems].sort((a, b) =>
+          topSorted
+            ? a[columnIndex]?.localeCompare(b[columnIndex] || "")
+            : b[columnIndex]?.localeCompare(a[columnIndex] || "")
         );
-    
-        setSortedItems(sortedList);
+      
+        setSortedItems(sorted);
         setTopSorted(!topSorted);
-    };
+        setSortColumn(columnIndex);
+    };      
 
     const isLastAdmin = (username: string): boolean => {
         const selected = allUsers.find(user => user[1] === username);
@@ -226,37 +230,37 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                     <tr className="bg-dark-blue text-white text-lg align-left">
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             First Name
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(0)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             Last Name
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(1)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th> 
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             Pronouns
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(2)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             Username
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(3)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             Email
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(4)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                             Role
-                            <button onClick={sortAlphabetically} className="ml-2">
+                            <button onClick={() => sortAlphabetically(5)} className="ml-2">
                                 <TiArrowUnsorted className="inline text-xl cursor-pointer" />
                             </button>
                         </th>
@@ -265,33 +269,40 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                     </tr>
                 </thead>
                 <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-                    {manageUsersItems.map((item, index) => (
-                        <tr key={index} className="py-2">
-                            {item.map((data, subIndex) => (
-                                <td
-                                    key={subIndex}
-                                    className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
-                                >
-                                    {data}
-                                </td>
-                            ))}
-                            <td className="border-collapse border-zinc-200 border-2 border-y-1 px-4 text-center">
-                                <span className="inline-flex justify-center gap-4">
-                                    <MdOutlineEdit
-                                        size={24}
-                                        onClick={() => openEditModal(item[0], item[1], item[3], item[5])} 
-                                        className="cursor-pointer"
-                                    />
-                                    <MdDeleteOutline
-                                        size={24}
-                                        onClick={() => openDeleteModal(item[0], item[1], item[3], item[5])}
-                                        className="cursor-pointer"
-                                    />
-                                </span>
-                            </td>
+                    {isLoading ? (
+                        <tr>
+                        <td colSpan={8} className="text-center py-4 text-gray-500">
+                            Loading users…
+                        </td>
                         </tr>
-                    ))}
-                </tbody>
+                    ) : (
+                        sortedItems.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="py-2">
+                        {row.map((cell, colIndex) => (
+                            <td
+                            key={colIndex}
+                            className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
+                            >
+                            {String(cell)}
+                            </td>
+                        ))}
+                        <td className="border-collapse border-zinc-200 border-2 border-y-1 px-4 text-center">
+                            <span className="inline-flex justify-center gap-4">
+                            <MdOutlineEdit
+                                size={24}
+                                onClick={() => openEditModal(row[0], row[1], row[3], row[5])}
+                                className="cursor-pointer"
+                            />
+                            <MdDeleteOutline
+                                size={24}
+                                onClick={() => openDeleteModal(row[0], row[1], row[3], row[5])}
+                                className="cursor-pointer"
+                            />
+                            </span>
+                        </td>
+                        </tr>
+                    )))}
+                    </tbody>
             </table>
             {showEditModal && (
                 <EditUserModal
