@@ -13,8 +13,39 @@ async function createInventoryItem(data: {
   lastUpdated: Date;
   history?: Prisma.InputJsonValue;
 }) {
-  return await prisma.inventory.create({ 
-    data: { ...data }
+  const { itemName, units } = data;
+
+  const historyKey = `${itemName}_${units}`;
+
+  // Ensure history is an object (if undefined, default to an empty object)
+  const initialHistory: Record<string, unknown> = data.history && typeof data.history === "object"
+    ? (data.history as Record<string, unknown>)
+    : {};
+
+  // Initialize history entry
+  const newHistoryEntry = {
+    itemName: data.itemName,
+    categoryName: data.categoryName,
+    units: data.units,
+    action: "add",
+    quantityChanged: data.quantity,
+    date: data.lastUpdated,
+  };
+
+  // Create a structured history object
+  const newHistory = {
+    ...initialHistory,
+    [historyKey]: [
+      ...(initialHistory[historyKey] as Array<typeof newHistoryEntry> || []),
+      newHistoryEntry
+    ]
+  };
+
+  return await prisma.inventory.create({
+    data: {
+      ...data,
+      history: newHistory as Prisma.InputJsonValue
+    }
   });
 }
 

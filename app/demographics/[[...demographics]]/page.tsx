@@ -149,6 +149,25 @@ const InternalViewDemographicsPage: React.FC = () => {
     setShowModal(false)
   };
 
+const handleDelete = async () => {
+    try {
+      for (const row of transformedDemographics) {
+        const phoneNumber = row[1];
+        const response = await fetch("../api/demographics", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber }),
+        });
+        if (!response.ok) {
+          console.error('Error Deleting Item, ${response.status}');
+        }
+      }
+      window.location.reload();
+    } catch (e) {
+      console.log("Error Deleting Category Items:", e);
+    }
+  };
+
   // States and logic for the storage modal remain unchanged
   const [showStorageModal, setShowStorageModal] = useState(false);
   const [showStorageCancel, setShowStorageCancel] = useState(false);
@@ -217,7 +236,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                       <p className="font-crimson text-[24px] text-[#828282] pb-3">
                         {storageUsed} MB of 1GB storage used
                       </p>
-                      <div className="flex flex-col space-y-1">
+                      <div className="flex flex-col space-y-1 font-crimson">
                         <p className="text-[16px] text-black">Want to clean up space?</p>
                         <div className="bg-[#B3B3B3] h-[1px]" />
                         <div className="flex flex-row">
@@ -281,7 +300,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                           <div>
                             <button
                               className="flex items-center text-white bg-red hover:bg-dark-red font-serif w-[100px] h-[40px] rounded-[8px] border-[1px] text-[20px] justify-center"
-                              onClick={() => console.log("just pressed delete")}
+                              onClick={() => handleDelete()}
                             >
                               Delete
                             </button>

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import NavBar from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
@@ -87,6 +87,11 @@ const InternalViewManageUsersPage: React.FC = () => {
         return;
     }
 
+    if (trimmedData.username.includes('@')) {
+        setCreateUserError("Username must not contain '@'");
+        return;
+    }
+
     try {
         // Make POST request to create user API endpoint
         const response = await fetch("../../api/users", {
@@ -143,7 +148,7 @@ const InternalViewManageUsersPage: React.FC = () => {
                 profileData={profileData}
                 setProfileData={setProfileData}
             />
-            <div>{createUserError}</div>
+            <div className="text-red">{createUserError}</div>
             <div>
               <button 
                 className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"

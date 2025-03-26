@@ -111,6 +111,7 @@ const Categories: React.FC = () => {
   };
 
   const editButtonClicked = () => {
+    setEditCategoryName(selectedCategory);
     setShowEditModal(true);
     console.log("Edit category button was clicked.")
   };
@@ -139,120 +140,142 @@ const Categories: React.FC = () => {
 
   // Save new category.
   const saveButtonClicked = async () => {
-    if (categoryName === "") {
+    if (categoryName.trim() === "") {
       setShowEmptyError(true);
       setShowRetrievalError(false);
-    } else {
-      setShowEmptyError(false);
-      try {
-        const response = await fetch("../api/categories", {
-          method: "POST",
-          body: JSON.stringify({
-            itemName: "",
-            name: categoryName,
-            units: [],
-          }),
-        });
-        if (response.ok) {
-          console.log("Successfully Added " + categoryName);
-          setShowRetrievalError(false);
-          setShowCategoryModal(false);
-          refreshPage();
-        } else {
-          setShowRetrievalError(true);
-        }
-      } catch (err) {
-        setShowRetrievalError(true);
-        console.error("Error saving category:", err);
-      }
+      return;
     }
-  };
+  
+    setShowEmptyError(false);
+  
+    try {
+      const response = await fetch("../api/categories", {
+        method: "POST",
+        body: JSON.stringify({
+          itemName: "",
+          name: categoryName,
+          units: [],
+        }),
+      });
+  
+      if (!response.ok) {
+        setShowRetrievalError(true);
+        return;
+      }
+  
+      // update state to include the new category
+      setCategoriesData((prev) => ({
+        ...prev,
+        [categoryName]: [],
+      }));
+  
+      // select and show the newly created category
+      setSelectedCategory(categoryName);
+      handleCategoryChange(categoryName);
+      setShowTable(true);
+  
+      // close modal and clear errors
+      setShowCategoryModal(false);
+      setShowRetrievalError(false);
+      refreshPage();
+    } catch (err) {
+      setShowRetrievalError(true);
+      console.error("Error saving category:", err);
+    }
+  };  
 
-  // Save a new item for the selected category.
   const saveCategories = async () => {
     try {
       const trimmedItemName = itemName.trim();
       const validUnits = units.filter(unit => unit && unit.trim() !== "");
+
       if (trimmedItemName === "" || validUnits.length < 1) {
         setShowEmptyError(true);
         return;
       }
+  
       setShowEmptyError(false);
+  
       const payload = {
         itemName: trimmedItemName,
         name: selectedCategory.trim(),
-        units: validUnits
+        units: validUnits,
       };
+  
       console.log("Sending payload:", payload);
+  
       const response = await fetch("../api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+  
       if (!response.ok) {
         console.log("Server error response:", response);
+        setShowRetrievalError(true);
+        return;
       }
+  
       itemModalClosed();
+      refreshPage();
     } catch (err) {
       console.log("Error in saveCategories:", err);
+      setShowRetrievalError(true);
     }
-  };
+  };  
 
-  // Save edit for category name change.
   const saveEditCategory = async () => {
     setShowEmptyError(false);
     setShowRetrievalError(false);
     setShowDuplicateError(false);
-    console.log(categoriesData);
-    if (editCategoryName === "") {
+  
+    if (editCategoryName.trim() === "") {
       setShowEmptyError(true);
-    } else if (Object.keys(categoriesData).includes(editCategoryName)) {
-      setShowDuplicateError(true);
-    } else {
-      try {
-        const response = await fetch("../api/categories");
-        const categories = await response.json();
-        const nameExists = categories.some((category: { name: string }) => 
-          category.name === editCategoryName
-        );
-        if (nameExists && editCategoryName !== selectedCategory) {
-          setShowDuplicateError(true);
-          return;
-        }
-        const oldCategories = categories.filter((category: { name: string }) => 
-          category.name === selectedCategory
-        );
-        if (!oldCategories) {
-          setShowRetrievalError(true);
-          return;
-        }
-        const updateCatRes = await fetch("../api/categories/", {
-          method: "PUT",
-          body: JSON.stringify({
-            oldName: selectedCategory,
-            newName: editCategoryName,
-          }),
-        });
-        const updateInvRes = await fetch("../api/inventory/", {
-          method: "PATCH",
-          body: JSON.stringify({
-            oldName: selectedCategory,
-            newName: editCategoryName,
-          }),
-        });
-        if (!updateCatRes.ok || !updateInvRes.ok) {
-          setShowRetrievalError(true);
-        }
-        console.log(`Updated ${selectedCategory} to be ${editCategoryName}`);
-        setShowEditModal(false);
-        setSelectedCategory(editCategoryName);
-        refreshPage();
-      } catch (err) {
-        setShowRetrievalError(true);
-        console.error("Error editing category item:", err);
-      }
+      return;
     }
-  };
+  
+    if (Object.keys(categoriesData).includes(editCategoryName)) {
+      setShowDuplicateError(true);
+      return;
+    }
+  
+    try {
+      const items = categoriesData[selectedCategory] ?? [];
+      const firstItemName = items?.[0]?.[0]?.trim() ?? "";
+      const unitString = items?.[0]?.[1] ?? "";
+      const units = unitString.split(",").map((u) => u.trim()).filter(Boolean);
+  
+      // if no item exists, use placeholders to satisfy backend requirements
+      const payload = {
+        oldItemName: firstItemName || "placeholder",
+        itemName: firstItemName || "placeholder",
+        name: selectedCategory,
+        units: units.length > 0 ? units : ["placeholder"],
+        oldCategoryName: selectedCategory,
+        newCategoryName: editCategoryName,
+      };
+  
+      const response = await fetch("/api/categories", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to update category:", response.status);
+        setShowRetrievalError(true);
+        return;
+      }
+  
+      setShowEditModal(false);
+      refreshPage();
+    } catch (err) {
+      console.error("Error editing category:", err);
+      setShowRetrievalError(true);
+    }
+  };   
 
   interface InventoryItem {
     itemName: string;
@@ -530,34 +553,41 @@ const Categories: React.FC = () => {
       )}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
-            <p className="text-center text-[32px] font-bold pb-[15px]">Edit Name</p>
-            <div className="flex w-full justify-center items-center pb-[30px]">
+          <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green flex flex-col justify-between">
+            <p className="text-center text-[32px] font-bold">Edit Name</p>
+            
+            <div className="flex flex-col items-center px-4 space-y-2">
               <input
                 type="text"
+                value={editCategoryName}
                 onChange={(e) => setEditCategoryName(e.target.value)}
-                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                className="w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-2 mt-4"
               />
+
+              {/* Reserved space for error messages */}
+              <div className="h-[10px] flex items-center">
+                {showEmptyError && (
+                  <p className="text-red text-center text-sm">
+                    Please enter a category name.
+                  </p>
+                )}
+                {showDuplicateError && (
+                  <p className="text-red text-center text-sm">
+                    Category already exists.
+                  </p>
+                )}
+              </div>
             </div>
-            {showEmptyError && (
-              <p className="text-red text-center mb-4">
-                Please enter a category name.
-              </p>
-            )}
-            {showDuplicateError && (
-              <p className="text-red text-center mb-4">
-                Category already exists.
-              </p>
-            )}
-            <div className="flex w-full justify-center space-x-[15px] items-center">
+
+            <div className="flex justify-center space-x-[15px] mt-4">
               <button
-                className="flex text-gray hover:bg-light-gray font-serif pt-[4px] w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+                className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
                 onClick={cancelButtonClicked}
               >
                 Cancel
               </button>
               <button
-                className="flex bg-light-green hover:bg-dark-green text-white font-serif pt-[4px] w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+                className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
                 onClick={saveEditCategory}
               >
                 Save

@@ -37,20 +37,3 @@ model categories {
   @@id([itemName, name])
 }
 
-model users {
-  firstName   String
-  lastName    String
-  pronouns    String
-  username    String @id
-  email       String
-  role        Role
-  phoneNumber String
-  password    String
-}
-
-enum Role {
-  admin
-  staff
-  volunteer
-  customer
-}
