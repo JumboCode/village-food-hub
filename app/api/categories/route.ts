@@ -119,52 +119,94 @@ export async function PUT(req: NextRequest) {
     const data = await req.json();
     console.log("Received data in API:", data);
 
-    if (!validCategory(data) || !data.oldItemName) {
-      console.log("Invalid category data:", data);
-      return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
-    }
-
-    const { oldItemName, itemName, name, units, oldCategoryName, newCategoryName } = data;
-
-    // Step 1: Update category
-    const updatedCategory = await updateCategory({
+    const {
+      oldCategoryName,
+      newCategoryName,
       oldItemName,
       itemName,
       name,
       units,
-    });
+    } = data;
 
-    // Step 2: Update inventory records if the category name changes
-    if (oldCategoryName && newCategoryName && oldCategoryName !== newCategoryName) {
-      console.log(`Updating inventory items from category "${oldCategoryName}" to "${newCategoryName}"`);
-      
+    const isRenamingCategory =
+      oldCategoryName && newCategoryName && oldCategoryName !== newCategoryName;
+
+    const isUpdatingItem =
+      oldItemName && itemName && oldItemName !== itemName;
+
+    // CATEGORY RENAME
+    if (isRenamingCategory) {
+      console.log(`Renaming category "${oldCategoryName}" → "${newCategoryName}"`);
+
+      const updated = await prisma.categories.updateMany({
+        where: {
+          name: oldCategoryName,
+        },
+        data: {
+          name: newCategoryName,
+        },
+      });
+
+      // Also update inventory
       await prisma.inventory.updateMany({
-        where: { categoryName: oldCategoryName },
-        data: { categoryName: newCategoryName },
+        where: {
+          categoryName: oldCategoryName,
+        },
+        data: {
+          categoryName: newCategoryName,
+        },
+      });
+
+      return NextResponse.json({
+        response: "Category renamed successfully",
+        updatedCount: updated.count,
       });
     }
 
-    // Step 3: Update inventory records if units are changed
-    const existingInventoryItems = await prisma.inventory.findMany({
-      where: { itemName: oldItemName },
-    });
+    // ITEM NAME OR UNIT UPDATE
+    if (isUpdatingItem || (units && Array.isArray(units))) {
+      console.log("Updating item name or units...");
 
-    for (const inventoryItem of existingInventoryItems) {
-      const updatedUnits = units.includes(inventoryItem.units) ? inventoryItem.units : units[0];
+      const updatedCategory = await prisma.categories.update({
+        where: {
+          itemName_name: {
+            itemName: oldItemName,
+            name,
+          },
+        },
+        data: {
+          itemName,
+          units,
+        },
+      });
 
+      // Sync inventory entries
       await prisma.inventory.updateMany({
-        where: { itemName: oldItemName, units: inventoryItem.units },
-        data: { itemName, units: updatedUnits },
+        where: {
+          itemName: oldItemName,
+        },
+        data: {
+          itemName,
+          units: units?.[0] ?? "", // only 1 unit stored per inventory item
+        },
+      });
+
+      return NextResponse.json({
+        response: "Item updated successfully",
+        updatedCategory,
       });
     }
 
     return NextResponse.json(
-      { response: "Category and inventory items updated successfully", updatedCategory },
-      { status: 200 }
+      { response: "No valid update action provided." },
+      { status: 400 }
     );
   } catch (error) {
-    console.log("Error in PUT:", error);
-    return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
+    console.error("Error in PUT:", error);
+    return NextResponse.json(
+      { response: "Failed to update entry", error: error instanceof Error ? error.message : error },
+      { status: 500 }
+    );
   }
 }
 
