@@ -134,10 +134,17 @@ const Categories: React.FC = () => {
     setShowRetrievalError(false);
   };
     
-  const refreshPage = () => {
-    window.location.reload();
+  const refreshCategories = async (newCategory: string = "") => {
+    const data = await loadCategoriesData();
+    if (newCategory && data && Object.keys(data).includes(newCategory)) {
+      setSelectedCategory(newCategory);
+      setShowTable(true);
+    } else {
+      setSelectedCategory("");
+      setShowTable(false);
+    }
   };
-
+  
   // Save new category.
   const saveButtonClicked = async () => {
     if (categoryName.trim() === "") {
@@ -169,15 +176,12 @@ const Categories: React.FC = () => {
         [categoryName]: [],
       }));
   
-      // select and show the newly created category
       setSelectedCategory(categoryName);
-      handleCategoryChange(categoryName);
       setShowTable(true);
-  
-      // close modal and clear errors
       setShowCategoryModal(false);
       setShowRetrievalError(false);
-      refreshPage();
+
+      await refreshCategories(categoryName);
     } catch (err) {
       setShowRetrievalError(true);
       console.error("Error saving category:", err);
@@ -188,7 +192,7 @@ const Categories: React.FC = () => {
     try {
       const trimmedItemName = itemName.trim();
       const validUnits = units.filter(unit => unit && unit.trim() !== "");
-
+  
       if (trimmedItemName === "" || validUnits.length < 1) {
         setShowEmptyError(true);
         return;
@@ -216,8 +220,12 @@ const Categories: React.FC = () => {
         return;
       }
   
-      itemModalClosed();
-      refreshPage();
+      // ✅ Instead of refreshing, reload categories and reselect
+      await loadCategoriesData();
+      setSelectedCategory(payload.name); // ensure dropdown persists
+      setShowTable(true); // ensure table stays visible
+      itemModalClosed(); // close the modal
+  
     } catch (err) {
       console.log("Error in saveCategories:", err);
       setShowRetrievalError(true);
@@ -270,7 +278,7 @@ const Categories: React.FC = () => {
       }
   
       setShowEditModal(false);
-      refreshPage();
+      await refreshCategories(editCategoryName);
     } catch (err) {
       console.error("Error editing category:", err);
       setShowRetrievalError(true);
@@ -354,9 +362,8 @@ const Categories: React.FC = () => {
         const result = await response.json();
         console.log("deleteCategoriesByName response:", result);
       }
-      refreshPage(); 
-      console.log("Deleted successfully!");
       closeModal();
+      await refreshCategories();
     } catch (error) {
       console.error("Error in handleDelete:", error);
     }
@@ -386,6 +393,7 @@ const Categories: React.FC = () => {
                     fetchUrl="/api/categories"
                     filterName="name"
                     onSelect={handleCategoryChange}
+                    defaultValue={selectedCategory}
                   />
                 </div>
                 {showTable && (

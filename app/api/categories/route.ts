@@ -233,8 +233,12 @@ export async function DELETE(req: NextRequest) {
         itemName: data.itemName,
         name: data.name,
       });
+      
+      if (!item) {
+        return NextResponse.json({ response: "Category not found" }, { status: 404 });
+      }      
 
-      // 🚀 Delete inventory items associated with this category item
+      // Delete inventory items associated with this category item
       await prisma.inventory.deleteMany({
         where: {
           itemName: data.itemName,
