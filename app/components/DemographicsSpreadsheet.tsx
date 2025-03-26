@@ -85,7 +85,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
   return (
     <div className="overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-black bg-light-gray bg-opacity-70">
+        <thead className="text-white bg-purple">
           <tr>
             <th className="px-6 py-3">
               <div className="flex items-center justify-between">
@@ -136,7 +136,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
           {sortedItems.map((row, rowIndex) => (
             <tr key={rowIndex} className="bg-white border-b border-light-gray">
               {row.map((cell, colIndex) => (
-                <td key={colIndex} className="px-6 py-4">
+                <td key={colIndex} className="px-6 py-2">
                   {String(cell)}
                 </td>
               ))}
