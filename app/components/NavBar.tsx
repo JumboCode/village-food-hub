@@ -17,8 +17,13 @@ declare global {
     preventNavigation?: boolean;
   }
 }
-  
-export default function NavBar() {
+
+interface NavBarProps {
+    savedChanges?: boolean
+}
+
+export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
+//export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -28,6 +33,7 @@ export default function NavBar() {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
+    console.log("navBar useEffect is activated");
     if (isLoaded && user) {
       setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
       setIsAdmin(user.publicMetadata?.role === "Admin");
@@ -44,6 +50,16 @@ export default function NavBar() {
   }, []);
 
   console.log("User:", user?.firstName, user?.lastName);
+
+  const updateUser = async () => {
+    if (savedChanges == true) {
+      console.log("user first name was " + user?.firstName);
+      await user?.reload();
+    }
+    console.log("user first name is now " + user?.firstName);
+  }
+
+  updateUser();
 
   const handleSignOut = async () => {
     // Dispatch a custom event for external unsaved changes modal handling

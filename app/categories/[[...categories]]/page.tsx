@@ -4,7 +4,7 @@ import useSWR, { mutate } from "swr";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { NameDropdown } from '@app/components/Dropdowns';
-import NavBar from '@app/components/NavBar';
+import { NavBar } from '@app/components/NavBar';
 import CategoriesSpreadsheet from '@app/components/CategoriesSpreadsheet';
 import UnitBoxes from '@app/components/UnitBoxes';
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";

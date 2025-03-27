@@ -1,7 +1,7 @@
 "use client"
 import ProfileView from "@app/components/ProfileView";
 import React, { useState, useEffect, useRef } from "react";
-import NavBar from "@app/components/NavBar";
+import { NavBar } from "@app/components/NavBar";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ const MyProfilePage: React.FC = () => {
     const [unsavedChanges, setUnsavedChanges] = useState(false);
     const [showUnsavedModal, setShowUnsavedModal] = useState(false);
     const [destinationPage, setDestinationPage] = useState("");
+    const [savedChanges, setSavedChanges] = useState(false);
     
     // Store profile data in parent
     const [profileData, setProfileData] = useState({
@@ -88,6 +89,8 @@ const MyProfilePage: React.FC = () => {
         };
         setShowEditProfileView(false);
         setUnsavedChanges(false);
+        setSavedChanges(true);
+        console.log("there are saved changes");
         window.preventNavigation = false;
 
         try {
@@ -233,7 +236,7 @@ const MyProfilePage: React.FC = () => {
 
     return (
         <div>
-            <NavBar/>
+            <NavBar savedChanges={savedChanges}/>
             {showEditProfileView ? (
             <div>
                 <div className="p-[80px] pt-[50px]">

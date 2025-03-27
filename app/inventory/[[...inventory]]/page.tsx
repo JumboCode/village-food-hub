@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
-import NavBar from '@app/components/NavBar';
+import { NavBar } from '@app/components/NavBar';
 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
