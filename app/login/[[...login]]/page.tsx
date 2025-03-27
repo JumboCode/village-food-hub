@@ -127,12 +127,10 @@ const LoginPage: React.FC = () => {
   
         // Navigate based on role/username
         setTimeout(() => {
-          if (username === "customer") {
-            router.push('/welcome-page');
-          } else if (username === "volunteer") {
+          if (username === "volunteer") {
             router.push('/volunteer-landing');
           } else {
-            router.push('/inventory');
+            router.push('/overview');
           }
         }, 1000);
       } else {
