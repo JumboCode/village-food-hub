@@ -200,7 +200,7 @@ const Categories: React.FC = () => {
       }
   
       // instead of refreshing, reload categories and reselect
-      await loadCategoriesData();
+      await mutateCategories();
       setSelectedCategory(payload.name); // ensure dropdown persists
       setShowTable(true); // ensure table stays visible
       itemModalClosed(); // close the modal
