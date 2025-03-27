@@ -185,7 +185,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
   
           console.log(`Deleted inventory item: ${itemName} (${units})`);
           closeDeleteModal();
-          refreshPage();
+          setSortedItems(sortedItems.filter((item) => (item[0] != itemName) && (item[3] != units)))
+          
       } catch (error) {
           console.error("Inventory delete failed:", error);
       }
