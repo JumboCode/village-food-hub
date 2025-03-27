@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Image from 'next/image';
-import deleteIcon from '@app/images/delete.png';
-import downloadIcon from "@app/images/download.png";
-import editIcon from "@app/images/edit.png";
 import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 import QuantityModal from "@app/components/QuantityModal";
 
@@ -78,15 +75,15 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setSortedItems([...inventoryItems]);
     }, [inventoryItems]);
 
-    const sortAlphabetically = () => {
-        const sortedList = [...sortedItems].sort((a, b) =>
-            topSorted 
-                ? a[0].toString().localeCompare(b[0].toString()) 
-                : b[0].toString().localeCompare(a[0].toString())
-        );
-    
-        setSortedItems(sortedList);
-        setTopSorted(!topSorted);
+    const sortAlphabetically = (columnIndex: number) => {
+      const sortedList = [...sortedItems].sort((a, b) =>
+        topSorted
+          ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+          : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString())
+      );
+
+      setSortedItems(sortedList);
+      setTopSorted(!topSorted);
     };
 
     const sortQuantity = () => {
@@ -223,7 +220,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Item Name</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(0)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
@@ -231,7 +228,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Category</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(1)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
@@ -247,7 +244,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                   <div className="flex flex-row justify-between items-center">
                     <p>Units</p>
-                    <button onClick={sortAlphabetically}>
+                    <button onClick={() => sortAlphabetically(3)}>
                       <TiArrowUnsorted />
                     </button>
                   </div>
@@ -271,56 +268,51 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                   {item.map((data, subIndex) => (
                     <td
                       key={subIndex}
-                      className={`border-collapse border-zinc-200 border-2 py-2 px-3 ${
+                      className={`border-collapse border-zinc-200 border-2 px-3 ${
                         subIndex === item.length - 1 ? "hidden" : ""
                       }`}
                     >
                       {data}
                     </td>
                   ))}
-                  <td className="flex row justify-around border-collapse border-zinc-300 border-2 py-2 px-3">
-                    {/* Edit Icon: Opens the QuantityModal */}
-                    <Image
-                      src={editIcon}
-                      width={18}
-                      height={18}
-                      alt="edit Icon"
-                      className="cursor-pointer"
-                      onClick={() =>
-                        openQuantityModal(
-                          String(sortedItems[index][0]),
-                          String(sortedItems[index][3]),
-                          String(sortedItems[index][1])
-                        )
-                      }
-                    />
-                    {/* Delete Icon: Opens the DeleteInventoryModal */}
-                    <button onClick={() => openDeleteModal(sortedItems[index])}>
-                      <Image
-                        src={deleteIcon}
-                        width={18}
-                        height={18}
-                        alt="delete Icon"
+                  <td className="border-collapse border-zinc-200 border-2 border-y-1 text-center">
+                    <span className="inline-flex justify-center gap-6">
+                      {/* Edit Icon: Opens the QuantityModal */}
+                      <MdOutlineEdit
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          openQuantityModal(
+                            String(sortedItems[index][0]),
+                            String(sortedItems[index][3]),
+                            String(sortedItems[index][1])
+                          )
+                        }
                       />
-                    </button>
-                    {/* Quantity Modal */}
-                    {showQuantityModal && (
-                        <QuantityModal
-                            itemName={String(itemName)}
-                            units={String(units)}
-                            closeModal={closeQuantityModal}
-                            handleUpdate={handleUpdateQuantity}
-                            categoryName={String(currCategoryName)}
-                        />
-                    )}
-                    <button onClick={() => downloadCSV(item)}>
-                        <Image
-                            src={downloadIcon}
-                            width={18}
-                            height={18}
-                            alt="download Icon"
-                        />
-                    </button>
+
+                      {/* Delete Icon: Opens the DeleteInventoryModal */}
+                      <MdDeleteOutline
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() => openDeleteModal(sortedItems[index])}
+                      />
+
+                      {/* Quantity Modal */}
+                      {showQuantityModal && (
+                          <QuantityModal
+                              itemName={String(itemName)}
+                              units={String(units)}
+                              closeModal={closeQuantityModal}
+                              handleUpdate={handleUpdateQuantity}
+                              categoryName={String(currCategoryName)}
+                          />
+                      )}
+                      <MdOutlineFileDownload
+                          size={24}
+                          className="cursor-pointer"
+                          onClick={() => downloadCSV(item)}
+                      />
+                    </span>
                   </td>
                 </tr>
               ))}

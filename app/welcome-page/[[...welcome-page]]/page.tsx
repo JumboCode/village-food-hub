@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import welcomeScreenBG from '@app/images/welcome-screen-background.png';
 import welcomeBWLogo from '@app/images/welcome-bw-logo.png';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,7 @@ const DEFAULT_TRANSLATIONS = [
     "Please fill out this quick demographic survey",
     "each visit",
     "to help us grow and reach more people in the community!",
-    "Choose Language",
+    "Choose Language:",
     "English",
     "Spanish",
     "Click to Complete the Demographic Survey",
@@ -38,12 +38,12 @@ const WelcomePage: React.FC = () => {
     // Define a type for the translation tuple returned by the API.
     type TranslationTuple = [string, ...unknown[]];
 
-    const translateText = async (lang: string) => {
+    const translateText = useCallback(async (lang: string) => {
         if (lang === 'en') {
             setTranslations(DEFAULT_TRANSLATIONS);
             return;
         }
-
+    
         try {
             const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(DEFAULT_TRANSLATIONS.join('\n'))}`;
             const response = await fetch(url);
@@ -64,14 +64,14 @@ const WelcomePage: React.FC = () => {
             console.error("Translation error:", e);
             setTranslations(DEFAULT_TRANSLATIONS);
         }
-    };
+    }, []);    
 
     useEffect(() => {
         const savedLanguage = localStorage.getItem("language") || 'en';
         setLanguage(savedLanguage);
         translateText(savedLanguage);
         setLoading(false); 
-    }, []);
+    }, [translateText]);
 
     useEffect(() => {
         if (!loading) { 
@@ -79,7 +79,7 @@ const WelcomePage: React.FC = () => {
             translateText(language);
             setDropdownOpen(false);  
         }
-    }, [language, loading]);
+    }, [language, loading, translateText]);
 
     if (loading) {
         return null;
@@ -100,7 +100,7 @@ const WelcomePage: React.FC = () => {
                         className="flex h-4/5 w-1/2 absolute"
                     />
                     <div className="flex w-full justify-center items-center">
-                        <div className="flex h-3/4 w-2/5 text-black text-center absolute bg-white text-[2.5rem]">
+                        <div className="flex h-3/4 w-2/5 text-black text-center absolute bg-white text-[2.5rem] rounded-md">
                             <div className="box-content p-6 pt-14">
                                 <span className="font-bold">{translations[1]}</span>
                                 <br />
@@ -119,20 +119,19 @@ const WelcomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-col bg-white justify-center items-center p-10 pt-14 w-full space-y-10">
                     <div className="flex flex-row absolute top-[220px] space-x-5">
-                        <div className="text-black text-3xl crimson">{translations[4]}</div>
+                        <div className="text-black text-4xl crimson">{translations[4]}</div>
                         <div className="w-[200px] h-[35px] flex-col">
                             <button
-                                className="w-full h-full text-white bg-white hover:bg-modal-gray border-2 border-modal-gray font-medium rounded-lg text-sm text-center inline-flex items-center"
+                                className="w-full h-full mt-[3px] text-white bg-white hover:bg-modal-gray border-2 border-modal-gray font-medium rounded-lg text-md text-center inline-flex items-center"
                                 type="button"
                                 onClick={clickDropdown}
                             >
-                                <div className="font-bold text-black pl-4">
+                                <div className="font-bold text-black pl-4 text-2xl">
                                     {language === 'en' ? translations[5] : translations[6]}
                                 </div>
                             </button>
                             {dropdownOpen && (
-                                
-                                <div className="absolute top-[35px] text-black w-[200px] border-x-2 border-modal-gray rounded">
+                                <div className="absolute top-[35px] text-black w-[200px] border-2 border-x-2 border-modal-gray rounded">
                                     <button className="h-[35px] w-full hover:bg-[#ebf9e9]" onClick={() => setLanguage('en')}>
                                         <p className="h-full w-full pt-[5px]">{translations[5]}</p>
                                     </button>
@@ -143,9 +142,9 @@ const WelcomePage: React.FC = () => {
                             )}
                         </div>
                     </div>
-                    <div className="text-center text-black text-4xl crimson-bold">{translations[7]}</div>
-                    <div className="justify-center items-center pb-20">
-                        <button className="bg-[#7EB672] rounded-full text-white text-2xl p-5 px-8" onClick={startSurvey}>
+                    <div className="text-center text-black text-5xl crimson-bold pb-8">{translations[7]}</div>
+                    <div className="justify-center items-center pb-10">
+                        <button className="bg-[#7EB672] rounded-full text-white text-4xl p-5 px-8 hover:bg-dark-green" onClick={startSurvey}>
                             {translations[8]}
                         </button>
                     </div>

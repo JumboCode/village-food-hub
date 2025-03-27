@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
+function convertTZ(date: Date) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "EST"}));   
+   
+}
+
 // CREATE
 async function createDemographic(data: {
     phoneNumber: string,
@@ -73,7 +78,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
         }
 
-        record.lastVisitDate = new Date();
+        record.lastVisitDate = new Date()
+        record.lastVisitDate = convertTZ(record.lastVisitDate)
+        
+        console.log("IN THE POST METHOD, date is: ", record.lastVisitDate);
         record.previousVisitDates = [record.lastVisitDate];
 
         const response = await createDemographic({ ...record });
@@ -105,7 +113,8 @@ export async function PUT(req: NextRequest) {
         }
 
         record.lastVisitDate = new Date();
-
+        record.lastVisitDate = convertTZ(record.lastVisitDate);
+        
         // Fetch existing record to update `previousVisitDates`
         const existingRecord = await prisma.demographics.findUnique({
             where: { phoneNumber: record.phoneNumber },

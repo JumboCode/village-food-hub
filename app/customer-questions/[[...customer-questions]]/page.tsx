@@ -11,7 +11,6 @@ import Image from 'next/image';
 import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 import ExitModal from '@app/components/ExitModal';
-import useSWR from 'swr';
 
 interface Details {
   name: string;
@@ -509,7 +508,7 @@ const HouseholdSize: React.FC<{
   );
 };
 
-// -------------------- CustomerDonor --------------------
+// -------------------- CustomerDonor -------------------- //
 const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
   const [translations, setTranslations] = useState([
     "We have a demographic survey that is optional.",
@@ -634,7 +633,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     (async () => {
       await fetchNewRecord();
     })();
-  }, []);
+  }, [fetchNewRecord]);
 
   return (
     <div className="background-white font-black">
@@ -886,7 +885,7 @@ const DemographicsSurvey: React.FC = () => {
       console.error("Error: Phone number is required.");
       return;
     }
-    const currentDate = new Date();
+    let currentDate = new Date();
     const recordData = {
       phoneNumber: responses.phoneNumber,
       takeCount: responses.receive ? 1 : 0,
@@ -933,6 +932,7 @@ const DemographicsSurvey: React.FC = () => {
         if (!createResponse.ok) {
           throw new Error(`Failed to create record: ${await createResponse.text()}`);
         }
+        const data = createResponse.json()
         console.log("Record created successfully.");
       }
       setCurrentStep("confirmation");

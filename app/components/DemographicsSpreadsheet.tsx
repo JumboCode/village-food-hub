@@ -1,10 +1,8 @@
 "use client"
 import React, {useState, useEffect} from "react";
-import Image from 'next/image';
-import deleteIcon from '@app/images/delete.png';
 import DeleteDemographicsModal from "@app/components/DeleteDemographicsModal";
 import { TiArrowUnsorted } from "react-icons/ti";
-
+import { MdDeleteOutline } from "react-icons/md";
 
 interface DemographicsSpreadsheetProps {
     demographicsItems: (string | number)[][];
@@ -101,7 +99,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         <div className="relative overflow-x-auto crimson-regular font-crimson">
         <table className="table-auto w-full">
             <thead className ="font-crimson border- crimson-regular border-separate content-start">
-                <tr className="bg-dark-blue text-white text-lg align-left ">
+                <tr className="bg-dark-blue text-white text-lg align-left">
                 <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                     <div className="font-[20px] flex flex-row justify-between">
                         <p>Date</p>
@@ -161,21 +159,20 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                         {row.map((cell, colIndex) => (
                             <td
                                 key={colIndex}
-                                className="border-collapse border-zinc-200 border-2 border-y-1 py-2 px-3"
+                                className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
                             >
                                 {String(cell)}
                             </td>
                         ))}
-                        <td className="flex row justify-around border-collapse border-zinc-300 border-2 border-y-1 py-2 px-3">
-                            <Image
-                                src={deleteIcon}
-                                width={18}
-                                height={18}
-                                alt="delete Icon"
-                                className="cursor-pointer" 
-                                onClick={() => openModal(String(row[1]), String(row[2]))}
-                            />
-                            {showModal && <DeleteDemographicsModal userName={String(name)} closeModal={closeModal} handleDelete={handleDelete} /> }
+                        <td className="border-collapse border-zinc-200 border-2 border-y-1 px-3 text-center">
+                            <span className="inline-flex justify-center gap-3">
+                                <MdDeleteOutline
+                                    size={24}
+                                    className="cursor-pointer" 
+                                    onClick={() => openModal(String(row[1]), String(row[2]))}
+                                />
+                                {showModal && <DeleteDemographicsModal userName={String(name)} closeModal={closeModal} handleDelete={handleDelete} /> }
+                            </span>
                         </td>
                     </tr>
                 ))}

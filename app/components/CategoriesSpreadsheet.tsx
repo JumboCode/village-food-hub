@@ -1,10 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import deleteIcon from "@app/images/delete.png";
-import editIcon from "@app/images/edit.png";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
+import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 
 // --- Types and Interfaces ---
 
@@ -41,12 +39,13 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     setSortedItems([...categoryItems]);
   }, [categoryItems]);
 
-  const sortAlphabetically = () => {
+  const sortAlphabetically = (columnIndex: number) => {
     const sortedList = [...sortedItems].sort((a, b) =>
       topSorted
-        ? a[0].toString().localeCompare(b[0].toString())
-        : b[0].toString().localeCompare(a[0].toString())
+        ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+        : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString())
     );
+
     setSortedItems(sortedList);
     setTopSorted(!topSorted);
   };
@@ -298,7 +297,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                 <div className="flex flex-row justify-between items-center">
                   <p>Item Name</p>
                   {/* Sorting button */}
-                  <button onClick={() => sortAlphabetically()}>
+                  <button onClick={() => sortAlphabetically(0)}>
                     <TiArrowUnsorted />
                   </button>
                 </div>
@@ -306,7 +305,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               <th className="border-r-2 border-slate-400 py-2 px-3">
                 <div className="flex flex-row justify-between items-center">
                   <p>Units</p>
-                  <button onClick={() => sortAlphabetically()}>
+                  <button onClick={() => sortAlphabetically(1)}>
                     <TiArrowUnsorted />
                   </button>
                 </div>
@@ -323,11 +322,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                   </td>
                 ))}
                 <td className="flex row justify-around py-2 px-3">
-                  <Image
-                    src={editIcon}
-                    width={18}
-                    height={18}
-                    alt="edit Icon"
+                  <MdOutlineEdit
+                    size={24}
                     className="cursor-pointer"
                     onClick={() =>
                       openModal(
@@ -336,9 +332,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                       )
                     }
                   />
-                  <button onClick={() => openDeleteModal(categoryName, item, index)}>
-                    <Image src={deleteIcon} width={18} height={18} alt="delete Icon" />
-                  </button>
+                  <MdDeleteOutline 
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => openDeleteModal(categoryName, item, index)}
+                  />
                   {showEditModal && (
                     <EditModal
                       itemNameOld={currItemName}
@@ -396,15 +394,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               </div>
               <div className={`flex w-[25%] ${!itemWarning ? "justify-end" : "justify-center"} items-center pr-1`}>
                 {!itemWarning ? (
-                  <button onClick={() => setItemWarning(true)}>
-                    <Image
-                      src={deleteIcon}
-                      width={18}
-                      height={18}
-                      alt="delete Icon"
-                      className="h-4/5"
-                    />
-                  </button>
+                  <MdDeleteOutline
+                      size={24}
+                      className="cursor-pointer"
+                      onClick={() => setItemWarning(true)}
+                  />
                 ) : (
                   <div className="flex flex-col">
                     <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
@@ -493,15 +487,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                       </div>
                       <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
                         {unitWarning !== index ? (
-                          <button onClick={() => setUnitWarning(index)}>
-                            <Image
-                              src={deleteIcon}
-                              width={18}
-                              height={18}
-                              alt="delete Icon"
-                              className="h-4/5"
-                            />
-                          </button>
+                          <MdDeleteOutline
+                              size={24}
+                              className="cursor-pointer"
+                              onClick={() => setUnitWarning(index)}
+                          />
                         ) : (
                           <div className="flex flex-col">
                             <p className="font-crimson crimson-bold text-[#EB2B0C] text-[20px] text-center">
@@ -547,23 +537,23 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       {/* Confirmation Modal */}
       {deleteConfirmation && (
         <div className="flex absolute top-0 left-0 justify-center items-center w-full h-full z-20 bg-black bg-opacity-50">
-          <div className="flex flex-col justify-center space-y-3 w-[533px] py-[20px] px-[27px] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50">
-            <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C]">
-              Delete Menu
-            </p>
-            <p className="text-[32px] flex font-crimson crimson-semibold items-center justify-start">
-              {`${modalItem[0]} deleted.`}
-            </p>
-            <div className="flex justify-center items-center">
-              <button
-                className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282]"
-                onClick={() => closeDeleteModal()}
-              >
-                <p className="text-[#828282] text-[24px] font-crimson">
-                  Close
-                </p>
-              </button>
-            </div>
+          <div className="flex flex-col w-[533px] max-w-[90vw] bg-white rounded-[7px] border-[2px] border-[#EB2B0C] z-50 px-6 py-6 space-y-6">
+          <p className="text-[32px] font-crimson crimson-bold text-[#EB2B0C] break-words">
+            Delete Menu
+          </p>
+          <p className="text-[24px] font-crimson crimson-semibold break-words">
+            {`${modalItem[0]} deleted.`}
+          </p>
+          <div className="flex justify-center pt-4">
+            <button
+              className="w-[117px] h-[46px] rounded-[8px] border-[1px] border-[#828282] hover:bg-light-gray"
+              onClick={() => closeDeleteModal()}
+            >
+              <p className="text-[#828282] text-[24px] font-crimson">
+                Close
+              </p>
+            </button>
+          </div>
           </div>
         </div>
       )}

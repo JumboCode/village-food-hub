@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import NavBar from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
@@ -42,6 +42,7 @@ const fetchUsers = async (url: string): Promise<string[][]> => {
 const InternalViewManageUsersPage: React.FC = () => {
   // Use SWR to fetch users. SWR will cache and revalidate data automatically.
   const { data: users, error, mutate } = useSWR("/api/users", fetchUsers);
+  const isLoading = !users && !error;
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
@@ -64,6 +65,8 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   async function createUser() {
     setCreateUserError("\u00A0");
+
+    console.log("Creating user with data:", profileData);
     
     const trimmedData = {
         firstName: profileData.firstName.trim(),
@@ -75,6 +78,8 @@ const InternalViewManageUsersPage: React.FC = () => {
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
+
+    console.log("Trimmed Data:", trimmedData);
     
     if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
         !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
@@ -83,9 +88,14 @@ const InternalViewManageUsersPage: React.FC = () => {
         return;
     }
 
+    if (trimmedData.username.includes('@')) {
+        setCreateUserError("Username must not contain '@'");
+        return;
+    }
+
     try {
         // Make POST request to create user API endpoint
-        const response = await fetch("../../api/create-user", {
+        const response = await fetch("../../api/users", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -97,23 +107,19 @@ const InternalViewManageUsersPage: React.FC = () => {
         if (response.ok) {
             setShowCreateProfileView(false);
             
-            //  refresh the users list
-            fetch("../api/users", { method: 'GET' })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data?.data) {
-                  const formattedUsers = data.data.map((user) => [
-                    user.firstName || "N/A",
-                    user.lastName || "N/A",
-                    user.publicMetadata?.pronouns || "N/A",
-                    user.username || "N/A",
-                    user.emailAddresses?.[0]?.emailAddress || "N/A",
-                    user.publicMetadata?.role || "N/A",
-                    user.publicMetadata?.phoneNumber || "N/A",
-                  ]);
-                  setUsers(formattedUsers);
-                }
-              });
+            // reset fields
+            setProfileData({
+              firstName: "",
+              lastName: "",
+              username: "",
+              emailAddress: "",
+              pronouns: "",
+              role: "",
+              phoneNumber: "",
+              password: ""
+          });
+
+          await mutate(undefined, true);
         } else {
             setCreateUserError(data.error || "Error creating user");
         }
@@ -123,7 +129,6 @@ const InternalViewManageUsersPage: React.FC = () => {
         setCreateUserError("An unexpected error occurred. Please try again.");
     }
 }
-
 
   function handleCancelProfileView() {
     setCreateUserError("\u00A0")
@@ -144,7 +149,7 @@ const InternalViewManageUsersPage: React.FC = () => {
                 profileData={profileData}
                 setProfileData={setProfileData}
             />
-            <div>{createUserError}</div>
+            <div className="text-red">{createUserError}</div>
             <div>
               <button 
                 className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
@@ -175,12 +180,14 @@ const InternalViewManageUsersPage: React.FC = () => {
                 Error loading users.
               </div>
             )}
-            {users ? (
-              <ManageUsersSpreadsheet manageUsersItems={users} />
-            ) : (
-              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-                Loading users…
+            {isLoading ? (
+              <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
               </div>
+            ) : error ? (
+              <div className="text-center text-red-600">Error loading users.</div>
+            ) : (
+              <ManageUsersSpreadsheet manageUsersItems={users} />
             )}
           </div>
         </div>
