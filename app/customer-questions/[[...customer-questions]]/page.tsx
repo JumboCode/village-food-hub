@@ -8,7 +8,7 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
-import logo from '@app/images/logo.jpg';
+import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 import ExitModal from '@app/components/ExitModal';
 

@@ -8,23 +8,24 @@ import Banner from '@app/components/DemographicsSurveyBanner';
 import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 
-// This functions returns the thank you page for an unsaved demographic survey
-export default function UnsavedThankYou() {
+// This functions returns the thank you page for successfully submitting the 
+// demographic survey
+export default function SavedThankYou() {
 
     useEffect(() => {
-      const timer = setTimeout(() => {
-        window.location.href = "../welcome-page";
-      }, 30000);
+        const timer = setTimeout(() => {
+          window.location.href = "../welcome-page";
+        }, 30000);
+  
+        return () => clearTimeout(timer);
+      }, []);
 
-      return () => clearTimeout(timer);
-    }, []);
-    
     return (
-        <div className="background-white font-black"> 
+        <div className="background-white font-black" > 
             <Banner />
             <div className="font-crimson flex flex-col items-center text-black">
-                <h1 className="font-bold text-[36px] mt-12" >You exited the survey before completing it.</h1>
-                <h2 className="font-bold text-[36px] mt-6 mb-2 flex ">Your response was <p className = "text-red px-4">NOT</p> recorded</h2>
+                <h1 className="font-bold text-[36px] mt-12" >THANK YOU FOR COMPLETING THE SURVEY!</h1>
+                <p className="font-bold text-[36px] mt-6 mb-2">Village Food Hub will be able to grow with your help!</p>
                 <div className="">
                     <Image
                         src={logo}
