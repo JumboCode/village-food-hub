@@ -52,7 +52,7 @@ const InternalViewDemographicsPage: React.FC = () => {
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
   const transformedDemographics = useMemo(() => {
     if (!demographicsRawData) return [];
-    return demographicsRawData.map((record) => [
+    return demographicsRawData.map((record: any) => [
       record.lastVisitDate.split("T")[0],
       record.phoneNumber,
       record.name,
@@ -68,7 +68,7 @@ const InternalViewDemographicsPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState("");
   // Update filtered demographics when the search input or transformed data changes
   useEffect(() => {
-    const filtered = transformedDemographics.filter((item) =>
+    const filtered = transformedDemographics.filter((item: any) =>
       item[1].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[2].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[3].toUpperCase().includes(searchInput.toUpperCase())
