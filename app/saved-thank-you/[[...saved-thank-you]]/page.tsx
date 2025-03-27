@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import Banner from '@app/components/DemographicsSurveyBanner';
 
-import logo from '@app/images/logo 300x263.png';
+import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 
 // This functions returns the thank you page for successfully submitting the 

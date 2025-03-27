@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Banner from '../../components/UpdateInventoryBanner';
 
-import logo from '../../images/logo 300x263.png';
+import logo from '../../images/Logo 300x263.png';
 import arrow from '../../images/arrow.png';
 
 // This functions returns the thank you page for an unsaved demographic survey
