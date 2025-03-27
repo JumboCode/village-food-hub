@@ -138,8 +138,26 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             if (!response.ok) {
                 throw new Error("Error updating inventory data.");
             }
+            
+              setSortedItems(prevItems =>
+                prevItems.map(row => {
+                    const nameMatch = row[0] === itemName;
+                    const unitMatch = row[3] === units;
+                    const categoryMatch = row[1] === categoryName;
+    
+                    if (nameMatch && unitMatch && categoryMatch) {
+                        const updatedRow = [...row];
+                        updatedRow[2] = Number(quantityChange);
+                        updatedRow[4] = formatDate(new Date());
+                        return updatedRow;
+                    }
+                    return row;
+                })
+            );
+            
             closeQuantityModal();
-            refreshPage();
+            // refreshPage();
+            
             console.log("Updated successfully!");
           
         } catch (error) {
@@ -263,7 +281,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson">
-              {sortedItems.map((item, index) => (
+              { sortedItems.map((item, index) => (
                 <tr key={index} className="py-2">
                   {item.map((data, subIndex) => (
                     <td
