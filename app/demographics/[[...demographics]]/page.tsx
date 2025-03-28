@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
-import NavBar from "@app/components/NavBar";
+import { NavBar } from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal";

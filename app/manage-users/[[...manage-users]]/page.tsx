@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import NavBar from "@app/components/NavBar";
+import { NavBar } from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
 import { NewUserButton } from "@app/components/InternalViewButtons";
 import ProfileView from "@app/components/ProfileView";
