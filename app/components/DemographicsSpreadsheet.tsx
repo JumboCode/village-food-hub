@@ -161,7 +161,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                 key={colIndex}
                                 className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
                             >
-                                {String(cell)}
+                                {colIndex === 4 && Number(cell) >= 10 ? "10+" : String(cell)}
                             </td>
                         ))}
                         <td className="border-collapse border-zinc-200 border-2 border-y-1 px-3 text-center">
