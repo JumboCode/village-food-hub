@@ -123,7 +123,7 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
       ) : (
         <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
           {/* Logo Section */}
-          <div className="flex-shrink-0 mr-8">
+          <div className="flex-shrink-0 mr-8 cursor-pointer" onClick={() => router.push('/overview')}>
             <Image src={whiteOutlineLogo} alt="logo" width={112} height={91} />
           </div>
 
