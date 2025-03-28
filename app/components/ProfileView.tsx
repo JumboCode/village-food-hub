@@ -204,13 +204,15 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                     <label className="block font-crimson text-[20px] mb-1">
                         Role <span className="text-red">*</span>
                     </label>
-                    <input
+                    <select
                         value={profileData.role}
                         onChange={(e) => handleChangeMade(e, "role")}
-                        placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         disabled={isView}
-                    />
+                    >
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Admin</option>
+                    </select>
                 </div>
             </div>
 
@@ -270,7 +272,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder=""
-                        className="pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] bg-[#fafafa]"
+                        className="pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] bg-white"
                         // In edit and view modes, password should not be editable.
                         disabled={isView || isEdit}
                     />
