@@ -8,7 +8,7 @@ import PhoneNumberInput from '@app/components/PhoneNumberInput';
 import YesOrNo from '@app/components/YesOrNo';
 import ProgressBar from '@app/components/ProgressBar';
 import Image from 'next/image';
-import logo from '@app/images/logo.jpg';
+import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 import ExitModal from '@app/components/ExitModal';
 
@@ -885,7 +885,7 @@ const DemographicsSurvey: React.FC = () => {
       console.error("Error: Phone number is required.");
       return;
     }
-    let currentDate = new Date();
+    const currentDate = new Date();
     const recordData = {
       phoneNumber: responses.phoneNumber,
       takeCount: responses.receive ? 1 : 0,
@@ -1000,7 +1000,7 @@ const DemographicsSurvey: React.FC = () => {
                 : prevRecord?.address
                 ? `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`
                 : "N/A",                  
-                householdSize: prevRecord?.householdSize === 11 ? 10 : prevRecord?.householdSize ?? 0,
+                householdSize: prevRecord?.householdSize === 11 ? "10+" : prevRecord?.householdSize ?? 0,
             }}             
           />
         )}

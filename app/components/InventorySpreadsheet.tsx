@@ -38,6 +38,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const [itemName, setItemName] = useState<string | null>(null);
     const [units, setUnits] = useState<string | null>(null);
     const [currCategoryName, setCurrCategoryName] = useState<string | null>(null);
+    const [currentQuantity, setCurrentQuantity] = useState<number>(0);
 
     const closeQuantityModal = (): void => {
         setShowQuantityModal(false);
@@ -46,11 +47,12 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setCurrCategoryName(null);
     };
 
-    const openQuantityModal = (itemName: string, units: string, category: string): void => {
-        setShowQuantityModal(true);
-        setItemName(itemName);
-        setUnits(units);
-        setCurrCategoryName(category);
+    const openQuantityModal = (itemName: string, units: string, category: string, quantity: number): void => {
+      setShowQuantityModal(true);
+      setItemName(itemName);
+      setUnits(units);
+      setCurrCategoryName(category);
+      setCurrentQuantity(quantity);
     };
 
     const closeDeleteModal = (): void => {
@@ -138,8 +140,26 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             if (!response.ok) {
                 throw new Error("Error updating inventory data.");
             }
+            
+              setSortedItems(prevItems =>
+                prevItems.map(row => {
+                    const nameMatch = row[0] === itemName;
+                    const unitMatch = row[3] === units;
+                    const categoryMatch = row[1] === categoryName;
+    
+                    if (nameMatch && unitMatch && categoryMatch) {
+                        const updatedRow = [...row];
+                        updatedRow[2] = Number(quantityChange);
+                        updatedRow[4] = formatDate(new Date());
+                        return updatedRow;
+                    }
+                    return row;
+                })
+            );
+            
             closeQuantityModal();
-            refreshPage();
+            // refreshPage();
+            
             console.log("Updated successfully!");
           
         } catch (error) {
@@ -167,7 +187,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
   
           console.log(`Deleted inventory item: ${itemName} (${units})`);
           closeDeleteModal();
-          refreshPage();
+          setSortedItems(sortedItems.filter((item) => (item[0] != itemName) && (item[3] != units)))
+          
       } catch (error) {
           console.error("Inventory delete failed:", error);
       }
@@ -263,7 +284,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson">
-              {sortedItems.map((item, index) => (
+              { sortedItems.map((item, index) => (
                 <tr key={index} className="py-2">
                   {item.map((data, subIndex) => (
                     <td
@@ -285,7 +306,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                           openQuantityModal(
                             String(sortedItems[index][0]),
                             String(sortedItems[index][3]),
-                            String(sortedItems[index][1])
+                            String(sortedItems[index][1]),
+                            Number(sortedItems[index][2])
                           )
                         }
                       />
@@ -305,6 +327,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                               closeModal={closeQuantityModal}
                               handleUpdate={handleUpdateQuantity}
                               categoryName={String(currCategoryName)}
+                              currentQuantity={currentQuantity}
                           />
                       )}
                       <MdOutlineFileDownload

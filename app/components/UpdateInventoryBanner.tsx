@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import whiteOutlineLogo from '@app/images/headerLogo.png';
+import whiteOutlineLogo from '@app/images/non-blank headerLogo 160x130.png';
 
 export default function UpdateInventoryBanner() {
     return ( 
