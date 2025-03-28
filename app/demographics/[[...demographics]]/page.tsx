@@ -9,6 +9,7 @@ import ProgressBar from "@app/components/ProgressBar";
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
+import { useUser } from "@clerk/nextjs";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -45,6 +46,22 @@ async function fetchNeonData() {
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
+
+  // current user
+  const { user, isLoaded } = useUser();
+  const [loggedInUser, setLoggedInUser] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
+      setIsAdmin(user.publicMetadata?.role === "Admin");
+    } else {
+      setLoggedInUser("");
+      setIsAdmin(false);
+    }
+  }, [isLoaded, user]);
+  
   // Use SWR to fetch the raw demographics data
   const { data: demographicsRawData, error, isLoading } = useSWR('/api/demographics', fetcher);
 
@@ -206,13 +223,15 @@ const handleDelete = async () => {
             />
             <RunReportButton onClick={openModal} />
             {/* Button showing storage used with dynamic progress */}
-            <button
-              className="flex flex-col justify-center items-center w-[60px] space-y-[-5px]"
-              onClick={() => setShowStorageModal(true)}
-            >
-              <ProgressBar progress={storagePercent} />
-              <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
-            </button>
+            {(loggedInUser !== "" && isAdmin) &&
+              <button
+                className="flex flex-col justify-center items-center w-[60px] space-y-[-5px]"
+                onClick={() => setShowStorageModal(true)}
+              >
+                <ProgressBar progress={storagePercent} />
+                <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
+              </button>
+            }
             {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} />}
 
             {showStorageModal && (
