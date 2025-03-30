@@ -1,7 +1,7 @@
 'use client';
 import React from "react";
 import useSWR from "swr";
-import NavBar from '@app/components/NavBar';
+import { NavBar } from '@app/components/NavBar';
 import { useUser } from "@clerk/nextjs";
 
 // // Utility function to format date to dd/mm/yyyy

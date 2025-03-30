@@ -7,11 +7,11 @@
  *
  * Behavior:
  * - Unauthenticated users:
- *   - Can only access "/login".
+ *   - Can only access "/login" and customer questions including "/welcome-page", "/customer-questions", "/unsaved-thank-you".
  *   - Are redirected to "/login" if they attempt to visit any other page.
  * - Authenticated users:
  *   - Can access all pages.
- *   - Are redirected away from "/login" to "/inventory" (or another page) to avoid seeing the login page again.
+ *   - Are redirected away from "/login" to "/overview" (or another page) to avoid seeing the login page again.
  *
  * Technologies Used:
  * - Clerk for authentication
@@ -28,21 +28,36 @@ import { NextResponse } from 'next/server';
 
 // Define protected routes (everything except "/login")
 // const isProtectedRoute = createRouteMatcher(['/(.*)']);
+const isProtectedRoute = createRouteMatcher([
+  '/api(.*)',
+  '/categories(.*)',
+  '/demographics(.*)',
+  '/inventory(.*)',
+  '/manage-users(.*)',
+  '/my-profile(.*)',
+  '/overview(.*)',
+  '/volunteer-landing(.*)',
+  '/volunteer-add-pages(.*)',
+  '/volunteer-remove-pages(.*)',
+  '/volunteer-saved(.*)',
+  '/volunteer-unsaved(.*)',
+]);
 
-export default clerkMiddleware();
+// export default clerkMiddleware();
 
 // TODO: uncomment the below code once we know auth is working right
-// export default clerkMiddleware(async (auth, req) => {
-//   If the request is for a protected route and is NOT "/login", enforce authentication
-//   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !auth.userId) {
-//     return NextResponse.redirect(new URL('/login', req.url));
-//   }
-//   If an authenticated user visits "/login", redirect them to "/inventory"
-//   if (auth.userId && req.nextUrl.pathname === "/login") {
-//     return NextResponse.redirect(new URL('/inventory', req.url));
-//   }
-//   return NextResponse.next();
-// });
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth()
+  // If the request is for a protected route and is NOT "/login", enforce authentication
+  if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+  // If an authenticated user visits "/login", redirect them to "/overview"
+  if (userId && req.nextUrl.pathname === "/login") {
+    return NextResponse.redirect(new URL('/overview', req.url));
+  }
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
