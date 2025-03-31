@@ -29,7 +29,42 @@ import { NextResponse } from 'next/server';
 // Define protected routes (everything except "/login")
 // const isProtectedRoute = createRouteMatcher(['/(.*)']);
 
-export default clerkMiddleware();
+export default clerkMiddleware(async (auth, req) => {
+  const { pathname } = req.nextUrl;
+
+  // Protect API routes: If the request is for an API endpoint and there is no authenticated user,
+  // return a 401 Unauthorized response.
+  if (pathname.startsWith('/api')) {
+    if (!auth.userId) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized' }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+  } else {
+    // For non-API routes, enforce page redirection rules:
+    // 1. If unauthenticated and not on "/login", redirect to "/login".
+    if (!auth.userId && pathname !== '/login') {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+    // 2. If authenticated and trying to access "/login", redirect to "/inventory".
+    if (auth.userId && pathname === '/login') {
+      return NextResponse.redirect(new URL('/inventory', req.url));
+    }
+  }
+
+  return NextResponse.next();
+});
+
+
+
+
+
+
+// export default clerkMiddleware();
 
 // TODO: uncomment the below code once we know auth is working right
 // export default clerkMiddleware(async (auth, req) => {

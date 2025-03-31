@@ -7,6 +7,10 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
 
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { isNotVolunteer } from "@app/components/ProtectedUrl";
+
+
 const MyProfilePage: React.FC = () => {
     const router = useRouter();
 
@@ -27,7 +31,9 @@ const MyProfilePage: React.FC = () => {
         phoneNumber: "",
         password: ""
     });
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
+    const isLoading = !isLoaded;
+    
     const initialRender = useRef(true);
 
     useEffect(() => {
@@ -234,7 +240,12 @@ const MyProfilePage: React.FC = () => {
         window.preventNavigation = false;
     }
 
+    const userIsNotVolunteer = isNotVolunteer();
     return (
+        isLoading ? (
+            <LoadingAnimation/>
+        ) : userIsNotVolunteer ? (
+            
         <div>
             <NavBar savedChanges={savedChanges}/>
             {showEditProfileView ? (
@@ -403,6 +414,12 @@ const MyProfilePage: React.FC = () => {
             </div>
         )}
         </div>
+        ) : (
+            <div className="p-10 text-center">
+              <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+              <p className="mt-4">You do not have permission to view this page.</p>
+            </div>
+        )
     );
 };
 
