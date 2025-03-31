@@ -696,7 +696,7 @@ interface SurveyResponse {
     state: string;
     zip: string;
   };
-  householdSize: number | null;
+  householdSize: number | string | null;
   lastVisitDate: Date;
   previousVisitDates: Date[];
 }
