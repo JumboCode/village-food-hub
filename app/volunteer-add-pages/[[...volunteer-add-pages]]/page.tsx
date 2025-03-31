@@ -29,12 +29,10 @@ const VolunteerAddPages: React.FC = () => {
   const [nextDisabled, setNextDisabled] = useState(true);
 
   const handleNext = () => {
-    console.log('Next clicked, transitioning to confirm');
     setCurrentStep('confirm');
   };
 
   const handleBack = () => {
-    console.log('Back clicked, currentStep:', currentStep);
     if (currentStep === 'confirm') setCurrentStep('details');
     else window.location.href = "../volunteer-landing";
   };
@@ -90,7 +88,6 @@ const VolunteerAddPages: React.FC = () => {
           <ButtonNext 
             disabled={nextDisabled} 
             onClick={() => {
-              console.log(itemToAdd);
               handleNext();
             }} 
           />
@@ -221,7 +218,6 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ i
                       quantity: updatedQuantity,
                     }),
                   }).then(() => {
-                    console.log("Quantity updated successfully");
                     window.location.href = "../volunteer-saved";
                   });
                 } else {
@@ -233,7 +229,6 @@ const VolunteerAddConfirmModule: React.FC<VolunteerAddConfirmModuleProps> = ({ i
                     },
                     body: JSON.stringify(itemToAdd),
                   }).then(() => {
-                    console.log("Item created successfully");
                     window.location.href = "../volunteer-saved";
                   });
                 }

@@ -38,7 +38,6 @@ async function fetchNeonData() {
     const data = await response.json();
     return data.storageSize.project.written_data_bytes;
   } catch (error) {
-    console.error("Error fetching Neon data:", error);
   } 
    finally {
      //setIsLoading(false);
@@ -168,12 +167,10 @@ const handleDelete = async () => {
           body: JSON.stringify({ phoneNumber }),
         });
         if (!response.ok) {
-          console.error('Error Deleting Item, ${response.status}');
         }
       }
       window.location.reload();
     } catch (e) {
-      console.log("Error Deleting Category Items:", e);
     }
   };
 
@@ -191,7 +188,6 @@ const handleDelete = async () => {
     const mb = Number((bytes / (1024 * 1024)).toFixed(1));
     // Calculate percent as (used MB / 1000 MB) * 100
     const percent = Number(((mb / 1000) * 100).toFixed(1));
-    console.log(mb, percent);
     setStorageUsed(mb);
     setStoragePercent(percent);
   };
@@ -255,7 +251,6 @@ const handleDelete = async () => {
                               size={24}
                               className="cursor-pointer"
                               onClick={() => {
-                                console.log("in here");
                                 fetchNeonData();
                                 setShowStorageCancel(true);
                               }}

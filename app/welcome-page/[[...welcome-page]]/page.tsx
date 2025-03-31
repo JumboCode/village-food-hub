@@ -57,11 +57,9 @@ const WelcomePage: React.FC = () => {
                 const translatedTexts = (data[0] as TranslationTuple[]).map((t) => t[0]);
                 setTranslations(translatedTexts);
             } else {
-                console.error(`Unexpected response format for translation: ${JSON.stringify(data)}`);
                 setTranslations(DEFAULT_TRANSLATIONS);
             }
         } catch (e) {
-            console.error("Translation error:", e);
             setTranslations(DEFAULT_TRANSLATIONS);
         }
     }, []);    

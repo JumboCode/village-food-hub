@@ -20,11 +20,9 @@
 //     try {
 //         //TEST READ FOR EMPTY DATBASE 
 //         const testReadEmpty = await CRUD.getDemographic();
-//         console.log("read empty database", testReadEmpty);
     
 //         //TEST CREATE
 //         const testCreate = await CRUD.createDemographic(testData);
-//         console.log("created entry", testCreate);
         
 //         //TEST READ
 //         const testRead = await CRUD.getDemographic();
@@ -44,7 +42,6 @@
 //         if (createdEntry.address !== "13 Winthrop Street") {
 //             throw new Error("error creating address");
 //         }
-//         console.log("read entry", testRead);
        
 //         //TEST UPDATE
 //         const testUpdateData = {
@@ -75,17 +72,14 @@
 //         if (new Date(testUpdate.lastVisitDate).getTime() !== testUpdateData.lastVisitDate.getTime()) {
 //             throw new Error("lastVisitDate not updated");
 //         }
-//         console.log("updated entry", testUpdate); 
 
 //     } catch (error) {
-//         console.error("error", error)
 //     }
 // }
 
 // //we should have empty database after it deletes
 // main()
 //     .catch(e => {
-//         console.error(e);
 //     })
 //     .finally(async () => {
 //         //Deletes demographic that we made

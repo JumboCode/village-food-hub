@@ -88,7 +88,6 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 throw new Error("Error fetching demographics data.");
             }
             refreshPage();
-            console.log("Deleted successfully!");
             closeModal();
         } catch (error) {
             console.error(error);

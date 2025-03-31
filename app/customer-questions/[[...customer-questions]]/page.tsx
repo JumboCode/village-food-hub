@@ -53,7 +53,6 @@ const CustomerAction: React.FC<{
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -132,7 +131,6 @@ const PhoneNumber: React.FC<{
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -197,7 +195,6 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -265,7 +262,6 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -360,7 +356,6 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -470,7 +465,6 @@ const HouseholdSize: React.FC<{
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -535,7 +529,6 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -602,7 +595,6 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
         }
         setTranslations(newTranslations);
       } catch (error) {
-        console.error(error);
       }
     })();
   }, []);
@@ -622,10 +614,8 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
       const latestRecord = matchedRecords.sort((a, b) =>
         new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
       )[0];
-      console.log("Latest Record:", latestRecord);
       setNewRecord(latestRecord || null);
     } catch (error) {
-      console.error("Error fetching responses:", error);
     }
   };
 
@@ -770,15 +760,12 @@ const DemographicsSurvey: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const surveyResponses: SurveyResponse[] = await response.json();
-      console.log("Fetched responses:", surveyResponses);
       const filteredRecord = surveyResponses.find(
         (response) => response.phoneNumber === responses.phoneNumber
       );
-      console.log("Filtered Record:", filteredRecord);
       setPrevRecord(filteredRecord || null);
       return filteredRecord || null;
     } catch (error) {
-      console.error("Error fetching responses:", error);
       setPrevRecord(null);
       return null;
     }
@@ -802,11 +789,9 @@ const DemographicsSurvey: React.FC = () => {
         break;
       case 'phoneNum':
         if (!responses.phoneNumber) {
-          console.error("Phone number is missing before fetching records.");
           return;
         }
         const record = await fetchPrevRecord();
-        console.log("Fetched record before transition:", record);
         if (record !== null) {
           setCurrentStep('changes');
         } else {
@@ -831,7 +816,6 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('confirmation');
         break;
       case 'confirmation':
-        console.log('Survey Completed');
         break;
       default:
         break;
@@ -863,7 +847,6 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('name');
         break;
       case 'name':
-        console.log("previous record", prevRecord);
         if (prevRecord !== null) {
           setCurrentStep('changes');
         } else {
@@ -879,10 +862,7 @@ const DemographicsSurvey: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    console.log('Survey Responses:', responses);
-    console.log("Previous record before submission:", prevRecord);
     if (!responses.phoneNumber) {
-      console.error("Error: Phone number is required.");
       return;
     }
     const currentDate = new Date();
@@ -896,7 +876,6 @@ const DemographicsSurvey: React.FC = () => {
       lastVisitDate: responses.receive ? currentDate : null,
       previousVisitDates: [currentDate],
     };
-    console.log("Record data for submission:", recordData);
     try {
       if (prevRecord) {
         const updatedRecordData = {
@@ -912,7 +891,6 @@ const DemographicsSurvey: React.FC = () => {
             ? [...prevRecord.previousVisitDates, currentDate]
             : [currentDate],
         };
-        console.log("Updated record data for PUT request:", updatedRecordData);
         const updateResponse = await fetch("/api/demographics", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -921,9 +899,7 @@ const DemographicsSurvey: React.FC = () => {
         if (!updateResponse.ok) {
           throw new Error(`Failed to update record: ${await updateResponse.text()}`);
         }
-        console.log("Record updated successfully.");
       } else {
-        console.log("Creating a new record...");
         const createResponse = await fetch("/api/demographics", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -933,11 +909,9 @@ const DemographicsSurvey: React.FC = () => {
           throw new Error(`Failed to create record: ${await createResponse.text()}`);
         }
         const data = createResponse.json()
-        console.log("Record created successfully.");
       }
       setCurrentStep("confirmation");
     } catch (error) {
-      console.error("Error submitting survey:", error);
     }
   };
 

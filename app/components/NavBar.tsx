@@ -33,7 +33,6 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    console.log("navBar useEffect is activated");
     if (isLoaded && user) {
       setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
       setIsAdmin(user.publicMetadata?.role === "Admin");
@@ -49,14 +48,10 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
     }
   }, []);
 
-  console.log("User:", user?.firstName, user?.lastName);
-
   const updateUser = async () => {
     if (savedChanges == true) {
-      console.log("user first name was " + user?.firstName);
       await user?.reload();
     }
-    console.log("user first name is now " + user?.firstName);
   }
 
   updateUser();
@@ -67,7 +62,6 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
       detail: { intendedAction: "signOut" },
     });
     document.dispatchEvent(event);
-    console.log("signOut dispatch sent");
 
     // Wait for confirmation from an external event listener
     const confirmation = await new Promise<boolean>((resolve) => {
@@ -81,21 +75,18 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
     });    
 
     if (!confirmation) {
-      console.log("Sign out cancelled due to unsaved changes.");
       return;
     }
 
     // Proceed with sign out
     try {
       await signOut();
-      console.log("Sign out successful");
 
       setLoggedInUser("");
       setIsAdmin(false);
 
       router.push("/login");
     } catch (error) {
-      console.error("Error during sign-out:", error);
     }
   };
 
@@ -107,7 +98,6 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
       if (!("preventNavigation" in window) || !window.preventNavigation) {
         router.push(path);
       } else {
-        console.log(`Navigation to ${path} was blocked due to unsaved changes.`);
       }
     }, 100);
   };  

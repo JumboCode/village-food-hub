@@ -168,7 +168,6 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ data: items }, { status: 200 });
 
     } catch (_error) {
-      console.error("PATCH Error:", _error);
       return NextResponse.json({ data: "Failed to update inventory items" }, { status: 500 });
     }
 }
@@ -182,13 +181,11 @@ export async function POST(req: NextRequest) {
       const result = await createInventoryItem({
         ...body,
       });
-      console.log(result);
       return NextResponse.json(
         { message: 'Successfully Created', data: result }, 
         { status: 201 }
       );
     } catch (_error) {
-      console.error("POST Error:", _error);
       return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
     }
 }
@@ -198,7 +195,6 @@ export async function GET() {
     const result = await getInventoryItems();
     return NextResponse.json({ data: result }, { status: 200 });
   } catch (_error) {
-    console.error("GET Error:", _error);
     return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
   }
 }
@@ -213,8 +209,6 @@ export async function PUT(req: NextRequest) {
 
     const { itemName, units } = body;
     if (!itemName || !units) {
-      console.log(itemName);
-      console.log(units);
       return NextResponse.json({ message: 'Missing itemName or units' }, { status: 400 });
     }
 
@@ -224,11 +218,8 @@ export async function PUT(req: NextRequest) {
       ...body,
     });
 
-    console.log(result);
     return NextResponse.json({ message: 'OK', data: result }, { status: 200 });
   } catch (_error) {
-    console.error(_error);
-    console.error("PUT Error:", _error);
     return NextResponse.json({ message: 'Unexpected Error' }, { status: 500 });
   }
 }
@@ -254,11 +245,9 @@ export async function DELETE(req: NextRequest) {
       // Delete the inventory item
       const result = await deleteInventoryItem({ itemName, units });
 
-      console.log(`Deleted ${result.count} inventory records for "${itemName}" with unit "${units}"`);
       return NextResponse.json({ message: "Inventory item deleted successfully" }, { status: 200 });
 
   } catch (error) {
-    console.error("Inventory DELETE error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json({ message: "Unexpected Error", error: errorMessage }, { status: 500 });
   }

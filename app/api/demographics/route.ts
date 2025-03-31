@@ -81,14 +81,12 @@ export async function POST(req: NextRequest) {
         record.lastVisitDate = new Date()
         record.lastVisitDate = convertTZ(record.lastVisitDate)
         
-        console.log("IN THE POST METHOD, date is: ", record.lastVisitDate);
         record.previousVisitDates = [record.lastVisitDate];
 
         const response = await createDemographic({ ...record });
 
         return NextResponse.json(response, { status: 201 });
     } catch (error) {
-        console.log(error);
         return NextResponse.json({ response: "Failed to create record" }, { status: 500 });
     }
 }
@@ -99,7 +97,6 @@ export async function GET() {
         const items = await getDemographic();
         return NextResponse.json(items, { status: 200 });
     } catch (error) {
-        console.log(error);
         return NextResponse.json({ response: "Failed to get records" }, { status: 500 });
     }
 }
@@ -133,7 +130,6 @@ export async function PUT(req: NextRequest) {
 
         return NextResponse.json(updatedRecord, { status: 200 });
     } catch (error) {
-        console.log(error);
         return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
     }
 }
@@ -149,7 +145,6 @@ export async function DELETE(req: NextRequest) {
         const item = await deleteDemographic(data.phoneNumber);
         return NextResponse.json(item, { status: 200 });
     } catch (error) {
-        console.log(error);
         return NextResponse.json({ response: "Failed to delete record" }, { status: 500 });
     }
 }
@@ -191,7 +186,6 @@ function validDemographic(record: DemographicRecord): boolean {
 
         return fieldsMatch && Array.isArray(previousVisitDates);
     } catch (error) {
-        console.log(error);
         return false;
     }
 }

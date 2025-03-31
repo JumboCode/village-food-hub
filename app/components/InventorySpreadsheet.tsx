@@ -159,11 +159,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             
             closeQuantityModal();
             // refreshPage();
-            
-            console.log("Updated successfully!");
           
         } catch (error) {
-            console.log(error);
             closeQuantityModal();
         }
     };
@@ -184,8 +181,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               const errorMessage = await response.json();
               throw new Error(`Error deleting inventory: ${errorMessage.message}`);
           }
-  
-          console.log(`Deleted inventory item: ${itemName} (${units})`);
+
           closeDeleteModal();
           setSortedItems(sortedItems.filter((item) => (item[0] != itemName) && (item[3] != units)))
           
@@ -195,7 +191,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };      
 
     const downloadCSV = (item: (string | number)[]) => {
-        console.log(item);
         const itemName = item[0];
         const unitData = item[3];
         const historyData = item[5];

@@ -48,7 +48,6 @@ async function updateCategory(data: {
 
 async function deleteCategory(data: { itemName: string; name: string }) {
   // Basic delete for a specific category/item pair.
-  console.log("deleteCategory called with:", data);
   const { itemName, name } = data;
   return await prisma.categories.delete({
     where: {
@@ -61,8 +60,6 @@ async function deleteCategory(data: { itemName: string; name: string }) {
 }
 
 async function deleteInventoryItemsByCategoryName(name: string) {
-  console.log("Deleting all records for category:", name);
-
   // First, delete related inventory items
   await prisma.inventory.deleteMany({
     where: {
@@ -91,7 +88,6 @@ export async function POST(req: NextRequest) {
     const response = await createCategory({ ...record });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { response: "Failed to create record" },
       { status: 500 }
@@ -105,7 +101,6 @@ export async function GET() {
     const items = await readCategories();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { response: "Failed to get categories" },
       { status: 500 }
@@ -117,7 +112,6 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log("Received data in API:", data);
 
     const {
       oldCategoryName,
@@ -136,8 +130,6 @@ export async function PUT(req: NextRequest) {
 
     // CATEGORY RENAME
     if (isRenamingCategory) {
-      console.log(`Renaming category "${oldCategoryName}" → "${newCategoryName}"`);
-
       const updated = await prisma.categories.updateMany({
         where: {
           name: oldCategoryName,
@@ -165,8 +157,6 @@ export async function PUT(req: NextRequest) {
 
     // ITEM NAME OR UNIT UPDATE
     if (isUpdatingItem || (units && Array.isArray(units))) {
-      console.log("Updating item name or units...");
-
       const updatedCategory = await updateCategory({
         oldItemName,
         itemName,
@@ -196,8 +186,7 @@ export async function PUT(req: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error("Error in PUT:", error);
-    return NextResponse.json(
+      return NextResponse.json(
       { response: "Failed to update entry", error: error instanceof Error ? error.message : error },
       { status: 500 }
     );
@@ -213,16 +202,12 @@ export async function DELETE(req: NextRequest) {
     const parsed = await req.json();
     const data = parsed.data ?? parsed;
 
-    console.log("DELETE payload received:", data);
-
     if (!data.name || typeof data.name !== "string") {
-      console.log("Error: Missing category name in DELETE request.");
       return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
     if (data.itemName && typeof data.itemName === "string" && data.itemName.trim() !== "") {
       // Case 1: Delete a specific category/item pair
-      console.log("Deleting specific category/item pair:", data);
       const item = await deleteCategory({
         itemName: data.itemName,
         name: data.name,
@@ -243,7 +228,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ response: "Item deleted successfully", data: item }, { status: 200 });
     } else {
       // Case 2: Delete all records for the given category name + related inventory items
-      console.log("Deleting all records for category:", data.name);
       
       // Step 1: Find all inventory items that belong to this category
       const inventoryItems = await prisma.inventory.findMany({
@@ -265,7 +249,6 @@ export async function DELETE(req: NextRequest) {
       }, { status: 200 });
     }
   } catch (error) {
-    console.error("Error in DELETE:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json({ response: "Failed to delete record", error: errorMessage }, { status: 500 });
   }  

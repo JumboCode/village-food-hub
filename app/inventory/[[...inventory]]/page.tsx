@@ -92,7 +92,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
         setCategories([...new Set(filteredItems)]);
       } catch (error) {
-        console.error('Failed to fetch categories', error);
       }
     }
     if (fetchUrl) fetchCategories();

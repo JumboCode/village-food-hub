@@ -9,7 +9,6 @@ export async function GET() {
 
         return NextResponse.json({ storageSize }, { status: 200 });
     } catch (error) {
-        console.error("Error in storage endpoint:", error);
         return NextResponse.json({ response: "Internal Server Error" }, { status: 500 });
     }
 }
@@ -33,7 +32,6 @@ async function getStorageSize() {
         return data;
         
     } catch (error) {
-        console.error("Error fetching storage size:", error);
         return null;
     }
 }

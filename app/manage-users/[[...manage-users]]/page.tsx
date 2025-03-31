@@ -65,8 +65,6 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   async function createUser() {
     setCreateUserError("\u00A0");
-
-    console.log("Creating user with data:", profileData);
     
     const trimmedData = {
         firstName: profileData.firstName.trim(),
@@ -78,8 +76,6 @@ const InternalViewManageUsersPage: React.FC = () => {
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
-
-    console.log("Trimmed Data:", trimmedData);
     
     if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
         !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
@@ -125,7 +121,6 @@ const InternalViewManageUsersPage: React.FC = () => {
         }
     } catch (error) {
         // Handle any network or unexpected errors
-        console.error("Error creating user:", error);
         setCreateUserError("An unexpected error occurred. Please try again.");
     }
 }

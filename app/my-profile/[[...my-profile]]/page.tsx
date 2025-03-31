@@ -90,7 +90,6 @@ const MyProfilePage: React.FC = () => {
         setShowEditProfileView(false);
         setUnsavedChanges(false);
         setSavedChanges(true);
-        console.log("there are saved changes");
         window.preventNavigation = false;
 
         try {
@@ -103,14 +102,11 @@ const MyProfilePage: React.FC = () => {
           });
       
           if (response.ok) {
-            console.log("User updated successfully");
             setShowEditProfileView(false);
           } else {
-            console.error("Failed to update user data");
             setErrorMessage(result.error || "Failed to create user.");
           }
         } catch (error) {
-          console.error("Error updating user data:", error);
         }
       };
 
@@ -166,12 +162,10 @@ const MyProfilePage: React.FC = () => {
                         deleteUser(user?.id || "");
                     }
                 } else {
-                    console.error("Failed to delete user data");
                 }
             } )
         
         } catch (error) {
-            console.error("Error deleting user data:", error);
         }
     }
 
@@ -180,7 +174,6 @@ const MyProfilePage: React.FC = () => {
         try {
             // ensures id is a string
             if (!id && id !== "") {
-                console.error("No id provided for deletion");
                 return;
             }
             
@@ -197,7 +190,6 @@ const MyProfilePage: React.FC = () => {
             const result = await response.json();
             // if success
             if (response.ok) {
-                console.log("User deleted successfully:", result);
 
                 // show success modal
                 setShowDeleteSuccess(true);
@@ -212,13 +204,11 @@ const MyProfilePage: React.FC = () => {
                 
             // if fail, show fail modal
             } else {
-                console.error("Error deleting user:", result.error);
                 setShowDeleteFail(true);
                 setShowDeleteSuccess(false);
                 setShowDeleteModal(false);
             }
         } catch (error) {
-            console.error("User deletion failed:", error);
         }
     };    
     

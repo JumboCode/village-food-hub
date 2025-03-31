@@ -75,13 +75,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
             setViewProfileMode(true);
         } else {
             setError("Invalid mode: " + mode + " Mode must be 'create', 'edit' or 'view'");
-            console.log(error);
         }
     }, [mode]);
-
-    useEffect(() => {
-        if (error) console.log(error);
-    }, [error]);
     
     // Fetch user data from your API when the component mounts
     useEffect(() => {
@@ -116,12 +111,9 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                           password: "",
                         });
                       }
-                } else {
-                    console.error("Failed to fetch user data");
                 }
             }
             } catch (error) {
-                console.error("Error fetching user data:", error);
             }
         }
 
@@ -132,13 +124,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
     }, [mode, clerkUsername, setProfileData]);
 
     const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>, fieldType: string) => {
-        console.log("here");
         // setChangeMade(true);
         if (setUnsavedChanges) {
             setUnsavedChanges(true);
-            console.log('Unsaved Changes: true');
         }
-        // console.log("CHANGE HANDLED")
         if (setProfileData) {
             setProfileData(prev => ({ ...prev, [fieldType]: e.target.value }));
         }

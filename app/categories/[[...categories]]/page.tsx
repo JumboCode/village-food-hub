@@ -60,7 +60,6 @@ const Categories: React.FC = () => {
 
   // Open delete category modal.
   const openModal = (categoryName: string, itemName: string) => {
-    console.log("openModal called with categoryName:", categoryName, "itemName:", itemName);
     setShowModal(true);
     setCategoryName(categoryName);
     setItemName(itemName);
@@ -94,7 +93,6 @@ const Categories: React.FC = () => {
   const editButtonClicked = () => {
     setEditCategoryName(selectedCategory);
     setShowEditModal(true);
-    console.log("Edit category button was clicked.")
   };
 
   useEffect(() => {
@@ -163,7 +161,6 @@ const Categories: React.FC = () => {
       await refreshCategories(categoryName);
     } catch (err) {
       setShowRetrievalError(true);
-      console.error("Error saving category:", err);
     }
   };  
 
@@ -184,9 +181,7 @@ const Categories: React.FC = () => {
         name: selectedCategory.trim(),
         units: validUnits,
       };
-  
-      console.log("Sending payload:", payload);
-  
+    
       const response = await fetch("../api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,7 +189,6 @@ const Categories: React.FC = () => {
       });
   
       if (!response.ok) {
-        console.log("Server error response:", response);
         setShowRetrievalError(true);
         return;
       }
@@ -206,7 +200,6 @@ const Categories: React.FC = () => {
       itemModalClosed(); // close the modal
   
     } catch (err) {
-      console.log("Error in saveCategories:", err);
       setShowRetrievalError(true);
     }
   };  
@@ -251,7 +244,6 @@ const Categories: React.FC = () => {
       });
   
       if (!response.ok) {
-        console.error("Failed to update category:", response.status);
         setShowRetrievalError(true);
         return;
       }
@@ -259,7 +251,6 @@ const Categories: React.FC = () => {
       setShowEditModal(false);
       await refreshCategories(editCategoryName);
     } catch (err) {
-      console.error("Error editing category:", err);
       setShowRetrievalError(true);
     }
   };   
@@ -275,16 +266,12 @@ const Categories: React.FC = () => {
 
   // handleDelete: if itemName is provided, delete that specific record; otherwise, delete all records for the category.
   const handleDelete = async () => {
-    console.log("handleDelete triggered");
-    console.log("categoryName:", categoryName);
-    console.log("itemName:", itemName);
     if (!categoryName) {
       console.warn("No categoryName provided; aborting deletion.");
       return;
     }
     // Prepare payload for categories deletion.
     const payload = { name: categoryName, itemName: itemName ? itemName : "", units: units.join(', ') };
-    console.log("DELETE payload for categories:", payload);
     try {
       if (itemName && itemName.trim() !== "") {
         // Check inventory for record existence.
@@ -296,55 +283,42 @@ const Categories: React.FC = () => {
               (invItem: InventoryItem) => invItem.itemName === itemName
             );
             if (exists) {
-              console.log("Inventory record exists; attempting inventory deletion.");
               const invDeleteResponse = await fetch("/api/inventory", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ itemName, units: units.join(', ') }),
               });              
-              console.log("Inventory deletion response status:", invDeleteResponse.status);
             } else {
-              console.log("No inventory record found; skipping inventory deletion.");
             }
-          } else {
-            console.error("Failed to fetch inventory data; status:", invResponse.status);
           }
         } catch (e) {
-          console.error("Error checking inventory:", e);
         }
   
         // Delete specific category record.
-        console.log("Deleting specific category record for:", payload);
         const response = await fetch("../api/categories", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        console.log("Categories deletion response status:", response.status);
         if (!response.ok) {
           throw new Error("Error deleting specific category record.");
         }
         const resData = await response.json();
-        console.log("Categories deletion response data:", resData);
       } else {
         // Delete all records for the category by calling the DELETE endpoint with an empty itemName.
-        console.log("Deleting all records for category:", categoryName);
         const response = await fetch("../api/categories", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: categoryName, itemName: "" }),
         });
-        console.log("Categories deletion response status:", response.status);
         if (!response.ok) {
           throw new Error("Error deleting categories by name.");
         }
         const result = await response.json();
-        console.log("deleteCategoriesByName response:", result);
       }
       closeModal();
       await refreshCategories();
     } catch (error) {
-      console.error("Error in handleDelete:", error);
     }
   };
   

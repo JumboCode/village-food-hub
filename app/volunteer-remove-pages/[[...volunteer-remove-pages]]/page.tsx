@@ -31,12 +31,10 @@ const VolunteerRemovePages: React.FC = () => {
   const [validQuantity, setValidQuantity] = useState("");
 
   const handleNext = () => {
-    console.log('Next clicked, transitioning to confirm');
     setCurrentStep('confirm');
   };
 
   const handleBack = () => {
-    console.log('Back clicked, currentStep:', currentStep);
     if (currentStep === 'confirm')
       setCurrentStep('details');
     else 
@@ -99,7 +97,6 @@ const VolunteerRemovePages: React.FC = () => {
             onClick={() => {
               setItemExists("");
               setValidQuantity("");
-              console.log(itemToRemove);
               setItemToRemove({ ...itemToRemove, lastUpdated: new Date() });
               fetch("../api/inventory", { method: 'GET' })
                 .then((response) => {
@@ -126,10 +123,8 @@ const VolunteerRemovePages: React.FC = () => {
                   } else {
                     setItemExists("Item does not exist in inventory");
                   }
-                  console.log(items);
                 })
                 .catch((error) => {
-                  console.error('Error fetching inventory:', error);
                 });
               }}
             />
@@ -266,11 +261,9 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
                     })
                   })
               }
-              console.log(items)
               window.location.href = "../volunteer-saved";
             })
             .catch((error) => {
-              console.error('Error fetching inventory:', error);
             });
       }}/>
       </div>

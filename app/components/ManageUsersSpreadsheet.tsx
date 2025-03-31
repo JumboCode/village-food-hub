@@ -20,7 +20,6 @@ interface ClerkUser {
 }
 
 export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ manageUsersItems = [], isLoading = false }) => {
-    console.log("manageUsersItems:", manageUsersItems);
     const [firstName, setFirstName] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string | null>(null);
     const [username, setUsername] = useState<string | null>(null);
@@ -85,7 +84,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         setUsername(username);
     
         if (isLastAdmin(username)) {
-            console.log("Cannot edit the last Admin - Showing Admin modal");
             setShowAdminModal(true);
             return;
         }
@@ -108,7 +106,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         setUsername(username);
     
         if (isLastAdmin(username)) {
-            console.log("Cannot delete the last Admin - Showing Admin modal");
             setShowAdminModal(true);
             return;
         }
@@ -188,17 +185,12 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             // Check the number of remaining admins
             const adminUsers = data.data.filter((user: ClerkUser) => user.publicMetadata?.role === "Admin");
     
-            console.log(`Number of admins remaining: ${adminUsers.length}`);
-    
             if (adminUsers.length <= 1 && deleteUser.publicMetadata?.role === "Admin") {
-                console.log("Cannot delete the last admin - Showing modal");
                 setShowAdminModal(true);
                 return;
             }
-    
-            console.log("Deleting user:", deleteUser);
+
             
-            console.log("id: " + deleteUser.id);
             // Send DELETE request to backend
             const response = await fetch("/api/users", {
                 method: "DELETE",
@@ -207,10 +199,8 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             });
     
             const result = await response.json();
-            console.log("Delete Response:", result);
     
             if (response.ok) {
-                console.log("User deleted successfully:", result);
                 closeModals();
                 refreshPage();
             } else {

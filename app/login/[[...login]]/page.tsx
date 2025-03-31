@@ -27,14 +27,11 @@ const LoginPage: React.FC = () => {
     setHasMounted(true);
 
     if (isSignedIn) {
-      console.log("User is signed in on the login page, logging them out first...");
 
       signOut()
         .then(() => {
-          console.log("User successfully signed out. Ready for new login.");
           setHasLoggedOut(true);
         })
-        .catch(err => console.error("Error during sign-out:", err));
     }
   }, [isLoaded, isSignedIn, hasMounted, loginCompleted, signOut]);
 
@@ -95,7 +92,6 @@ const LoginPage: React.FC = () => {
     setIsLoggingIn(true);
   
     if (!signIn) {
-      console.error("signIn is undefined. Clerk may not be initialized yet.");
       setIsLoggingIn(false);
       return;
     }
@@ -117,11 +113,9 @@ const LoginPage: React.FC = () => {
   
     try {
       const result = await signIn.create({ identifier: username, password });
-      console.log("Sign in successful");
   
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        console.log("Session is active, marking login as complete...");
         setLoginCompleted(true);
         setIsLoggingIn(false);
   
@@ -134,11 +128,9 @@ const LoginPage: React.FC = () => {
           }
         }, 1000);
       } else {
-        console.warn("Unexpected sign-in status:", result.status);
         setIsLoggingIn(false);
       }
     } catch (error: unknown) {
-      console.error('Login error:', error);
       setIsLoggingIn(false);
   
       if (
@@ -150,7 +142,6 @@ const LoginPage: React.FC = () => {
         const firstError = (error as { errors: { code: string; longMessage?: string }[] }).errors[0];
   
         if (firstError?.longMessage?.includes("You're currently in single session mode")) {
-          console.warn("Single session mode error. Please try again after sign out.");
           return;
         }
   
@@ -173,19 +164,16 @@ const LoginPage: React.FC = () => {
   const handleSendCode = async () => {
     setErrorMsg('\u00A0')
     try {  
-      console.log(email);
       const response = await signIn
         ?.create({
           strategy: 'reset_password_email_code',
           identifier: email,
         })
-      console.log("Response:", response);
       setShowTypeEmail(false);
       setShowTypeCode(true);
     } catch (error : unknown) { 
       setErrorMsg("No account found with that email.")
       if (error instanceof Error) {
-        console.log("Error:", error.message);
       }
     }
   };
@@ -196,7 +184,6 @@ const LoginPage: React.FC = () => {
     setConfirmationMsg('');
 
     try {
-      console.log("Resending code to:", email);
       await signIn
         ?.create({
           strategy: 'reset_password_email_code',
@@ -206,7 +193,6 @@ const LoginPage: React.FC = () => {
       setShowTypeResentCode(true);
       setConfirmationMsg("A new reset code has been sent to your email.");
     } catch (error : unknown) {
-      console.log("Error resending code:", error);
       setErrorMsg("Error resending code. Please try again.");
     }
   };
@@ -259,7 +245,6 @@ const LoginPage: React.FC = () => {
             setErrorMsg(firstError.longMessage || "An error occurred. Please try again.");
         }
       } else {
-        console.error("Unexpected error format:", error);
         setErrorMsg("An unexpected error occurred.");
       }
     }    

@@ -5,7 +5,6 @@
 // async function main() {
 //   //test 1: read empty database
 //   let response = await CRUD.getInventoryItems();
-//   console.log(response);
 //   if (response.length != 0) {
 //     throw new Error("length not 0");
 //   }
@@ -18,7 +17,6 @@
 //                      units: "pounds", 
 //                      lastUpdated: new Date(2024, 10, 27)})
                      
-//   console.log(response);
 //   if (response.itemName !== "carrots") {
 //     throw new Error("itemName not carrots");
 //   }
@@ -36,7 +34,6 @@
 //   }
 //   //check number of entries
 //   response = await CRUD.getInventoryItems();
-//   console.log(response);
 //   if (response.length != 1) {
 //     throw new Error("length not 1");
 //   }
@@ -66,7 +63,6 @@
 //   }
 //   //make sure number of entries stays 1
 //   response = await CRUD.getInventoryItems();
-//   console.log(response);
 //   if (response.length != 1) {
 //     throw new Error("length not 1");
 //   }
@@ -96,7 +92,6 @@
 //   }
 //   //check number of entries is 2
 //   response = await CRUD.getInventoryItems();
-//   console.log(response);
 //   if (response.length != 2) {
 //     throw new Error("length not 2");
 //   }
@@ -105,7 +100,6 @@
 //   await CRUD.deleteInventoryItem("carrots");
 //   await CRUD.deleteInventoryItem("apples");
 //   response = await CRUD.getInventoryItems();
-//   console.log(response);
 //   if (response.length != 0) {
 //     throw new Error("length not 0");
 //   } else {
@@ -116,7 +110,6 @@
 
 // main()
 //   .catch(e => {
-//     console.error(e);
 //   })
 //   .finally(async () => {
 //     await CRUD.deleteInventoryItem("carrots");

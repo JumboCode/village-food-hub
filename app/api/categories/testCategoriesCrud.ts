@@ -14,11 +14,9 @@
     
 //     try {
 //         const testReadEmpty = await CRUD.readCategories();
-//         console.log("read empty database", testReadEmpty);
         
 //         //TEST CREATE
 //         const testCreate = await CRUD.createCategory(testData);
-//         console.log("created entry", testCreate);
         
 //         //TEST READ
 //         const testRead = await CRUD.readCategories();
@@ -32,7 +30,6 @@
 //         if (createdEntry.units[0] !== 'bunch') {
 //             throw new Error("error creating units");
 //         }
-//         console.log("read entry", testRead);
 
 //         const testUpdateData = {
 //             itemName : 'banana',
@@ -43,20 +40,16 @@
 //         if (testUpdate.units[0] !== 'bag') {
 //             throw new Error("error updating units");
 //         }
-//         console.log("updated entry", testUpdate);
         
 //         const deleteData = {
 //             itemName: "banana",
 //             name: "fruit"
 //         }
 //         const testDelete = await CRUD.deleteCategory(deleteData);
-//         console.log("deleted entry");
 //         const testReadAfterDelete = await CRUD.readCategories();
-//         console.log("read after delete", testReadAfterDelete);
 
 //     }
 //     catch (error) {
-//         console.log(error);
 //     }
 // }
 

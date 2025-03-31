@@ -33,7 +33,6 @@ import { useUser } from "@clerk/nextjs";
 //   const jsonData = await response.json();
 //   const data = jsonData.data;
 //   if (!Array.isArray(data)) {
-//     console.log("not an array");
 //     return [];
 //   }
 //   const listOfLists = data.map((object: InventoryRaw) => {

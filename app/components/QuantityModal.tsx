@@ -20,7 +20,6 @@ const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName,
             setShowQuantityError(true);
         } else {
             handleUpdate(itemName, units, quantityChange, categoryName); 
-            console.log("updating");
         }
     };
 
