@@ -8,12 +8,6 @@ async function createCategory(data: {
   name: string;
   units: string[];
 }) {
-  if (data.units.length > 5) {
-    return NextResponse.json(
-      { response: "Units must not exceed 5" },
-      { status: 404 }
-    );
-  }
   return await prisma.categories.create({
     data: {
       itemName: data.itemName,
@@ -38,12 +32,6 @@ async function updateCategory(data: {
   name: string;     // category name (unchanged)
   units: string[];
 }) {
-  if (data.units.length > 5) {
-    return NextResponse.json(
-      { response: "Units must not exceed 5" },
-      { status: 404 }
-    );
-  }
   return await prisma.categories.update({
     where: {
       itemName_name: {
@@ -98,6 +86,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { response: "Invalid data format" },
         { status: 400 }
+      );
+    }
+    if (record.units.length > 5) {
+      return NextResponse.json(
+        { response: "Units must not exceed 5" },
+        { status: 404 }
       );
     }
     const response = await createCategory({ ...record });
@@ -186,7 +180,12 @@ export async function PUT(req: NextRequest) {
         units,
       });
 
-
+      if (units.length > 5) {
+        return NextResponse.json(
+          { response: "Units must not exceed 5" },
+          { status: 404 }
+        );
+      }
 
       // Sync inventory entries
       await prisma.inventory.updateMany({
