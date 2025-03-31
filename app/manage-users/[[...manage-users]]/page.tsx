@@ -74,7 +74,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         username: profileData.username.trim(),
         emailAddress: profileData.emailAddress.trim(),
         pronouns: profileData.pronouns.trim(),
-        role: profileData.role.trim(),
+        role: profileData.role.trim() == "" ? "Staff" : profileData.role.trim(),
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
