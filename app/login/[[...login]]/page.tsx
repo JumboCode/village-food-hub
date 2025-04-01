@@ -71,7 +71,6 @@ const LoginPage: React.FC = () => {
   const [emptyPasswordError, setEmptyPasswordError] = useState(false)
 
   const handleGoBack = () => {
-    console.log("going back", username, password)
     setErrorMsg('\u00A0');
     if (showTypeEmail) {
       setShowTypeEmail(false);
