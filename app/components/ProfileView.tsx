@@ -204,15 +204,13 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                     <label className="block font-crimson text-[20px] mb-1">
                         Role <span className="text-red">*</span>
                     </label>
-                    <select
+                    <input
                         value={profileData.role}
                         onChange={(e) => handleChangeMade(e, "role")}
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView}
+                        disabled={isView || isEdit}
                     >
-                        <option value="Staff">Staff</option>
-                        <option value="Admin">Admin</option>
-                    </select>
+                    </input>
                 </div>
             </div>
 
