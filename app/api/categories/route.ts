@@ -88,6 +88,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    if (record.units.length > 5) {
+      return NextResponse.json(
+        { response: "Units must not exceed 5" },
+        { status: 404 }
+      );
+    }
     const response = await createCategory({ ...record });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
@@ -173,6 +179,13 @@ export async function PUT(req: NextRequest) {
         name,
         units,
       });
+
+      if (units.length > 5) {
+        return NextResponse.json(
+          { response: "Units must not exceed 5" },
+          { status: 404 }
+        );
+      }
 
       // Sync inventory entries
       await prisma.inventory.updateMany({
