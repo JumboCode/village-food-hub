@@ -220,7 +220,7 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
         <div className="text-[20px] font-bold mb-4">
           <p>{translations[1]} <span className="font-normal">{details.name}</span></p>
           <p>{translations[2]} <span className="font-normal">{details.address}</span></p>
-          <p>{translations[3]} <span className="font-normal">{details.householdSize}</span></p>
+          <p>{translations[3]} <span className="font-normal">{details.householdSize === 11 ? "10+" : details.householdSize}</span></p>
         </div>
 
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
@@ -696,7 +696,7 @@ interface SurveyResponse {
     state: string;
     zip: string;
   };
-  householdSize: number | string | null;
+  householdSize: number | null;
   lastVisitDate: Date;
   previousVisitDates: Date[];
 }
@@ -1000,7 +1000,7 @@ const DemographicsSurvey: React.FC = () => {
                 : prevRecord?.address
                 ? `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`
                 : "N/A",                  
-                householdSize: prevRecord?.householdSize === 11 ? "10+" : prevRecord?.householdSize ?? 0,
+              householdSize: prevRecord?.householdSize ?? 0
             }}             
           />
         )}

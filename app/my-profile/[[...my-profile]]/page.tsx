@@ -7,6 +7,14 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
 
+interface User {
+    id: string;
+    username: string;
+    publicMetadata: {
+      role: string;
+    };
+}
+
 const MyProfilePage: React.FC = () => {
     const router = useRouter();
 
@@ -15,6 +23,7 @@ const MyProfilePage: React.FC = () => {
     const [showUnsavedModal, setShowUnsavedModal] = useState(false);
     const [destinationPage, setDestinationPage] = useState("");
     const [savedChanges, setSavedChanges] = useState(false);
+    const [validationError, setValidationError] = useState<string>("");
     
     // Store profile data in parent
     const [profileData, setProfileData] = useState({
@@ -78,6 +87,7 @@ const MyProfilePage: React.FC = () => {
 
     // This function will be called when "Save Changes" is pressed.
     const handleSaveChange = async () => {
+        if (!validateProfileData()) return;
         
         const updatedData = {
           userId: user?.id,
@@ -87,10 +97,10 @@ const MyProfilePage: React.FC = () => {
           role: profileData.role,
           phoneNumber: profileData.phoneNumber,
         };
+
         setShowEditProfileView(false);
         setUnsavedChanges(false);
         setSavedChanges(true);
-        console.log("there are saved changes");
         window.preventNavigation = false;
 
         try {
@@ -107,10 +117,11 @@ const MyProfilePage: React.FC = () => {
             setShowEditProfileView(false);
           } else {
             console.error("Failed to update user data");
-            setErrorMessage(result.error || "Failed to create user.");
+            setValidationError("Failed to update user data.");
           }
         } catch (error) {
           console.error("Error updating user data:", error);
+          setValidationError("Unexpected error occurred.");
         }
       };
 
@@ -147,7 +158,7 @@ const MyProfilePage: React.FC = () => {
                     // determines number of "Admin" accounts
                     // count number of admins left
                     let adminCount = 0;
-                    data.data.forEach((user: any) => {
+                    data.data.forEach((user: User) => {
                         if (user.publicMetadata.role === "Admin") { adminCount = adminCount + 1; }
                     })
                     
@@ -220,7 +231,34 @@ const MyProfilePage: React.FC = () => {
         } catch (error) {
             console.error("User deletion failed:", error);
         }
-    };    
+    };   
+    
+    const validateProfileData = (): boolean => {
+        const requiredFields = [
+          { key: 'firstName', label: 'First Name' },
+          { key: 'lastName', label: 'Last Name' },
+          { key: 'username', label: 'Username' },
+          { key: 'emailAddress', label: 'Email Address' },
+          { key: 'role', label: 'Role' },
+          { key: 'phoneNumber', label: 'Phone Number' },
+        ];
+      
+        for (const field of requiredFields) {
+          const value = profileData[field.key as keyof typeof profileData];
+          if (!value.trim()) {
+            setValidationError(`${field.label} is required.`);
+            return false;
+          }
+        }
+      
+        if (!profileData.password.trim() && !showEditProfileView) {
+          setValidationError("Password is required.");
+          return false;
+        }
+      
+        setValidationError("");
+        return true;
+    };           
     
     // signs user out and redirects to login page
     const { signOut } = useClerk();
@@ -245,11 +283,18 @@ const MyProfilePage: React.FC = () => {
                     <ProfileView visible={showEditProfileView} mode="edit" onCancel={handleCancelProfileView} 
                         profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
                     <div>
+                    
+                    {/* Save Changes Button */}
+                    {validationError && (
+                    <p className="text-red font-crimson text-[18px] mt-4 mb-[-15px]">{validationError}</p>
+                    )}
                     <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px]"
                         onClick={handleSaveChange}
                         >
                         Save Changes
                     </button>
+
+                    {/* Cancel Button */}
                     <button 
                         className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] border-[2px] border-gray"
                         onClick={handleCancelProfileView}
