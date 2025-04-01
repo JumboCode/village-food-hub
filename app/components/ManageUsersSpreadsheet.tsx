@@ -125,10 +125,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
         setUsername(null);
     };
 
-    const refreshPage = () => {
-        window.location.reload();
-    };
-
     const handleSave = async (updatedRole: string, userId: string) => {
         try {
             if (!userId) {
@@ -152,9 +148,21 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 const errorData = await response.json();
                 throw new Error(errorData.error || "Failed to update user");
             }
-    
+            
+            setSortedItems(prevItems =>
+                prevItems.map(row =>
+                    row[3] === username
+                        ? [...row.slice(0, 5), updatedRole, ...row.slice(6)]
+                        : row
+                )
+            );
+
+            setAllUsers(prevUsers =>
+                prevUsers.map(user =>
+                    user[1] === username ? [user[0], user[1], updatedRole] : user
+                )
+            );
             closeModals();
-            window.location.reload();  
         } catch (error) {
             console.error("Error updating user:", error);
             alert("Failed to update user. Please try again.");
@@ -211,8 +219,16 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     
             if (response.ok) {
                 console.log("User deleted successfully:", result);
+
+                // Update sortedItems and allUsers state to reflect the deletion
+                setSortedItems(prevItems =>
+                    prevItems.filter(row => row[3] !== username)
+                );
+
+                setAllUsers(prevUsers =>
+                    prevUsers.filter(user => user[1] !== username)
+                );
                 closeModals();
-                refreshPage();
             } else {
                 console.error("Error deleting user:", result.error);
             }
