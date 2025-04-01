@@ -130,10 +130,20 @@ const InternalViewManageUsersPage: React.FC = () => {
     }
 }
 
-  function handleCancelProfileView() {
-    setCreateUserError("\u00A0")
-    setShowCreateProfileView(false);
-  }
+function handleCancelProfileView() {
+  setCreateUserError("\u00A0");
+  setProfileData({
+    firstName: "",
+    lastName: "",
+    username: "",
+    emailAddress: "",
+    pronouns: "",
+    role: "",
+    phoneNumber: "",
+    password: ""
+  });
+  setShowCreateProfileView(false);
+}
 
   return (
     <div>
