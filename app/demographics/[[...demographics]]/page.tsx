@@ -63,13 +63,13 @@ const InternalViewDemographicsPage: React.FC = () => {
   }, [isLoaded, user]);
   
   // Use SWR to fetch the raw demographics data
-  const { data: demographicsRawData, error, isLoading } = useSWR('/api/demographics', fetcher);
+  const { data: demographicsRawData, isLoading } = useSWR('/api/demographics', fetcher);
 
   // Transform raw data into the format expected by the spreadsheet:
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
   const transformedDemographics = useMemo(() => {
     if (!demographicsRawData) return [];
-    return demographicsRawData.map((record: any) => [
+    return demographicsRawData.map((record: DemographicsRecord) => [
       record.lastVisitDate.split("T")[0],
       record.phoneNumber,
       record.name,
@@ -85,7 +85,7 @@ const InternalViewDemographicsPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState("");
   // Update filtered demographics when the search input or transformed data changes
   useEffect(() => {
-    const filtered = transformedDemographics.filter((item: any) =>
+    const filtered = transformedDemographics.filter((item: string[]) =>
       item[1].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[2].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[3].toUpperCase().includes(searchInput.toUpperCase())

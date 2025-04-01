@@ -73,7 +73,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         lastName: profileData.lastName.trim(),
         username: profileData.username.trim(),
         emailAddress: profileData.emailAddress.trim(),
-        pronouns: profileData.pronouns.trim(),
+        pronouns: profileData.pronouns.trim() || "N/A",
         role: profileData.role.trim() == "" ? "Staff" : profileData.role.trim(),
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
@@ -197,7 +197,7 @@ function handleCancelProfileView() {
             ) : error ? (
               <div className="text-center text-red-600">Error loading users.</div>
             ) : (
-              <ManageUsersSpreadsheet manageUsersItems={users} />
+              <ManageUsersSpreadsheet manageUsersItems={users ?? []} />
             )}
           </div>
         </div>

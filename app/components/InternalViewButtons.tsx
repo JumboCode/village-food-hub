@@ -67,7 +67,6 @@ export const RunReportButton = ({ onClick, disabled }: RunReportButtonProps) => 
       <div className="flex flex-row py-2 px-3">
         <MdOutlineFileDownload
             size={24}
-            alt="Run Report button"
             className="cursor-pointer text-white mt-[2px]"
         />
         <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson text-white pl-2">

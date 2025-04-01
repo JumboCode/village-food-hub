@@ -221,13 +221,13 @@ const Categories: React.FC = () => {
       return;
     }
   
-    if (Object.keys(categoriesData).includes(editCategoryName)) {
+    if (categoriesData && Object.keys(categoriesData).includes(editCategoryName)) {
       setShowDuplicateError(true);
       return;
     }
   
     try {
-      const items = categoriesData[selectedCategory] ?? [];
+      const items = categoriesData?.[selectedCategory] ?? [];
       const firstItemName = items?.[0]?.[0]?.trim() ?? "";
       const unitString = items?.[0]?.[1] ?? "";
       const units = unitString.split(",").map((u) => u.trim()).filter(Boolean);
@@ -429,8 +429,8 @@ const Categories: React.FC = () => {
               <>
                 <CategoriesSpreadsheet 
                   categoryName={selectedCategory}
-                  categoryItems={categoriesData[selectedCategory] || []}
-                  loadData={mutateCategories}
+                  categoryItems={categoriesData?.[selectedCategory] || []}
+                  loadData={async () => { await mutateCategories(); }} 
                 />
                 {selectedCategoryData.length === 0 && (
                   <p className="flex-center py-4 font-crimson text-[20px] text-center">
