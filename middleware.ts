@@ -43,9 +43,6 @@ const isProtectedRoute = createRouteMatcher([
   '/volunteer-unsaved(.*)',
 ]);
 
-// export default clerkMiddleware();
-
-// TODO: uncomment the below code once we know auth is working right
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth()
   // If the request is for a protected route and is NOT "/login", enforce authentication
@@ -53,9 +50,9 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL('/login', req.url));
   }
   // If an authenticated user visits "/login", redirect them to "/overview"
-  if (userId && req.nextUrl.pathname === "/login") {
+  if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
     return NextResponse.redirect(new URL('/overview', req.url));
-  }
+  }  
   return NextResponse.next();
 });
 

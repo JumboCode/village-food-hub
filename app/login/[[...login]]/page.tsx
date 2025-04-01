@@ -22,22 +22,26 @@ const LoginPage: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded || hasMounted || loginCompleted) return;
-
-    setHasMounted(true);
-
-    if (isSignedIn) {
-      console.log("User is signed in on the login page, logging them out first...");
-
-      signOut()
-        .then(() => {
-          console.log("User successfully signed out. Ready for new login.");
-          setHasLoggedOut(true);
-        })
-        .catch(err => console.error("Error during sign-out:", err));
+    if (typeof window === "undefined") return; // SSR safety
+    const params = new URLSearchParams(window.location.search);
+    const justSignedOut = params.get("justSignedOut");
+  
+    console.log("[LoginPage] useEffect triggered with:", {
+      isLoaded,
+      isSignedIn,
+      justSignedOut,
+      hasLoggedOut,
+      loginCompleted,
+    });
+  
+    if (!isLoaded) return;
+  
+    if (isSignedIn && !justSignedOut) {
+      console.log("[LoginPage] User is signed in. Triggering signOut...");
+      signOut({ redirectUrl: "/login?justSignedOut=true" });
+      setHasLoggedOut(true);
     }
-  }, [isLoaded, isSignedIn, hasMounted, loginCompleted, signOut]);
-
+  }, [isSignedIn, isLoaded]);  
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
