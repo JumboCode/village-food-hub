@@ -307,6 +307,7 @@ const LoginPage: React.FC = () => {
                 type="text"
                 id="username"
                 className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                defaultValue={username || ""}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
                 required
@@ -327,6 +328,7 @@ const LoginPage: React.FC = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 className="w-full bg-gray bg-opacity-30 border-2 rounded-md border-light-green text-white focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
+                defaultValue={password || ""}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 required
@@ -387,6 +389,7 @@ const LoginPage: React.FC = () => {
                   id="password-reset"
                   className="w-full bg-gray bg-opacity-30 text-white border-2 rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                   placeholder="Email"
+                  defaultValue={email || ""}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />    
@@ -486,6 +489,7 @@ const LoginPage: React.FC = () => {
                 <label className="block mb-2 text-2xl text-white">Reset Code</label>
                 <input
                   type="text"
+
                   id="reset-code"
                   className="w-full bg-gray bg-opacity-30 border-2 text-white rounded-md border-light-green focus:border-2 focus:rounded-md focus:border-dark-green focus:ring-0 placeholder-neutral-400"
                   placeholder="Reset Code"
