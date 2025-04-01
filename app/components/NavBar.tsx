@@ -62,42 +62,14 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
   updateUser();
 
   const handleSignOut = async () => {
-    // Dispatch a custom event for external unsaved changes modal handling
-    const event = new CustomEvent("signOutClicked", {
-      detail: { intendedAction: "signOut" },
-    });
-    document.dispatchEvent(event);
-    console.log("signOut dispatch sent");
-
-    // Wait for confirmation from an external event listener
-    const confirmation = await new Promise<boolean>((resolve) => {
-      const handleConfirm = (event: Event) => {
-        const customEvent = event as CustomEvent<{ confirmed: boolean }>;
-        document.removeEventListener("signOutConfirmed", handleConfirm);
-        resolve(customEvent.detail?.confirmed ?? false);
-      };
-    
-      document.addEventListener("signOutConfirmed", handleConfirm);
-    });    
-
-    if (!confirmation) {
-      console.log("Sign out cancelled due to unsaved changes.");
-      return;
-    }
-
-    // Proceed with sign out
     try {
-      await signOut();
-      console.log("Sign out successful");
-
-      setLoggedInUser("");
-      setIsAdmin(false);
-
-      router.push("/login");
+      console.log("Attempting to sign out...");
+      await signOut({ redirectUrl: "/login?justSignedOut=true" });
+      console.log("Signed out successfully");
     } catch (error) {
-      console.error("Error during sign-out:", error);
+      console.error("Sign-out error:", error);
     }
-  };
+  };  
 
   const handleNavigation = (eventName: string, path: string) => {
     const event = new CustomEvent(eventName, { detail: { intendedPage: path } });
@@ -197,7 +169,7 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
                     )}
                     <li
                       className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={() => handleNavigation("signOutClicked", "/login")}
+                      onClick={handleSignOut}
                     >
                       <Image src={icon} alt="icon" width={24} height={24} className="mr-2" />
                       Sign Out
