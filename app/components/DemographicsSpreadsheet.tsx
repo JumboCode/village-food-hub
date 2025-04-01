@@ -66,11 +66,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         setSelectedData(null); 
         setName(null);
       };
-
-      const refreshPage = () => {
-        window.location.reload();
-      };
-   
+      
       const handleDelete = async () => {
         if (!selectedData) return;
         
@@ -87,7 +83,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
             if (!response.ok) {
                 throw new Error("Error fetching demographics data.");
             }
-            refreshPage();
+            setSortedItems(sortedItems.filter((item) => (item[2] != name)))
             console.log("Deleted successfully!");
             closeModal();
         } catch (error) {
