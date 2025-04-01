@@ -220,7 +220,6 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             if (response.ok) {
                 console.log("User deleted successfully:", result);
 
-                // From Chat :(
                 // Update sortedItems and allUsers state to reflect the deletion
                 setSortedItems(prevItems =>
                     prevItems.filter(row => row[3] !== username)
