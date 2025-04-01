@@ -4,12 +4,14 @@ import Image, { StaticImageData } from 'next/image';
 interface AddUnitBoxProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showLabel: boolean;
 }
 
-function AddUnitBox({ value, onChange }: AddUnitBoxProps) {
+function AddUnitBox({ value, onChange, showLabel }: AddUnitBoxProps) {
   return (
     <div className='flex ml-[5%] mb-2'>
-      <div className="font-crimson text-[28px] w-24 items-center">Units</div>
+      {showLabel && <div className="font-crimson text-[28px] w-24 items-center">Units</div>}
+      {!showLabel && <div className="font-crimson text-[28px] w-24 items-center"></div>}
       <input
         type="text"
         value={value}
@@ -60,6 +62,7 @@ const UnitBoxes: React.FC<UnitBoxesProps> = ({ icon, onUnitsChange, initialUnits
           <AddUnitBox 
             value={unitValues[index] || ""} 
             onChange={(e) => handleInputChange(index, e.target.value)} 
+            showLabel={index === 0}
           />
           {index === unitCount - 1 && unitCount < 5 && (
             <button onClick={addUnit} className='ml-2'>
