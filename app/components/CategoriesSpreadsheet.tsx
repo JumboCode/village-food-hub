@@ -386,13 +386,13 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                 Item
               </p>
               <div className="flex w-[60%] px-[30px]">
-                <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
-                  itemWarning && "rounded-[13px] border-[3px] border-[#EB2B0C]"
+                <div className={`overflow-x-auto flex text-[24px] items-center w-full pl-[5px] h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
+                  itemWarning && "border-[#EB2B0C]"
                 }`}>
                   {modalItem[0]}
-                </p>
+                </div>
               </div>
-              <div className={`flex w-[25%] ${!itemWarning ? "justify-end" : "justify-center"} items-center pr-1`}>
+              <div className={`flex w-[25%] justify-center items-center pr-1`}>
                 {!itemWarning ? (
                   <MdDeleteOutline
                       size={24}
@@ -479,13 +479,13 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                         Units
                       </p>
                       <div className="flex w-[60%] px-[30px]">
-                        <p className={`flex text-[24px] items-center w-full pl-[20px] h-[50px] font-crimson ${
-                          unitWarning === index && "rounded-[13px] border-[3px] border-[#EB2B0C]"
+                        <div className={`overflow-x-auto text-[24px] items-center w-full pl-[5px] h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
+                          unitWarning === index && "border-[#EB2B0C]"
                         }`}>
                           {unitItem}
-                        </p>
+                        </div>
                       </div>
-                      <div className={`flex w-[25%] ${unitWarning !== index ? "justify-end" : "justify-center"} items-center pr-1`}>
+                      <div className={`flex w-[25%] justify-center items-center pr-1`}>
                         {unitWarning !== index ? (
                           <MdDeleteOutline
                               size={24}
