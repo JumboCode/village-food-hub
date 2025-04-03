@@ -112,7 +112,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                   type="checkbox"
                   checked={selectedCategories.includes(category)}
                   onChange={e => handleCheckboxChange(category, e.target.checked)}
-                  className="w-4 h-4"
+                  className="w-4 h-4 focus:outline-none focus:ring-0"
                 />
                 <p className="text-lg cursor-pointer">{category}</p>
               </div>
