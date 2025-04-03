@@ -81,12 +81,33 @@ const InternalViewManageUsersPage: React.FC = () => {
 
     console.log("Trimmed Data:", trimmedData);
     
-    if (!trimmedData.firstName || !trimmedData.lastName || !trimmedData.username || 
-        !trimmedData.emailAddress || !trimmedData.pronouns || !trimmedData.role || 
-        !trimmedData.phoneNumber || !trimmedData.password) {
+    if (trimmedData.role === "Volunteer") {
+      if (
+        !trimmedData.username ||
+        !trimmedData.emailAddress ||
+        !trimmedData.role ||
+        !trimmedData.password
+      ) {
         setCreateUserError("Please enter all required fields");
         return;
+      }
+    } else {
+      // For non-Volunteer roles, require all fields
+      if (
+        !trimmedData.firstName ||
+        !trimmedData.lastName ||
+        !trimmedData.username ||
+        !trimmedData.emailAddress ||
+        !trimmedData.pronouns ||
+        !trimmedData.role ||
+        !trimmedData.phoneNumber ||
+        !trimmedData.password
+      ) {
+        setCreateUserError("Please enter all required fields");
+        return;
+      }
     }
+  
 
     if (trimmedData.username.includes('@')) {
         setCreateUserError("Username must not contain '@'");

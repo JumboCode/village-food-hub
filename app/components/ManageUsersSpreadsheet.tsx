@@ -5,6 +5,7 @@ import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import DeleteUserModal from "@app/components/DeleteUserModal";
 import EditUserModal from "@app/components/EditUserModal";
+import Snackbar from '@mui/material/Snackbar';
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
@@ -31,6 +32,8 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     const [selectedUser, setSelectedUser] = useState<ClerkUser | null>(null);
     const [sortedItems, setSortedItems] = useState<string[][]>([]);
     const [topSorted, setTopSorted] = useState<boolean>(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("Role for volunteer cannot be changed. You can create a new volunteer by deleting this user first and creating a new one through the create user button.");
 
     useEffect(() => {
         setSortedItems(manageUsersItems);
@@ -80,6 +83,13 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     };    
     
     const openEditModal = (firstName: string, lastName: string, username: string, role: string) => {
+        if (username == "volunteer") {
+            setShowEditModal(false);
+            setSnackbarOpen(true);
+            return;
+
+        }
+        
         setFirstName(firstName);
         setLastName(lastName);
         setUsername(username);
@@ -355,6 +365,14 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 </div>
             </div>
             }
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+            />
+
         </div>
     )
 }
