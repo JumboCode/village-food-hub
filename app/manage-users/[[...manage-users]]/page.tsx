@@ -121,7 +121,7 @@ const InternalViewManageUsersPage: React.FC = () => {
 
           await mutate(undefined, true);
         } else {
-            setCreateUserError(data.error || "Error creating user");
+            setCreateUserError(data.error == "email_address must be a valid email address." ? "Email address must be a valid email address." : data.error || "Error creating user");
         }
     } catch (error) {
         // Handle any network or unexpected errors

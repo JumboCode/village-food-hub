@@ -204,7 +204,7 @@ const InternalViewInventoryPage: React.FC = () => {
         ) : (
           <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
             {appliedFilters.length > 0 
-              ? `There are no items under ${appliedFilters.join(', ')}.`
+              ? `${searchInput} not found under ${appliedFilters.join(', ')}.`
               : "There are currently no items in the inventory database matching the searched item."}
           </div>
         )}
