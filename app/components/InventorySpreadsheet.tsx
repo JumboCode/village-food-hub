@@ -194,22 +194,30 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
       }
     };      
 
-    const downloadCSV = (item: (string | number)[]) => {
-        console.log(item);
-        const itemName = item[0];
-        const unitData = item[3];
-        const historyData = item[5];
-        
+    const downloadCSV = async (item: (string | number)[]) => { 
+      const itemName = item[0];
+      const unitData = item[3];
+      
+      try {
+        const response = await fetch("/api/inventory", { method: "GET" });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch inventory data");
+        }
+
+        const { data } = await response.json(); // Extract data from response
+        if (!Array.isArray(data)) {
+            throw new Error("Invalid inventory data format");
+        }
+
+        // Filter to find the matching item
+        const matchedItem = data.find(
+            (item: any) => item.itemName === itemName && item.units === unitData
+        );
+
         // Build a key to extract the relevant history records
         const key = `${itemName}_${unitData}`;
-        let historyRecords: InventoryHistoryRecord[] = [];
-        try {
-            // Parse historyData as a JSON object whose keys map to arrays of InventoryHistoryRecord
-            const parsedData = JSON.parse(historyData as string) as Record<string, InventoryHistoryRecord[]>;
-            historyRecords = parsedData?.[key] ?? [];
-        } catch (e) {
-            console.error("Error parsing history data:", e);
-        }
+        const historyRecords = matchedItem["history"][key];
 
         const headers = ["date", "quantity-change", "action-of-change"];
         const rows = [
@@ -231,6 +239,10 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    } catch (error) {
+        console.error("Error fetching inventory item:", error);
+        return null;
+    }
     };
 
     return (
