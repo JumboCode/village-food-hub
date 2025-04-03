@@ -268,7 +268,7 @@ const MyProfilePage: React.FC = () => {
     
     const handleCloseModal = () => {
         setShowUnsavedModal(false);
-        setUnsavedChanges(false);
+        // setUnsavedChanges(false);
         window.preventNavigation = false;
     }
 
