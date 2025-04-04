@@ -9,7 +9,7 @@ import ProgressBar from "@app/components/ProgressBar";
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -23,11 +23,25 @@ interface DemographicsRecord {
   previousVisitDates: string[];
 }
 // A simple fetcher function for SWR
-const fetcher = (url: string) =>
-  fetch(url).then((res) => {
-    if (!res.ok) throw new Error("Error fetching data");
+const useSecureFetcher = () => {
+  const { getToken } = useAuth();
+
+  return async (url: string) => {
+    const token = await getToken();
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Fetch error ${res.status}: ${errorText}`);
+    }
+
     return res.json();
-  });
+  };
+};
 
 // Neon fetch function remains the same
 async function fetchNeonData() {
@@ -63,7 +77,14 @@ const InternalViewDemographicsPage: React.FC = () => {
   }, [isLoaded, user]);
   
   // Use SWR to fetch the raw demographics data
-  const { data: demographicsRawData, isLoading } = useSWR('/api/demographics', fetcher);
+  const shouldFetch = isLoaded && isAdmin;
+
+  const secureFetcher = useSecureFetcher();
+
+  const { data: demographicsRawData, isLoading } = useSWR(
+    shouldFetch ? '/api/demographics' : null,
+    secureFetcher
+  );
 
   // Transform raw data into the format expected by the spreadsheet:
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
@@ -162,7 +183,7 @@ const handleDelete = async () => {
     try {
       for (const row of transformedDemographics) {
         const phoneNumber = row[1];
-        const response = await fetch("../api/demographics", {
+        const response = await fetch("/api/demographics", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phoneNumber }),

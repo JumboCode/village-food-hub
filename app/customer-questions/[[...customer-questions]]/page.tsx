@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
@@ -609,30 +609,43 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
 
   const [newRecord, setNewRecord] = useState<NewResponse | null>(null);
 
-  const fetchNewRecord = async () => {
+  const fetchNewRecord = useCallback(async () => {
     try {
-      const response = await fetch("../api/demographics", { method: "GET" });
+      const response = await fetch(`/api/demographics?phoneNumber=${encodeURIComponent(phoneNumber)}`);
+  
+      if (response.status === 204) {
+        console.log("No content returned (204), setting newRecord to null.");
+        setNewRecord(null);
+        return;
+      }
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const newResponses: NewResponse[] = await response.json();
-      const matchedRecords = newResponses.filter(
+  
+      const data = await response.json();
+  
+      const records: NewResponse[] = Array.isArray(data) ? data : [data];
+  
+      const matchedRecords = records.filter(
         (record) => record.phoneNumber === phoneNumber
       );
+  
       const latestRecord = matchedRecords.sort((a, b) =>
         new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
       )[0];
+  
       console.log("Latest Record:", latestRecord);
       setNewRecord(latestRecord || null);
+  
     } catch (error) {
       console.error("Error fetching responses:", error);
+      setNewRecord(null);
     }
-  };
+  }, [phoneNumber]);
 
   useEffect(() => {
-    (async () => {
-      await fetchNewRecord();
-    })();
+    fetchNewRecord();
   }, [fetchNewRecord]);
 
   return (
@@ -765,24 +778,36 @@ const DemographicsSurvey: React.FC = () => {
 
   const fetchPrevRecord = async () => {
     try {
-      const response = await fetch("../api/demographics", { method: "GET" });
+      const response = await fetch(`/api/demographics?phoneNumber=${encodeURIComponent(responses.phoneNumber)}`);
+  
+      // ✅ Return early if response is 204 No Content
+      if (response.status === 204) {
+        console.log("No content returned (204), setting prevRecord to null.");
+        setPrevRecord(null);
+        return null;
+      }
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const surveyResponses: SurveyResponse[] = await response.json();
-      console.log("Fetched responses:", surveyResponses);
-      const filteredRecord = surveyResponses.find(
-        (response) => response.phoneNumber === responses.phoneNumber
-      );
-      console.log("Filtered Record:", filteredRecord);
+  
+      // ✅ Only call .json() after making sure it’s not empty
+      const data = await response.json();
+  
+      // Handle array or object formats (defensive programming)
+      const filteredRecord = Array.isArray(data)
+        ? data.find((r) => r.phoneNumber === responses.phoneNumber)
+        : data;
+  
       setPrevRecord(filteredRecord || null);
       return filteredRecord || null;
+  
     } catch (error) {
       console.error("Error fetching responses:", error);
       setPrevRecord(null);
       return null;
     }
-  };
+  };  
 
   useEffect(() => {
     if (responses.phoneNumber) {

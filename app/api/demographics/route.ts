@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from "@clerk/nextjs/server";
+
 const prisma = new PrismaClient()
 
 function convertTZ(date: Date) {
@@ -94,13 +96,34 @@ export async function POST(req: NextRequest) {
 }
 
 // GET
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const { userId, user } = auth();
+    const phoneNumber = req.nextUrl.searchParams.get("phoneNumber");
+  
     try {
-        const items = await getDemographic();
-        return NextResponse.json(items, { status: 200 });
+      if (phoneNumber) {
+        const record = await prisma.demographics.findUnique({
+          where: { phoneNumber },
+        });
+  
+        if (!record) {
+          return new NextResponse(null, { status: 204 });
+        }
+  
+        return NextResponse.json(record, { status: 200 });
+      }
+  
+      // check admin role for full list
+      if (!userId || user?.publicMetadata?.role !== "Admin") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
+  
+      const items = await prisma.demographics.findMany();
+      return NextResponse.json(items, { status: 200 });
+  
     } catch (error) {
-        console.log(error);
-        return NextResponse.json({ response: "Failed to get records" }, { status: 500 });
+      console.error("Failed to get demographic record:", error);
+      return NextResponse.json({ response: "Failed to get records" }, { status: 500 });
     }
 }
 

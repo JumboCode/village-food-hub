@@ -44,15 +44,51 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth()
-  // If the request is for a protected route and is NOT "/login", enforce authentication
-  if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
+  const { userId, user } = await auth();
+  const { pathname, searchParams } = req.nextUrl;
+
+  // Allow unauthenticated GET requests with phoneNumber query to /api/demographics
+  if (
+    pathname === '/api/demographics' &&
+    req.method === 'GET' &&
+    searchParams.has('phoneNumber')
+  ) {
+    return NextResponse.next();
+  }
+
+  // Allow unauthenticated POST and PUT to /api/demographics
+  if (
+    pathname === '/api/demographics' &&
+    (req.method === 'POST' || req.method === 'PUT')
+  ) {
+    return NextResponse.next();
+  }
+
+  // Allow GET /api/demographics only if user is admin
+  if (
+    pathname === '/api/demographics' &&
+    req.method === 'GET' &&
+    !searchParams.has('phoneNumber')
+  ) {
+    if (!userId || user?.publicMetadata?.role !== 'Admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: admin role required for full data access' },
+        { status: 403 }
+      );
+    }
+    return NextResponse.next();
+  }
+
+  // Protect all other sensitive routes
+  if (isProtectedRoute(req) && pathname !== "/login" && !userId) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
-  // If an authenticated user visits "/login", redirect them to "/overview"
-  if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
+
+  // Redirect authenticated users away from login
+  if (userId && pathname === "/login" && !searchParams.has("justSignedOut")) {
     return NextResponse.redirect(new URL('/overview', req.url));
-  }  
+  }
+
   return NextResponse.next();
 });
 
