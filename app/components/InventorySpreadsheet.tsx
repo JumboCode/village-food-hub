@@ -8,6 +8,12 @@ interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
 }
 
+interface InventoryItem {
+  itemName: string;
+  units: string;
+  history: Record<string, InventoryHistoryRecord[]>;
+}
+
 interface InventoryHistoryRecord {
     date: string; // or Date if preferred, but string is used for formatting
     quantityChanged: number;
@@ -112,10 +118,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
         setDateAscending(!DateAscending); 
     };
 
-    const refreshPage = () => {
-        window.location.reload();
-    };
-
     const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: number, categoryName: string) => {
         if (!itemName || !units) return;
 
@@ -158,7 +160,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             );
             
             closeQuantityModal();
-            // refreshPage();
             
             console.log("Updated successfully!");
           
@@ -212,7 +213,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
         // Filter to find the matching item
         const matchedItem = data.find(
-            (item: any) => item.itemName === itemName && item.units === unitData
+            (item: InventoryItem) => item.itemName === itemName && item.units === unitData
         );
 
         // Build a key to extract the relevant history records
