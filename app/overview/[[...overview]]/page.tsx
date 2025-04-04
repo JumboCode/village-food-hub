@@ -101,7 +101,7 @@ const OverviewPage: React.FC = () => {
         data: visitFrequencyData,
         backgroundColor: [
           "#3498DB", "#507c0c", "#24593D", "#EB2B0C", "#C31C01", "#3851BC", 
-          "#293b8b", "#828282", "#000000", "#FFFFFF"
+          "#293b8b", "#828282", "#000000", "#ffe070"
         ],
         borderWidth: 1,
       },
@@ -117,8 +117,9 @@ const OverviewPage: React.FC = () => {
         <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
           Welcome back, {user.firstName}! Here is an overview of this month!
         </div>}
-        <div className="grid grid-cols-3 gap-4"> 
-          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md border-t-4 border-light-green">
+        <div className="bg-light-green bg-opacity-20 p-6 rounded-xl shadow-inner mt-6">
+          <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading12 ? (
                 <div className="flex justify-center items-center bg-transparent">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
@@ -126,23 +127,23 @@ const OverviewPage: React.FC = () => {
               ) : (
                 <>
                   <div className="text-lg text-black font-crimson">Number of Unique Individuals Served</div>
-                  <div className="text-5xl font-bold text-black mt-2">{num_responses}</div>
+                  <div className="text-5xl font-bold font-crimson text-black mt-2">{num_responses}</div>
                 </>
               )}
             </div>
-          <div className="bg-light-green text-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+            <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading12 ? (
               <div className="flex justify-center items-center bg-transparent">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
               </div>
             ) : (
               <>
-                <div className="text-lg text-white font-crimson">Household Size</div>
-                <Pie data={householdSizeData} options={{ maintainAspectRatio: false, responsive: true, plugins: {legend: {labels: {color: "#FFFFFF",},},}}}/>
+                <div className="text-lg text-black font-crimson">Household Size</div>
+                <Pie data={householdSizeData} options={{ maintainAspectRatio: false, responsive: true, plugins: {legend: {labels: {color: "#000000",},},}}}/>
               </>
             )}
           </div>
-          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md border-t-4 border-light-green">
+          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading3 ? (
               <div className="flex justify-center items-center bg-transparent">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
@@ -153,7 +154,7 @@ const OverviewPage: React.FC = () => {
               </>
             )}
           </div>
-          <div className="bg-light-green text-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading4 ? (
               <div className="flex justify-center items-center bg-transparent">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
@@ -164,7 +165,7 @@ const OverviewPage: React.FC = () => {
               </>
             )}
           </div>
-          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-xl border border-light-green">
+          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading5 ? (
               <div className="flex justify-center items-center bg-transparent">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
@@ -175,7 +176,7 @@ const OverviewPage: React.FC = () => {
               </>
             )}
           </div>
-          <div className="bg-light-green text-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+          <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
             {isLoading6 ? (
               <div className="flex justify-center items-center bg-transparent">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
@@ -186,6 +187,7 @@ const OverviewPage: React.FC = () => {
               </>
             )}
           </div>
+        </div>
         </div>
         </div>
       </div>
