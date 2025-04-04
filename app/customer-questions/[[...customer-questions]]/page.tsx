@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
@@ -609,7 +609,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
 
   const [newRecord, setNewRecord] = useState<NewResponse | null>(null);
 
-  const fetchNewRecord = async () => {
+  const fetchNewRecord = useCallback(async () => {
     try {
       const response = await fetch("../api/demographics", { method: "GET" });
       if (!response.ok) {
@@ -627,7 +627,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     } catch (error) {
       console.error("Error fetching responses:", error);
     }
-  };
+  }, [phoneNumber]);
 
   useEffect(() => {
     (async () => {
