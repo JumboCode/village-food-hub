@@ -161,24 +161,6 @@ const Categories: React.FC = () => {
       setShowRetrievalError(false);
 
       await refreshCategories(categoryName);
-      try {
-        const invUpdateRes = await fetch("/api/inventory", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            oldCategoryName: selectedCategory,
-            newCategoryName: editCategoryName,
-          }),
-        });
-      
-        if (!invUpdateRes.ok) {
-          console.error("Failed to update inventory category names:", invUpdateRes.status);
-        }
-      } catch (err) {
-        console.error("Error updating inventory records:", err);
-      }
     } catch (err) {
       setShowRetrievalError(true);
       console.error("Error saving category:", err);
