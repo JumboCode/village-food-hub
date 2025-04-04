@@ -171,9 +171,9 @@ const Categories: React.FC = () => {
     try {
       const trimmedItemName = itemName.trim();
       console.log("units: " + units);
-      let validUnits = units.filter(unit => unit && unit.trim() !== "");
+      const validUnits = units.filter(unit => unit && unit.trim() !== "");
 
-      let seen: string[] = [];
+      const seen: string[] = [];
       for (let i = 0; i < validUnits.length; i++) {
         console.log("item in validUnits is " + validUnits[i]);
         if (seen.includes(validUnits[i])) {

@@ -40,10 +40,10 @@ const EditModal: React.FC<EditModalProps> = ({
     }
 
     // Validate that at least one unit is provided. 
-    let validUnits = newUnits.filter(
+    const validUnits = newUnits.filter(
       (unit) => unit && unit.trim() !== ""
     );
-    let seen: string[] = [];
+    const seen: string[] = [];
     for (let i = 0; i < validUnits.length; i++) {
       if (initialUnits.includes(validUnits[i]) || seen.includes(validUnits[i])) {
         setErrorMessage("Cannot add duplicate units.");
