@@ -8,11 +8,11 @@ interface QuantityProps {
     categoryName: string; 
     closeModal: () => void; 
     handleUpdate: (itemName: string, units: string, quantityChange: number, categoryName: string) => void; 
-
+    currentQuantity: number;
 }
 
-const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName, closeModal, handleUpdate}) => {
-    const [quantityChange, setQuantityChange] = useState(0);
+const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName, closeModal, handleUpdate, currentQuantity}) => {
+    const [quantityChange, setQuantityChange] = useState(currentQuantity);
     const [showQuantityError, setShowQuantityError] = useState(false);
 
     const handleSave = () => {
@@ -31,6 +31,8 @@ const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName,
                         <div className="flex w-full justify-center items-center pb-[30px]">
                             <input
                                 type="number"
+                                min="0"
+                                value={quantityChange}
                                 onChange={(e) => setQuantityChange(parseInt(e.target.value, 10) || 0)}
                                 className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
                             />

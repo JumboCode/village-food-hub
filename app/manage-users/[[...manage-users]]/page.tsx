@@ -1,7 +1,7 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import NavBar from "@app/components/NavBar";
+import { NavBar } from "@app/components/NavBar";
 import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
 import { NewUserButton } from "@app/components/InternalViewButtons";
 import ProfileView from "@app/components/ProfileView";
@@ -42,6 +42,7 @@ const fetchUsers = async (url: string): Promise<string[][]> => {
 const InternalViewManageUsersPage: React.FC = () => {
   // Use SWR to fetch users. SWR will cache and revalidate data automatically.
   const { data: users, error, mutate } = useSWR("/api/users", fetchUsers);
+  const isLoading = !users && !error;
 
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
@@ -72,8 +73,8 @@ const InternalViewManageUsersPage: React.FC = () => {
         lastName: profileData.lastName.trim(),
         username: profileData.username.trim(),
         emailAddress: profileData.emailAddress.trim(),
-        pronouns: profileData.pronouns.trim(),
-        role: profileData.role.trim(),
+        pronouns: profileData.pronouns.trim() || "N/A",
+        role: profileData.role.trim() == "" ? "Staff" : profileData.role.trim(),
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
@@ -118,7 +119,7 @@ const InternalViewManageUsersPage: React.FC = () => {
               password: ""
           });
 
-            await mutate();
+          await mutate(undefined, true);
         } else {
             setCreateUserError(data.error || "Error creating user");
         }
@@ -129,10 +130,20 @@ const InternalViewManageUsersPage: React.FC = () => {
     }
 }
 
-  function handleCancelProfileView() {
-    setCreateUserError("\u00A0")
-    setShowCreateProfileView(false);
-  }
+function handleCancelProfileView() {
+  setCreateUserError("\u00A0");
+  setProfileData({
+    firstName: "",
+    lastName: "",
+    username: "",
+    emailAddress: "",
+    pronouns: "",
+    role: "",
+    phoneNumber: "",
+    password: ""
+  });
+  setShowCreateProfileView(false);
+}
 
   return (
     <div>
@@ -179,12 +190,14 @@ const InternalViewManageUsersPage: React.FC = () => {
                 Error loading users.
               </div>
             )}
-            {users ? (
-              <ManageUsersSpreadsheet manageUsersItems={users} />
-            ) : (
-              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-                Loading users…
+            {isLoading ? (
+              <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
               </div>
+            ) : error ? (
+              <div className="text-center text-red-600">Error loading users.</div>
+            ) : (
+              <ManageUsersSpreadsheet manageUsersItems={users ?? []} />
             )}
           </div>
         </div>

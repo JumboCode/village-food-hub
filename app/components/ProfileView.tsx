@@ -1,4 +1,4 @@
-// We are in ProfileView!
+// components/ProfileView
 'use client'
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +7,6 @@ import { useUser } from '@clerk/nextjs';
 interface ProfileViewProps {
     visible: boolean;
     mode: string;
-    onCancel?: () => void;
     profileData: {
         firstName: string;
         lastName: string;
@@ -29,16 +28,17 @@ interface ProfileViewProps {
         password: string;
       }>>;
       setUnsavedChanges?: React.Dispatch<React.SetStateAction<boolean>>
+      onCancel?: () => void;
   }
   
-const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, profileData, setProfileData, setUnsavedChanges }) => {
+const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, setProfileData, setUnsavedChanges }) => {
     const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState("");
-    
     const [createProfileMode, setCreateProfileMode] = useState(false);
     const [editProfileMode, setEditProfileMode] = useState(false);
     const [viewProfileMode, setViewProfileMode] = useState(false);
+    const [error, setError] = useState("");
     
+    const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
@@ -46,13 +46,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
     const [pronouns, setPronouns] = useState("");
     const [role, setRole] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [error, setError] = useState("");
     const [changeMade, setChangeMade] = useState(false);
     
     const { user } = useUser();
     const clerkUsername = user?.username;
-    
-    
     
     useEffect(() => {
         if (mode === "create") {
@@ -82,6 +79,10 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
             console.log(error);
         }
     }, [mode]);
+
+    useEffect(() => {
+        if (error) console.log(error);
+    }, [error]);
     
     // Fetch user data from your API when the component mounts
     useEffect(() => {
@@ -110,7 +111,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                           lastName: userData.lastName || "",
                           username: userData.username || "",
                           emailAddress: email,
-                          pronouns: userData.publicMetadata?.pronouns || "",
+                          pronouns: userData.publicMetadata?.pronouns || "N/A",
                           role: userData.publicMetadata?.role || "",
                           phoneNumber: userData.publicMetadata?.phoneNumber || "",
                           password: "",
@@ -129,14 +130,12 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
         if (mode !== "create") {
             fetchUserData();
         }
-    }, [mode, clerkUsername]);
-    
-    const handleEditProfileModeOn = () => {
-        setEditProfileMode(true);
-        setViewProfileMode(false);
-    }
+    }, [mode, clerkUsername, setProfileData]);
 
-    const handleChangeMade = (e: React.ChangeEvent<HTMLInputElement>, fieldType: string) => {
+    const handleChangeMade = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+        fieldType: string
+      ) => {
         console.log("here");
         // setChangeMade(true);
         if (setUnsavedChanges) {
@@ -155,7 +154,6 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
     
     const isView = viewProfileMode;
     const isEdit = editProfileMode;
-    const isCreate = createProfileMode;
       
     return (
         <div>
@@ -210,13 +208,15 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                     <label className="block font-crimson text-[20px] mb-1">
                         Role <span className="text-red">*</span>
                     </label>
-                    <input
+                    <select
                         value={profileData.role}
                         onChange={(e) => handleChangeMade(e, "role")}
-                        placeholder=""
-                        className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView}
-                    />
+                        className={`pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] ${(isEdit || isView) ? 'bg-[#F5F5F5]' : 'bg-white'}`}
+                        disabled={isView || isEdit}
+                    >
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Admin</option>
+                    </select>
                 </div>
             </div>
 
@@ -224,10 +224,14 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                 {/* Pronouns */}
                 <div className="mb-4">
                     <label className="block font-crimson text-[20px] mb-1">
-                        Pronouns <span className="text-red">*</span>
+                        Pronouns
                     </label>
                     <input
-                        value={profileData.pronouns}
+                        value={
+                            isView && !profileData.pronouns.trim()
+                            ? "N/A"
+                            : profileData.pronouns
+                        }
                         onChange={(e) => handleChangeMade(e, "pronouns")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
@@ -276,7 +280,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, onCancel, pro
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder=""
-                        className="pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] bg-[#fafafa]"
+                        className={`pl-3 pr-10 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px] ${(isEdit || isView) ? 'bg-[#F5F5F5]' : 'bg-white'}`}
                         // In edit and view modes, password should not be editable.
                         disabled={isView || isEdit}
                     />

@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
-import NavBar from "@app/components/NavBar";
+import { NavBar } from "@app/components/NavBar";
 import { DemographicsSpreadsheet } from "@app/components/DemographicsSpreadsheet";
 import { SearchBar, RunReportButton } from "@app/components/InternalViewButtons";
 import DateRangeModal from "@app/components/DateRangeModal";
@@ -9,6 +9,7 @@ import ProgressBar from "@app/components/ProgressBar";
 import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
+import { useUser } from "@clerk/nextjs";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -21,7 +22,6 @@ interface DemographicsRecord {
   donateCount: number;
   previousVisitDates: string[];
 }
-
 // A simple fetcher function for SWR
 const fetcher = (url: string) =>
   fetch(url).then((res) => {
@@ -32,24 +32,44 @@ const fetcher = (url: string) =>
 // Neon fetch function remains the same
 async function fetchNeonData() {
   try {
+    //setIsLoading(true);
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data.storageSize.project.written_data_bytes;
   } catch (error) {
     console.error("Error fetching Neon data:", error);
-  }
+  } 
+   finally {
+     //setIsLoading(false);
+   }
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
+
+  // current user
+  const { user, isLoaded } = useUser();
+  const [loggedInUser, setLoggedInUser] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
+      setIsAdmin(user.publicMetadata?.role === "Admin");
+    } else {
+      setLoggedInUser("");
+      setIsAdmin(false);
+    }
+  }, [isLoaded, user]);
+  
   // Use SWR to fetch the raw demographics data
-  const { data: demographicsRawData, error: demographicsError } = useSWR<DemographicsRecord[]>('/api/demographics', fetcher);
+  const { data: demographicsRawData, isLoading } = useSWR('/api/demographics', fetcher);
 
   // Transform raw data into the format expected by the spreadsheet:
   // [date, phoneNumber, name, address, householdSize, takeCount, donateCount]
   const transformedDemographics = useMemo(() => {
     if (!demographicsRawData) return [];
-    return demographicsRawData.map((record) => [
+    return demographicsRawData.map((record: DemographicsRecord) => [
       record.lastVisitDate.split("T")[0],
       record.phoneNumber,
       record.name,
@@ -63,10 +83,9 @@ const InternalViewDemographicsPage: React.FC = () => {
   // Local state for filtered data (based on search)
   const [filteredDemographics, setFilteredDemographics] = useState<string[][]>([]);
   const [searchInput, setSearchInput] = useState("");
-
   // Update filtered demographics when the search input or transformed data changes
   useEffect(() => {
-    const filtered = transformedDemographics.filter((item) =>
+    const filtered = transformedDemographics.filter((item: string[]) =>
       item[1].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[2].toUpperCase().includes(searchInput.toUpperCase()) ||
       item[3].toUpperCase().includes(searchInput.toUpperCase())
@@ -139,12 +158,32 @@ const InternalViewDemographicsPage: React.FC = () => {
     setShowModal(false)
   };
 
+const handleDelete = async () => {
+    try {
+      for (const row of transformedDemographics) {
+        const phoneNumber = row[1];
+        const response = await fetch("../api/demographics", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber }),
+        });
+        if (!response.ok) {
+          console.error('Error Deleting Item, ${response.status}');
+        }
+      }
+      window.location.reload();
+    } catch (e) {
+      console.log("Error Deleting Category Items:", e);
+    }
+  };
+
   // States and logic for the storage modal remain unchanged
   const [showStorageModal, setShowStorageModal] = useState(false);
   const [showStorageCancel, setShowStorageCancel] = useState(false);
   const [checkedDelete, setCheckedDelete] = useState(false);
   const [storageUsed, setStorageUsed] = useState(0);
   const [storagePercent, setStoragePercent] = useState(0);
+  
 
   // Function to get storage bytes and update state
   const getBytes = async () => {
@@ -162,6 +201,14 @@ const InternalViewDemographicsPage: React.FC = () => {
     getBytes();
   }, [demographicsRawData]);
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <NavBar />
@@ -176,13 +223,15 @@ const InternalViewDemographicsPage: React.FC = () => {
             />
             <RunReportButton onClick={openModal} />
             {/* Button showing storage used with dynamic progress */}
-            <button
-              className="flex flex-col justify-center items-center w-[60px] space-y-[-5px]"
-              onClick={() => setShowStorageModal(true)}
-            >
-              <ProgressBar progress={storagePercent} />
-              <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
-            </button>
+            {(loggedInUser !== "" && isAdmin) &&
+              <button
+                className="flex flex-col justify-center items-center w-[60px] space-y-[-5px]"
+                onClick={() => setShowStorageModal(true)}
+              >
+                <ProgressBar progress={storagePercent} />
+                <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
+              </button>
+            }
             {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} />}
 
             {showStorageModal && (
@@ -197,7 +246,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                       <p className="font-crimson text-[24px] text-[#828282] pb-3">
                         {storageUsed} MB of 1GB storage used
                       </p>
-                      <div className="flex flex-col space-y-1">
+                      <div className="flex flex-col space-y-1 font-crimson">
                         <p className="text-[16px] text-black">Want to clean up space?</p>
                         <div className="bg-[#B3B3B3] h-[1px]" />
                         <div className="flex flex-row">
@@ -261,7 +310,7 @@ const InternalViewDemographicsPage: React.FC = () => {
                           <div>
                             <button
                               className="flex items-center text-white bg-red hover:bg-dark-red font-serif w-[100px] h-[40px] rounded-[8px] border-[1px] text-[20px] justify-center"
-                              onClick={() => console.log("just pressed delete")}
+                              onClick={() => handleDelete()}
                             >
                               Delete
                             </button>

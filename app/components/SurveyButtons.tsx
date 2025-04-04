@@ -2,6 +2,7 @@
 
 import { faArrowLeft, faArrowRight, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useState, useEffect } from 'react';
 
 interface ButtonProps {
   onClick?: () => void;
@@ -9,6 +10,35 @@ interface ButtonProps {
 }
 
 export function ButtonExit({ onClick, disabled }: ButtonProps) {
+  const [exit, setexit] = useState([
+      "EXIT",
+    ]);
+
+  useEffect(() => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultexit = [
+          "EXIT",
+        ];
+        const newexit = [...defaultexit];
+        if (language !== "en") {
+          for (let i = 0; i < defaultexit.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultexit[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newexit[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setexit(newexit);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+
   return (
     <div>
       <button 
@@ -16,7 +46,7 @@ export function ButtonExit({ onClick, disabled }: ButtonProps) {
         onClick={onClick}
         disabled={disabled}
       >
-        { "EXIT" } <FontAwesomeIcon className='pl-3' icon={faX} />
+        { exit[0] } <FontAwesomeIcon className='pl-3' icon={faX} />
       </button>
     </div>
   );
@@ -53,6 +83,35 @@ export function ButtonExitAnyway({ onClick, disabled }: ButtonProps) {
 
 
 export function ButtonNext({ onClick, disabled }: ButtonProps) {
+  const [next, setnext] = useState([
+    "NEXT",
+  ]);
+
+  useEffect(() => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultnext = [
+          "NEXT",
+        ];
+        const newnext = [...defaultnext];
+        if (language !== "en") {
+          for (let i = 0; i < defaultnext.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultnext[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newnext[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setnext(newnext);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+
   return (
     <div>
       <button
@@ -60,13 +119,42 @@ export function ButtonNext({ onClick, disabled }: ButtonProps) {
         onClick={onClick}
         disabled={disabled}
       >
-        { "NEXT" } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
+        { next[0] } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
       </button>
     </div>
   );
 }
 
 export function ButtonSubmit({ onClick, disabled }: ButtonProps) {
+  const [submit, setsubmit] = useState([
+    "SUBMIT",
+  ]);
+
+  useEffect(() => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultsubmit = [
+          "SUBMIT",
+        ];
+        const newsubmit = [...defaultsubmit];
+        if (language !== "en") {
+          for (let i = 0; i < defaultsubmit.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultsubmit[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newsubmit[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setsubmit(newsubmit);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+  
   return (
     <div>
       <button 
@@ -74,7 +162,7 @@ export function ButtonSubmit({ onClick, disabled }: ButtonProps) {
         onClick={onClick}
         disabled={disabled}
       >
-        { "SUBMIT" } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
+        { submit[0] } <FontAwesomeIcon className='pl-3' icon={faArrowRight} />
       </button>
     </div>
   );
@@ -95,6 +183,35 @@ export function ButtonSave({ onClick, disabled }: ButtonProps) {
 }
 
 export function ButtonBack({ onClick, disabled }: ButtonProps) {
+  const [back, setback] = useState([
+    "BACK",
+  ]);
+
+  useEffect(() => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultback = [
+          "BACK",
+        ];
+        const newback = [...defaultback];
+        if (language !== "en") {
+          for (let i = 0; i < defaultback.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultback[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newback[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setback(newback);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+  
   return (
     <div>
       <button 
@@ -102,13 +219,42 @@ export function ButtonBack({ onClick, disabled }: ButtonProps) {
         onClick={onClick}
         disabled={disabled}
       >
-        <FontAwesomeIcon className='pr-3' icon={faArrowLeft} /> { "BACK" }
+        <FontAwesomeIcon className='pr-3' icon={faArrowLeft} /> { back[0] }
       </button>
     </div>
   );
 }
 
 export function ButtonCancel({ onClick, disabled }: ButtonProps) {
+  const [cancel, setcancel] = useState([
+    "CANCEL",
+  ]);
+
+  useEffect(() => {
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+        const defaultcancel = [
+          "CANCEL",
+        ];
+        const newcancel = [...defaultcancel];
+        if (language !== "en") {
+          for (let i = 0; i < defaultcancel.length; i++) {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultcancel[i])}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            // Cast data[0] as string[][] and map over it.
+            const translationArray = data[0] as string[][];
+            newcancel[i] = translationArray.map(t => t[0]).join('');
+          }
+        }
+        setcancel(newcancel);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+  
   return (
     <div>
       <button 
@@ -116,7 +262,7 @@ export function ButtonCancel({ onClick, disabled }: ButtonProps) {
         onClick={onClick}
         disabled={disabled}
       >
-        { "CANCEL" }
+        { cancel[0] }
       </button>
     </div>
   );

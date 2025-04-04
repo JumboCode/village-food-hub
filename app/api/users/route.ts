@@ -45,17 +45,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-interface ClerkUser {
-  firstName: string,
-  lastName: string,
-  username: string,
-  emailAddress: string,
-  pronouns: string,
-  role: string,
-  phoneNumber: string,
-  password: string
-}
-
 /* 
  * Inserts a new user into the database.
  * Expects the request body to be JSON with the fields: username, password,
@@ -117,11 +106,14 @@ export async function POST(req: NextRequest) {
     const user = await client.users.createUser(userData);
     return NextResponse.json({ message: 'User created successfully', user });
   } catch (error: unknown) {
-    console.error('Error creating user in Clerk:', error);
+    console.error('Error creating user in Clerk:', JSON.stringify(error, null, 2));
+
     let errorMessage = 'An unknown error occurred';
 
     if (isClerkError(error)) {
-      errorMessage = error.errors.map(err => err.longMessage).join('; ') || errorMessage;
+      console.error("Clerk error details:", error.errors);
+      const clerkMessage = error.errors[0]?.longMessage || "Unknown Clerk error.";
+      return NextResponse.json({ error: clerkMessage }, { status: 400 });
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -146,6 +138,22 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Error updating user:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const data = await req.json();
+    console.log('Received data:', data);
+    const id = data.id;
+    
+    const client = await clerkClient();
+    const user = await client.users.deleteUser(id);
+    return NextResponse.json({ message: 'User deleted successfully', user });
+    
+  } catch (error) {
+    console.error("Error deleting user:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,6 +1,5 @@
 "use client"
 import React, {useState, useEffect} from "react";
-import Image from 'next/image';
 import DeleteDemographicsModal from "@app/components/DeleteDemographicsModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdDeleteOutline } from "react-icons/md";
@@ -67,11 +66,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         setSelectedData(null); 
         setName(null);
       };
-
-      const refreshPage = () => {
-        window.location.reload();
-      };
-   
+      
       const handleDelete = async () => {
         if (!selectedData) return;
         
@@ -88,7 +83,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
             if (!response.ok) {
                 throw new Error("Error fetching demographics data.");
             }
-            refreshPage();
+            setSortedItems(sortedItems.filter((item) => (item[2] != name)))
             console.log("Deleted successfully!");
             closeModal();
         } catch (error) {
@@ -162,7 +157,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                 key={colIndex}
                                 className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
                             >
-                                {String(cell)}
+                                {colIndex === 4 && Number(cell) >= 10 ? "10+" : String(cell)}
                             </td>
                         ))}
                         <td className="border-collapse border-zinc-200 border-2 border-y-1 px-3 text-center">

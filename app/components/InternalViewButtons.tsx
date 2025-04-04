@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import searchSymbol from "@app/images/searchSymbol.svg"
 import filterSymbol from "@app/images/filterSymbol.svg"
-import saveSymbol from "@app/images/saveSymbol.svg"
 import plusSymbol from "@app/images/plusSymbol.svg"
+import { MdOutlineFileDownload } from "react-icons/md";
 
 
 export const SearchBar = ({ input, setInput, placeholder }: { input: string, setInput: React.Dispatch<React.SetStateAction<string>>, placeholder: string }) => {
@@ -65,11 +65,9 @@ export const RunReportButton = ({ onClick, disabled }: RunReportButtonProps) => 
             disabled={disabled}
     >
       <div className="flex flex-row py-2 px-3">
-        <Image
-          src={saveSymbol}
-          alt="Run Report button"
-          width={24}
-          height={29.14}
+        <MdOutlineFileDownload
+            size={24}
+            className="cursor-pointer text-white mt-[2px]"
         />
         <div className="text-[20px] relative overflow-x-auto crimson-bold font-crimson text-white pl-2">
           Run Report

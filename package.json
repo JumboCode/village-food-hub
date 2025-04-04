@@ -30,6 +30,7 @@
     "google-translate-api-x": "^10.7.2",
     "jquery": "^3.7.1",
     "jquery-ui-dist": "^1.13.3",
+    "libphonenumber-js": "^1.12.6",
     "next": "^15.2.1",
     "open-google-translator": "^1.0.5",
     "prop-types": "^15.8.1",

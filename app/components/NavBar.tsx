@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import Image from "next/image";
 import whiteOutlineLogo from "@app/images/headerLogo.png";
-import initials from "@app/images/group2.png";
 import face from "@app/images/Frame6.png";
 import settings from "@app/images/Frame7.png";
 import icon from "@app/images/Frame8.png";
@@ -18,8 +17,13 @@ declare global {
     preventNavigation?: boolean;
   }
 }
-  
-export default function NavBar() {
+
+interface NavBarProps {
+    savedChanges?: boolean
+}
+
+export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
+//export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -29,6 +33,7 @@ export default function NavBar() {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
+    console.log("navBar useEffect is activated");
     if (isLoaded && user) {
       setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
       setIsAdmin(user.publicMetadata?.role === "Admin");
@@ -46,43 +51,25 @@ export default function NavBar() {
 
   console.log("User:", user?.firstName, user?.lastName);
 
+  const updateUser = async () => {
+    if (savedChanges == true) {
+      console.log("user first name was " + user?.firstName);
+      await user?.reload();
+    }
+    console.log("user first name is now " + user?.firstName);
+  }
+
+  updateUser();
+
   const handleSignOut = async () => {
-    // Dispatch a custom event for external unsaved changes modal handling
-    const event = new CustomEvent("signOutClicked", {
-      detail: { intendedAction: "signOut" },
-    });
-    document.dispatchEvent(event);
-    console.log("signOut dispatch sent");
-
-    // Wait for confirmation from an external event listener
-    const confirmation = await new Promise<boolean>((resolve) => {
-      const handleConfirm = (event: Event) => {
-        const customEvent = event as CustomEvent<{ confirmed: boolean }>;
-        document.removeEventListener("signOutConfirmed", handleConfirm);
-        resolve(customEvent.detail?.confirmed ?? false);
-      };
-    
-      document.addEventListener("signOutConfirmed", handleConfirm);
-    });    
-
-    if (!confirmation) {
-      console.log("Sign out cancelled due to unsaved changes.");
-      return;
-    }
-
-    // Proceed with sign out
     try {
-      await signOut();
-      console.log("Sign out successful");
-
-      setLoggedInUser("");
-      setIsAdmin(false);
-
-      router.push("/login");
+      console.log("Attempting to sign out...");
+      await signOut({ redirectUrl: "/login?justSignedOut=true" });
+      console.log("Signed out successfully");
     } catch (error) {
-      console.error("Error during sign-out:", error);
+      console.error("Sign-out error:", error);
     }
-  };
+  };  
 
   const handleNavigation = (eventName: string, path: string) => {
     const event = new CustomEvent(eventName, { detail: { intendedPage: path } });
@@ -100,11 +87,7 @@ export default function NavBar() {
   const handleMyProfile = () => {
     router.push("/my-profile");
   };
-
-  useEffect(() => {
-    setCurrentPath(window.location.pathname);
-  }, []);
-
+  
   return (
     <>
       {!isLoaded ? (
@@ -112,7 +95,7 @@ export default function NavBar() {
       ) : (
         <div className="relative w-full h-[90px] bg-banner-green flex items-center shadow-xl">
           {/* Logo Section */}
-          <div className="flex-shrink-0 mr-8">
+          <div className="flex-shrink-0 mr-8 cursor-pointer" onClick={() => router.push('/overview')}>
             <Image src={whiteOutlineLogo} alt="logo" width={112} height={91} />
           </div>
 
@@ -151,15 +134,6 @@ export default function NavBar() {
           </div>
 
           <div className="absolute right-10 flex items-center space-x-4">
-            {/* User Initials */}
-            <Image
-              src={initials}
-              alt="initial_letters"
-              width={51}
-              height={51}
-              className="rounded-full"
-            />
-
             {/* User Name and Dropdown */}
             <div className="relative">
               <button
@@ -195,7 +169,7 @@ export default function NavBar() {
                     )}
                     <li
                       className="flex items-center text-[21px] rounded-md font-crimson font-bold px-4 py-2 hover:bg-[#ECF9E9] cursor-pointer"
-                      onClick={() => handleNavigation("signOutClicked", "/login")}
+                      onClick={handleSignOut}
                     >
                       <Image src={icon} alt="icon" width={24} height={24} className="mr-2" />
                       Sign Out
