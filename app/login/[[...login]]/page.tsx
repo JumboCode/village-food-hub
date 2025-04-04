@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import headerLogo from '@app/images/non-blank headerLogo 125x125.png';
 import irlPantry from '@app/images/irl_pantry.png';
@@ -20,6 +20,8 @@ const LoginPage: React.FC = () => {
   const [loginCompleted, setLoginCompleted] = useState(false);
 
   const [hasMounted, setHasMounted] = useState(false);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+
 
   useEffect(() => {
     if (typeof window === "undefined") return; // SSR safety
@@ -311,6 +313,12 @@ const LoginPage: React.FC = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
                 required
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    passwordRef.current?.focus();
+                  }
+                }}
               />
             </div>
 
@@ -332,6 +340,13 @@ const LoginPage: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 required
+                ref={passwordRef}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSignIn();
+                  }
+                }}
               />
 
               {/* Show / Hide Password */}
