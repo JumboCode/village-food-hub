@@ -200,14 +200,25 @@ const InternalViewInventoryPage: React.FC = () => {
         </div>
 
         {filteredInventory.length > 0 ? (
-          <InventorySpreadsheet inventoryItems={filteredInventory} />
-        ) : (
-          <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-            {appliedFilters.length > 0 
-              ? `${searchInput} not found under ${appliedFilters.join(', ')}.`
-              : "There are currently no items in the inventory database matching the searched item."}
-          </div>
+      <InventorySpreadsheet inventoryItems={filteredInventory} />
+    ) : (
+      <div className="flex flex-col items-center text-gray-500 text-[20px] font-crimson py-4 space-y-4">
+        <div className="text-center">
+          {appliedFilters.length > 0 
+            ? `There are no items found under ${appliedFilters.join(', ')}.`
+            : "There are currently no items in the inventory database matching the searched item."}
+        </div>
+
+        {appliedFilters.length > 0 && (
+          <button
+            onClick={() => setAppliedFilters([])}
+            className="bg-purple text-white px-4 py-2 rounded-md hover:bg-dark-purple transition-all"
+          >
+            Clear Filters
+          </button>
         )}
+      </div>
+    )}
       </div>
     </div>
   );
