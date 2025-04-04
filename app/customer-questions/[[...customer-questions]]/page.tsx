@@ -702,10 +702,10 @@ const HouseholdSize: React.FC<{
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15);
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
