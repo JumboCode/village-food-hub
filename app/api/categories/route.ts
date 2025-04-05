@@ -226,16 +226,17 @@ export async function DELETE(req: NextRequest) {
     const parsed = await req.json();
     const data = parsed.data ?? parsed;
 
-    console.log("DELETE payload received:", data);
-
     if (!data.name || typeof data.name !== "string") {
       console.log("Error: Missing category name in DELETE request.");
       return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
+    console.log("DELETE request received with data:", data);
+
     if (data.itemName && typeof data.itemName === "string" && data.itemName.trim() !== "") {
+
+      console.log("Branch 1")
       // Case 1: Delete a specific category/item pair
-      console.log("Deleting specific category/item pair:", data);
       const item = await deleteCategory({
         itemName: data.itemName,
         name: data.name,
@@ -256,7 +257,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ response: "Item deleted successfully", data: item }, { status: 200 });
     } else {
       // Case 2: Delete all records for the given category name + related inventory items
-      console.log("Deleting all records for category:", data.name);
+      console.log("Branch 2");
       
       // Step 1: Find all inventory items that belong to this category
       const inventoryItems = await prisma.inventory.findMany({
@@ -267,10 +268,10 @@ export async function DELETE(req: NextRequest) {
       await prisma.inventory.deleteMany({
         where: { categoryName: data.name },
       });
-
+  
       // Step 3: Delete categories
       const result = await deleteInventoryItemsByCategoryName(data.name);
-
+      
       return NextResponse.json({
         response: "Category and related items deleted successfully",
         deletedInventoryItems: inventoryItems,
