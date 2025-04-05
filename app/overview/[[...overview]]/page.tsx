@@ -4,6 +4,9 @@ import useSWR from "swr";
 import { NavBar } from '@app/components/NavBar';
 import { useUser } from "@clerk/nextjs";
 
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+
 // // Utility function to format date to dd/mm/yyyy
 // function formatDate(date: Date): string {
 //   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -70,19 +73,30 @@ const OverviewPage: React.FC = () => {
 //   const { data: demographics, error: demographicsError } = useSWR<DemographicsRecord[]>('/api/demographics', fetchDemographics);
 
   const { user, isLoaded } = useUser();
+  const isNotVolunteer = userIsNotVolunteer();
 
   return (
-    <div>
-      <NavBar />
-      <div className="px-10">
-        <div className="flex flex-row justify-between mt-10 mb-6">
-        {user && isLoaded && 
-        <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
-          Welcome back, {user.firstName}! Here is an overview of this month!
-        </div>}
+    !isLoaded ? (
+        <LoadingAnimation/>
+    ) : isNotVolunteer ? (
+        <div>
+            <NavBar />
+                <div className="px-10">
+                    <div className="flex flex-row justify-between mt-10 mb-6">
+                    { user && 
+                        <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
+                        Welcome back, {user.firstName}! Here is an overview of this month!
+                        </div>
+                    }
+                    </div>
+                </div>
         </div>
-      </div>
-    </div>
+    ) : (
+        <div className="p-10 text-center">
+          <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+          <p className="mt-4">You do not have permission to view this page.</p>
+        </div>
+    )
   );
 };
 

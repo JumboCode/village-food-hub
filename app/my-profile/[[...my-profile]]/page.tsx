@@ -7,6 +7,9 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
 
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+
 interface User {
     id: string;
     username: string;
@@ -36,7 +39,10 @@ const MyProfilePage: React.FC = () => {
         phoneNumber: "",
         password: ""
     });
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
+    const isLoading = !isLoaded;
+    const isNotVolunteer = userIsNotVolunteer();
+
     const initialRender = useRef(true);
 
     useEffect(() => {
@@ -273,181 +279,190 @@ const MyProfilePage: React.FC = () => {
     }
 
     return (
-        <div>
-            <NavBar savedChanges={savedChanges}/>
-            {showEditProfileView ? (
+        isLoading ? (
+            <LoadingAnimation/>
+        ) : isNotVolunteer ? (
             <div>
-                <div className="p-[80px] pt-[50px]">
-                    {showUnsavedModal && (<ProfileUnsavedModal closeUnsavedModal={handleCloseModal} redirectPage={destinationPage}/>)}
-                    <p className="font-crimson text-[40px] mb-[20px]"> Edit Profile</p>
-                    <ProfileView visible={showEditProfileView} mode="edit" onCancel={handleCancelProfileView} 
-                        profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
-                    <div>
-                    
-                    {/* Save Changes Button */}
-                    {validationError && (
-                    <p className="text-red font-crimson text-[18px] mt-4 mb-[-15px]">{validationError}</p>
-                    )}
-                    <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px]"
-                        onClick={handleSaveChange}
-                        >
-                        Save Changes
-                    </button>
+                <NavBar savedChanges={savedChanges}/>
+                {showEditProfileView ? (
+                <div>
+                    <div className="p-[80px] pt-[50px]">
+                        {showUnsavedModal && (<ProfileUnsavedModal closeUnsavedModal={handleCloseModal} redirectPage={destinationPage}/>)}
+                        <p className="font-crimson text-[40px] mb-[20px]"> Edit Profile</p>
+                        <ProfileView visible={showEditProfileView} mode="edit" onCancel={handleCancelProfileView} 
+                            profileData={profileData} setProfileData={setProfileData} setUnsavedChanges={setUnsavedChanges}/>
+                        <div>
+                        
+                        {/* Save Changes Button */}
+                        {validationError && (
+                        <p className="text-red font-crimson text-[18px] mt-4 mb-[-15px]">{validationError}</p>
+                        )}
+                        <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px]"
+                            onClick={handleSaveChange}
+                            >
+                            Save Changes
+                        </button>
 
-                    {/* Cancel Button */}
-                    <button 
-                        className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] border-[2px] border-gray"
-                        onClick={handleCancelProfileView}
-                    >
-                        Cancel
-                    </button>
+                        {/* Cancel Button */}
+                        <button 
+                            className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] border-[2px] border-gray"
+                            onClick={handleCancelProfileView}
+                        >
+                            Cancel
+                        </button>
+                        </div>
                     </div>
                 </div>
+            ) : (
+                <div>
+                    <div className="p-[80px] pt-[50px]">
+                        <p className="font-crimson text-[40px] mb-[20px]"> My Profile</p>
+                            <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData}/>
+                        <div>
+                        <div className="flex flex-row justify-between">
+                            <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
+                                    onClick={handleEditProfileView}
+                            > 
+                                <MdOutlineEdit
+                                    size={24}
+                                    className="cursor-pointer mr-3"
+                                />
+                                Edit Profile
+                            </button>
+                            {/* Button to Delete the Current Account */}
+                            <button 
+                                className="bg-red hover:bg-red text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] flex items-center justify-center"
+                                onClick={() => setShowDeleteModal(true)}
+                            >
+                                {/* trashcan */}
+                                <MdDeleteOutline
+                                    size={24}
+                                    className="cursor-pointer mr-3"
+                                />
+                                Delete Account
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* Modal to Delete Current User */}
+                    {showDeleteModal &&
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div
+                            className="w-[412px] bg-white font-crimson
+                                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                                    pt-2 shadow-lg rounded-lg"
+                        >
+                            {/* warning */}
+                            <div className="flex flex-col px-5 pt-2">
+                                <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">Are you sure you want to delete your account?</p>
+                                <p className="flex justify-center text-[24px] crimson-semibold text-[#EB2B0C] text-center">
+                                    This action cannot be undone.
+                                </p>
+                            </div>
+                            {/* buttons */}
+                            <div className="flex flex-row justify-center space-x-5 py-5 mb-2">
+                                <button 
+                                    className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[46px] rounded-[8px] border border-gray text-[24px] justify-center items-center" 
+                                    onClick={() => setShowDeleteModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
+                                    onClick={() => handleDeleteUser()}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    {/* Delete Success Modal */}
+                    {showDeleteSuccess && !showDeleteFail &&
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div
+                            className="w-[441px] bg-white font-crimson
+                                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                                    pt-2 shadow-lg rounded-lg"
+                        >
+                            {/* explanation of redirecting in 10 seconds */}
+                            <div className="flex flex-col px-5 pt-6 space-y-4">
+                                <p className="flex justify-center text-[32px] crimson text-[#EB2B0C] text-center ">Your account has been deleted.</p>
+                                <p className="flex justify-center text-[24px] crimson text-black leading-[1.4] pl-2">
+                                    In ten seconds, you will be redirected to the login page of this site. 
+                                </p>
+                            </div>
+                            {/* option to redirect now */}
+                            <div className="flex flex-row justify-center space-x-5 py-5 my-3">
+                                <button 
+                                    className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
+                                    onClick={() => handleExit()}
+                                >
+                                    Exit Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    {/* Delete Failure Modal */}
+                    {showDeleteFail && !showDeleteSuccess &&
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div
+                            className="w-[412px] bg-white font-crimson
+                                    fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                                    pt-2 shadow-lg rounded-lg"
+                        >
+                            <div className="flex flex-col px-5 pt-4">
+                                {/* one admin left error */}
+                                {adminFail &&
+                                    <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
+                                        The system has to have at least one admin.
+                                    </p>
+                                }
+                                {/* deleting customer or volunteer error */}
+                                {customerVolunteerFail &&
+                                    <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
+                                        Only admins can delete the customer and volunteer accounts.
+                                    </p>
+                                }
+                                {/* general error */}
+                                {(!adminFail && !customerVolunteerFail) &&
+                                    <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
+                                        Something went wrong.
+                                    </p>
+                                }
+                                <p className="flex justify-center text-[24px] crimson-semibold text-[#7EB672] text-center mt-[-4px]">
+                                    Your account was not deleted.
+                                </p>
+                            </div>
+                            {/* close button */}
+                            <div className="flex flex-row justify-center space-x-5 py-2 mb-4">
+                                <button 
+                                    className="flex text-white bg-[#7EB672] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#7EB672] text-[24px] justify-center items-center"
+                                    onClick={() => {
+                                        setShowDeleteFail(false);
+                                        setCustomerVolunteerFail(false);
+                                        setAdminFail(false);
+                                    }}
+                                >
+                                    Okay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            )}
             </div>
         ) : (
-            <div>
-                <div className="p-[80px] pt-[50px]">
-                    <p className="font-crimson text-[40px] mb-[20px]"> My Profile</p>
-                        <ProfileView visible={!showEditProfileView} mode="view" profileData={profileData} setProfileData={setProfileData}/>
-                    <div>
-                    <div className="flex flex-row justify-between">
-                        <button className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] mr-[30px] flex items-center justify-center "
-                                onClick={handleEditProfileView}
-                        > 
-                            <MdOutlineEdit
-                                size={24}
-                                className="cursor-pointer mr-3"
-                            />
-                            Edit Profile
-                        </button>
-                        {/* Button to Delete the Current Account */}
-                        <button 
-                            className="bg-red hover:bg-red text-white text-[24px] font-crimson px-8 py-2 rounded-xl mt-[45px] flex items-center justify-center"
-                            onClick={() => setShowDeleteModal(true)}
-                        >
-                            {/* trashcan */}
-                            <MdDeleteOutline
-                                size={24}
-                                className="cursor-pointer mr-3"
-                            />
-                            Delete Account
-                        </button>
-                    </div>
-                    </div>
-                </div>
-
-                {/* Modal to Delete Current User */}
-                {showDeleteModal &&
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div
-                        className="w-[412px] bg-white font-crimson
-                                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                                pt-2 shadow-lg rounded-lg"
-                    >
-                        {/* warning */}
-                        <div className="flex flex-col px-5 pt-2">
-                            <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">Are you sure you want to delete your account?</p>
-                            <p className="flex justify-center text-[24px] crimson-semibold text-[#EB2B0C] text-center">
-                                This action cannot be undone.
-                            </p>
-                        </div>
-                        {/* buttons */}
-                        <div className="flex flex-row justify-center space-x-5 py-5 mb-2">
-                            <button 
-                                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[46px] rounded-[8px] border border-gray text-[24px] justify-center items-center" 
-                                onClick={() => setShowDeleteModal(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
-                                onClick={() => handleDeleteUser()}
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                }
-
-                {/* Delete Success Modal */}
-                {showDeleteSuccess && !showDeleteFail &&
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div
-                        className="w-[441px] bg-white font-crimson
-                                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                                pt-2 shadow-lg rounded-lg"
-                    >
-                        {/* explanation of redirecting in 10 seconds */}
-                        <div className="flex flex-col px-5 pt-6 space-y-4">
-                            <p className="flex justify-center text-[32px] crimson text-[#EB2B0C] text-center ">Your account has been deleted.</p>
-                            <p className="flex justify-center text-[24px] crimson text-black leading-[1.4] pl-2">
-                                In ten seconds, you will be redirected to the login page of this site. 
-                            </p>
-                        </div>
-                        {/* option to redirect now */}
-                        <div className="flex flex-row justify-center space-x-5 py-5 my-3">
-                            <button 
-                                className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
-                                onClick={() => handleExit()}
-                            >
-                                Exit Now
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                }
-
-                {/* Delete Failure Modal */}
-                {showDeleteFail && !showDeleteSuccess &&
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div
-                        className="w-[412px] bg-white font-crimson
-                                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                                pt-2 shadow-lg rounded-lg"
-                    >
-                        <div className="flex flex-col px-5 pt-4">
-                            {/* one admin left error */}
-                            {adminFail &&
-                                <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
-                                    The system has to have at least one admin.
-                                </p>
-                            }
-                            {/* deleting customer or volunteer error */}
-                            {customerVolunteerFail &&
-                                <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
-                                    Only admins can delete the customer and volunteer accounts.
-                                </p>
-                            }
-                            {/* general error */}
-                            {(!adminFail && !customerVolunteerFail) &&
-                                <p className="flex justify-center text-[36px] crimson-semibold text-center leading-[1.4]">
-                                    Something went wrong.
-                                </p>
-                            }
-                            <p className="flex justify-center text-[24px] crimson-semibold text-[#7EB672] text-center mt-[-4px]">
-                                Your account was not deleted.
-                            </p>
-                        </div>
-                        {/* close button */}
-                        <div className="flex flex-row justify-center space-x-5 py-2 mb-4">
-                            <button 
-                                className="flex text-white bg-[#7EB672] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#7EB672] text-[24px] justify-center items-center"
-                                onClick={() => {
-                                    setShowDeleteFail(false);
-                                    setCustomerVolunteerFail(false);
-                                    setAdminFail(false);
-                                }}
-                            >
-                                Okay
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                }
+            <div className="p-10 text-center">
+              <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+              <p className="mt-4">You do not have permission to view this page.</p>
             </div>
-        )}
-        </div>
+        )
     );
 };
 

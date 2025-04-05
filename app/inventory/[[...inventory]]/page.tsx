@@ -5,6 +5,10 @@ import { InventorySpreadsheet } from '@app/components/InventorySpreadsheet';
 import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
 import { NavBar } from '@app/components/NavBar';
 
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+
+
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -146,6 +150,8 @@ const InternalViewInventoryPage: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
+  const isNotVolunteer = userIsNotVolunteer(); // Check if the user is not a volunteer for access control
+
   const filteredInventory = useMemo(() => {
     if (!inventory) return [];
     let result = inventory;
@@ -160,9 +166,7 @@ const InternalViewInventoryPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-      </div>
+      <LoadingAnimation />
     );
   }
 
@@ -175,41 +179,50 @@ const InternalViewInventoryPage: React.FC = () => {
   }
 
   return (
-    <div>
-      <NavBar />
-      <div className="px-10">
-        <div className="flex flex-row justify-between mt-10 mb-6">
-          <div className="text-[40px] font-crimson font-bold">Inventory</div>
-          <div className="flex items-center space-x-4">
-            <SearchBar 
-              input={searchInput}
-              setInput={setSearchInput}
-              placeholder="Search by item name..."
-            />
-            <FilterButton onClick={() => setFilterModalOpen(prev => !prev)} />
-            <FilterModal
-              isOpen={filterModalOpen}
-              onApply={setAppliedFilters}
-              onReset={() => setAppliedFilters([])}
-              onClose={() => setFilterModalOpen(false)}
-              fetchUrl="/api/categories"
-              filterName="name"
-              initialSelectedCategories={appliedFilters}
-            />
-          </div>
-        </div>
+    isLoading ? (
+        <LoadingAnimation/>
+      ) : isNotVolunteer ? (
+        <div>
+        <NavBar />
+        <div className="px-10">
+            <div className="flex flex-row justify-between mt-10 mb-6">
+            <div className="text-[40px] font-crimson font-bold">Inventory</div>
+            <div className="flex items-center space-x-4">
+                <SearchBar 
+                input={searchInput}
+                setInput={setSearchInput}
+                placeholder="Search by item name..."
+                />
+                <FilterButton onClick={() => setFilterModalOpen(prev => !prev)} />
+                <FilterModal
+                isOpen={filterModalOpen}
+                onApply={setAppliedFilters}
+                onReset={() => setAppliedFilters([])}
+                onClose={() => setFilterModalOpen(false)}
+                fetchUrl="/api/categories"
+                filterName="name"
+                initialSelectedCategories={appliedFilters}
+                />
+            </div>
+            </div>
 
-        {filteredInventory.length > 0 ? (
-          <InventorySpreadsheet inventoryItems={filteredInventory} />
-        ) : (
-          <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-            {appliedFilters.length > 0 
-              ? `There are no items under ${appliedFilters.join(', ')}.`
-              : "There are currently no items in the inventory database matching the searched item."}
-          </div>
-        )}
-      </div>
-    </div>
+            {filteredInventory.length > 0 ? (
+            <InventorySpreadsheet inventoryItems={filteredInventory} />
+            ) : (
+            <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                {appliedFilters.length > 0 
+                ? `There are no items under ${appliedFilters.join(', ')}.`
+                : "There are currently no items in the inventory database matching the searched item."}
+            </div>
+            )}
+        </div>
+        </div>
+    ) : (
+        <div className="p-10 text-center">
+            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+            <p className="mt-4">You do not have permission to view this page.</p>
+        </div>
+    )
   );
 };
 

@@ -6,6 +6,9 @@ import { ManageUsersSpreadsheet } from "@app/components/ManageUsersSpreadsheet";
 import { NewUserButton } from "@app/components/InternalViewButtons";
 import ProfileView from "@app/components/ProfileView";
 
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { userIsAdmin } from "@app/components/ProtectedUrls";
+
 // Define a type for the structure of each user record from the API.
 interface ClerkUser {
   firstName?: string;
@@ -47,6 +50,8 @@ const InternalViewManageUsersPage: React.FC = () => {
   // Local state for managing the create profile view.
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
   const [createUserError, setCreateUserError] = useState("\u00A0");
+
+  const isAdmin = userIsAdmin();
   
   const [profileData, setProfileData] = useState({
     firstName: "",
@@ -128,81 +133,90 @@ const InternalViewManageUsersPage: React.FC = () => {
         console.error("Error creating user:", error);
         setCreateUserError("An unexpected error occurred. Please try again.");
     }
-}
+  }
 
-function handleCancelProfileView() {
-  setCreateUserError("\u00A0");
-  setProfileData({
-    firstName: "",
-    lastName: "",
-    username: "",
-    emailAddress: "",
-    pronouns: "",
-    role: "",
-    phoneNumber: "",
-    password: ""
-  });
-  setShowCreateProfileView(false);
-}
+  function handleCancelProfileView() {
+    setCreateUserError("\u00A0");
+    setProfileData({
+        firstName: "",
+        lastName: "",
+        username: "",
+        emailAddress: "",
+        pronouns: "",
+        role: "",
+        phoneNumber: "",
+        password: ""
+    });
+    setShowCreateProfileView(false);
+  }
 
   return (
-    <div>
-      <NavBar />
-      {showCreateProfileView ? (
+    isLoading ? (
+        <LoadingAnimation />
+    ) : isAdmin ? (
         <div>
-          <div className="p-[80px] pt-[50px]">
-            <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
-            <ProfileView 
-                visible={showCreateProfileView} 
-                mode="create" 
-                onCancel={handleCancelProfileView} 
-                profileData={profileData}
-                setProfileData={setProfileData}
-            />
-            <div className="text-red">{createUserError}</div>
+        <NavBar />
+        {showCreateProfileView ? (
             <div>
-              <button 
-                className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
-                onClick={createUser}
-              >
-                Create
-              </button>
-              <button 
-                className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
-                onClick={handleCancelProfileView}
-              >
-                Cancel
-              </button>
+            <div className="p-[80px] pt-[50px]">
+                <p className="font-crimson text-[40px] mb-[5px]"> Create Profile</p>
+                <ProfileView 
+                    visible={showCreateProfileView} 
+                    mode="create" 
+                    onCancel={handleCancelProfileView} 
+                    profileData={profileData}
+                    setProfileData={setProfileData}
+                />
+                <div className="text-red">{createUserError}</div>
+                <div>
+                <button 
+                    className="bg-light-green hover:bg-dark-green text-white text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] mr-[30px]"
+                    onClick={createUser}
+                >
+                    Create
+                </button>
+                <button 
+                    className="bg-white hover:bg-light-gray text-gray text-[24px] font-crimson w-[200px] h-[50px] rounded-xl mt-[20px] border-[2px] border-gray"
+                    onClick={handleCancelProfileView}
+                >
+                    Cancel
+                </button>
+                </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div className="py-4 px-10">
-            <div className="flex flex-row justify-between mt-10 mb-6">
-              <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
-              <div className="flex flex-row">
-                <NewUserButton onClick={handleProfileView} />
-              </div>
             </div>
-            {error && (
-              <div className="text-center text-red-600">
-                Error loading users.
-              </div>
-            )}
-            {isLoading ? (
-              <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-              </div>
-            ) : error ? (
-              <div className="text-center text-red-600">Error loading users.</div>
-            ) : (
-              <ManageUsersSpreadsheet manageUsersItems={users ?? []} />
-            )}
-          </div>
+        ) : (
+            <div>
+            <div className="py-4 px-10">
+                <div className="flex flex-row justify-between mt-10 mb-6">
+                <h1 className="font-crimson text-3xl text-[40px] font-bold">Manage Users</h1>
+                <div className="flex flex-row">
+                    <NewUserButton onClick={handleProfileView} />
+                </div>
+                </div>
+                {error && (
+                <div className="text-center text-red-600">
+                    Error loading users.
+                </div>
+                )}
+                {isLoading ? (
+                <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                </div>
+                ) : error ? (
+                <div className="text-center text-red-600">Error loading users.</div>
+                ) : (
+                <ManageUsersSpreadsheet manageUsersItems={users ?? []} />
+                )}
+            </div>
+            </div>
+        )}
         </div>
-      )}
-    </div>
+    ) : (
+        <div className="p-10 text-center">
+            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+            <p className="mt-4">You do not have permission to view this page.</p>
+        </div>
+    )
   );
 };
 
