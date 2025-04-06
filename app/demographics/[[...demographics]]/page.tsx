@@ -10,6 +10,7 @@ import crossIcon from '@app/images/cross-svgrepo-com.svg';
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
 import { useUser } from "@clerk/nextjs";
+import Snackbar from '@mui/material/Snackbar';
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -158,6 +159,8 @@ const InternalViewDemographicsPage: React.FC = () => {
     setShowModal(false)
   };
 
+const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("Error conneccting to internet");
 const handleDelete = async () => {
     try {
       for (const row of transformedDemographics) {
@@ -169,7 +172,13 @@ const handleDelete = async () => {
         });
         if (!response.ok) {
           console.error('Error Deleting Item, ${response.status}');
+          if (response.status == 500) {
+            console.log("Showing snackbar...");
+            setSnackbarOpen(true);
+          }
         }
+        
+
       }
       window.location.reload();
     } catch (e) {
@@ -327,6 +336,13 @@ const handleDelete = async () => {
         {/* Render the spreadsheet using the filtered demographics */}
         <DemographicsSpreadsheet demographicsItems={filteredDemographics} />
       </div>
+      <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+            />
     </div>
   );
 };

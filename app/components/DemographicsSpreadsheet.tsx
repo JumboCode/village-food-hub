@@ -3,6 +3,7 @@ import React, {useState, useEffect} from "react";
 import DeleteDemographicsModal from "@app/components/DeleteDemographicsModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdDeleteOutline } from "react-icons/md";
+import Snackbar from '@mui/material/Snackbar';
 
 interface DemographicsSpreadsheetProps {
     demographicsItems: (string | number)[][];
@@ -66,11 +67,18 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
         setSelectedData(null); 
         setName(null);
       };
-      
+
+      const [snackbarOpen, setSnackbarOpen] = useState(false);
+      const [snackbarMessage, setSnackbarMessage] = useState("");
+
       const handleDelete = async () => {
         if (!selectedData) return;
-        
+    
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // Abort after 5s
 
+        let is500 = false;
+    
         try {
             const response = await fetch("/../api/demographics", {
                 method: "DELETE",
@@ -78,18 +86,67 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ phoneNumber: selectedData }),
+                signal: controller.signal,
             });
-
+    
+            clearTimeout(timeoutId);
+    
             if (!response.ok) {
-                throw new Error("Error fetching demographics data.");
+                if (response.status === 500) {
+                    //setSnackbarMessage("Server error while deleting. Please try again.");
+                    //setSnackbarOpen(true);
+                    console.log("Showing snackbar...");
+                    is500 = true;
+                }
+                throw new Error("Non-OK response");
             }
-            setSortedItems(sortedItems.filter((item) => (item[2] != name)))
-            console.log("Deleted successfully!");
+    
+            setSortedItems(sortedItems.filter((item) => item[2] !== name));
             closeModal();
-        } catch (error) {
-            console.error(error);
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+    
+            if (error.name === "AbortError" || is500) {
+                setSnackbarMessage("No internet connection. Please check your internet.");
+                setSnackbarOpen(true);
+            }
+    
+            console.error("Delete error:", error);
         }
     };
+      
+    //   const handleDelete = async () => {
+    //     if (!selectedData) return;
+
+    //     let is500 = false;
+
+    //     try {
+    //         const response = await fetch("/../api/demographics", {
+    //             method: "DELETE",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({ phoneNumber: selectedData }),
+    //         });
+
+    //         if (!response.ok) {
+    //             if (response.status == 500) {
+    //                     console.log("Showing snackbar...");
+    //                     is500 = true;
+    //             }
+    //             throw new Error("Error fetching demographics data.");
+    //         }
+    //         setSortedItems(sortedItems.filter((item) => (item[2] != name)))
+    //         console.log("Deleted successfully!");
+    //         closeModal();
+    //     } catch (error) {
+    //         if (is500 == true) {
+    //             setSnackbarMessage("Error connecting to internet, delete unsuccessful");
+    //             setSnackbarOpen(true);
+    //         }
+    //         console.error(error);
+    //     }
+    // };
 
     return(
         <div className="relative overflow-x-auto crimson-regular font-crimson">
@@ -174,6 +231,13 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 ))}
             </tbody>
             </table>
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+            />
         </div>
     )
 }
