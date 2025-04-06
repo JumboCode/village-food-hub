@@ -11,11 +11,17 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 
+import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+import LoadingAnimation from "@app/components/LoadingAnimation";
+
+
 interface CategoryData {
   [key: string]: [string, string][];
 }
 
 const Categories: React.FC = () => {
+
+
   const fetchCategories = async (): Promise<CategoryData> => {
     const response = await fetch("/api/categories");
     if (!response.ok) throw new Error("Failed to fetch categories");
@@ -41,6 +47,7 @@ const Categories: React.FC = () => {
   };
   
   const { data: categoriesData, error, isLoading, mutate: mutateCategories } = useSWR("/api/categories", fetchCategories);
+  const isNotVolunteer = userIsNotVolunteer(); 
 
   // State variables
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -347,242 +354,244 @@ const Categories: React.FC = () => {
       console.error("Error in handleDelete:", error);
     }
   };
-  
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-      </div>
-    );
-  }
+
 
   return (
-    <div>
-      <NavBar />
-      <p className="font-crimson font-bold pl-20 pt-10 text-[40px]">Categories</p>
-      <div className="flex justify-center items-center">
-        <div className="w-3/5 h-4/5">
-          <div className="flex flex-col">
-            <p className="font-crimson crimson-bold text-[24px] pt-5">Edit Category</p>
-            <div className="flex justify-between items-center py-4 w-full">
-              <div className="flex flex-row items-center w-1/2">
-                <div className="w-full">
-                  <NameDropdown
-                    fetchUrl="/api/categories"
-                    filterName="name"
-                    onSelect={handleCategoryChange}
-                    defaultValue={selectedCategory}
-                  />
+    isLoading ? (
+      <LoadingAnimation />
+    ) : isNotVolunteer ? (
+        <div>
+        <NavBar />
+        <p className="font-crimson font-bold pl-20 pt-10 text-[40px]">Categories</p>
+        <div className="flex justify-center items-center">
+            <div className="w-3/5 h-4/5">
+            <div className="flex flex-col">
+                <p className="font-crimson crimson-bold text-[24px] pt-5">Edit Category</p>
+                <div className="flex justify-between items-center py-4 w-full">
+                <div className="flex flex-row items-center w-1/2">
+                    <div className="w-full">
+                    <NameDropdown
+                        fetchUrl="/api/categories"
+                        filterName="name"
+                        onSelect={handleCategoryChange}
+                        defaultValue={selectedCategory}
+                        />
+                    </div>
+                    {showTable && (
+                        <>
+                    <div className="flex items-center pl-4 space-x-4">
+                        <MdDeleteOutline
+                            size={24}
+                            className="cursor-pointer"
+                            onClick={() =>
+                                openModal(
+                                    String(selectedCategory),
+                                    String(selectedCategoryData[0]?.[0] || "")
+                                )
+                            }
+                            />
+                        {showModal && (
+                            <DeleteCategoryModal
+                            categoryName={String(selectedCategory)}
+                            itemName={String(itemName)}
+                            closeModal={closeModal}
+                            handleDelete={handleDelete}
+                            />
+                        )}
+                        <MdOutlineEdit
+                            size={24}
+                            className="cursor-pointer"
+                            onClick={editButtonClicked}
+                            />
+                    </div>
+                    </>
+                )}
                 </div>
-                {showTable && (
-                  <>
-                  <div className="flex items-center pl-4 space-x-4">
-                    <MdDeleteOutline
-                        size={24}
-                        className="cursor-pointer"
-                        onClick={() =>
-                          openModal(
-                            String(selectedCategory),
-                            String(selectedCategoryData[0]?.[0] || "")
-                          )
-                        }
-                    />
-                    {showModal && (
-                      <DeleteCategoryModal
-                        categoryName={String(selectedCategory)}
-                        itemName={String(itemName)}
-                        closeModal={closeModal}
-                        handleDelete={handleDelete}
-                      />
+                <div className="flex justify-end w-full">
+                    {showTable && (
+                        <button
+                        className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
+                        onClick={itemButtonClicked}
+                        >
+                        {"Item "}
+                        <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
+                    </button>
                     )}
-                    <MdOutlineEdit
-                        size={24}
-                        className="cursor-pointer"
-                        onClick={editButtonClicked}
-                    />
-                  </div>
-                </>
-              )}
-              </div>
-              <div className="flex justify-end w-full">
-                {showTable && (
-                  <button
-                    className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
-                    onClick={itemButtonClicked}
-                  >
-                    {"Item "}
+                    <button
+                    className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
+                    onClick={categoryButtonClicked}
+                    >
+                    {"Category "}
                     <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
-                  </button>
+                    </button>
+                </div>
+                </div>
+            </div>
+            <div className="bg-slate-50 items-center h-full">
+                {showTable ? (
+                    <>
+                    <CategoriesSpreadsheet 
+                    categoryName={selectedCategory}
+                    categoryItems={categoriesData?.[selectedCategory] || []}
+                    loadData={async () => { await mutateCategories(); }} 
+                    />
+                    {selectedCategoryData.length === 0 && (
+                        <p className="flex-center py-4 font-crimson text-[20px] text-center">
+                        No entries for this category.
+                    </p>
+                    )}
+                </>
+                ) : (
+                    <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
+                    Select a category.
+                </p>
                 )}
-                <button
-                  className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
-                  onClick={categoryButtonClicked}
-                >
-                  {"Category "}
-                  <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
-                </button>
-              </div>
             </div>
-          </div>
-          <div className="bg-slate-50 items-center h-full">
-            {showTable ? (
-              <>
-                <CategoriesSpreadsheet 
-                  categoryName={selectedCategory}
-                  categoryItems={categoriesData?.[selectedCategory] || []}
-                  loadData={async () => { await mutateCategories(); }} 
-                />
-                {selectedCategoryData.length === 0 && (
-                  <p className="flex-center py-4 font-crimson text-[20px] text-center">
-                    No entries for this category.
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
-                Select a category.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-      {showItemModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-[450px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
-            <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Add Item</div>
-            <div className="flex flex-col ml-[15px] mb-[30px]">
-              <div className="flex mb-2">
-                <div className="text-[28px] w-24 ml-[5%]">Name</div>
-                <input
-                  type="text"
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
-                />
-              </div>
-              <UnitBoxes 
-                icon={addIcon}
-                onUnitsChange={setUnits}
-              />
             </div>
-            {showEmptyError && (
-              <p className="text-red text-center mb-4">
-                Please enter an item name and at least one unit.
-              </p>
-            )}
-            {showRetrievalError && (
-              <p className="text-red text-center mb-4">
-                Failed to add item.
-              </p>
-            )}
-            <div className="flex w-full justify-center space-x-[15px] items-center">
-              <button
-                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={itemModalClosed}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={saveCategories}
-              >
-                Add
-              </button>
-            </div>
-          </div>
         </div>
-      )}
-      {showCategoryModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green relative">
-          <p className="text-center text-[32px] pb-[15px] text-light-green">Category Name</p>
-      
-          {/* Input Field */}
-          <div className="flex w-full justify-center items-center pb-[20px]">
-            <input
-              type="text"
-              onChange={(e) => setCategoryName(e.target.value)}
-              className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
-            />
-          </div>
-      
-          {/* Error Messages */}
-          <div className="absolute top-[135px] left-0 right-0 flex flex-col items-center h-[20px]">
-            {showEmptyError && (
-              <p className="text-red text-center">
-                Please enter a category name.
-              </p>
-            )}
-            {showRetrievalError && (
-              <p className="text-red text-center">
-                Category name already exists.
-              </p>
-            )}
-          </div>
-      
-          {/* Buttons */}
-          <div className="absolute bottom-[20px] left-0 right-0 flex justify-center space-x-[15px]">
-            <button
-              className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
-              onClick={cancelButtonClicked}
-            >
-              Cancel
-            </button>
-            <button
-              className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
-              onClick={saveButtonClicked}
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      </div>      
-      )}
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green flex flex-col justify-between">
-            <p className="text-center text-[32px] font-bold">Edit Name</p>
-            
-            <div className="flex flex-col items-center px-4 space-y-2">
-              <input
-                type="text"
-                value={editCategoryName}
-                onChange={(e) => setEditCategoryName(e.target.value)}
-                className="w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-2 mt-4"
-              />
-
-              {/* Reserved space for error messages */}
-              <div className="h-[10px] flex items-center">
+        {showItemModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-[450px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+                <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Add Item</div>
+                <div className="flex flex-col ml-[15px] mb-[30px]">
+                <div className="flex mb-2">
+                    <div className="text-[28px] w-24 ml-[5%]">Name</div>
+                    <input
+                    type="text"
+                    onChange={(e) => setItemName(e.target.value)}
+                    className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
+                    />
+                </div>
+                <UnitBoxes 
+                    icon={addIcon}
+                    onUnitsChange={setUnits}
+                    />
+                </div>
                 {showEmptyError && (
-                  <p className="text-red text-center text-sm">
+                    <p className="text-red text-center mb-4">
+                    Please enter an item name and at least one unit.
+                </p>
+                )}
+                {showRetrievalError && (
+                    <p className="text-red text-center mb-4">
+                    Failed to add item.
+                </p>
+                )}
+                <div className="flex w-full justify-center space-x-[15px] items-center">
+                <button
+                    className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
+                    onClick={itemModalClosed}
+                    >
+                    Cancel
+                </button>
+                <button
+                    className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
+                    onClick={saveCategories}
+                    >
+                    Add
+                </button>
+                </div>
+            </div>
+            </div>
+        )}
+        {showCategoryModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green relative">
+            <p className="text-center text-[32px] pb-[15px] text-light-green">Category Name</p>
+        
+            {/* Input Field */}
+            <div className="flex w-full justify-center items-center pb-[20px]">
+                <input
+                type="text"
+                onChange={(e) => setCategoryName(e.target.value)}
+                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                />
+            </div>
+        
+            {/* Error Messages */}
+            <div className="absolute top-[135px] left-0 right-0 flex flex-col items-center h-[20px]">
+                {showEmptyError && (
+                    <p className="text-red text-center">
                     Please enter a category name.
-                  </p>
+                </p>
                 )}
-                {showDuplicateError && (
-                  <p className="text-red text-center text-sm">
-                    Category already exists.
-                  </p>
+                {showRetrievalError && (
+                    <p className="text-red text-center">
+                    Category name already exists.
+                </p>
                 )}
-              </div>
             </div>
-
-            <div className="flex justify-center space-x-[15px] mt-4">
-              <button
-                className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
+        
+            {/* Buttons */}
+            <div className="absolute bottom-[20px] left-0 right-0 flex justify-center space-x-[15px]">
+                <button
+                className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
                 onClick={cancelButtonClicked}
-              >
+                >
                 Cancel
-              </button>
-              <button
-                className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
-                onClick={saveEditCategory}
-              >
+                </button>
+                <button
+                className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+                onClick={saveButtonClicked}
+                >
                 Save
-              </button>
+                </button>
             </div>
-          </div>
+            </div>
+        </div>      
+        )}
+        {showEditModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green flex flex-col justify-between">
+                <p className="text-center text-[32px] font-bold">Edit Name</p>
+                
+                <div className="flex flex-col items-center px-4 space-y-2">
+                <input
+                    type="text"
+                    value={editCategoryName}
+                    onChange={(e) => setEditCategoryName(e.target.value)}
+                    className="w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-2 mt-4"
+                    />
+
+                {/* Reserved space for error messages */}
+                <div className="h-[10px] flex items-center">
+                    {showEmptyError && (
+                        <p className="text-red text-center text-sm">
+                        Please enter a category name.
+                    </p>
+                    )}
+                    {showDuplicateError && (
+                        <p className="text-red text-center text-sm">
+                        Category already exists.
+                    </p>
+                    )}
+                </div>
+                </div>
+
+                <div className="flex justify-center space-x-[15px] mt-4">
+                <button
+                    className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
+                    onClick={cancelButtonClicked}
+                >
+                    Cancel
+                </button>
+                <button
+                    className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
+                    onClick={saveEditCategory}
+                    >
+                    Save
+                </button>
+                </div>
+            </div>
+            </div>
+        )}
         </div>
-      )}
-    </div>
+    ) : (
+        <div className="p-10 text-center">
+            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+            <p className="mt-4">You do not have permission to view this page.</p>
+        </div>
+    )
   );
 };
 
