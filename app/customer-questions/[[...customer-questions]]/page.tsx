@@ -18,6 +18,13 @@ import {
   isValidPhoneNumber,
   validatePhoneNumberLength
 } from 'libphonenumber-js';
+import '@geoapify/geocoder-autocomplete/styles/minimal.css';
+import {  
+  GeoapifyGeocoderAutocomplete,
+   GeoapifyContext 
+} from '@geoapify/react-geocoder-autocomplete';
+
+
 
 interface Details {
   name: string;
@@ -500,22 +507,16 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
 // -------------------- Address --------------------
 interface AddressProps {
   line1: string;
-  city: string;
-  state: string;
-  zip: string;
+
   onAddressLineChange: (value: string) => void;
-  onCityChange: (value: string) => void;
-  onStateChange: (value: string) => void;
-  onZipChange: (value: string) => void;
+
   setNextDisabled: (disabled: boolean) => void;
 }
-const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLineChange, onCityChange, onStateChange, onZipChange, setNextDisabled }) => {
+const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDisabled }) => {
   const [translations, setTranslations] = useState([
     "Address",
     "Address Line",
-    "City",
-    "State",
-    "Zip Code",
+
   ]);
 
   useEffect(() => {
@@ -525,9 +526,7 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
         const defaultTranslations = [
           "Address",
           "Address Line",
-          "City",
-          "State",
-          "Zip Code",
+
         ];
         const newTranslations = [...defaultTranslations];
         if (language !== "en") {
@@ -547,33 +546,15 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
   }, []);
 
   const [line, setLine] = useState<string>(line1);
-  const [cityState, setCityState] = useState<string>(city);
-  const [stateState, setStateState] = useState<string>(state);
-  const [zipState, setZipState] = useState<string>(zip);
 
   const handleLineChange = (value: string) => {
+    console.log(value)
     setLine(value);
     onAddressLineChange(value);
+    setNextDisabled(false);
+
   };
 
-  const handleCityChange = (value: string) => {
-    setCityState(value);
-    onCityChange(value);
-  };
-
-  const handleStateChange = (value: string) => {
-    setStateState(value);
-    onStateChange(value);
-  };
-
-  const handleZipChange = (value: string) => {
-    setZipState(value);
-    onZipChange(value);
-  };
-
-  useEffect(() => {
-    setNextDisabled(line === "" || cityState === "" || stateState === "" || zipState === "");
-  }, [line, cityState, stateState, zipState, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [timer, setTimer] = useState(10);
@@ -611,6 +592,22 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
     };
   }, [handleClick]);
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Incase no autocomplete option was given, capture manual input
+  useEffect(() => {
+    const input = document.querySelector('.geoapify-autocomplete-input') as HTMLInputElement;
+    if (input) {
+      inputRef.current = input;
+      const handleInput = () => {
+        handleLineChange(input.value); 
+      };
+      input.addEventListener('input', handleInput);
+  
+      return () => input.removeEventListener('input', handleInput);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
@@ -618,47 +615,20 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
       </div>
       <div className="w-2/3">
         <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
-        <input
-          type="text"
-          className="bg-gray-50 w-full border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          onChange={(e) => handleLineChange(e.target.value)}
-          value={line}
-          required
-        />
+      
+          {/* autofill component  -- should api key be here??*/}
+         <GeoapifyContext apiKey="64e958fc3aa74f4bb4aa34c3d7d3dff4">
+            <GeoapifyGeocoderAutocomplete
+              placeholder="Enter address here"
+              type={'amenity'}
+              limit={7}
+              filterByCountryCode={['us']}
+              placeSelect={(place) => {
+                handleLineChange(place?.properties?.formatted.trim()); 
+              }}
+            />
+          </GeoapifyContext>
       </div>
-      <div className='flex flex-row w-2/3 justify-between gap-2'>
-        <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleCityChange(e.target.value)}
-            value={cityState}
-            required
-          />
-        </div>
-        <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">{translations[3]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleStateChange(e.target.value)}
-            value={stateState}
-            required
-          />
-        </div>
-        <div className='flex-1'>
-          <p className="text-[24px] mt-4">{translations[4]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleZipChange(e.target.value)}
-            value={zipState}
-            required
-          />
-        </div>
-      </div>
-
       {/* timeout modal after 10 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
@@ -998,9 +968,6 @@ interface SurveyResponse {
   };
   address: {
     line1: string;
-    city: string;
-    state: string;
-    zip: string;
   };
   householdSize: number | null;
   lastVisitDate: Date;
@@ -1017,7 +984,8 @@ const DemographicsSurvey: React.FC = () => {
     phoneNumber: '',
     changes: '',
     name: { firstName: '', lastName: '' },
-    address: { line1: '', city: '', state: '', zip: '' },
+    address: { line1: ''},
+
     householdSize: 0,
   });
 
@@ -1056,10 +1024,11 @@ const DemographicsSurvey: React.FC = () => {
     }));
   };
 
-  const updateAddress = (field: 'line1' | 'city' | 'state' | 'zip', value: string) => {
+  const updateAddress = (value: string) => {
+
     setResponses((prev) => ({
       ...prev,
-      address: { ...prev.address, [field]: value },
+      address: { ...prev.address, ['line1']: value },
     }));
   };
 
@@ -1203,7 +1172,8 @@ const DemographicsSurvey: React.FC = () => {
       takeCount: responses.receive ? 1 : 0,
       donateCount: responses.donate ? 1 : 0,
       name: `${responses.name.firstName} ${responses.name.lastName}`,
-      address: `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}`,
+      address: `${responses.address.line1}`,
+
       householdSize: responses.householdSize,
       lastVisitDate: responses.receive ? currentDate : null,
       previousVisitDates: [currentDate],
@@ -1217,7 +1187,7 @@ const DemographicsSurvey: React.FC = () => {
           takeCount: (prevRecord.takeCount || 0) + (responses.receive ? 1 : 0),
           donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
           name: responses.changes === "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
-          address: responses.changes === "yes" ? `${responses.address.line1}, ${responses.address.city}, ${responses.address.state} ${responses.address.zip}` : prevRecord.address,
+          address: responses.changes === "yes" ? `${responses.address.line1}` : prevRecord.address,
           householdSize: responses.changes === "yes" ? responses.householdSize : prevRecord.householdSize,
           lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
           previousVisitDates: Array.isArray(prevRecord.previousVisitDates)
@@ -1316,7 +1286,8 @@ const DemographicsSurvey: React.FC = () => {
               address: typeof prevRecord?.address === "string"
                 ? prevRecord.address
                 : prevRecord?.address
-                ? `${prevRecord.address.line1}, ${prevRecord.address.city}, ${prevRecord.address.state} ${prevRecord.address.zip}`
+                ? `${prevRecord.address.line1}`
+
                 : "N/A",                  
               householdSize: prevRecord?.householdSize ?? 0
             }}             
@@ -1334,13 +1305,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'address' && 
           <Address 
             line1={responses.address.line1} 
-            city={responses.address.city} 
-            state={responses.address.state} 
-            zip={responses.address.zip}
-            onAddressLineChange={(value) => updateAddress('line1', value)}
-            onCityChange={(value) => updateAddress('city', value)}
-            onStateChange={(value) => updateAddress('state', value)}
-            onZipChange={(value) => updateAddress('zip', value)} 
+            onAddressLineChange={(value) => updateAddress(value)}
             setNextDisabled={setNextDisabled} 
           />
         }
