@@ -37,6 +37,7 @@ const VolunteerRemovePages: React.FC = () => {
 
   const handleBack = () => {
     console.log('Back clicked, currentStep:', currentStep);
+    console.log(itemToRemove.itemName)
     if (currentStep === 'confirm')
       setCurrentStep('details');
     else 
@@ -171,6 +172,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             setSelectedCategory(selected);
             setItemToRemove({ ...itemToRemove, categoryName: selected }); 
           }}
+          defaultValue={itemToRemove.categoryName}
         />
       </div>
       <div className="font-bold text-[20px]">
@@ -185,8 +187,9 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
           onSelect={(selected) => {
             setItemToRemove({ ...itemToRemove, itemName: selected });
           }} 
-          disabled={!selectedCategory} 
-          filterValue={selectedCategory || ""}
+          disabled={!itemToRemove.categoryName} 
+          filterValue={itemToRemove.categoryName || ""}
+          defaultValue={(itemToRemove.itemName)}
         />
       </div>
       <div className="flex flex-row w-full justify-between">
@@ -215,6 +218,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             }} 
             disabled={!itemToRemove.itemName} 
             filterValue={itemToRemove.itemName || ""}
+            defaultValue={itemToRemove.units}
           />
         </div>
       </div>
