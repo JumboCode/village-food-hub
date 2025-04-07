@@ -10,6 +10,7 @@ import UnitBoxes from '@app/components/UnitBoxes';
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
+import { Snackbar } from '@mui/material';
 
 interface CategoryData {
   [key: string]: [string, string][];
@@ -56,6 +57,10 @@ const Categories: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showDuplicateError, setShowDuplicateError] = useState(false);
+  const [snackbarCatRename, setSnackBarCatRename] = useState(false);
+  const [snackbarCatDelete, setSnackBarCatDelete] = useState(false);
+  const [snackbarMessageCatRename, setSnackbarMessageCatRename] = useState("Category Renamed");
+  const [snackbarMessageCatDelete, setSnackbarMessageCatDelete] = useState("Category Deleted");
   // const [isLoading, setIsLoading] = useState(true);
 
   // Open delete category modal.
@@ -212,6 +217,7 @@ const Categories: React.FC = () => {
   };  
 
   const saveEditCategory = async () => {
+    setSnackBarCatRename(true);
     setShowEmptyError(false);
     setShowRetrievalError(false);
     setShowDuplicateError(false);
@@ -275,6 +281,7 @@ const Categories: React.FC = () => {
 
   // handleDelete: if itemName is provided, delete that specific record; otherwise, delete all records for the category.
   const handleDelete = async () => {
+    setSnackBarCatDelete(true);
     console.log("handleDelete triggered");
     console.log("categoryName:", categoryName);
     console.log("itemName:", itemName);
@@ -582,6 +589,20 @@ const Categories: React.FC = () => {
           </div>
         </div>
       )}
+       <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarCatRename}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarCatRename(false)}
+                message={snackbarMessageCatRename}
+            />
+             <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarCatDelete}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarCatDelete(false)}
+                message={snackbarMessageCatDelete}
+            />
     </div>
   );
 };

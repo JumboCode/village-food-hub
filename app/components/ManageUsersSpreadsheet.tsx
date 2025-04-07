@@ -5,6 +5,7 @@ import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import DeleteUserModal from "@app/components/DeleteUserModal";
 import EditUserModal from "@app/components/EditUserModal";
+import Snackbar from '@mui/material/Snackbar';
 
 interface ManageUsersSpreadsheetProps {
     manageUsersItems: string[][];
@@ -31,6 +32,10 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
     const [selectedUser, setSelectedUser] = useState<ClerkUser | null>(null);
     const [sortedItems, setSortedItems] = useState<string[][]>([]);
     const [topSorted, setTopSorted] = useState<boolean>(false);
+    const [snackbarOpenDelete, setSnackbarOpenDelete] = useState(false);
+    const [snackbarOpenEditRole, setSnackbarOpenEditRole] = useState(false);
+    const [snackbarMessageDelete, setSnackbarMessageDelete] = useState("User Deleted");
+    const [snackbarMessageEditRole, setSnackbarMessageEditRole] = useState("User Role Edited");
 
     useEffect(() => {
         setSortedItems(manageUsersItems);
@@ -167,6 +172,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             console.error("Error updating user:", error);
             alert("Failed to update user. Please try again.");
         }
+        setSnackbarOpenEditRole(true);
     };    
 
     const handleDelete = async () => {
@@ -218,6 +224,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
             console.log("Delete Response:", result);
     
             if (response.ok) {
+                setSnackbarOpenDelete(true);
                 console.log("User deleted successfully:", result);
 
                 // Update sortedItems and allUsers state to reflect the deletion
@@ -355,6 +362,20 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({ 
                 </div>
             </div>
             }
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenEditRole}
+                autoHideDuration={6000}
+                onClose={() => setSnackbarOpenEditRole(false)}
+                message={snackbarMessageEditRole}
+            />
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenDelete}
+                autoHideDuration={6000}
+                onClose={() => setSnackbarOpenDelete(false)}
+                message={snackbarMessageDelete}
+            />
         </div>
     )
 }

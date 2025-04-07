@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
+import { Snackbar } from "@mui/material";
 
 // --- Types and Interfaces ---
 
@@ -64,6 +65,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [unitWarning, setUnitWarning] = useState(-1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [lastUnitWarning, setLastUnitWarning] = useState(false);
+  const [snackbarOpenEdit, setSnackbarOpenEdit] = useState(false);
+  const [snackbarCatRename, setSnackBarCatRename] = useState(false);
+  const [snackbarOpenDelete, setSnackbarOpenDelete] = useState(false);
+  const [snackbarOpenRename, setSnackBarOpenRename] = useState(false);
+  const [snackbarMessageDelete, setSnackbarMessageDelete] = useState("Item Deleted"); // There's a refresh :(
+  const [snackbarMessageCatRename, setSnackbarMessageCatRename] = useState("Category Renamed");
+  const [snackbarMessageEdit, setSnackbarMessageEdit] = useState("Item Edited");
+  const [snackbarMessageRename, setSnackbarMessageRename] = useState("Item or Units Renamed");
 
   // ---------- EDIT FUNCTIONS ----------
   // Opens the edit modal, prepopulating with the item name and parsed units (from a comma-separated string)
@@ -89,11 +98,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   // - name (category name, passed consistently),
   // - and units (an array of updated units)
   const handleSave = async (
+    
     oldItemName: string,
     newItemName: string,
     updatedUnits: string[],
     categoryName: string
   ) => {
+    console.log("trying to open snackbar!")
+    setSnackBarOpenRename(true);
     try {
       const validUnits = updatedUnits.filter(
         (unit) => unit && unit.trim() !== ""
@@ -150,6 +162,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
   // Deletes the entire row (item) from both inventory and categories.
   const deleteItem = async () => {
+    setSnackbarOpenDelete(true);
     closeDeleteModal();
   
     // First, fetch inventory data.
@@ -224,6 +237,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
   // Deletes a single unit from an item.
   const deleteUnit = async (unit: string) => {
+    setSnackbarOpenDelete(true);
     setUnitWarning(-1);
   
     // Check if this is the last unit
@@ -555,6 +569,34 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
             </button>
           </div>
           </div>
+          <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenEdit}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpenEdit(false)}
+                message={snackbarMessageEdit}
+            />
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenDelete}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpenDelete(false)}
+                message={snackbarMessageDelete}
+            />
+          <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenRename}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarOpenRename(false)}
+                message={snackbarMessageRename}
+            />
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarCatRename}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarCatRename(false)}
+                message={snackbarMessageCatRename}
+            />
         </div>
       )}
     </>

@@ -3,6 +3,7 @@ import React, {useState, useEffect} from "react";
 import DeleteDemographicsModal from "@app/components/DeleteDemographicsModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdDeleteOutline } from "react-icons/md";
+import Snackbar from '@mui/material/Snackbar';
 
 interface DemographicsSpreadsheetProps {
     demographicsItems: (string | number)[][];
@@ -17,6 +18,8 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
     const [topSorted, setTopSorted] = useState(true);
     const [quantityAscending, setQuantityAscending] = useState(true);
     const [DateAscending, setDateAscending] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("Demographic Response Deleted");
     
     useEffect(() => {
         setSortedItems([...demographicsItems]);
@@ -68,6 +71,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
       };
       
       const handleDelete = async () => {
+        setSnackbarOpen(true);
         if (!selectedData) return;
         
 
@@ -168,12 +172,27 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                     onClick={() => openModal(String(row[1]), String(row[2]))}
                                 />
                                 {showModal && <DeleteDemographicsModal userName={String(name)} closeModal={closeModal} handleDelete={handleDelete} /> }
+                                {/* {snackbarOpen && 
+                                <Snackbar
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                    open={snackbarOpen}
+                                    autoHideDuration={4000}
+                                    onClose={() => setSnackbarOpen(false)}
+                                    message={snackbarMessage}
+                                />} */}
                             </span>
                         </td>
                     </tr>
                 ))}
             </tbody>
             </table>
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+            />
         </div>
     )
 }

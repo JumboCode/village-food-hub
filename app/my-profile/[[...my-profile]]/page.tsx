@@ -6,6 +6,7 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
+import { Snackbar } from "@mui/material";
 
 interface User {
     id: string;
@@ -24,6 +25,8 @@ const MyProfilePage: React.FC = () => {
     const [destinationPage, setDestinationPage] = useState("");
     const [savedChanges, setSavedChanges] = useState(false);
     const [validationError, setValidationError] = useState<string>("");
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("Edited User Info");
     
     // Store profile data in parent
     const [profileData, setProfileData] = useState({
@@ -114,6 +117,7 @@ const MyProfilePage: React.FC = () => {
       
           if (response.ok) {
             console.log("User updated successfully");
+            setSnackbarOpen(true);
             setShowEditProfileView(false);
           } else {
             console.error("Failed to update user data");
@@ -127,6 +131,7 @@ const MyProfilePage: React.FC = () => {
 
   
     function handleEditProfileView() {
+        console.log("edited profile")
         setShowEditProfileView(true);
     }
 
@@ -447,6 +452,13 @@ const MyProfilePage: React.FC = () => {
                 }
             </div>
         )}
+        <Snackbar
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            open={snackbarOpen}
+            autoHideDuration={4000}
+            onClose={() => setSnackbarOpen(false)}
+            message={snackbarMessage}
+        />
         </div>
     );
 };
