@@ -135,6 +135,7 @@ const VolunteerRemovePages: React.FC = () => {
                         setValidQuantity("The quantity you are removing is greater than the quantity in the inventory");
                       } 
                     } else {
+                      console.log(itemToRemove);
                       setItemExists("Item does not exist in inventory");
                     }
                     console.log(items);
@@ -190,7 +191,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
           onSelect={(selected) => { 
             setItemExists("");
             setSelectedCategory(selected);
-            setItemToRemove({ ...itemToRemove, categoryName: selected }); 
+            setItemToRemove({ ...itemToRemove, categoryName: selected, itemName: "", units: "" }); 
           }}
           defaultValue={itemToRemove.categoryName}
         />
@@ -205,7 +206,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
           filterName="name" 
           currentDropdown="itemName"
           onSelect={(selected) => {
-            setItemToRemove({ ...itemToRemove, itemName: selected });
+            setItemToRemove({ ...itemToRemove, itemName: selected, units:"" });
           }} 
           disabled={!itemToRemove.categoryName} 
           filterValue={itemToRemove.categoryName || ""}
