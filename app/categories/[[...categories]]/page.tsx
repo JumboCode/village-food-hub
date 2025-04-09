@@ -294,71 +294,19 @@ const Categories: React.FC = () => {
 
   // handleDelete: if itemName is provided, delete that specific record; otherwise, delete all records for the category.
   const handleDelete = async () => {
-    console.log("handleDelete triggered");
-    console.log("categoryName:", categoryName);
-    console.log("itemName:", itemName);
     if (!categoryName) {
       console.warn("No categoryName provided; aborting deletion.");
       return;
     }
-    // Prepare payload for categories deletion.
-    const payload = { name: categoryName, itemName: itemName ? itemName : "", units: units.join(', ') };
-    console.log("DELETE payload for categories:", payload);
     try {
-      if (itemName && itemName.trim() !== "") {
-        // Check inventory for record existence.
-        try {
-          const invResponse = await fetch("/api/inventory");
-          if (invResponse.ok) {
-            const invData: { data: InventoryItem[] } = await invResponse.json();
-            const exists = invData.data.some(
-              (invItem: InventoryItem) => invItem.itemName === itemName
-            );
-            if (exists) {
-              console.log("Inventory record exists; attempting inventory deletion.");
-              const invDeleteResponse = await fetch("/api/inventory", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ itemName, units: units.join(', ') }),
-              });              
-              console.log("Inventory deletion response status:", invDeleteResponse.status);
-            } else {
-              console.log("No inventory record found; skipping inventory deletion.");
-            }
-          } else {
-            console.error("Failed to fetch inventory data; status:", invResponse.status);
-          }
-        } catch (e) {
-          console.error("Error checking inventory:", e);
-        }
-  
-        // Delete specific category record.
-        console.log("Deleting specific category record for:", payload);
-        const response = await fetch("../api/categories", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        console.log("Categories deletion response status:", response.status);
-        if (!response.ok) {
-          throw new Error("Error deleting specific category record.");
-        }
-        const resData = await response.json();
-        console.log("Categories deletion response data:", resData);
-      } else {
-        // Delete all records for the category by calling the DELETE endpoint with an empty itemName.
-        console.log("Deleting all records for category:", categoryName);
-        const response = await fetch("../api/categories", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: categoryName, itemName: "" }),
-        });
-        console.log("Categories deletion response status:", response.status);
-        if (!response.ok) {
-          throw new Error("Error deleting categories by name.");
-        }
-        const result = await response.json();
-        console.log("deleteCategoriesByName response:", result);
+      const response = await fetch("../api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: categoryName, itemName: "" }),
+      });
+      console.log("Categories deletion response status:", response.status);
+      if (!response.ok) {
+        throw new Error("Error deleting categories by name.");
       }
       closeModal();
       await refreshCategories();
