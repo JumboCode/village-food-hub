@@ -98,45 +98,49 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   // - name (category name, passed consistently),
   // - and units (an array of updated units)
   const handleSave = async (
-    
     oldItemName: string,
     newItemName: string,
     updatedUnits: string[],
     categoryName: string
   ) => {
-    console.log("trying to open snackbar!")
-    setSnackBarOpenRename(true);
     try {
-      const validUnits = updatedUnits.filter(
-        (unit) => unit && unit.trim() !== ""
-      );
+      const validUnits = updatedUnits.filter(unit => unit.trim() !== "");
+      const trimmedOldName = oldItemName.trim();
+      const trimmedNewName = newItemName.trim();
+      const sortedOriginalUnits = [...currUnits].map(u => u.trim()).sort();
+      const sortedUpdatedUnits = [...validUnits].map(u => u.trim()).sort();
+  
+      const nameChanged = trimmedOldName !== trimmedNewName;
+      const unitsChanged = JSON.stringify(sortedOriginalUnits) !== JSON.stringify(sortedUpdatedUnits);
+  
       const payload = {
-        oldItemName: oldItemName.trim(),
-        itemName: newItemName.trim(),
+        oldItemName: trimmedOldName,
+        itemName: trimmedNewName,
         name: categoryName.trim(),
         units: validUnits,
       };
-      console.log("Sending request with payload:", payload);
+  
       const response = await fetch("/api/categories", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+  
       if (!response.ok) {
-        console.log(
-          `Error editing category with server response: ${response.status}`
-        );
+        console.error("Error editing item; status:", response.status);
       } else {
+        if (nameChanged || unitsChanged) {
+          setSnackBarOpenRename(true);
+        }
         await loadData();
       }
+  
       closeModal();
     } catch (error) {
       console.error("Error updating data:", error);
       closeModal();
     }
-  };
+  };  
 
   // ---------- DELETION FUNCTIONS ----------
   // Opens the delete modal for an entire row.
