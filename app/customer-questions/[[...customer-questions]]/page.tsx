@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit, NoDone, YesProceed } from '@app/components/SurveyButtons';
 import DemographicsSurveyBanner from '@app/components/DemographicsSurveyBanner';
@@ -11,6 +11,13 @@ import Image from 'next/image';
 import logo from '@app/images/Logo 300x263.png';
 import arrow from '@app/images/arrow.png';
 import ExitModal from '@app/components/ExitModal';
+import TimeoutModal from '@app/components/TimeoutModal';
+import ErrorModal from '@app/components/ErrorModal';
+import {
+  isPossiblePhoneNumber,
+  isValidPhoneNumber,
+  validatePhoneNumberLength
+} from 'libphonenumber-js';
 
 interface Details {
   name: string;
@@ -70,6 +77,40 @@ const CustomerAction: React.FC<{
     setNextDisabled(!receive && !donate);
   }, [receive, donate, setNextDisabled]);
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+    };
+  }, [handleClick]);
+
   return (
     <div>
       <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
@@ -89,7 +130,7 @@ const CustomerAction: React.FC<{
             </div>
             <div>{translations[1]}</div>
           </div>
-          <div className="flex space-x-5">
+          <div className="flex space-x-5 onClick={() => setTimer(10)}">
             <div className="flex items-center mb-4">
               <input 
                 id="default-checkbox" 
@@ -103,6 +144,13 @@ const CustomerAction: React.FC<{
           </div>
         </div>
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -138,9 +186,13 @@ const PhoneNumber: React.FC<{
   }, []);
 
   const [phoneNumber, setPhoneNumber] = useState<string>(value);
-
+ 
   const handlePhoneNumberChange = (newValue: string | undefined) => {
     const val = newValue || "";
+    // if (!isValidPhoneNumber(phoneNumber)) {
+    //   setShowErrorModal(true);
+    //   return;
+    // }
     setPhoneNumber(val);
     onChange(val);
   };
@@ -148,14 +200,59 @@ const PhoneNumber: React.FC<{
   useEffect(() => {
     const phoneNumberWithoutCountryCode = phoneNumber.replace(/^\+\d+/, '');
     setNextDisabled(phoneNumberWithoutCountryCode === "");
+  
   }, [phoneNumber, setNextDisabled]);
+
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+      document.removeEventListener("keydown", handleClick); 
+    };
+  }, [handleClick]);
 
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full max-w-lg font-crimson">
         <p className="text-[36px] font-bold mb-8">{translations[0]} <span className="text-red">*</span></p>
         <PhoneNumberInput value={phoneNumber} onChange={handlePhoneNumberChange} />
+        {/* {showErrorModal && <ErrorModal errorMsg='Phone Number is Invalid' closeModal={closeErrorModal}/>} */}
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -213,6 +310,40 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
     setNextDisabled(selectedValue === "");
   }, [selectedValue, setNextDisabled]);
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+    };
+  }, [handleClick]);
+
   return (
     <div className="flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center w-full font-crimson">
@@ -225,6 +356,13 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
 
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -287,6 +425,42 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
     setNextDisabled(firstNameState === "" || lastNameState === "");
   }, [firstNameState, lastNameState, setNextDisabled]);
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+      document.removeEventListener("keydown", handleClick); 
+    };
+  }, [handleClick]);
+
   return (
     <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
@@ -312,6 +486,13 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
           required
         />
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -394,6 +575,42 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
     setNextDisabled(line === "" || cityState === "" || stateState === "" || zipState === "");
   }, [line, cityState, stateState, zipState, setNextDisabled]);
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+      document.removeEventListener("keydown", handleClick); 
+    };
+  }, [handleClick]);
+
   return (
     <div className="flex flex-col items-center font-crimson">
       <div className="flex flex-col items-center w-full">
@@ -441,6 +658,13 @@ const Address: React.FC<AddressProps> = ({ line1, city, state, zip, onAddressLin
           />
         </div>
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -484,6 +708,40 @@ const HouseholdSize: React.FC<{
     setSubmitDisabled(sizeValue === null);
   };
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(15);
+  };
+
+  // sets up 15 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+    };
+  }, [handleClick]);
+
   const sizes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
   return (
     <div className="flex flex-col justify-center items-center py-10">
@@ -504,6 +762,13 @@ const HouseholdSize: React.FC<{
         </select>
         </div>
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -540,6 +805,40 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
     })();
   }, []);
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [timer, setTimer] = useState(10);
+
+  const handleCloseModal = () => {
+    setShowTimeoutModal(false);
+    window.preventNavigation = false;
+    setTimer(10); // Optionally reset the timer
+  };
+
+  // sets up 10 second timer on open
+  useEffect(() => {
+  
+    // sets up interval to decrement timer
+    setInterval(() => {
+      setTimer(prev => {
+        if (prev === 1) { setShowTimeoutModal(true); }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // tracks when a click occurs
+  const handleClick = useCallback(() => {
+    setTimer(10);
+  }, []);
+
+  // after a click occurs
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    return () => { 
+      document.removeEventListener("click", handleClick); 
+    };
+  }, [handleClick]);
+
   return (
     <div className="font-crimson">
       <div className="text-black crimson-bold flex pt-[80px] text-4xl content-center justify-center text-center">
@@ -552,6 +851,13 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
         <YesProceed onClick={() => onChange(true)}/>
         <NoDone onClick={() => onChange(false)}/>
       </div>
+
+      {/* timeout modal after 10 seconds of inactivity */}
+      {showTimeoutModal &&
+        <TimeoutModal
+          closeTimeoutModal={handleCloseModal}
+        />
+      }
     </div>
   );
 };
@@ -609,7 +915,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
 
   const [newRecord, setNewRecord] = useState<NewResponse | null>(null);
 
-  const fetchNewRecord = async () => {
+  const fetchNewRecord = useCallback(async () => {
     try {
       const response = await fetch("../api/demographics", { method: "GET" });
       if (!response.ok) {
@@ -627,7 +933,7 @@ const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
     } catch (error) {
       console.error("Error fetching responses:", error);
     }
-  };
+  }, [phoneNumber]);
 
   useEffect(() => {
     (async () => {
@@ -806,6 +1112,12 @@ const DemographicsSurvey: React.FC = () => {
           return;
         }
         const record = await fetchPrevRecord();
+        if (!isValidPhoneNumber('+' + responses.phoneNumber)) {
+          setShowErrorModal(true);
+          setErrorMsg('Phone Number is Not Valid');
+          return;
+
+        }
         console.log("Fetched record before transition:", record);
         if (record !== null) {
           setCurrentStep('changes');
@@ -941,6 +1253,11 @@ const DemographicsSurvey: React.FC = () => {
     }
   };
 
+
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const closeErrorModal = (): void => setShowErrorModal(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const openModal = (): void => setShowModal(true);
   const closeModal = (): void => setShowModal(false);
@@ -984,6 +1301,7 @@ const DemographicsSurvey: React.FC = () => {
         {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
+        {showErrorModal && <ErrorModal errorMsg={errorMsg} closeModal={closeErrorModal}/>}
         {currentStep === 'changes' && (
           <Changes
             value={responses.changes}
@@ -1042,6 +1360,7 @@ const DemographicsSurvey: React.FC = () => {
           } else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
+          
         })()}
       </div>
     </div>

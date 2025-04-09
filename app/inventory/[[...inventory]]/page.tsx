@@ -116,7 +116,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                   type="checkbox"
                   checked={selectedCategories.includes(category)}
                   onChange={e => handleCheckboxChange(category, e.target.checked)}
-                  className="w-4 h-4"
+                  className="w-4 h-4 focus:outline-none focus:ring-0"
                 />
                 <p className="text-lg cursor-pointer">{category}</p>
               </div>
@@ -216,6 +216,15 @@ const InternalViewInventoryPage: React.FC = () => {
             </div>
             )}
         </div>
+        
+        {appliedFilters.length > 0 && (
+          <button
+            onClick={() => setAppliedFilters([])}
+            className="bg-purple text-white px-4 py-2 rounded-md hover:bg-dark-purple transition-all"
+          >
+            Clear Filters
+          </button>
+        )}
         </div>
     ) : (
         <div className="p-10 text-center">
