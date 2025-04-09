@@ -29,13 +29,16 @@ const VolunteerRemovePages: React.FC = () => {
   const [nextDisabled, setNextDisabled] = useState(true);
   const [itemExists, setItemExists] = useState("");
   const [validQuantity, setValidQuantity] = useState("");
+  const [nextAttempted, setNextAttempted] = useState(false);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
     setCurrentStep('confirm');
+    setNextAttempted(true);
   };
 
   const handleBack = () => {
+    setNextAttempted(false);
     console.log('Back clicked, currentStep:', currentStep);
     if (currentStep === 'confirm')
       setCurrentStep('details');
@@ -93,46 +96,65 @@ const VolunteerRemovePages: React.FC = () => {
 
       {/* Next Button */}
       {currentStep === 'details' && (
-        <div className="flex justify-center mt-8">
-          <ButtonNext 
-            disabled={nextDisabled}
-            onClick={() => {
-              setItemExists("");
-              setValidQuantity("");
-              console.log(itemToRemove);
-              setItemToRemove({ ...itemToRemove, lastUpdated: new Date() });
-              fetch("../api/inventory", { method: 'GET' })
-                .then((response) => {
-                  if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                  }
-                  return response.json();
-                })
-                .then((jsonData) => jsonData.data)
-                .then((items) => {
-                  const inventoryItem = items.find((item: Inventory) => 
-                    item.itemName === itemToRemove.itemName && 
-                    item.units === itemToRemove.units
-                  );
-                  const exists = inventoryItem !== undefined;
+        <div className="flex flex-col items-center mt-8 space-y-2">
+          {nextDisabled && nextAttempted && (
+            <div className="text-red text-sm font-medium">
+              {itemToRemove.quantity == 0 
+                ? "Quantity should be a value bigger than 0." 
+                : "Please fill out all required fields to proceed."}
+            </div>
+          )}
+          <div className="relative w-fit">
+          {/* Actual Button */}
+            <ButtonNext 
+              disabled={nextDisabled}
+              onClick={() => {
+                setItemExists("");
+                setValidQuantity("");
+                setItemToRemove({ ...itemToRemove, lastUpdated: new Date() });
+                fetch("../api/inventory", { method: 'GET' })
+                  .then((response) => {
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+                  .then((jsonData) => jsonData.data)
+                  .then((items) => {
+                    const inventoryItem = items.find((item: Inventory) => 
+                      item.itemName === itemToRemove.itemName && 
+                      item.units === itemToRemove.units
+                    );
+                    const exists = inventoryItem !== undefined;
 
-                  if (exists) {
-                    if ((inventoryItem.quantity >= itemToRemove.quantity) && (itemToRemove.quantity > 0)) {
-                      handleNext();
+                    if (exists) {
+                      if ((inventoryItem.quantity >= itemToRemove.quantity) && (itemToRemove.quantity > 0)) {
+                        handleNext();
+                      } else {
+                        setNextDisabled(false);
+                        setValidQuantity("The quantity you are removing is greater than the quantity in the inventory");
+                      } 
                     } else {
-                      setNextDisabled(false);
-                      setValidQuantity("The quantity you are removing is greater than the quantity in the inventory");
-                    } 
-                  } else {
-                    setItemExists("Item does not exist in inventory");
-                  }
-                  console.log(items);
-                })
-                .catch((error) => {
-                  console.error('Error fetching inventory:', error);
-                });
-              }}
-            />
+                      console.log(itemToRemove);
+                      setItemExists("Item does not exist in inventory");
+                    }
+                    console.log(items);
+                  })
+                  .catch((error) => {
+                    console.error('Error fetching inventory:', error);
+                  });
+                }}
+              />
+              {/* Overlay only when disabled */}
+              {nextDisabled && (
+                <div
+                  className="absolute inset-0 z-10 cursor-not-allowed"
+                  onClick={() => {
+                    setNextAttempted(true);
+                  }}
+                />
+              )}
+          </div>
         </div>
       )}
     </div>
@@ -169,8 +191,9 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
           onSelect={(selected) => { 
             setItemExists("");
             setSelectedCategory(selected);
-            setItemToRemove({ ...itemToRemove, categoryName: selected }); 
+            setItemToRemove({ ...itemToRemove, categoryName: selected, itemName: "", units: "" }); 
           }}
+          defaultValue={itemToRemove.categoryName}
         />
       </div>
       <div className="font-bold text-[20px]">
@@ -183,23 +206,26 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
           filterName="name" 
           currentDropdown="itemName"
           onSelect={(selected) => {
-            setItemToRemove({ ...itemToRemove, itemName: selected });
+            setItemToRemove({ ...itemToRemove, itemName: selected, units:"" });
           }} 
-          disabled={!selectedCategory} 
-          filterValue={selectedCategory || ""}
+          disabled={!itemToRemove.categoryName} 
+          filterValue={itemToRemove.categoryName || ""}
+          defaultValue={(itemToRemove.itemName)}
         />
       </div>
       <div className="flex flex-row w-full justify-between">
         <div className="font-bold text-[20px] pt-6">
           <p className="mb-2">Quantity <span className="text-red">*</span></p>
           <input
-            type="text"
+            type="number"
+            min="1"
+            step="1"
             placeholder=""
             className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
             onBlur={(e) => {
               setItemToRemove({ ...itemToRemove, quantity: Number(e.target.value) });
               setValidQuantity("");
-              setNextDisabled(false);
+              setNextDisabled(Number(e.target.value) <= 0);
             }}
             defaultValue={itemToRemove.quantity > 0 ? itemToRemove.quantity : ''}
           />
@@ -215,6 +241,7 @@ const VolunteerRemoveDetailsModule: React.FC<VolunteerRemoveDetailsModuleProps> 
             }} 
             disabled={!itemToRemove.itemName} 
             filterValue={itemToRemove.itemName || ""}
+            defaultValue={itemToRemove.units}
           />
         </div>
       </div>

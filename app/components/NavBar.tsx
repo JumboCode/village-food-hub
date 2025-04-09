@@ -103,6 +103,16 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
           <div className="flex space-x-10">
             <button
               className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${
+                currentPath === "/overview"
+                  ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
+                  : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
+              }`}
+              onClick={() => handleNavigation("overviewClicked", "/overview")}
+            >
+              Overview
+            </button>
+            <button
+              className={`text-[21px] font-crimson font-bold text-white px-6 py-3 rounded-xl ${
                 currentPath === "/demographics"
                   ? "bg-[#D9D9D9] hover:bg-opacity-90 bg-opacity-30"
                   : "bg-transparent hover:bg-[#D9D9D9] hover:bg-opacity-30"
