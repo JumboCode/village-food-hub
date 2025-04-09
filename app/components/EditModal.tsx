@@ -46,7 +46,7 @@ const EditModal: React.FC<EditModalProps> = ({
     
     // Check for duplicates (case-insensitive)
     const seen = new Set<string>();
-    for (let unit of validUnits) {
+    for (const unit of validUnits) {
       const lowerUnit = unit.toLowerCase();
       if (seen.has(lowerUnit)) {
         setErrorMessage("Cannot add duplicate units.");
