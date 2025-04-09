@@ -129,7 +129,12 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       if (!response.ok) {
         console.error("Error editing item; status:", response.status);
       } else {
-        if (nameChanged || unitsChanged) {
+        if (nameChanged) {
+          setSnackbarMessageRename("Item Renamed");
+          setSnackBarOpenRename(true);
+        }
+        if (unitsChanged) {
+          setSnackbarMessageRename("Units Renamed");
           setSnackBarOpenRename(true);
         }
         await loadData();
