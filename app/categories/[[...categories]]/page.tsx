@@ -11,17 +11,12 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 import { Snackbar } from '@mui/material';
-import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
-import LoadingAnimation from "@app/components/LoadingAnimation";
-import { useUser } from "@clerk/nextjs";
 
 interface CategoryData {
   [key: string]: [string, string][];
 }
 
 const Categories: React.FC = () => {
-
-
   const fetchCategories = async (): Promise<CategoryData> => {
     const response = await fetch("/api/categories");
     if (!response.ok) throw new Error("Failed to fetch categories");
@@ -47,8 +42,6 @@ const Categories: React.FC = () => {
   };
   
   const { data: categoriesData, error, isLoading, mutate: mutateCategories } = useSWR("/api/categories", fetchCategories);
-  const { user } = useUser();
-  const isNotVolunteer = userIsNotVolunteer(user); 
 
   // State variables
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -182,31 +175,19 @@ const Categories: React.FC = () => {
   const saveCategories = async () => {
     try {
       const trimmedItemName = itemName.trim();
-      console.log("units: " + units);
       const validUnits = units.filter(unit => unit && unit.trim() !== "");
-
-      const seen: string[] = [];
-      for (let i = 0; i < validUnits.length; i++) {
-        console.log("item in validUnits is " + validUnits[i]);
-        if (seen.includes(validUnits[i])) {
-          console.log("duplicate unit");
-        } else {
-          seen.push(validUnits[i]);
-          console.log("adding this seen:", seen);
-        }
-      }
-
-      if (trimmedItemName === "" || seen.length < 1) {
+  
+      if (trimmedItemName === "" || validUnits.length < 1) {
         setShowEmptyError(true);
         return;
       }
-      console.log("this is valid units:", validUnits);
+  
       setShowEmptyError(false);
   
       const payload = {
         itemName: trimmedItemName,
         name: selectedCategory.trim(),
-        units: seen
+        units: validUnits,
       };
   
       console.log("Sending payload:", payload);
@@ -308,15 +289,64 @@ const Categories: React.FC = () => {
       console.warn("No categoryName provided; aborting deletion.");
       return;
     }
+    // Prepare payload for categories deletion.
+    const payload = { name: categoryName, itemName: itemName ? itemName : "", units: units.join(', ') };
+    console.log("DELETE payload for categories:", payload);
     try {
-      const response = await fetch("../api/categories", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: categoryName, itemName: "" }),
-      });
-      console.log("Categories deletion response status:", response.status);
-      if (!response.ok) {
-        throw new Error("Error deleting categories by name.");
+      if (itemName && itemName.trim() !== "") {
+        // Check inventory for record existence.
+        try {
+          const invResponse = await fetch("/api/inventory");
+          if (invResponse.ok) {
+            const invData: { data: InventoryItem[] } = await invResponse.json();
+            const exists = invData.data.some(
+              (invItem: InventoryItem) => invItem.itemName === itemName
+            );
+            if (exists) {
+              console.log("Inventory record exists; attempting inventory deletion.");
+              const invDeleteResponse = await fetch("/api/inventory", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemName, units: units.join(', ') }),
+              });              
+              console.log("Inventory deletion response status:", invDeleteResponse.status);
+            } else {
+              console.log("No inventory record found; skipping inventory deletion.");
+            }
+          } else {
+            console.error("Failed to fetch inventory data; status:", invResponse.status);
+          }
+        } catch (e) {
+          console.error("Error checking inventory:", e);
+        }
+  
+        // Delete specific category record.
+        console.log("Deleting specific category record for:", payload);
+        const response = await fetch("../api/categories", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        console.log("Categories deletion response status:", response.status);
+        if (!response.ok) {
+          throw new Error("Error deleting specific category record.");
+        }
+        const resData = await response.json();
+        console.log("Categories deletion response data:", resData);
+      } else {
+        // Delete all records for the category by calling the DELETE endpoint with an empty itemName.
+        console.log("Deleting all records for category:", categoryName);
+        const response = await fetch("../api/categories", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryName, itemName: "" }),
+        });
+        console.log("Categories deletion response status:", response.status);
+        if (!response.ok) {
+          throw new Error("Error deleting categories by name.");
+        }
+        const result = await response.json();
+        console.log("deleteCategoriesByName response:", result);
       }
       closeModal();
       await refreshCategories();
@@ -324,242 +354,239 @@ const Categories: React.FC = () => {
       console.error("Error in handleDelete:", error);
     }
   };
-
+  
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+      </div>
+    );
+  }
 
   return (
-    isLoading ? (
-      <LoadingAnimation />
-    ) : isNotVolunteer ? (
-        <div>
-        <NavBar />
-        <p className="font-crimson font-bold pl-20 pt-10 text-[40px]">Categories</p>
-        <div className="flex justify-center items-center">
-            <div className="w-3/5 h-4/5">
-            <div className="flex flex-col">
-                <p className="font-crimson crimson-bold text-[24px] pt-5">Edit Category</p>
-                <div className="flex justify-between items-center py-4 w-full">
-                <div className="flex flex-row items-center w-1/2">
-                    <div className="w-full">
-                    <NameDropdown
-                        fetchUrl="/api/categories"
-                        filterName="name"
-                        onSelect={handleCategoryChange}
-                        defaultValue={selectedCategory}
-                        />
-                    </div>
-                    {showTable && (
-                        <>
-                    <div className="flex items-center pl-4 space-x-4">
-                        <MdDeleteOutline
-                            size={24}
-                            className="cursor-pointer"
-                            onClick={() =>
-                                openModal(
-                                    String(selectedCategory),
-                                    String(selectedCategoryData[0]?.[0] || "")
-                                )
-                            }
-                            />
-                        {showModal && (
-                            <DeleteCategoryModal
-                            categoryName={String(selectedCategory)}
-                            itemName={String(itemName)}
-                            closeModal={closeModal}
-                            handleDelete={handleDelete}
-                            />
-                        )}
-                        <MdOutlineEdit
-                            size={24}
-                            className="cursor-pointer"
-                            onClick={editButtonClicked}
-                            />
-                    </div>
-                    </>
-                )}
+    <div>
+      <NavBar />
+      <p className="font-crimson font-bold pl-20 pt-10 text-[40px]">Categories</p>
+      <div className="flex justify-center items-center">
+        <div className="w-3/5 h-4/5">
+          <div className="flex flex-col">
+            <p className="font-crimson crimson-bold text-[24px] pt-5">Edit Category</p>
+            <div className="flex justify-between items-center py-4 w-full">
+              <div className="flex flex-row items-center w-1/2">
+                <div className="w-full">
+                  <NameDropdown
+                    fetchUrl="/api/categories"
+                    filterName="name"
+                    onSelect={handleCategoryChange}
+                    defaultValue={selectedCategory}
+                  />
                 </div>
-                <div className="flex justify-end w-full">
-                    {showTable && (
-                        <button
-                        className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
-                        onClick={itemButtonClicked}
-                        >
-                        {"Item "}
-                        <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
-                    </button>
-                    )}
-                    <button
-                    className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
-                    onClick={categoryButtonClicked}
-                    >
-                    {"Category "}
-                    <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
-                    </button>
-                </div>
-                </div>
-            </div>
-            <div className="bg-slate-50 items-center h-full">
-                {showTable ? (
-                    <>
-                    <CategoriesSpreadsheet 
-                    categoryName={selectedCategory}
-                    categoryItems={categoriesData?.[selectedCategory] || []}
-                    loadData={async () => { await mutateCategories(); }} 
+                {showTable && (
+                  <>
+                  <div className="flex items-center pl-4 space-x-4">
+                    <MdDeleteOutline
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          openModal(
+                            String(selectedCategory),
+                            String(selectedCategoryData[0]?.[0] || "")
+                          )
+                        }
                     />
-                    {selectedCategoryData.length === 0 && (
-                        <p className="flex-center py-4 font-crimson text-[20px] text-center">
-                        No entries for this category.
-                    </p>
+                    {showModal && (
+                      <DeleteCategoryModal
+                        categoryName={String(selectedCategory)}
+                        itemName={String(itemName)}
+                        closeModal={closeModal}
+                        handleDelete={handleDelete}
+                      />
                     )}
+                    <MdOutlineEdit
+                        size={24}
+                        className="cursor-pointer"
+                        onClick={editButtonClicked}
+                    />
+                  </div>
                 </>
-                ) : (
-                    <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
-                    Select a category.
-                </p>
+              )}
+              </div>
+              <div className="flex justify-end w-full">
+                {showTable && (
+                  <button
+                    className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-36 rounded text-[20px]"
+                    onClick={itemButtonClicked}
+                  >
+                    {"Item "}
+                    <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
+                  </button>
                 )}
-            </div>
-            </div>
-        </div>
-        {showItemModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-[450px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
-                <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Add Item</div>
-                <div className="flex flex-col ml-[15px] mb-[30px]">
-                <div className="flex mb-2">
-                    <div className="text-[28px] w-24 ml-[5%]">Name</div>
-                    <input
-                    type="text"
-                    onChange={(e) => setItemName(e.target.value)}
-                    className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
-                    />
-                </div>
-                <UnitBoxes 
-                    icon={addIcon}
-                    onUnitsChange={setUnits}
-                    />
-                </div>
-                {showEmptyError && (
-                    <p className="text-red text-center mb-4">
-                    Please enter an item name and at least one unit.
-                </p>
-                )}
-                {showRetrievalError && (
-                    <p className="text-red text-center mb-4">
-                    Failed to add item.
-                </p>
-                )}
-                <div className="flex w-full justify-center space-x-[15px] items-center">
                 <button
-                    className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                    onClick={itemModalClosed}
-                    >
-                    Cancel
+                  className="bg-light-green hover:bg-dark-green text-white font-serif pt-1 pb-1 px-4 mb-2 ml-4 rounded text-[20px]"
+                  onClick={categoryButtonClicked}
+                >
+                  {"Category "}
+                  <FontAwesomeIcon icon={faPlus} style={{ fontSize: '14px' }} />
                 </button>
-                <button
-                    className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
-                    onClick={saveCategories}
-                    >
-                    Add
-                </button>
-                </div>
+              </div>
             </div>
-            </div>
-        )}
-        {showCategoryModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green relative">
-            <p className="text-center text-[32px] pb-[15px] text-light-green">Category Name</p>
-        
-            {/* Input Field */}
-            <div className="flex w-full justify-center items-center pb-[20px]">
-                <input
-                type="text"
-                onChange={(e) => setCategoryName(e.target.value)}
-                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+          </div>
+          <div className="bg-slate-50 items-center h-full">
+            {showTable ? (
+              <>
+                <CategoriesSpreadsheet 
+                  categoryName={selectedCategory}
+                  categoryItems={categoriesData?.[selectedCategory] || []}
+                  loadData={async () => { await mutateCategories(); }} 
                 />
-            </div>
-        
-            {/* Error Messages */}
-            <div className="absolute top-[135px] left-0 right-0 flex flex-col items-center h-[20px]">
-                {showEmptyError && (
-                    <p className="text-red text-center">
-                    Please enter a category name.
-                </p>
+                {selectedCategoryData.length === 0 && (
+                  <p className="flex-center py-4 font-crimson text-[20px] text-center">
+                    No entries for this category.
+                  </p>
                 )}
-                {showRetrievalError && (
-                    <p className="text-red text-center">
-                    Category name already exists.
-                </p>
-                )}
-            </div>
-        
-            {/* Buttons */}
-            <div className="absolute bottom-[20px] left-0 right-0 flex justify-center space-x-[15px]">
-                <button
-                className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={cancelButtonClicked}
-                >
-                Cancel
-                </button>
-                <button
-                className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
-                onClick={saveButtonClicked}
-                >
-                Save
-                </button>
-            </div>
-            </div>
-        </div>      
-        )}
-        {showEditModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green flex flex-col justify-between">
-                <p className="text-center text-[32px] font-bold">Edit Name</p>
-                
-                <div className="flex flex-col items-center px-4 space-y-2">
-                <input
-                    type="text"
-                    value={editCategoryName}
-                    onChange={(e) => setEditCategoryName(e.target.value)}
-                    className="w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-2 mt-4"
-                    />
-
-                {/* Reserved space for error messages */}
-                <div className="h-[10px] flex items-center">
-                    {showEmptyError && (
-                        <p className="text-red text-center text-sm">
-                        Please enter a category name.
-                    </p>
-                    )}
-                    {showDuplicateError && (
-                        <p className="text-red text-center text-sm">
-                        Category already exists.
-                    </p>
-                    )}
-                </div>
-                </div>
-
-                <div className="flex justify-center space-x-[15px] mt-4">
-                <button
-                    className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
-                    onClick={cancelButtonClicked}
-                >
-                    Cancel
-                </button>
-                <button
-                    className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
-                    onClick={saveEditCategory}
-                    >
-                    Save
-                </button>
-                </div>
-            </div>
-            </div>
-        )}
+              </>
+            ) : (
+              <p className="flex-center py-[250px] font-crimson text-[20px] text-center">
+                Select a category.
+              </p>
+            )}
+          </div>
         </div>
-    ) : (
-        <div className="p-10 text-center">
-            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
-            <p className="mt-4">You do not have permission to view this page.</p>
+      </div>
+      {showItemModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-[450px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
+            <div className="text-[32px] text-[#7EB672] ml-[5%] mb-2">Add Item</div>
+            <div className="flex flex-col ml-[15px] mb-[30px]">
+              <div className="flex mb-2">
+                <div className="text-[28px] w-24 ml-[5%]">Name</div>
+                <input
+                  type="text"
+                  onChange={(e) => setItemName(e.target.value)}
+                  className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1]"
+                />
+              </div>
+              <UnitBoxes 
+                icon={addIcon}
+                onUnitsChange={setUnits}
+              />
+            </div>
+            {showEmptyError && (
+              <p className="text-red text-center mb-4">
+                Please enter an item name and at least one unit.
+              </p>
+            )}
+            {showRetrievalError && (
+              <p className="text-red text-center mb-4">
+                Failed to add item.
+              </p>
+            )}
+            <div className="flex w-full justify-center space-x-[15px] items-center">
+              <button
+                className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
+                onClick={itemModalClosed}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] pt-1 rounded-[8px] border border-gray text-[20px] justify-center"
+                onClick={saveCategories}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCategoryModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green relative">
+          <p className="text-center text-[32px] pb-[15px] text-light-green">Category Name</p>
+      
+          {/* Input Field */}
+          <div className="flex w-full justify-center items-center pb-[20px]">
+            <input
+              type="text"
+              onChange={(e) => setCategoryName(e.target.value)}
+              className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+            />
+          </div>
+      
+          {/* Error Messages */}
+          <div className="absolute top-[135px] left-0 right-0 flex flex-col items-center h-[20px]">
+            {showEmptyError && (
+              <p className="text-red text-center">
+                Please enter a category name.
+              </p>
+            )}
+            {showRetrievalError && (
+              <p className="text-red text-center">
+                Category name already exists.
+              </p>
+            )}
+          </div>
+      
+          {/* Buttons */}
+          <div className="absolute bottom-[20px] left-0 right-0 flex justify-center space-x-[15px]">
+            <button
+              className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+              onClick={cancelButtonClicked}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px] justify-center"
+              onClick={saveButtonClicked}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>      
+      )}
+      {showEditModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green flex flex-col justify-between">
+            <p className="text-center text-[32px] font-bold">Edit Name</p>
+            
+            <div className="flex flex-col items-center px-4 space-y-2">
+              <input
+                type="text"
+                value={editCategoryName}
+                onChange={(e) => setEditCategoryName(e.target.value)}
+                className="w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] px-2 mt-4"
+              />
+
+              {/* Reserved space for error messages */}
+              <div className="h-[10px] flex items-center">
+                {showEmptyError && (
+                  <p className="text-red text-center text-sm">
+                    Please enter a category name.
+                  </p>
+                )}
+                {showDuplicateError && (
+                  <p className="text-red text-center text-sm">
+                    Category already exists.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-center space-x-[15px] mt-4">
+              <button
+                className="text-gray hover:bg-light-gray font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
+                onClick={cancelButtonClicked}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-light-green hover:bg-dark-green text-white font-serif w-[117px] h-[40px] rounded-[8px] border border-gray text-[20px]"
+                onClick={saveEditCategory}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
        <Snackbar
