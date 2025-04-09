@@ -27,6 +27,7 @@ const VolunteerAddPages: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>('details');
   const [showModal, setShowModal] = useState(false);
   const [nextDisabled, setNextDisabled] = useState(true);
+  const [nextAttempted, setNextAttempted] = useState(false);
 
   const handleNext = () => {
     console.log('Next clicked, transitioning to confirm');
@@ -34,6 +35,7 @@ const VolunteerAddPages: React.FC = () => {
   };
 
   const handleBack = () => {
+    setNextAttempted(false);
     console.log('Back clicked, currentStep:', currentStep);
     if (currentStep === 'confirm') setCurrentStep('details');
     else window.location.href = "../volunteer-landing";
@@ -86,14 +88,35 @@ const VolunteerAddPages: React.FC = () => {
 
       {/* Next Button */}
       {currentStep === 'details' && (
-        <div className="flex justify-center mt-8">
-          <ButtonNext 
-            disabled={nextDisabled} 
-            onClick={() => {
-              console.log(itemToAdd);
-              handleNext();
-            }} 
-          />
+        <div className="flex flex-col items-center mt-8 space-y-2">
+          {nextDisabled && nextAttempted && (
+            <div className="text-red text-sm font-medium">
+              {itemToAdd.quantity == 0
+                ? "Quantity should be a value bigger than 0."
+                : "Please fill out all required fields to proceed."}
+            </div>
+          )}
+
+          <div className="relative w-fit">
+            {/* Actual Button */}
+            <ButtonNext
+              disabled={nextDisabled}
+              onClick={() => {
+                console.log(itemToAdd);
+                handleNext();
+              }}
+            />
+
+            {/* Overlay only when disabled */}
+            {nextDisabled && (
+              <div
+                className="absolute inset-0 z-10 cursor-not-allowed"
+                onClick={() => {
+                  setNextAttempted(true);
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -149,11 +172,14 @@ const VolunteerAddDetailsModule: React.FC<VolunteerAddDetailsModuleProps> = ({ i
         <div className="font-bold text-[20px] pt-6">
           <p className="mb-2">Quantity <span className="text-red">*</span></p>
           <input
-            type="text"
+            type="number"
+            min="1"
+            step="1"
             placeholder=""
             className="input input-bordered input-xs w-full max-w-xs rounded-xl border-light-gray"
             onBlur={(e) => {
               setItemToAdd({ ...itemToAdd, quantity: Number(e.target.value) });
+              setNextDisabled(Number(e.target.value) <= 0);
             }}
             defaultValue={itemToAdd.quantity > 0 ? itemToAdd.quantity : ''}
           />

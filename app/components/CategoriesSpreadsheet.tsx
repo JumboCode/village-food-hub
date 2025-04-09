@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import EditModal from "@app/components/EditModal";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
+import { Snackbar } from "@mui/material";
 
 // --- Types and Interfaces ---
 
@@ -64,6 +65,14 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [unitWarning, setUnitWarning] = useState(-1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [lastUnitWarning, setLastUnitWarning] = useState(false);
+  const [snackbarOpenEdit, setSnackbarOpenEdit] = useState(false);
+  const [snackbarCatRename, setSnackBarCatRename] = useState(false);
+  const [snackbarOpenDelete, setSnackbarOpenDelete] = useState(false);
+  const [snackbarOpenRename, setSnackBarOpenRename] = useState(false);
+  const [snackbarMessageDelete, setSnackbarMessageDelete] = useState("Item Deleted"); // There's a refresh :(
+  const [snackbarMessageCatRename, setSnackbarMessageCatRename] = useState("Category Renamed");
+  const [snackbarMessageEdit, setSnackbarMessageEdit] = useState("Item Edited");
+  const [snackbarMessageRename, setSnackbarMessageRename] = useState("Item or Units Renamed");
 
   // ---------- EDIT FUNCTIONS ----------
   // Opens the edit modal, prepopulating with the item name and parsed units (from a comma-separated string)
@@ -95,36 +104,48 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     categoryName: string
   ) => {
     try {
-      const validUnits = updatedUnits.filter(
-        (unit) => unit && unit.trim() !== ""
-      );
+      const validUnits = updatedUnits.filter(unit => unit.trim() !== "");
+      const trimmedOldName = oldItemName.trim();
+      const trimmedNewName = newItemName.trim();
+      const sortedOriginalUnits = [...currUnits].map(u => u.trim().toLowerCase()).sort();
+      const sortedUpdatedUnits = [...validUnits].map(u => u.trim().toLowerCase()).sort();
+  
+      const nameChanged = trimmedOldName !== trimmedNewName;
+      const unitsChanged = JSON.stringify(sortedOriginalUnits) !== JSON.stringify(sortedUpdatedUnits);
+  
       const payload = {
-        oldItemName: oldItemName.trim(),
-        itemName: newItemName.trim(),
+        oldItemName: trimmedOldName,
+        itemName: trimmedNewName,
         name: categoryName.trim(),
         units: validUnits,
       };
-      console.log("Sending request with payload:", payload);
+  
       const response = await fetch("/api/categories", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+  
       if (!response.ok) {
-        console.log(
-          `Error editing category with server response: ${response.status}`
-        );
+        console.error("Error editing item; status:", response.status);
       } else {
+        if (nameChanged) {
+          setSnackbarMessageRename("Item Renamed");
+          setSnackBarOpenRename(true);
+        }
+        if (unitsChanged) {
+          setSnackbarMessageRename("Units Renamed");
+          setSnackBarOpenRename(true);
+        }
         await loadData();
       }
+  
       closeModal();
     } catch (error) {
       console.error("Error updating data:", error);
       closeModal();
     }
-  };
+  };  
 
   // ---------- DELETION FUNCTIONS ----------
   // Opens the delete modal for an entire row.
@@ -150,6 +171,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
   // Deletes the entire row (item) from both inventory and categories.
   const deleteItem = async () => {
+    setSnackbarOpenDelete(true);
     closeDeleteModal();
   
     // First, fetch inventory data.
@@ -224,6 +246,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
 
   // Deletes a single unit from an item.
   const deleteUnit = async (unit: string) => {
+    setSnackbarOpenDelete(true);
     setUnitWarning(-1);
   
     // Check if this is the last unit
@@ -554,9 +577,37 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               </p>
             </button>
           </div>
-          </div>
         </div>
-      )}
+      </div>
+    )}
+    <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenEdit}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpenEdit(false)}
+          message={snackbarMessageEdit}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenDelete}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpenDelete(false)}
+          message={snackbarMessageDelete}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenRename}
+          autoHideDuration={4000}
+          onClose={() => setSnackBarOpenRename(false)}
+          message={snackbarMessageRename}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarCatRename}
+          autoHideDuration={4000}
+          onClose={() => setSnackBarCatRename(false)}
+          message={snackbarMessageCatRename}
+        />
     </>
   );
 };

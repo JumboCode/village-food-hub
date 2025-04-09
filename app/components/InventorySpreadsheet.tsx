@@ -3,6 +3,7 @@ import { TiArrowUnsorted } from "react-icons/ti";
 import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-icons/md";
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 import QuantityModal from "@app/components/QuantityModal";
+import Snackbar from '@mui/material/Snackbar';
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
@@ -45,6 +46,13 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const [units, setUnits] = useState<string | null>(null);
     const [currCategoryName, setCurrCategoryName] = useState<string | null>(null);
     const [currentQuantity, setCurrentQuantity] = useState<number>(0);
+    const [snackbarOpenEdit, setSnackbarOpenEdit] = useState(false);
+    const [snackbarOpenDelete, setSnackbarOpenDelete] = useState(false);
+    const [snackbarMessageDelete, setSnackbarMessageDelete] = useState("Item Deleted");
+    const [snackbarMessageEdit, setSnackbarMessageEdit] = useState("Item Edited");
+
+
+    
 
     const closeQuantityModal = (): void => {
         setShowQuantityModal(false);
@@ -119,6 +127,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };
 
     const handleUpdateQuantity = async (itemName: string, units: string, quantityChange: number, categoryName: string) => {
+        setSnackbarOpenEdit(true);
         if (!itemName || !units) return;
 
         const updatedData = {
@@ -170,6 +179,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };
 
     const handleDelete = async () => {
+      setSnackbarOpenDelete(true);
       if (!itemName || !units) return;
   
       try {
@@ -363,6 +373,20 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                 handleDelete={handleDelete}
               />
           )}
+           <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenEdit}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpenEdit(false)}
+                message={snackbarMessageEdit}
+            />
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpenDelete}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpenDelete(false)}
+                message={snackbarMessageDelete}
+            />
         </div>
     );
 };

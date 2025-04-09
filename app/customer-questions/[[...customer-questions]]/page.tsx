@@ -85,15 +85,15 @@ const CustomerAction: React.FC<{
   }, [receive, donate, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -107,7 +107,7 @@ const CustomerAction: React.FC<{
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -137,7 +137,7 @@ const CustomerAction: React.FC<{
             </div>
             <div>{translations[1]}</div>
           </div>
-          <div className="flex space-x-5 onClick={() => setTimer(10)}">
+          <div className="flex space-x-5 onClick={() => setTimer(15)}">
             <div className="flex items-center mb-4">
               <input 
                 id="default-checkbox" 
@@ -152,7 +152,7 @@ const CustomerAction: React.FC<{
         </div>
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -211,15 +211,15 @@ const PhoneNumber: React.FC<{
   }, [phoneNumber, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -233,7 +233,7 @@ const PhoneNumber: React.FC<{
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -254,7 +254,7 @@ const PhoneNumber: React.FC<{
         {/* {showErrorModal && <ErrorModal errorMsg='Phone Number is Invalid' closeModal={closeErrorModal}/>} */}
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -318,15 +318,15 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
   }, [selectedValue, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -340,7 +340,7 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -364,7 +364,7 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
         <YesOrNo value={selectedValue} onChange={handleYesNoChange} setNextDisabled={setNextDisabled} />
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -433,15 +433,15 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
   }, [firstNameState, lastNameState, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -455,7 +455,7 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -494,7 +494,7 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
         />
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -557,15 +557,15 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
 
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -579,7 +579,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -629,7 +629,40 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
             />
           </GeoapifyContext>
       </div>
-      {/* timeout modal after 10 seconds of inactivity */}
+      <div className='flex flex-row w-2/3 justify-between gap-2'>
+        <div className='flex-1 mr-3'>
+          <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleCityChange(e.target.value)}
+            value={cityState}
+            required
+          />
+        </div>
+        <div className='flex-1 mr-3'>
+          <p className="text-[24px] mt-4">{translations[3]} <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleStateChange(e.target.value)}
+            value={stateState}
+            required
+          />
+        </div>
+        <div className='flex-1'>
+          <p className="text-[24px] mt-4">{translations[4]} <span className="text-red">*</span></p>
+          <input
+            type="text"
+            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
+            onChange={(e) => handleZipChange(e.target.value)}
+            value={zipState}
+            required
+          />
+        </div>
+      </div>
+
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -679,7 +712,7 @@ const HouseholdSize: React.FC<{
   };
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
@@ -701,7 +734,7 @@ const HouseholdSize: React.FC<{
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -733,7 +766,7 @@ const HouseholdSize: React.FC<{
         </div>
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
@@ -776,15 +809,15 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
   }, []);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(15);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(10); // Optionally reset the timer
+    setTimer(15); // Optionally reset the timer
   };
 
-  // sets up 10 second timer on open
+  // sets up 15 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
@@ -798,7 +831,7 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
 
   // tracks when a click occurs
   const handleClick = useCallback(() => {
-    setTimer(10);
+    setTimer(15);
   }, []);
 
   // after a click occurs
@@ -822,7 +855,7 @@ const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onCha
         <NoDone onClick={() => onChange(false)}/>
       </div>
 
-      {/* timeout modal after 10 seconds of inactivity */}
+      {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
