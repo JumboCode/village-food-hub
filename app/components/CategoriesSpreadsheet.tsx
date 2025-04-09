@@ -107,8 +107,8 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       const validUnits = updatedUnits.filter(unit => unit.trim() !== "");
       const trimmedOldName = oldItemName.trim();
       const trimmedNewName = newItemName.trim();
-      const sortedOriginalUnits = [...currUnits].map(u => u.trim()).sort();
-      const sortedUpdatedUnits = [...validUnits].map(u => u.trim()).sort();
+      const sortedOriginalUnits = [...currUnits].map(u => u.trim().toLowerCase()).sort();
+      const sortedUpdatedUnits = [...validUnits].map(u => u.trim().toLowerCase()).sort();
   
       const nameChanged = trimmedOldName !== trimmedNewName;
       const unitsChanged = JSON.stringify(sortedOriginalUnits) !== JSON.stringify(sortedUpdatedUnits);
@@ -572,37 +572,37 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
               </p>
             </button>
           </div>
-          </div>
-          <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarOpenEdit}
-                autoHideDuration={4000}
-                onClose={() => setSnackbarOpenEdit(false)}
-                message={snackbarMessageEdit}
-            />
-            <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarOpenDelete}
-                autoHideDuration={4000}
-                onClose={() => setSnackbarOpenDelete(false)}
-                message={snackbarMessageDelete}
-            />
-          <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarOpenRename}
-                autoHideDuration={4000}
-                onClose={() => setSnackBarOpenRename(false)}
-                message={snackbarMessageRename}
-            />
-            <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarCatRename}
-                autoHideDuration={4000}
-                onClose={() => setSnackBarCatRename(false)}
-                message={snackbarMessageCatRename}
-            />
         </div>
-      )}
+      </div>
+    )}
+    <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenEdit}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpenEdit(false)}
+          message={snackbarMessageEdit}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenDelete}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpenDelete(false)}
+          message={snackbarMessageDelete}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarOpenRename}
+          autoHideDuration={4000}
+          onClose={() => setSnackBarOpenRename(false)}
+          message={snackbarMessageRename}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarCatRename}
+          autoHideDuration={4000}
+          onClose={() => setSnackBarCatRename(false)}
+          message={snackbarMessageCatRename}
+        />
     </>
   );
 };
