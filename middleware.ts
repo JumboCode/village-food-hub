@@ -49,6 +49,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
+  // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
   // If an authenticated user visits "/login", redirect them to "/overview"
   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
     return NextResponse.redirect(new URL('/overview', req.url));
