@@ -1,21 +1,11 @@
-import { useUser } from '@clerk/clerk-react'
+import type { UserResource } from '@clerk/types';
 
-// For client components only
-export function userIsAdmin() {
-    const { user } = useUser()
-    console.log("User is:", user, "\n\n")
-    return (user && user.publicMetadata.role === "Admin")
+export function userIsAdmin(user: UserResource | null | undefined): boolean {
+  return !!user && user.publicMetadata?.role === "Admin";
 }
 
-// For client components only
-export function userIsNotVolunteer() {
-    const { user } = useUser()
-
-    if (user) {
-        return user.username 
-        && user.username.toLowerCase() !== "volunteer" 
-        && user.publicMetadata.role !== "Volunteer"
-    } 
-
-    return true;
+export function userIsNotVolunteer(user: UserResource | null | undefined): boolean {
+  return !!user &&
+    user.username?.toLowerCase() !== "volunteer" &&
+    user.publicMetadata?.role !== "Volunteer";
 }

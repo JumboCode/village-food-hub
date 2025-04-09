@@ -9,6 +9,8 @@ import ProfileView from "@app/components/ProfileView";
 import LoadingAnimation from "@app/components/LoadingAnimation";
 import { userIsAdmin } from "@app/components/ProtectedUrls";
 
+import { useUser } from "@clerk/nextjs";
+
 // Define a type for the structure of each user record from the API.
 interface ClerkUser {
   firstName?: string;
@@ -51,7 +53,8 @@ const InternalViewManageUsersPage: React.FC = () => {
   const [showCreateProfileView, setShowCreateProfileView] = useState(false);
   const [createUserError, setCreateUserError] = useState("\u00A0");
 
-  const isAdmin = userIsAdmin();
+  const { user } = useUser(); // Get the current user from Clerk
+  const isAdmin = userIsAdmin(user);
   
   const [profileData, setProfileData] = useState({
     firstName: "",

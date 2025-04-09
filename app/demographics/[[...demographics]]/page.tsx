@@ -204,7 +204,7 @@ const handleDelete = async () => {
     getBytes();
   }, [demographicsRawData]);
 
-  const notVolunteer = userIsNotVolunteer()
+  const notVolunteer = userIsNotVolunteer(user)
 
   return (
     isLoading ? (

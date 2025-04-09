@@ -6,7 +6,6 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import ProfileUnsavedModal from '@app/components/ProfileUnsavedModal';
-
 import LoadingAnimation from "@app/components/LoadingAnimation";
 import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
 
@@ -41,7 +40,7 @@ const MyProfilePage: React.FC = () => {
     });
     const { user, isLoaded } = useUser();
     const isLoading = !isLoaded;
-    const isNotVolunteer = userIsNotVolunteer();
+    const isNotVolunteer = userIsNotVolunteer(user);
 
     const initialRender = useRef(true);
 

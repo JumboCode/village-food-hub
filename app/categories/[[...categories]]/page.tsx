@@ -10,10 +10,9 @@ import UnitBoxes from '@app/components/UnitBoxes';
 import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
-
 import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
 import LoadingAnimation from "@app/components/LoadingAnimation";
-
+import { useUser } from "@clerk/nextjs";
 
 interface CategoryData {
   [key: string]: [string, string][];
@@ -47,7 +46,8 @@ const Categories: React.FC = () => {
   };
   
   const { data: categoriesData, error, isLoading, mutate: mutateCategories } = useSWR("/api/categories", fetchCategories);
-  const isNotVolunteer = userIsNotVolunteer(); 
+  const { user } = useUser();
+  const isNotVolunteer = userIsNotVolunteer(user); 
 
   // State variables
   const [selectedCategory, setSelectedCategory] = useState<string>('');

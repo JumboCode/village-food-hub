@@ -1,102 +1,208 @@
 'use client';
-import React from "react";
-import useSWR from "swr";
+import React, { useState, useEffect } from "react";
 import { NavBar } from '@app/components/NavBar';
 import { useUser } from "@clerk/nextjs";
-
+import type { UserResource } from "@clerk/types";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import LoadingAnimation from "@app/components/LoadingAnimation";
-import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
 
-// // Utility function to format date to dd/mm/yyyy
-// function formatDate(date: Date): string {
-//   const month = String(date.getMonth() + 1).padStart(2, '0');
-//   const day = String(date.getDate()).padStart(2, '0');
-//   const year = date.getFullYear();
-//   return `${month}/${day}/${year}`;
-// }
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-// // Define the structure of the inventory data item.
-// // Here each inventory item is represented as an array.
-// type InventoryItem = (string | number)[];
+interface DataItem {
+  lastVisitDate: string;
+  householdSize: number;
+}
 
-// // Define the structure of the raw inventory object returned by the API.
-// interface InventoryRaw {
-//   itemName: string;
-//   categoryName: string;
-//   quantity: number;
-//   units: string;
-//   lastUpdated: string;
-//   history: unknown;
-// }
-
-// // SWR fetcher function to fetch and transform inventory data.
-// const fetchInventory = async (url: string): Promise<InventoryItem[]> => {
-//   const response = await fetch(url, { method: "GET" });
-//   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-//   const jsonData = await response.json();
-//   const data = jsonData.data;
-//   if (!Array.isArray(data)) {
-//     console.log("not an array");
-//     return [];
-//   }
-//   const listOfLists = data.map((object: InventoryRaw) => {
-//     const { itemName, categoryName, quantity, units, lastUpdated, history } = object;
-//     const formattedDate = lastUpdated ? formatDate(new Date(lastUpdated)) : "";
-//     const historyString = history ? JSON.stringify(history) : "";
-//     return [itemName, categoryName, quantity, units, formattedDate, historyString];
-//   });
-//   return listOfLists;
-// };
-
-// // Define a type for the structure of each record returned by the API
-// interface DemographicsRecord {
-//         lastVisitDate: string;
-//         phoneNumber: string;
-//         name: string;
-//         address: string;
-//         householdSize: number;
-//         takeCount: number;
-//         donateCount: number;
-//         previousVisitDates: string[];
-// }
-
-// // A simple fetcher function for SWR
-// const fetchDemographics = (url: string) =>
-//         fetch(url).then((res) => {
-//         if (!res.ok) throw new Error("Error fetching data");
-//         return res.json();
-// });
+// Role-based access check
+const hasAccess = (user: UserResource | null): boolean => {
+  const role = user?.publicMetadata?.role;
+  return role === 'Admin' || role === 'Staff';
+};
 
 const OverviewPage: React.FC = () => {
-  // Use SWR to fetch the inventory data.
-//   const { data: inventory, error: inventoryError } = useSWR("/../api/inventory", fetchInventory);
-//   const { data: demographics, error: demographicsError } = useSWR<DemographicsRecord[]>('/api/demographics', fetchDemographics);
-
   const { user, isLoaded } = useUser();
-  const isNotVolunteer = userIsNotVolunteer();
+  const isAuthorized = user && hasAccess(user);
+
+  const [num_responses, setNumResponses] = useState<number | null>(null);
+  const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
+
+  const [isLoading12, setIsLoading12] = useState<boolean>(true);
+  const [isLoading3, setIsLoading3] = useState<boolean>(false);
+  const [isLoading4, setIsLoading4] = useState<boolean>(false);
+  const [isLoading5, setIsLoading5] = useState<boolean>(false);
+  const [isLoading6, setIsLoading6] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("../api/demographics");
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+
+        const data: DataItem[] = await response.json();
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        const filteredData = data.filter(item => {
+          const visitDate = new Date(item.lastVisitDate);
+          return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
+        });
+
+        setNumResponses(filteredData.length);
+
+        const visitCountsArray = new Array(10).fill(0);
+        filteredData.forEach(record => {
+          const size = record.householdSize;
+          if (size >= 1 && size <= 9) {
+            visitCountsArray[size - 1] += 1;
+          } else {
+            visitCountsArray[9] += 1; // 10+ category
+          }
+        });
+
+        setVisitFrequencyData(visitCountsArray);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setNumResponses(0);
+        setVisitFrequencyData(new Array(10).fill(0));
+      } finally {
+        setIsLoading12(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const householdSizeData = {
+    labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
+    datasets: [
+      {
+        data: visitFrequencyData,
+        backgroundColor: [
+          "#3498DB", "#507c0c", "#24593D", "#EB2B0C", "#C31C01", "#3851BC",
+          "#293b8b", "#828282", "#000000", "#ffe070"
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  if (!isLoaded) {
+    return <LoadingAnimation />;
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+        <p className="mt-4">You do not have permission to view this page.</p>
+      </div>
+    );
+  }
 
   return (
-    !isLoaded ? (
-        <LoadingAnimation/>
-    ) : isNotVolunteer ? (
-        <div>
-            <NavBar />
-                <div className="px-10">
-                    <div className="flex flex-row justify-between mt-10 mb-6">
-                    { user && 
-                        <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
-                        Welcome back, {user.firstName}! Here is an overview of this month!
-                        </div>
-                    }
-                    </div>
-                </div>
+    <div>
+      <NavBar />
+      <div className="px-10">
+        <div className="mt-10 mb-6 flex flex-col">
+          {user && (
+            <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
+              Welcome back, {user.firstName}! Here is an overview of this month!
+            </div>
+          )}
+
+          <div className="bg-light-green bg-opacity-20 p-6 rounded-xl shadow-inner mt-6">
+            <div className="grid grid-cols-3 gap-4">
+              {/* Unique Individuals Served */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading12 ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">Number of Unique Individuals Served</div>
+                    <div className="text-5xl font-bold font-crimson text-black mt-2">{num_responses}</div>
+                  </>
+                )}
+              </div>
+
+              {/* Household Size Pie Chart */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading12 || !visitFrequencyData ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">Household Size</div>
+                    <Pie
+                      data={householdSizeData}
+                      options={{
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            labels: {
+                              color: "#000000",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+
+              {/* New Individuals Served - Placeholder */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading3 ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">Number of New Individuals Served</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                  </>
+                )}
+              </div>
+
+              {/* TBD Placeholder */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading4 ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">TBD</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                  </>
+                )}
+              </div>
+
+              {/* Cooked Meals */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading5 ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                  </>
+                )}
+              </div>
+
+              {/* Unique Items Distributed */}
+              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+                {isLoading6 ? (
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+                ) : (
+                  <>
+                    <div className="text-lg text-black font-crimson">Number of Unique Items Distributed</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
         </div>
-    ) : (
-        <div className="p-10 text-center">
-          <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
-          <p className="mt-4">You do not have permission to view this page.</p>
-        </div>
-    )
+      </div>
+    </div>
   );
 };
 

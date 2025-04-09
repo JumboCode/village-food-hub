@@ -8,6 +8,7 @@ import { NavBar } from '@app/components/NavBar';
 import LoadingAnimation from "@app/components/LoadingAnimation";
 import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
 
+import { useUser } from "@clerk/nextjs";
 
 // Utility function to format date to dd/mm/yyyy
 function formatDate(date: Date): string {
@@ -116,7 +117,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                   type="checkbox"
                   checked={selectedCategories.includes(category)}
                   onChange={e => handleCheckboxChange(category, e.target.checked)}
-                  className="w-4 h-4"
+                  className="w-4 h-4 focus:outline-none focus:ring-0"
                 />
                 <p className="text-lg cursor-pointer">{category}</p>
               </div>
@@ -150,7 +151,8 @@ const InternalViewInventoryPage: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const isNotVolunteer = userIsNotVolunteer(); // Check if the user is not a volunteer for access control
+  const { user } = useUser(); // Get the current user from Clerk
+  const isNotVolunteer = userIsNotVolunteer(user); // Check if the user is not a volunteer for access control
 
   const filteredInventory = useMemo(() => {
     if (!inventory) return [];
@@ -216,6 +218,15 @@ const InternalViewInventoryPage: React.FC = () => {
             </div>
             )}
         </div>
+        
+        {appliedFilters.length > 0 && (
+          <button
+            onClick={() => setAppliedFilters([])}
+            className="bg-purple text-white px-4 py-2 rounded-md hover:bg-dark-purple transition-all"
+          >
+            Clear Filters
+          </button>
+        )}
         </div>
     ) : (
         <div className="p-10 text-center">
