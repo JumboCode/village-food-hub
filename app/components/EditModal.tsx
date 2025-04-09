@@ -38,10 +38,21 @@ const EditModal: React.FC<EditModalProps> = ({
       setErrorMessage("Item name is required.");
       return;
     }
-    // Validate that at least one unit is provided.
+
+    // Validate that at least one unit is provided. 
     const validUnits = newUnits.filter(
       (unit) => unit && unit.trim() !== ""
     );
+    const seen: string[] = [];
+    for (let i = 0; i < validUnits.length; i++) {
+      if (initialUnits.includes(validUnits[i]) || seen.includes(validUnits[i])) {
+        setErrorMessage("Cannot add duplicate units.");
+        return;
+      } else {
+        seen.push(validUnits[i]);
+      }
+    }
+    
     if (validUnits.length < 1) {
       setErrorMessage("At least one unit is required.");
       return;

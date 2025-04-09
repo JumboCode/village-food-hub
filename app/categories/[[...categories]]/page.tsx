@@ -177,19 +177,31 @@ const Categories: React.FC = () => {
   const saveCategories = async () => {
     try {
       const trimmedItemName = itemName.trim();
+      console.log("units: " + units);
       const validUnits = units.filter(unit => unit && unit.trim() !== "");
-  
-      if (trimmedItemName === "" || validUnits.length < 1) {
+
+      const seen: string[] = [];
+      for (let i = 0; i < validUnits.length; i++) {
+        console.log("item in validUnits is " + validUnits[i]);
+        if (seen.includes(validUnits[i])) {
+          console.log("duplicate unit");
+        } else {
+          seen.push(validUnits[i]);
+          console.log("adding this seen:", seen);
+        }
+      }
+
+      if (trimmedItemName === "" || seen.length < 1) {
         setShowEmptyError(true);
         return;
       }
-  
+      console.log("this is valid units:", validUnits);
       setShowEmptyError(false);
   
       const payload = {
         itemName: trimmedItemName,
         name: selectedCategory.trim(),
-        units: validUnits,
+        units: seen
       };
   
       console.log("Sending payload:", payload);

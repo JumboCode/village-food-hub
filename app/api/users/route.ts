@@ -64,9 +64,16 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const data = await req.json();
     console.log('Received data:', data);
-
+    
+    let requiredFields;
+    
     // Ensure all required fields are provided
-    const requiredFields = ['username', 'password', 'firstName', 'lastName', 'pronouns', 'emailAddress', 'phoneNumber', 'role'];
+    if (data.role == "Volunteer") {
+      requiredFields = ['username', 'password', 'emailAddress', 'role'];
+    } else {
+      requiredFields = ['username', 'password', 'firstName', 'lastName', 'pronouns', 'emailAddress', 'phoneNumber', 'role'];
+    }
+    
     for (const field of requiredFields) {
       if (!data[field] || typeof data[field] !== 'string' || data[field].trim() === '') {
         return NextResponse.json(
