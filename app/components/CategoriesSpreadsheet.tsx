@@ -95,16 +95,28 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
     categoryName: string
   ) => {
     try {
-      const validUnits = updatedUnits.filter(
-        (unit) => unit && unit.trim() !== ""
-      );
+      // Step 1: Normalize units (trim + lowercase for case-insensitive comparison)
+      const normalizedUnits = updatedUnits
+        .map((unit) => unit.trim())
+        .filter((unit) => unit !== "");
+  
+      const lowerCaseUnits = normalizedUnits.map((u) => u.toLowerCase());
+      const unitSet = new Set(lowerCaseUnits);
+  
+      // Step 2: Check for duplicates
+      if (unitSet.size !== lowerCaseUnits.length) {
+        alert("Duplicate units are not allowed. Please remove duplicates.");
+        return;
+      }
+  
+      // Step 3: Proceed with trimmed units only (but preserve case if needed)
       const payload = {
         oldItemName: oldItemName.trim(),
         itemName: newItemName.trim(),
         name: categoryName.trim(),
-        units: validUnits,
+        units: normalizedUnits,
       };
-      console.log("Sending request with payload:", payload);
+  
       const response = await fetch("/api/categories", {
         method: "PUT",
         headers: {
@@ -112,19 +124,19 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
         },
         body: JSON.stringify(payload),
       });
+  
       if (!response.ok) {
-        console.log(
-          `Error editing category with server response: ${response.status}`
-        );
+        console.error(`Error editing category. Server responded with: ${response.status}`);
       } else {
         await loadData();
       }
+  
       closeModal();
     } catch (error) {
       console.error("Error updating data:", error);
       closeModal();
     }
-  };
+  };  
 
   // ---------- DELETION FUNCTIONS ----------
   // Opens the delete modal for an entire row.

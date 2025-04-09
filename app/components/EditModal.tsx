@@ -43,14 +43,16 @@ const EditModal: React.FC<EditModalProps> = ({
     const validUnits = newUnits.filter(
       (unit) => unit && unit.trim() !== ""
     );
-    const seen: string[] = [];
-    for (let i = 0; i < validUnits.length; i++) {
-      if (initialUnits.includes(validUnits[i]) || seen.includes(validUnits[i])) {
+    
+    // Check for duplicates (case-insensitive)
+    const seen = new Set<string>();
+    for (let unit of validUnits) {
+      const lowerUnit = unit.toLowerCase();
+      if (seen.has(lowerUnit)) {
         setErrorMessage("Cannot add duplicate units.");
         return;
-      } else {
-        seen.push(validUnits[i]);
       }
+      seen.add(lowerUnit);
     }
     
     if (validUnits.length < 1) {
@@ -59,7 +61,7 @@ const EditModal: React.FC<EditModalProps> = ({
     }
     // If validation passes, clear error and call handleSave.
     setErrorMessage("");
-    handleSave(itemNameOld, itemName, newUnits, selectedCategory);
+    handleSave(itemNameOld, itemName.trim(), newUnits, selectedCategory);
   };
 
   return (
