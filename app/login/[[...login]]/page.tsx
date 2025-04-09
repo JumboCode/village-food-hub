@@ -5,7 +5,7 @@ import Image from 'next/image';
 import headerLogo from '@app/images/non-blank headerLogo 125x125.png';
 import irlPantry from '@app/images/irl_pantry.png';
 import { useRouter } from 'next/navigation';
-import { useSignIn, useAuth } from "@clerk/nextjs";
+import { useSignIn, useAuth, useUser } from "@clerk/nextjs";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FiEye, FiEyeOff } from "react-icons/fi"; // eye icons for password visibility
 
@@ -25,19 +25,10 @@ const LoginPage: React.FC = () => {
     if (typeof window === "undefined") return; // SSR safety
     const params = new URLSearchParams(window.location.search);
     const justSignedOut = params.get("justSignedOut");
-  
-    console.log("[LoginPage] useEffect triggered with:", {
-      isLoaded,
-      isSignedIn,
-      justSignedOut,
-      hasLoggedOut,
-      loginCompleted,
-    });
-  
+    
     if (!isLoaded) return;
   
     if (isSignedIn && !justSignedOut) {
-      console.log("[LoginPage] User is signed in. Triggering signOut...");
       signOut({ redirectUrl: "/login?justSignedOut=true" });
       setHasLoggedOut(true);
     }
@@ -121,17 +112,16 @@ const LoginPage: React.FC = () => {
   
     try {
       const result = await signIn.create({ identifier: username, password });
-      console.log("Sign in successful");
+      console.log("Sign in successful:", result);
   
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        console.log("Session is active, marking login as complete...");
         setLoginCompleted(true);
         setIsLoggingIn(false);
   
-        // Navigate based on role/username
+        // Navigate based on role
         setTimeout(() => {
-          if (username === "volunteer") {
+          if (username.toLocaleLowerCase() === "volunteer") {
             router.push('/volunteer-landing');
           } else {
             router.push('/overview');
@@ -177,19 +167,17 @@ const LoginPage: React.FC = () => {
   const handleSendCode = async () => {
     setErrorMsg('\u00A0')
     try {  
-      console.log(email);
       const response = await signIn
         ?.create({
           strategy: 'reset_password_email_code',
           identifier: email,
         })
-      console.log("Response:", response);
       setShowTypeEmail(false);
       setShowTypeCode(true);
     } catch (error : unknown) { 
       setErrorMsg("No account found with that email.")
       if (error instanceof Error) {
-        console.log("Error:", error.message);
+        console.error("Error:", error.message);
       }
     }
   };
@@ -200,7 +188,6 @@ const LoginPage: React.FC = () => {
     setConfirmationMsg('');
 
     try {
-      console.log("Resending code to:", email);
       await signIn
         ?.create({
           strategy: 'reset_password_email_code',
@@ -210,7 +197,6 @@ const LoginPage: React.FC = () => {
       setShowTypeResentCode(true);
       setConfirmationMsg("A new reset code has been sent to your email.");
     } catch (error : unknown) {
-      console.log("Error resending code:", error);
       setErrorMsg("Error resending code. Please try again.");
     }
   };
