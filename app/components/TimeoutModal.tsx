@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 
 interface TimeoutModalProps {
   closeTimeoutModal: () => void;
+  translations: string[];
 }
 
-const TimeoutModal: React.FC<TimeoutModalProps> = ({ closeTimeoutModal}) => {
+const TimeoutModal: React.FC<TimeoutModalProps> = ({ closeTimeoutModal, translations, }) => {
   const router = useRouter();
 
   // Function to confirm navigation
@@ -39,7 +40,7 @@ const TimeoutModal: React.FC<TimeoutModalProps> = ({ closeTimeoutModal}) => {
       >
         <div className="flex flex-col">
           <p className="flex justify-center text-[32px] crimson-semibold text-center leading-[1.4] pt-6 py-6">
-            Click to remain on survey
+            {translations[0]}
           </p>
         </div>
         <div className="flex flex-row justify-center space-x-5">
@@ -47,18 +48,18 @@ const TimeoutModal: React.FC<TimeoutModalProps> = ({ closeTimeoutModal}) => {
             className="flex text-gray hover:bg-light-gray font-serif w-[117px] h-[46px] rounded-[8px] border border-gray text-[24px] justify-center items-center" 
             onClick={closeTimeoutModal}
           >
-            Stay
+            {translations[1]}
           </button>
           <button 
             className="flex text-white bg-[#EB2B0C] font-serif w-[117px] h-[46px] rounded-[8px] border border-[#EB2B0C] text-[24px] justify-center items-center"
             onClick={confirmNavigation}
           >
-            Leave
+            {translations[2]}
           </button>
         </div>
         <div className="flex flex-col py-6">
             <p className="flex justify-center text-[24px] crimson-semibold text-[#EB2B0C] text-center">
-                {timer}{" seconds left..."}
+                {timer} {translations[3]}
             </p>
         </div>
       </div>

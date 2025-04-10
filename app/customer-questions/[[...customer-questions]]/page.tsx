@@ -34,6 +34,8 @@ const DEFAULT_TRANSLATIONS = {
   householdSize: ["Household Size"],
   customerDonor: ["We have a demographic survey that is optional.", "Would you like to fill it out?"],
   confirmation: ["Household size:", "THANK YOU FOR VISITING!", "Village Food Hub will be able to grow with your help!", "Your Information", "Full Name:", "Phone Number:", "Address:", "Return home"],
+  exitModal: ["Warning!", "Your changes will not be saved."],
+  timeoutModal: ["Click to remain on survey", "Stay", "Leave", " seconds left..."],
 };
 
 interface Details {
@@ -49,8 +51,9 @@ const CustomerAction: React.FC<{
   receive: boolean; 
   donate: boolean; 
   translations: string[];
+  timeoutTranslations: string[];
   showText: boolean;
-}> = ({ onChange, setNextDisabled, receive, donate, translations, showText }) => {
+}> = ({ onChange, setNextDisabled, receive, donate, translations, timeoutTranslations, showText }) => {
 
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked, donate);
@@ -144,6 +147,7 @@ const CustomerAction: React.FC<{
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -156,7 +160,8 @@ const PhoneNumber: React.FC<{
   onChange: (value: string) => void; 
   setNextDisabled: (disabled: boolean) => void; 
   translations: string[];
-}> = ({ value, onChange, setNextDisabled, translations }) => {
+  timeoutTranslations: string[];
+}> = ({ value, onChange, setNextDisabled, translations, timeoutTranslations }) => {
 
   const [phoneNumber, setPhoneNumber] = useState<string>(value);
  
@@ -224,6 +229,7 @@ const PhoneNumber: React.FC<{
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -237,8 +243,9 @@ interface ChangesProps {
   setNextDisabled: (disabled: boolean) => void;
   details: Details;
   translations: string[];
+  timeoutTranslations: string[];
 }
-const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, details, translations }) => {
+const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, details, translations, timeoutTranslations }) => {
 
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
@@ -302,6 +309,7 @@ const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, det
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -316,8 +324,9 @@ interface NameProps {
   onLastNameChange: (value: string) => void;
   setNextDisabled: (disabled: boolean) => void;
   translations: string[];
+  timeoutTranslations: string[];
 }
-const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled, translations }) => {
+const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled, translations, timeoutTranslations }) => {
 
   const [firstNameState, setFirstNameState] = useState<string>(firstName);
   const [lastNameState, setLastNameState] = useState<string>(lastName);
@@ -402,6 +411,7 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -414,8 +424,9 @@ interface AddressProps {
   onAddressLineChange: (value: string) => void;
   setNextDisabled: (disabled: boolean) => void;
   translations: string[];
+  timeoutTranslations: string[];
 }
-const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDisabled, translations }) => {
+const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDisabled, translations, timeoutTranslations }) => {
 
   const [line, setLine] = useState<string>(line1);
 
@@ -538,6 +549,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -550,7 +562,8 @@ const HouseholdSize: React.FC<{
   onChange: (value: number | null) => void; 
   setSubmitDisabled: (disabled: boolean) => void; 
   translations: string[];
-}> = ({ value, onChange, setSubmitDisabled, translations }) => {
+  timeoutTranslations: string[];
+}> = ({ value, onChange, setSubmitDisabled, translations, timeoutTranslations }) => {
 
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
@@ -620,6 +633,7 @@ const HouseholdSize: React.FC<{
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -630,7 +644,8 @@ const HouseholdSize: React.FC<{
 const CustomerDonor: React.FC<{ 
   onChange: (value: boolean) => void;
   translations: string[]; 
-}> = ({ onChange, translations }) => {
+  timeoutTranslations: string[];
+}> = ({ onChange, translations, timeoutTranslations }) => {
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [timer, setTimer] = useState(15);
@@ -683,6 +698,7 @@ const CustomerDonor: React.FC<{
       {showTimeoutModal &&
         <TimeoutModal
           closeTimeoutModal={handleCloseModal}
+          translations={timeoutTranslations}
         />
       }
     </div>
@@ -1132,15 +1148,15 @@ const DemographicsSurvey: React.FC = () => {
             <ButtonBack onClick={handleBackClick} />
             <div>
               <ButtonExit onClick={openModal} />
-              {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} />}
+              {showModal && <ExitModal closeModal={closeModal} redirectPage={'/unsaved-thank-you'} translations={translationArray.exitModal}/>}
             </div>
           </div>
         </>
       )}
       <div className='w-full'>
-        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} translations={translationArray.customerActions} showText={translationsDone} />}
-        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor} translations={translationArray.customerDonor}/>}
-        {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} translations={translationArray.phoneNumber}/>}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} translations={translationArray.customerActions} timeoutTranslations={translationArray.timeoutModal} showText={translationsDone} />}
+        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor} translations={translationArray.customerDonor} timeoutTranslations={translationArray.timeoutModal}/>}
+        {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} translations={translationArray.phoneNumber} timeoutTranslations={translationArray.timeoutModal}/>}
         {showErrorModal && <ErrorModal errorMsg={errorMsg} closeModal={closeErrorModal} />}
         {currentStep === 'changes' && (
           <Changes
@@ -1161,7 +1177,8 @@ const DemographicsSurvey: React.FC = () => {
                 : "N/A",                  
               householdSize: prevRecord?.householdSize ?? 0
             }}    
-            translations={translationArray.changes}         
+            translations={translationArray.changes}   
+            timeoutTranslations={translationArray.timeoutModal}      
           />
         )}
         {currentStep === 'name' && 
@@ -1172,6 +1189,7 @@ const DemographicsSurvey: React.FC = () => {
             onLastNameChange={(value) => updateName('lastName', value)} 
             setNextDisabled={setNextDisabled} 
             translations={translationArray.name}
+            timeoutTranslations={translationArray.timeoutModal}
           />
         }
         {currentStep === 'address' && 
@@ -1180,6 +1198,7 @@ const DemographicsSurvey: React.FC = () => {
             onAddressLineChange={(value) => updateAddress(value)}
             setNextDisabled={setNextDisabled} 
             translations={translationArray.address}
+            timeoutTranslations={translationArray.timeoutModal}
           />
         }
         {currentStep === 'houseSize' && 
@@ -1188,6 +1207,7 @@ const DemographicsSurvey: React.FC = () => {
             onChange={updateHouseholdSize} 
             setSubmitDisabled={setSubmitDisabled} 
             translations={translationArray.householdSize}
+            timeoutTranslations={translationArray.timeoutModal}
           />
         }
         {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber} translations={translationArray.confirmation}/>}

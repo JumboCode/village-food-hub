@@ -8,45 +8,15 @@ import { useState, useEffect } from 'react';
 interface ExitModalProps {
   closeModal: () => void;
   redirectPage: string;
+  translations: string[];
 }
 
-const ExitModal: React.FC<ExitModalProps> = ({ closeModal, redirectPage }) => {
+const ExitModal: React.FC<ExitModalProps> = ({ closeModal, redirectPage, translations, }) => {
   const router = useRouter();
 
   const handleExitAnyway = () => {
     router.push(redirectPage);
   };
-
-  const [ExitTranslations, setExitTranslations] = useState([
-    "Warning!",
-    "Your changes will not be saved.",
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultExitTranslations = [
-          "Warning!",
-          "Your changes will not be saved.",
-        ];
-        const newExitTranslations = [...defaultExitTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultExitTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultExitTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            // Cast data[0] as string[][] and map over it.
-            const translationArray = data[0] as string[][];
-            newExitTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setExitTranslations(newExitTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -56,9 +26,9 @@ const ExitModal: React.FC<ExitModalProps> = ({ closeModal, redirectPage }) => {
                    pt-8 shadow-lg rounded-lg"
       >
         <div className="flex flex-col">
-          <p className="flex justify-center text-[28px] crimson-bold">{ExitTranslations[0]}</p>
+          <p className="flex justify-center text-[28px] crimson-bold">{translations[0]}</p>
           <p className="flex justify-center text-[28px] crimson-bold">
-          {ExitTranslations[1]}
+          {translations[1]}
           </p>
         </div>
         <div className="flex flex-row justify-around pt-8">
