@@ -24,7 +24,16 @@ import {
    GeoapifyContext 
 } from '@geoapify/react-geocoder-autocomplete';
 
-
+const DEFAULT_TRANSLATIONS = {
+  customerActions: ["Select all the actions you plan to do today. ", " Receive ", " Donate "],
+  phoneNumber: ["Phone Number"],
+  changes: ["Has your information changed? ", "Name:", "Address:",  "Household size:"],
+  name: ["Full Name", "First Name", "Last Name"],
+  address: ["Address", "Address Line"],
+  householdSize: ["Household Size"],
+  customerDonor: ["We have a demographic survey that is optional.", "Would you like to fill it out?"],
+  confirmation: ["Household size:", "THANK YOU FOR VISITING!", "Village Food Hub will be able to grow with your help!", "Your Information", "Full Name:", "Phone Number:", "Address:", "Return home"],
+};
 
 interface Details {
   name: string;
@@ -38,39 +47,8 @@ const CustomerAction: React.FC<{
   setNextDisabled: (disabled: boolean) => void; 
   receive: boolean; 
   donate: boolean; 
-}> = ({ onChange, setNextDisabled, receive, donate }) => {
-  const [translations, setTranslations] = useState([
-    "Select all the actions you plan to do today. ",
-    " Receive ",
-    " Donate ",
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "Select all the actions you plan to do today. ",
-          " Receive ",
-          " Donate ",
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            // Cast data[0] as string[][] and map over it.
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+  translations: string[];
+}> = ({ onChange, setNextDisabled, receive, donate, translations }) => {
 
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked, donate);
@@ -167,30 +145,8 @@ const PhoneNumber: React.FC<{
   value: string; 
   onChange: (value: string) => void; 
   setNextDisabled: (disabled: boolean) => void; 
-}> = ({ value, onChange, setNextDisabled }) => {
-  const [translations, setTranslations] = useState(["Phone Number"]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = ["Phone Number"];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+  translations: string[];
+}> = ({ value, onChange, setNextDisabled, translations }) => {
 
   const [phoneNumber, setPhoneNumber] = useState<string>(value);
  
@@ -270,41 +226,9 @@ interface ChangesProps {
   onChange: (newValue: string) => void;
   setNextDisabled: (disabled: boolean) => void;
   details: Details;
+  translations: string[];
 }
-const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, details }) => {
-  const [translations, setTranslations] = useState([
-    "Has your information changed? ",
-    "Name:",
-    "Address:",
-    "Household size:",
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "Has your information changed? ",
-          "Name:",
-          "Address:",
-          "Household size:",
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+const Changes: React.FC<ChangesProps> = ({ value, onChange, setNextDisabled, details, translations }) => {
 
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
@@ -381,39 +305,9 @@ interface NameProps {
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
   setNextDisabled: (disabled: boolean) => void;
+  translations: string[];
 }
-const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled }) => {
-  const [translations, setTranslations] = useState([
-    "Full Name",
-    "First Name",
-    "Last Name",
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "Full Name",
-          "First Name",
-          "Last Name",
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onLastNameChange, setNextDisabled, translations }) => {
 
   const [firstNameState, setFirstNameState] = useState<string>(firstName);
   const [lastNameState, setLastNameState] = useState<string>(lastName);
@@ -507,43 +401,11 @@ const Name: React.FC<NameProps> = ({ firstName, lastName, onFirstNameChange, onL
 // -------------------- Address --------------------
 interface AddressProps {
   line1: string;
-
   onAddressLineChange: (value: string) => void;
-
   setNextDisabled: (disabled: boolean) => void;
+  translations: string[];
 }
-const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDisabled }) => {
-  const [translations, setTranslations] = useState([
-    "Address",
-    "Address Line",
-
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "Address",
-          "Address Line",
-
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDisabled, translations }) => {
 
   const [line, setLine] = useState<string>(line1);
 
@@ -677,30 +539,8 @@ const HouseholdSize: React.FC<{
   value: number; 
   onChange: (value: number | null) => void; 
   setSubmitDisabled: (disabled: boolean) => void; 
-}> = ({ value, onChange, setSubmitDisabled }) => {
-  const [translations, setTranslations] = useState(["Household Size"]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = ["Household Size"];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+  translations: string[];
+}> = ({ value, onChange, setSubmitDisabled, translations }) => {
 
   const [selectedSize, setSelectedSize] = useState<string>(value ? value.toString() : "");
 
@@ -777,36 +617,10 @@ const HouseholdSize: React.FC<{
 };
 
 // -------------------- CustomerDonor -------------------- //
-const CustomerDonor: React.FC<{ onChange: (value: boolean) => void }> = ({ onChange }) => {
-  const [translations, setTranslations] = useState([
-    "We have a demographic survey that is optional.",
-    "Would you like to fill it out?",
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "We have a demographic survey that is optional.",
-          "Would you like to fill it out?",
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+const CustomerDonor: React.FC<{ 
+  onChange: (value: boolean) => void;
+  translations: string[]; 
+}> = ({ onChange, translations }) => {
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [timer, setTimer] = useState(15);
@@ -873,48 +687,10 @@ interface NewResponse {
   householdSize: number | null;
   lastVisitDate: string;
 }
-const Confirmation: React.FC<{ phoneNumber: string }> = ({ phoneNumber }) => {
-  const [translations, setTranslations] = useState([
-    "Household size:",
-    "THANK YOU FOR VISITING!",
-    "Village Food Hub will be able to grow with your help!",
-    "Your Information",
-    "Full Name:",
-    "Phone Number:",
-    "Address:",
-    "Return home"
-  ]);
-
-  useEffect(() => {
-    const language = localStorage.getItem("language") || "en";
-    (async () => {
-      try {
-        const defaultTranslations = [
-          "Household size:",
-          "THANK YOU FOR VISITING!",
-          "Village Food Hub will be able to grow with your help!",
-          "Your Information",
-          "Full Name:",
-          "Phone Number:",
-          "Address:",
-          "Return home"
-        ];
-        const newTranslations = [...defaultTranslations];
-        if (language !== "en") {
-          for (let i = 0; i < defaultTranslations.length; i++) {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(defaultTranslations[i])}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            const translationArray = data[0] as string[][];
-            newTranslations[i] = translationArray.map(t => t[0]).join('');
-          }
-        }
-        setTranslations(newTranslations);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+const Confirmation: React.FC<{ 
+  phoneNumber: string;
+  translations: string[];
+}> = ({ phoneNumber, translations }) => {
 
   const [newRecord, setNewRecord] = useState<NewResponse | null>(null);
 
@@ -1279,6 +1055,50 @@ const DemographicsSurvey: React.FC = () => {
     }
   };
 
+  // for the translations, a set of arrays organized by page
+  const [translationArray, setTranslationArray] = useState(DEFAULT_TRANSLATIONS);
+
+  // translates all text for the questions on open
+  useEffect(() => {
+    console.log("starting translations")
+    const language = localStorage.getItem("language") || "en";
+    (async () => {
+      try {
+
+        // makes a copy of the default translations to change them
+        const newTranslations = {...DEFAULT_TRANSLATIONS};
+
+        // translates only if the language is not the default (english)
+        if (language !== "en") {
+
+          // loops over each page
+          for (const key of Object.keys(DEFAULT_TRANSLATIONS) as (keyof typeof DEFAULT_TRANSLATIONS)[]) {
+            const translatedStrings: string[] = [];
+        
+            // loops over each string in the current page to translate it
+            for (const str of DEFAULT_TRANSLATIONS[key]) {
+              const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${encodeURIComponent(str)}`;
+              const response = await fetch(url);
+              const data = await response.json();
+              const translationArray = data[0] as string[][];
+              translatedStrings.push(translationArray.map(t => t[0]).join(''));
+            }
+        
+            newTranslations[key] = translatedStrings;
+          }
+        }
+
+        // stores the new translations
+        setTranslationArray(newTranslations);
+        console.log("finished translations")
+
+      // error catching
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <DemographicsSurveyBanner />
@@ -1301,10 +1121,10 @@ const DemographicsSurvey: React.FC = () => {
         </>
       )}
       <div className='w-full'>
-        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} />}
-        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor}/>}
-        {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} />}
-        {showErrorModal && <ErrorModal errorMsg={errorMsg} closeModal={closeErrorModal}/>}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} translations={translationArray.customerActions} />}
+        {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor} translations={translationArray.customerDonor}/>}
+        {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} translations={translationArray.phoneNumber}/>}
+        {showErrorModal && <ErrorModal errorMsg={errorMsg} closeModal={closeErrorModal} />}
         {currentStep === 'changes' && (
           <Changes
             value={responses.changes}
@@ -1323,7 +1143,8 @@ const DemographicsSurvey: React.FC = () => {
 
                 : "N/A",                  
               householdSize: prevRecord?.householdSize ?? 0
-            }}             
+            }}    
+            translations={translationArray.changes}         
           />
         )}
         {currentStep === 'name' && 
@@ -1333,6 +1154,7 @@ const DemographicsSurvey: React.FC = () => {
             onFirstNameChange={(value) => updateName('firstName', value)}
             onLastNameChange={(value) => updateName('lastName', value)} 
             setNextDisabled={setNextDisabled} 
+            translations={translationArray.name}
           />
         }
         {currentStep === 'address' && 
@@ -1340,6 +1162,7 @@ const DemographicsSurvey: React.FC = () => {
             line1={responses.address.line1} 
             onAddressLineChange={(value) => updateAddress(value)}
             setNextDisabled={setNextDisabled} 
+            translations={translationArray.address}
           />
         }
         {currentStep === 'houseSize' && 
@@ -1347,9 +1170,10 @@ const DemographicsSurvey: React.FC = () => {
             value={responses.householdSize} 
             onChange={updateHouseholdSize} 
             setSubmitDisabled={setSubmitDisabled} 
+            translations={translationArray.householdSize}
           />
         }
-        {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber}/>}
+        {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber} translations={translationArray.confirmation}/>}
       </div>
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>
         {(() => {
