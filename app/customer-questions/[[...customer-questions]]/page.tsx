@@ -23,6 +23,7 @@ import {
   GeoapifyGeocoderAutocomplete,
    GeoapifyContext 
 } from '@geoapify/react-geocoder-autocomplete';
+import LoadingAnimation from '@app/components/LoadingAnimation';
 
 const DEFAULT_TRANSLATIONS = {
   customerActions: ["Select all the actions you plan to do today. ", " Receive ", " Donate "],
@@ -48,7 +49,8 @@ const CustomerAction: React.FC<{
   receive: boolean; 
   donate: boolean; 
   translations: string[];
-}> = ({ onChange, setNextDisabled, receive, donate, translations }) => {
+  showText: boolean;
+}> = ({ onChange, setNextDisabled, receive, donate, translations, showText }) => {
 
   const handleReceive = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked, donate);
@@ -98,37 +100,45 @@ const CustomerAction: React.FC<{
 
   return (
     <div>
-      <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
-        {translations[0]}<span className="text-red">*</span>
-      </div>
-      <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
-        <div>
-          <div className="flex space-x-5">
-            <div className="flex items-center mb-4">
-              <input 
-                id="default-checkbox" 
-                type="checkbox" 
-                className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
-                checked={receive}
-                onChange={handleReceive}
-              />
+      {/* only shows when translations are done */}
+      {showText
+      ?
+      <>
+        <div className="flex justify-center pt-[60px] text-black font-crimson crimson-bold text-4xl">
+          {translations[0]}<span className="text-red">*</span>
+        </div>
+        <div className="flex pt-[40px] text-black font-crimson crimson-bold text-4xl justify-center">
+          <div>
+            <div className="flex space-x-5">
+              <div className="flex items-center mb-4">
+                <input 
+                  id="default-checkbox" 
+                  type="checkbox" 
+                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                  checked={receive}
+                  onChange={handleReceive}
+                />
+              </div>
+              <div>{translations[1]}</div>
             </div>
-            <div>{translations[1]}</div>
-          </div>
-          <div className="flex space-x-5 onClick={() => setTimer(15)}">
-            <div className="flex items-center mb-4">
-              <input 
-                id="default-checkbox" 
-                type="checkbox" 
-                className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
-                checked={donate}
-                onChange={handleDonate}
-              />
+            <div className="flex space-x-5 onClick={() => setTimer(15)}">
+              <div className="flex items-center mb-4">
+                <input 
+                  id="default-checkbox" 
+                  type="checkbox" 
+                  className="w-8 h-8 bg-[#bdbdbd] border-[#bdbdbd] rounded checked:bg-banner-green text-3xl"
+                  checked={donate}
+                  onChange={handleDonate}
+                />
+              </div>
+              <div>{translations[2]}</div>
             </div>
-            <div>{translations[2]}</div>
           </div>
         </div>
-      </div>
+      </>
+      :
+        <LoadingAnimation/>
+      }
 
       {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
@@ -1057,10 +1067,15 @@ const DemographicsSurvey: React.FC = () => {
 
   // for the translations, a set of arrays organized by page
   const [translationArray, setTranslationArray] = useState(DEFAULT_TRANSLATIONS);
+  const [translationsDone, setTranslationsDone] = useState(false);
 
   // translates all text for the questions on open
   useEffect(() => {
-    console.log("starting translations")
+    
+    // when translations are not finished
+    setTranslationsDone(false);
+    
+    // only translates non-english
     const language = localStorage.getItem("language") || "en";
     (async () => {
       try {
@@ -1090,7 +1105,9 @@ const DemographicsSurvey: React.FC = () => {
 
         // stores the new translations
         setTranslationArray(newTranslations);
-        console.log("finished translations")
+    
+        // when translations are finished
+        setTranslationsDone(true);
 
       // error catching
       } catch (error) {
@@ -1121,7 +1138,7 @@ const DemographicsSurvey: React.FC = () => {
         </>
       )}
       <div className='w-full'>
-        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} translations={translationArray.customerActions} />}
+        {currentStep === 'action'   && <CustomerAction onChange={updateAction} setNextDisabled={setNextDisabled} receive={responses.receive} donate={responses.donate} translations={translationArray.customerActions} showText={translationsDone} />}
         {currentStep === 'donor'    && <CustomerDonor onChange={redirectDonor} translations={translationArray.customerDonor}/>}
         {currentStep === 'phoneNum' && <PhoneNumber value={responses.phoneNumber} onChange={updatePhoneNumber} setNextDisabled={setNextDisabled} translations={translationArray.phoneNumber}/>}
         {showErrorModal && <ErrorModal errorMsg={errorMsg} closeModal={closeErrorModal} />}
@@ -1182,7 +1199,6 @@ const DemographicsSurvey: React.FC = () => {
           } else if (currentStep !== 'donor' && currentStep !== 'confirmation') {
             return <ButtonNext onClick={handleNextClick} disabled={nextDisabled} />;
           }
-          
         })()}
       </div>
     </div>
