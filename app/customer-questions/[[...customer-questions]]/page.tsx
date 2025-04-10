@@ -30,12 +30,13 @@ const DEFAULT_TRANSLATIONS = {
   phoneNumber: ["Phone Number"],
   changes: ["Has your information changed? ", "Name:", "Address:",  "Household size:"],
   name: ["Full Name", "First Name", "Last Name"],
-  address: ["Address", "Address Line"],
+  address: ["Address", "Address Line", "City", "State", "Zip Code", "Enter address here"],
   householdSize: ["Household Size"],
   customerDonor: ["We have a demographic survey that is optional.", "Would you like to fill it out?"],
   confirmation: ["Household size:", "THANK YOU FOR VISITING!", "Village Food Hub will be able to grow with your help!", "Your Information", "Full Name:", "Phone Number:", "Address:", "Return home"],
   exitModal: ["Warning!", "Your changes will not be saved."],
   timeoutModal: ["Click to remain on survey", "Stay", "Leave", " seconds left..."],
+  errorMessage: ["Phone Number is Not Valid"],
 };
 
 interface Details {
@@ -438,6 +439,10 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
 
   };
 
+  const [cityState, setCityState] = useState<string>("");
+  const [stateState, setStateState] = useState<string>("");
+  const [zipState, setZipState] = useState<string>("");
+
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [timer, setTimer] = useState(15);
@@ -502,7 +507,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
           {/* autofill component  -- should api key be here??*/}
          <GeoapifyContext apiKey="64e958fc3aa74f4bb4aa34c3d7d3dff4">
             <GeoapifyGeocoderAutocomplete
-              placeholder="Enter address here"
+              placeholder={translations[5]}
               type={'amenity'}
               limit={7}
               filterByCountryCode={['us']}
@@ -518,7 +523,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleCityChange(e.target.value)}
+            onChange={(e) => setCityState(e.target.value)}
             value={cityState}
             required
           />
@@ -528,7 +533,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleStateChange(e.target.value)}
+            onChange={(e) => setStateState(e.target.value)}
             value={stateState}
             required
           />
@@ -538,7 +543,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
           <input
             type="text"
             className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleZipChange(e.target.value)}
+            onChange={(e) => setZipState(e.target.value)}
             value={zipState}
             required
           />
@@ -918,7 +923,7 @@ const DemographicsSurvey: React.FC = () => {
         const record = await fetchPrevRecord();
         if (!isValidPhoneNumber('+' + responses.phoneNumber)) {
           setShowErrorModal(true);
-          setErrorMsg('Phone Number is Not Valid');
+          setErrorMsg(translationArray.errorMessage[0]);
           return;
 
         }

@@ -39,7 +39,7 @@ const TimeoutModal: React.FC<TimeoutModalProps> = ({ closeTimeoutModal, translat
                    pt-2 shadow-lg rounded-lg"
       >
         <div className="flex flex-col">
-          <p className="flex justify-center text-[32px] crimson-semibold text-center leading-[1.4] pt-6 py-6">
+          <p className="flex justify-center text-[32px] crimson-semibold text-center leading-[1.4] pt-6 py-6 px-10">
             {translations[0]}
           </p>
         </div>
