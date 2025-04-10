@@ -9,3 +9,9 @@ export function userIsNotVolunteer(user: UserResource | null | undefined): boole
     user.username?.toLowerCase() !== "volunteer" &&
     user.publicMetadata?.role !== "Volunteer";
 }
+
+export function userIsNotCustomer(user: UserResource | null | undefined): boolean {
+  return !!user &&
+    user.username?.toLowerCase() !== "customer" &&
+    user.publicMetadata?.role !== "Customer";
+}

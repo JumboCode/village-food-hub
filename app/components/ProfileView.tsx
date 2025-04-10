@@ -48,6 +48,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
     const [phoneNumber, setPhoneNumber] = useState("");
     const [changeMade, setChangeMade] = useState(false);
     const [isVolunteer, setIsVolunteer] = useState(false);
+    const [isCustomer, setIsCustomer] = useState(false);
     
     const { user } = useUser();
     const clerkUsername = user?.username;
@@ -137,13 +138,19 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
         fieldType: string
       ) => {
-        // If the role is being changed, update isVolunteer state based on the selected value
+        // If the role is being changed, update isVolunteer and isCustomer state based on the selected value
         if (fieldType === "role") {
             if (e.target.value === "Volunteer") {
                 setIsVolunteer(true);
                 
                 if (setProfileData) {
                     setProfileData(prev => ({ ...prev, username: "Volunteer" }));
+                  }
+            } else if (e.target.value === "Customer") {
+                setIsCustomer(true);
+                
+                if (setProfileData) {
+                    setProfileData(prev => ({ ...prev, username: "Customer" }));
                   }
             }
         }
@@ -163,8 +170,8 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
       
-        // If the role is not Volunteer, require firstName, lastName, and phoneNumber.
-        if (profileData.role !== "Volunteer") {
+        // If the role is not Volunteer or Customer, require firstName, lastName, and phoneNumber.
+        if (profileData.role !== "Volunteer" || profileData.role !== "Customer") {
           if (!profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.phoneNumber.trim()) {
             alert("Please fill out all required fields.");
             return;
@@ -198,7 +205,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
                         // required={profileData.role !== "Volunteer"}
-                        disabled={isView || isVolunteer}
+                        disabled={isView || isVolunteer || isCustomer}
                     />
                 </div>
 
@@ -212,7 +219,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         onChange={(e) => handleChangeMade(e, "lastName")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView || isVolunteer}
+                        disabled={isView || isVolunteer || isCustomer}
                     />
                 </div>
             </div>
@@ -228,7 +235,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         onChange={(e) => handleChangeMade(e, "username")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView || isEdit || isVolunteer}
+                        disabled={isView || isEdit || isVolunteer || isCustomer}
                     />
                 </div>
 
@@ -246,6 +253,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         <option value="Staff">Staff</option>
                         <option value="Admin">Admin</option>
                         <option value="Volunteer">Volunteer</option> 
+                        <option value="Customer">Customer</option>
                     </select>
                 </div>
             </div>
@@ -265,7 +273,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         onChange={(e) => handleChangeMade(e, "pronouns")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView || isVolunteer}
+                        disabled={isView || isVolunteer || isCustomer}
                     />
                 </div>
 
@@ -279,7 +287,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         onChange={(e) => handleChangeMade(e, "phoneNumber")}
                         placeholder=""
                         className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView || isVolunteer}
+                        disabled={isView || isVolunteer || isCustomer}
                     />
                 </div>
             </div>

@@ -123,7 +123,10 @@ const LoginPage: React.FC = () => {
         setTimeout(() => {
           if (username.toLocaleLowerCase() === "volunteer") {
             router.push('/volunteer-landing');
-          } else {
+          } else if (username.toLocaleLowerCase() === "customer") {
+            router.push('/welcome-page');
+          }
+          else {
             router.push('/overview');
           }
         }, 1000);

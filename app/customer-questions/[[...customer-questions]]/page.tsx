@@ -629,39 +629,6 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
             />
           </GeoapifyContext>
       </div>
-      <div className='flex flex-row w-2/3 justify-between gap-2'>
-        <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">{translations[2]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleCityChange(e.target.value)}
-            value={cityState}
-            required
-          />
-        </div>
-        <div className='flex-1 mr-3'>
-          <p className="text-[24px] mt-4">{translations[3]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleStateChange(e.target.value)}
-            value={stateState}
-            required
-          />
-        </div>
-        <div className='flex-1'>
-          <p className="text-[24px] mt-4">{translations[4]} <span className="text-red">*</span></p>
-          <input
-            type="text"
-            className="bg-gray-50 border border-light-gray text-[24px] text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-full"
-            onChange={(e) => handleZipChange(e.target.value)}
-            value={zipState}
-            required
-          />
-        </div>
-      </div>
-
       {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
         <TimeoutModal

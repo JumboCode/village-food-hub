@@ -12,7 +12,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { useUser } from "@clerk/nextjs";
 
 import LoadingAnimation from "@app/components/LoadingAnimation";
-import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+import { userIsNotVolunteer, userIsNotCustomer } from "@app/components/ProtectedUrls";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -204,12 +204,12 @@ const handleDelete = async () => {
     getBytes();
   }, [demographicsRawData]);
 
-  const notVolunteer = userIsNotVolunteer(user)
+  const notVolunteerOrCustomer = userIsNotVolunteer(user) || userIsNotCustomer(user);
 
   return (
     isLoading ? (
         <LoadingAnimation/>
-    ) : notVolunteer ? (
+    ) : notVolunteerOrCustomer ? (
         <div>
         <NavBar />
         <div className="py-4 px-10">
@@ -330,7 +330,7 @@ const handleDelete = async () => {
         </div>
     ) : (
         <div className="p-10 text-center">
-          <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+          <h1 className="text-2xl font-bold">Unauthorized Access</h1>
           <p className="mt-4">You do not have permission to view this page.</p>
         </div>
     )
