@@ -12,6 +12,7 @@ import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 import { Snackbar } from '@mui/material';
 
+
 interface CategoryData {
   [key: string]: [string, string][];
 }
@@ -431,14 +432,18 @@ const Categories: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-slate-50 items-center h-full">
+          <div className="bg-slate-50 items-center h-[50%]">
             {showTable ? (
               <>
+              <div className="mb-10">
                 <CategoriesSpreadsheet 
                   categoryName={selectedCategory}
                   categoryItems={categoriesData?.[selectedCategory] || []}
                   loadData={async () => { await mutateCategories(); }} 
                 />
+              </div>
+             
+                
                 {selectedCategoryData.length === 0 && (
                   <p className="flex-center py-4 font-crimson text-[20px] text-center">
                     No entries for this category.
@@ -450,6 +455,15 @@ const Categories: React.FC = () => {
                 Select a category.
               </p>
             )}
+          </div>
+          <div className="mt-5 h-[50px] bottom-6 left-1/2 transform -translate-x-1/2">
+            <div className="join">
+              <button className="join-item btn border rounded-l-md border-gray w-[40px] font-serif text-[20px] hover:bg-slate-200">1</button>
+              <button className="join-item btn border border-gray w-[40px] font-serif text-[20px] hover:bg-slate-200">2</button>
+              <button className="join-item btn btn-disabled border border-gray w-[40px] font-serif text-[20px] bg-slate-200">...</button>
+              <button className="join-item btn border border-gray w-[40px] font-serif text-[20px] hover:bg-slate-200">99</button>
+              <button className="join-item btn border rounded-r-md border-gray w-[40px] font-serif text-[20px] hover:bg-slate-200">100</button>
+            </div>
           </div>
         </div>
       </div>
@@ -590,19 +604,20 @@ const Categories: React.FC = () => {
         </div>
       )}
        <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarCatRename}
-                autoHideDuration={4000}
-                onClose={() => setSnackBarCatRename(false)}
-                message={snackbarMessageCatRename}
-            />
-             <Snackbar
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                open={snackbarCatDelete}
-                autoHideDuration={4000}
-                onClose={() => setSnackBarCatDelete(false)}
-                message={snackbarMessageCatDelete}
-            />
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            open={snackbarCatRename}
+            autoHideDuration={4000}
+            onClose={() => setSnackBarCatRename(false)}
+            message={snackbarMessageCatRename}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={snackbarCatDelete}
+          autoHideDuration={4000}
+          onClose={() => setSnackBarCatDelete(false)}
+          message={snackbarMessageCatDelete}
+        />
+            
     </div>
   );
 };
