@@ -12,6 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface DataItem {
   lastVisitDate: string;
   householdSize: number;
+  previousVisitDates: string[];
 }
 
 // Role-based access check
@@ -25,6 +26,7 @@ const OverviewPage: React.FC = () => {
   const isAuthorized = user && hasAccess(user);
 
   const [num_responses, setNumResponses] = useState<number | null>(null);
+  const [numNewIndividuals, setNumNewIndividuals] = useState<number | null>(null);
   const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
 
   const [isLoading12, setIsLoading12] = useState<boolean>(true);
@@ -61,9 +63,26 @@ const OverviewPage: React.FC = () => {
         });
 
         setVisitFrequencyData(visitCountsArray);
+        
+        const servedThisMonth = data.filter(item => {
+          const visitDate = new Date(item.lastVisitDate);
+          return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
+        });
+        
+        const newIndividuals = servedThisMonth.filter(item => {
+          // If there are no previous visits, we consider this individual new.
+          if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
+          // Otherwise, check that every previous visit is in the current month/year.
+          return item.previousVisitDates.every(dateStr => {
+            const prevDate = new Date(dateStr);
+            return prevDate.getMonth() === currentMonth && prevDate.getFullYear() === currentYear;
+          });
+        });
+        setNumNewIndividuals(newIndividuals.length);
       } catch (error) {
         console.error("Error fetching data:", error);
         setNumResponses(0);
+        setNumNewIndividuals(0);
         setVisitFrequencyData(new Array(10).fill(0));
       } finally {
         setIsLoading12(false);
@@ -157,7 +176,9 @@ const OverviewPage: React.FC = () => {
                 ) : (
                   <>
                     <div className="text-lg text-black font-crimson">Number of New Individuals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-5xl font-bold font-crimson text-black mt-2">
+                      {numNewIndividuals}
+                    </div>
                   </>
                 )}
               </div>
@@ -176,12 +197,14 @@ const OverviewPage: React.FC = () => {
 
               {/* Cooked Meals */}
               <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading5 ? (
+                {isLoading5 || numNewIndividuals === null ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
                   <>
                     <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-5xl font-bold font-crimson text-black mt-2">
+                      {numNewIndividuals}
+                    </div>
                   </>
                 )}
               </div>
