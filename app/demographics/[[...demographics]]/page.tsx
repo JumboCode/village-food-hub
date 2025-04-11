@@ -12,7 +12,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { useUser } from "@clerk/nextjs";
 
 import LoadingAnimation from "@app/components/LoadingAnimation";
-import { userIsNotVolunteer, userIsNotCustomer } from "@app/components/ProtectedUrls";
+import { userIsAdmin, userIsStaff } from "@app/components/ProtectedUrls";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -35,7 +35,6 @@ const fetcher = (url: string) =>
 // Neon fetch function remains the same
 async function fetchNeonData() {
   try {
-    //setIsLoading(true);
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
@@ -43,9 +42,7 @@ async function fetchNeonData() {
   } catch (error) {
     console.error("Error fetching Neon data:", error);
   } 
-   finally {
-     //setIsLoading(false);
-   }
+   finally {}
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
@@ -204,12 +201,12 @@ const handleDelete = async () => {
     getBytes();
   }, [demographicsRawData]);
 
-  const notVolunteerOrCustomer = userIsNotVolunteer(user) || userIsNotCustomer(user);
+  const hasAccess = userIsAdmin(user) || userIsStaff(user);
 
   return (
     isLoading ? (
         <LoadingAnimation/>
-    ) : notVolunteerOrCustomer ? (
+    ) : hasAccess ? (
         <div>
         <NavBar />
         <div className="py-4 px-10">

@@ -3,8 +3,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import whiteOutlineLogo from '@app/images/non-blank headerLogo 160x130.png';
 import { useState, useEffect } from 'react';
+import { useClerk } from "@clerk/nextjs";
 
 export default function DemographicsSurveyBanner() {
+  // TODO: TEMPORARY
+  const { signOut } = useClerk();
+
+  const handleSignOut = async () => {
+    try {
+      console.log("Attempting to sign out...");
+      await signOut({ redirectUrl: "/login?justSignedOut=true" });
+      console.log("Signed out successfully");
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
+  };
+
   const [bannerTranslation, setbannerTranslation] = useState([
       "Demographics Survey",
     ]);
@@ -49,6 +63,15 @@ export default function DemographicsSurveyBanner() {
           </div>
           <div className="text-center">
             <h1 className="text-[54px] font-crimson font-bold text-white">{bannerTranslation[0]}</h1>
+          </div>
+          {/* TODO: TEMPORARY */}
+          <div className="absolute right-0 top-5 mt-4 mr-8">
+            <div
+              className="flex items-center text-white text-[24px] rounded-md font-crimson font-bold px-4 py-2 hover:text-light-gray cursor-pointer"
+              onClick={handleSignOut}
+            >
+              Sign Out (will be removed)
+            </div>
           </div>
         </div>
       </>

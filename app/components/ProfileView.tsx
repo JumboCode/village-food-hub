@@ -171,7 +171,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
         e.preventDefault();
       
         // If the role is not Volunteer or Customer, require firstName, lastName, and phoneNumber.
-        if (profileData.role !== "Volunteer" || profileData.role !== "Customer") {
+        if (profileData.role !== "Volunteer" && profileData.role !== "Customer") {
           if (!profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.phoneNumber.trim()) {
             alert("Please fill out all required fields.");
             return;

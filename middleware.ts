@@ -41,18 +41,28 @@ const isProtectedRoute = createRouteMatcher([
   '/volunteer-remove-pages(.*)',
   '/volunteer-saved(.*)',
   '/volunteer-unsaved(.*)',
+  '/welcome-page(.*)',
+  '/customer-questions(.*)',
+  '/unsaved-thank-you(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth()
+  const { userId, user } = await auth()
   // If the request is for a protected route and is NOT "/login", enforce authentication
   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
   // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
+  // TODO: STILL WORKING ON THIS -jiyoon
   // If an authenticated user visits "/login", redirect them to "/overview"
   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
-    return NextResponse.redirect(new URL('/overview', req.url));
+    if (user?.publicMetadata?.role == 'Admin' || user?.publicMetadata?.role == 'Staff') {
+      return NextResponse.redirect(new URL('/overview', req.url));
+    } else if (user?.publicMetadata?.role == 'Customer') {
+      return NextResponse.redirect(new URL('/welcome-page', req.url));
+    } else if (user?.publicMetadata?.role == 'Volunteer') {
+      return NextResponse.redirect(new URL('/volunteer-landing', req.url));
+    }
   }  
   return NextResponse.next();
 });
