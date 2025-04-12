@@ -69,15 +69,15 @@ const CustomerAction: React.FC<{
   }, [receive, donate, setNextDisabled]);
 
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [timer, setTimer] = useState(15);
+  const [timer, setTimer] = useState(20);
 
   const handleCloseModal = () => {
     setShowTimeoutModal(false);
     window.preventNavigation = false;
-    setTimer(15); // Optionally reset the timer
+    setTimer(20); // Optionally reset the timer
   };
 
-  // sets up 15 second timer on open
+  // sets up 20 second timer on open
   useEffect(() => {
   
     // sets up interval to decrement timer
