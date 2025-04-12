@@ -12,7 +12,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { useUser } from "@clerk/nextjs";
 
 import LoadingAnimation from "@app/components/LoadingAnimation";
-import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+import { userIsAdmin, userIsStaff } from "@app/components/ProtectedUrls";
 
 // Define a type for the structure of each record returned by the API
 interface DemographicsRecord {
@@ -35,7 +35,6 @@ const fetcher = (url: string) =>
 // Neon fetch function remains the same
 async function fetchNeonData() {
   try {
-    //setIsLoading(true);
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
@@ -43,9 +42,7 @@ async function fetchNeonData() {
   } catch (error) {
     console.error("Error fetching Neon data:", error);
   } 
-   finally {
-     //setIsLoading(false);
-   }
+   finally {}
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
@@ -204,12 +201,12 @@ const handleDelete = async () => {
     getBytes();
   }, [demographicsRawData]);
 
-  const notVolunteer = userIsNotVolunteer(user)
+  const hasAccess = userIsAdmin(user) || userIsStaff(user);
 
   return (
     isLoading ? (
         <LoadingAnimation/>
-    ) : notVolunteer ? (
+    ) : hasAccess ? (
         <div>
         <NavBar />
         <div className="py-4 px-10">
@@ -330,7 +327,7 @@ const handleDelete = async () => {
         </div>
     ) : (
         <div className="p-10 text-center">
-          <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+          <h1 className="text-2xl font-bold">Unauthorized Access</h1>
           <p className="mt-4">You do not have permission to view this page.</p>
         </div>
     )

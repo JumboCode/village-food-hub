@@ -94,7 +94,7 @@ const OverviewPage: React.FC = () => {
   if (!isAuthorized) {
     return (
       <div className="p-10 text-center">
-        <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+        <h1 className="text-2xl font-bold">Unauthorized Access</h1>
         <p className="mt-4">You do not have permission to view this page.</p>
       </div>
     );

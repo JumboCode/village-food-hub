@@ -5,6 +5,8 @@ import { ButtonExit, ButtonBack, ButtonNext, ButtonSubmit } from '@app/component
 import UpdateInventoryBanner from '@app/components/UpdateInventoryBanner';
 import { NameDropdown } from '@app/components/Dropdowns';
 import ExitModal from "@app/components/ExitModal"
+import { userIsCustomer } from "@app/components/ProtectedUrls";
+import { useUser } from "@clerk/nextjs";
 
 type Step = 'details' | 'confirm';
 
@@ -48,78 +50,88 @@ const VolunteerAddPages: React.FC = () => {
   const closeModal = (): void => {
     setShowModal(false);
   };
+
+  const { user } = useUser();
+  const hasAccess = !userIsCustomer(user);
   
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Banner */}
-      <UpdateInventoryBanner />
+    hasAccess ? (
+      <div className="min-h-screen bg-gray-100">
+        {/* Banner */}
+        <UpdateInventoryBanner />
 
-      {/* Back and Exit buttons */}
-      <div className="flex flex-row h-full w-full justify-between mt-10 px-40 py-18">
-        <div className="flex flex-2">
-          <ButtonBack onClick={handleBack} />
-        </div>
-        <div className="">
-          <ButtonExit onClick={openModal} />
-          {showModal && <ExitModal closeModal={closeModal} redirectPage={'/volunteer-unsaved'} translations={["Warning!", "Your changes will not be saved."]}/> }
-        </div>
-      </div>
-
-      {/* Page Content */}
-      <div className="flex justify-center w-full h-full">
-        {currentStep === 'details' && (
-          <div className="w-4/5 h-4/5">
-            <VolunteerAddDetailsModule 
-              itemToAdd={itemToAdd} 
-              setItemToAdd={setItemToAdd} 
-              setNextDisabled={setNextDisabled}
-            />
+        {/* Back and Exit buttons */}
+        <div className="flex flex-row h-full w-full justify-between mt-10 px-40 py-18">
+          <div className="flex flex-2">
+            <ButtonBack onClick={handleBack} />
           </div>
-        )}
-        {currentStep === 'confirm' && (
-          <div className="w-4/5 h-4/5">
-            <VolunteerAddConfirmModule 
-              itemToAdd={itemToAdd} 
-              setItemToAdd={setItemToAdd} 
-            />
+          <div className="">
+            <ButtonExit onClick={openModal} />
+            {showModal && <ExitModal closeModal={closeModal} redirectPage={'/volunteer-unsaved'}/> }
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Next Button */}
-      {currentStep === 'details' && (
-        <div className="flex flex-col items-center mt-8 space-y-2">
-          {nextDisabled && nextAttempted && (
-            <div className="text-red text-sm font-medium">
-              {itemToAdd.quantity == 0
-                ? "Quantity should be a value bigger than 0."
-                : "Please fill out all required fields to proceed."}
+        {/* Page Content */}
+        <div className="flex justify-center w-full h-full">
+          {currentStep === 'details' && (
+            <div className="w-4/5 h-4/5">
+              <VolunteerAddDetailsModule 
+                itemToAdd={itemToAdd} 
+                setItemToAdd={setItemToAdd} 
+                setNextDisabled={setNextDisabled}
+              />
             </div>
           )}
+          {currentStep === 'confirm' && (
+            <div className="w-4/5 h-4/5">
+              <VolunteerAddConfirmModule 
+                itemToAdd={itemToAdd} 
+                setItemToAdd={setItemToAdd} 
+              />
+            </div>
+          )}
+        </div>
 
-          <div className="relative w-fit">
-            {/* Actual Button */}
-            <ButtonNext
-              disabled={nextDisabled}
-              onClick={() => {
-                console.log(itemToAdd);
-                handleNext();
-              }}
-            />
+        {/* Next Button */}
+        {currentStep === 'details' && (
+          <div className="flex flex-col items-center mt-8 space-y-2">
+            {nextDisabled && nextAttempted && (
+              <div className="text-red text-sm font-medium">
+                {itemToAdd.quantity == 0
+                  ? "Quantity should be a value bigger than 0."
+                  : "Please fill out all required fields to proceed."}
+              </div>
+            )}
 
-            {/* Overlay only when disabled */}
-            {nextDisabled && (
-              <div
-                className="absolute inset-0 z-10 cursor-not-allowed"
+            <div className="relative w-fit">
+              {/* Actual Button */}
+              <ButtonNext
+                disabled={nextDisabled}
                 onClick={() => {
-                  setNextAttempted(true);
+                  console.log(itemToAdd);
+                  handleNext();
                 }}
               />
-            )}
+
+              {/* Overlay only when disabled */}
+              {nextDisabled && (
+                <div
+                  className="absolute inset-0 z-10 cursor-not-allowed"
+                  onClick={() => {
+                    setNextAttempted(true);
+                  }}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    ) : (
+      <div className="p-10 text-center">
+          <h1 className="text-2xl font-bold">Unauthorized Access</h1>
+          <p className="mt-4">You do not have permission to view this page.</p>
+      </div>
+    )
   );
 };
 

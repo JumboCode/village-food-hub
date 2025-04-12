@@ -21,7 +21,7 @@ import {
 import '@geoapify/geocoder-autocomplete/styles/minimal.css';
 import {  
   GeoapifyGeocoderAutocomplete,
-   GeoapifyContext 
+  GeoapifyContext 
 } from '@geoapify/react-geocoder-autocomplete';
 import LoadingAnimation from '@app/components/LoadingAnimation';
 
@@ -504,8 +504,8 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
       <div className="w-2/3">
         <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
       
-          {/* autofill component  -- should api key be here??*/}
-         <GeoapifyContext apiKey="64e958fc3aa74f4bb4aa34c3d7d3dff4">
+          {/* autofill component */}
+          <GeoapifyContext apiKey={process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY!}>
             <GeoapifyGeocoderAutocomplete
               placeholder={translations[5]}
               type={'amenity'}
