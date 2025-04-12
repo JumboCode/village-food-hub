@@ -617,7 +617,7 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
         <p className="text-[24px] mt-4">{translations[1]} <span className="text-red">*</span></p>
       
           {/* autofill component */}
-         <GeoapifyContext apiKey={process.env.ADDRESS_AUTOCOMPLETE_API_KEY || ''}>
+          <GeoapifyContext apiKey={process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY!}>
             <GeoapifyGeocoderAutocomplete
               placeholder="Enter address here"
               type={'amenity'}
