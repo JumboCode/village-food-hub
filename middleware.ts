@@ -88,7 +88,8 @@ export default clerkMiddleware(async (auth, req) => {
   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
     try {
       const user = await clerkClient.users.getUser(userId);
-      const role = user?.publicMetadata?.role?.toLowerCase();
+      const roleRaw = user?.publicMetadata?.role;
+      const role = typeof roleRaw === 'string' ? roleRaw.toLowerCase() : undefined;
 
       console.log("Middleware resolved role:", role);
 
