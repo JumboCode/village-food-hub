@@ -24,6 +24,7 @@
  */
 
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/clerk-sdk-node';
 import { NextResponse } from 'next/server';
 
 // Define protected routes (everything except "/login")
@@ -46,24 +47,70 @@ const isProtectedRoute = createRouteMatcher([
   '/unsaved-thank-you(.*)'
 ]);
 
+// export default clerkMiddleware(async (auth, req) => {
+//   const { userId, user } = await auth()
+//   // If the request is for a protected route and is NOT "/login", enforce authentication
+//   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
+//     return NextResponse.redirect(new URL('/login', req.url));
+//   }
+//   // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
+//   // If an authenticated user visits "/login", redirect them to "/overview"
+//   // if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
+//   //   // if (!userId || user?.publicMetadata?.role !== 'Admin') {
+//   //   return NextResponse.redirect(new URL('/overview', req.url));
+//   // }  
+//   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
+//     // standardize to lowercase strings for comparison
+//     const role = user?.publicMetadata?.role?.toLowerCase();
+  
+//     if (role === 'admin' || role === 'staff') {
+//       return NextResponse.redirect(new URL('/overview', req.url));
+//     } else if (role === 'customer') {
+//       return NextResponse.redirect(new URL('/welcome-page', req.url));
+//     } else if (role === 'volunteer') {
+//       return NextResponse.redirect(new URL('/volunteer-landing', req.url));
+//     } else {
+//       return NextResponse.redirect(new URL('/overview', req.url)); // fallback
+//     }
+//   }  
+//   return NextResponse.next();
+// });
+
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, user } = await auth()
-  // If the request is for a protected route and is NOT "/login", enforce authentication
+  const { userId } = await auth();
+
+  // Redirect unauthenticated users from protected routes
   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
-  // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
-  // TODO: STILL WORKING ON THIS -jiyoon
-  // If an authenticated user visits "/login", redirect them to "/overview"
+
+  // Handle logged-in users visiting /login (e.g. redirect based on role)
   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
-    if (user?.publicMetadata?.role == 'Admin' || user?.publicMetadata?.role == 'Staff') {
-      return NextResponse.redirect(new URL('/overview', req.url));
-    } else if (user?.publicMetadata?.role == 'Customer') {
-      return NextResponse.redirect(new URL('/welcome-page', req.url));
-    } else if (user?.publicMetadata?.role == 'Volunteer') {
-      return NextResponse.redirect(new URL('/volunteer-landing', req.url));
+    try {
+      const user = await clerkClient.users.getUser(userId);
+      const role = user?.publicMetadata?.role?.toLowerCase();
+
+      console.log("Middleware resolved role:", role);
+
+      switch (role) {
+        case 'customer':
+          return NextResponse.redirect(new URL("/welcome-page", req.url));
+        case 'volunteer':
+          return NextResponse.redirect(new URL("/volunteer-landing", req.url));
+        case 'admin':
+        case 'staff':
+          return NextResponse.redirect(new URL("/overview", req.url));
+        default:
+          console.warn("Unrecognized role, falling back to overview:", role);
+          return NextResponse.redirect(new URL("/overview", req.url));
+      }
+    } catch (err) {
+      console.error("Failed to fetch Clerk user in middleware:", err);
+      // Fallback route if Clerk fetch fails
+      return NextResponse.redirect(new URL("/overview", req.url));
     }
-  }  
+  }
+
   return NextResponse.next();
 });
 

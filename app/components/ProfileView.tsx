@@ -144,13 +144,13 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                 setIsVolunteer(true);
                 
                 if (setProfileData) {
-                    setProfileData(prev => ({ ...prev, username: "Volunteer" }));
+                    setProfileData(prev => ({ ...prev, username: "volunteer" }));
                   }
             } else if (e.target.value === "Customer") {
                 setIsCustomer(true);
                 
                 if (setProfileData) {
-                    setProfileData(prev => ({ ...prev, username: "Customer" }));
+                    setProfileData(prev => ({ ...prev, username: "customer" }));
                   }
             }
         }

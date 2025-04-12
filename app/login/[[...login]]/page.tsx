@@ -120,16 +120,25 @@ const LoginPage: React.FC = () => {
         setIsLoggingIn(false);
   
         // Navigate based on role
-        setTimeout(() => {
-          if (username.toLocaleLowerCase() === "volunteer") {
-            router.push('/volunteer-landing');
-          } else if (username.toLocaleLowerCase() === "customer") {
-            router.push('/welcome-page');
+        const interval = setInterval(async () => {
+          const clerkUser = window.Clerk?.user;
+          const role = clerkUser?.publicMetadata?.role?.toLowerCase();
+      
+          if (role) {
+            clearInterval(interval);
+      
+            switch (role) {
+              case "volunteer":
+                router.push("/volunteer-landing");
+                break;
+              case "customer":
+                router.push("/welcome-page");
+                break;
+              default:
+                router.push("/overview");
+            }
           }
-          else {
-            router.push('/overview');
-          }
-        }, 1000);
+        }, 100);
       } else {
         console.warn("Unexpected sign-in status:", result.status);
         setIsLoggingIn(false);
