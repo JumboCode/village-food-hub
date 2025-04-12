@@ -72,7 +72,7 @@ const VolunteerRemovePages: React.FC = () => {
           </div>
           <div className="">
             <ButtonExit onClick={openModal} />
-            {showModal && <ExitModal closeModal={closeModal} redirectPage={'/volunteer-unsaved'}/>}
+            {showModal && <ExitModal closeModal={closeModal} redirectPage={'/volunteer-unsaved'} translations={["Warning!", "Your changes will not be saved."]}/>}
           </div>
         </div>
 
