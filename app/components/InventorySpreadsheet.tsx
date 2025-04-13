@@ -265,7 +265,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     };
 
     return (
-        <div className="relative overflow-x-auto crimson-regular font-crimson">
+      <div className="min-h-[550px] flex flex-col">
+        <div className="h-[550px] relative overflow-x-auto crimson-regular font-crimson flex-grow">
           <table className="table-auto w-full">
             <thead className="font-crimson border-crimson-regular border-separate content-start">
               <tr className="bg-dark-blue text-white text-lg align-left">
@@ -373,9 +374,10 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               ))}
             </tbody>
           </table>
-          {/* Pagination */}
-          {inventoryItems.length !== 0 && (
-            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2">
+        </div>
+        {/* Pagination */}
+        {inventoryItems.length !== 0 && (
+          <div className="w-full flex justify-center">
               <div className="join">
                 <button 
                   onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
@@ -393,7 +395,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                   }`}
                   >»</button>
               </div>
-            </div> )}
+          </div>)}
 
           {/* Delete Inventory Modal */}
           {showDeleteModal && (

@@ -435,13 +435,11 @@ const Categories: React.FC = () => {
           <div className="bg-white items-center h-[50%]">
             {showTable ? (
               <>
-              <div className="mb-8">
-                <CategoriesSpreadsheet 
-                  categoryName={selectedCategory}
-                  categoryItems={categoriesData?.[selectedCategory] || []}
-                  loadData={async () => { await mutateCategories(); }} 
-                />
-              </div>
+              <CategoriesSpreadsheet 
+                categoryName={selectedCategory}
+                categoryItems={categoriesData?.[selectedCategory] || []}
+                loadData={async () => { await mutateCategories(); }} 
+              />
              
                 
                 {selectedCategoryData.length === 0 && (

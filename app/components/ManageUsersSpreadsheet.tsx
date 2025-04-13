@@ -234,59 +234,61 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
   };
 
   return (
-    <div className="relative overflow-x-auto crimson-regular font-crimson">
-      <table className="table-auto w-full">
-        <thead className="font-crimson border-crimson-regular border-separate content-start">
-          <tr className="bg-dark-blue text-white text-lg align-left">
-            {["First Name", "Last Name", "Pronouns", "Username", "Email", "Role", "Phone Number"].map((label, index) => (
-              <th key={index} className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                {label}
-                <button onClick={() => sortAlphabetically(index)} className="ml-2">
-                  <TiArrowUnsorted className="inline text-xl cursor-pointer" />
-                </button>
-              </th>
-            ))}
-            <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-          {isLoading ? (
-            <tr>
-              <td colSpan={8} className="text-center py-4 text-gray-500">
-                Loading users…
-              </td>
+    <div className="min-h-[540px] flex flex-col">
+      <div className="h-[540px] relative overflow-x-auto crimson-regular font-crimson">
+        <table className="table-auto w-full">
+          <thead className="font-crimson border-crimson-regular border-separate content-start">
+            <tr className="bg-dark-blue text-white text-lg align-left">
+              {["First Name", "Last Name", "Pronouns", "Username", "Email", "Role", "Phone Number"].map((label, index) => (
+                <th key={index} className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                  {label}
+                  <button onClick={() => sortAlphabetically(index)} className="ml-2">
+                    <TiArrowUnsorted className="inline text-xl cursor-pointer" />
+                  </button>
+                </th>
+              ))}
+              <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">Actions</th>
             </tr>
-          ) : (
-            sortedItems.slice(initialIndex, lastIndex)
-            .map((row, rowIndex) => (
-              <tr key={rowIndex} className="py-2">
-                {row.map((cell, colIndex) => (
-                  <td key={colIndex} className="border-collapse border-zinc-200 border-2 border-y-1 px-3">
-                    {String(cell)}
-                  </td>
-                ))}
-                <td className="border-collapse border-zinc-200 border-2 border-y-1 px-4 text-center">
-                  <span className="inline-flex justify-center gap-4">
-                    <MdOutlineEdit
-                      size={24}
-                      onClick={() => openEditModal(row[0], row[1], row[3], row[5])}
-                      className="cursor-pointer"
-                    />
-                    <MdDeleteOutline
-                      size={24}
-                      onClick={() => openDeleteModal(row[0], row[1], row[3], row[5])}
-                      className="cursor-pointer"
-                    />
-                  </span>
+          </thead>
+          <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
+            {isLoading ? (
+              <tr>
+                <td colSpan={8} className="text-center py-4 text-gray-500">
+                  Loading users…
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              sortedItems.slice(initialIndex, lastIndex)
+              .map((row, rowIndex) => (
+                <tr key={rowIndex} className="py-2">
+                  {row.map((cell, colIndex) => (
+                    <td key={colIndex} className="border-collapse border-zinc-200 border-2 border-y-1 px-3">
+                      {String(cell)}
+                    </td>
+                  ))}
+                  <td className="border-collapse border-zinc-200 border-2 border-y-1 px-4 text-center">
+                    <span className="inline-flex justify-center gap-4">
+                      <MdOutlineEdit
+                        size={24}
+                        onClick={() => openEditModal(row[0], row[1], row[3], row[5])}
+                        className="cursor-pointer"
+                      />
+                      <MdDeleteOutline
+                        size={24}
+                        onClick={() => openDeleteModal(row[0], row[1], row[3], row[5])}
+                        className="cursor-pointer"
+                      />
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
       { /* Pagination */}
       {manageUsersItems.length !== 0 && ( 
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2">
+        <div className="w-full flex justify-center">
           <div className="join">
             <button 
               onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}

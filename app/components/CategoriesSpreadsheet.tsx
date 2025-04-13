@@ -322,7 +322,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   return (
     <>
       {/* Table */}
-      <div className="pb-18 bg-white">
+      <div className="min-h-[460px] flex flex-col bg-white">        
         <div className="relative overflow-x-auto font-arial bg-slate-50">
           <table className="table-auto w-full">
             <thead className="font-crimson crimson-regular content-start">
@@ -390,7 +390,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       </div>
       { /* Pagination */}
       {categoryItems.length !== 0 && (
-            <div className="flex justify-center mt-6 bg-white">
+            <div className="w-full flex justify-center pb-6 pt-2">
               <div className="join">
                 <button 
                   onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
