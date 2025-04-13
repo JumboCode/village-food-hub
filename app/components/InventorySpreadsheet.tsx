@@ -87,9 +87,17 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const [quantityAscending, setQuantityAscending] = useState(true);
     const [DateAscending, setDateAscending] = useState(false);
 
+    // Pagination functionality
+    const [currPage, setCurrPage] = useState(1);
+    const totalPages = Math.ceil(inventoryItems.length / 10);
+    const initialIndex = (currPage - 1) * 10;
+    const lastIndex = (currPage * 10);
+    
     useEffect(() => {
         setSortedItems([...inventoryItems]);
+        setCurrPage(1);
     }, [inventoryItems]);
+
 
     const sortAlphabetically = (columnIndex: number) => {
       const sortedList = [...sortedItems].sort((a, b) =>
@@ -307,7 +315,8 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson">
-              { sortedItems.map((item, index) => (
+              {sortedItems.slice(initialIndex, lastIndex)
+              .map((item, index) => (
                 <tr key={index} className="py-2">
                   {item.map((data, subIndex) => (
                     <td
@@ -364,6 +373,28 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
               ))}
             </tbody>
           </table>
+          {/* Pagination */}
+          {inventoryItems.length !== 0 && (
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2">
+              <div className="join">
+                <button 
+                  onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currPage === 1}
+                  className={`join-item btn border rounded-l-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                  }`}
+                  >«</button>
+                <button className="join-item btn border border-gray w-[80px] font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage}</button>
+                <button  
+                  onClick={() => setCurrPage((next) => Math.min(next + 1, totalPages))}
+                  disabled={currPage === totalPages}
+                  className={`join-item btn border rounded-r-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === totalPages ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                  }`}
+                  >»</button>
+              </div>
+            </div> )}
+
           {/* Delete Inventory Modal */}
           {showDeleteModal && (
               <DeleteInventoryModal

@@ -20,10 +20,22 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
     const [DateAscending, setDateAscending] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("Demographic Response Deleted");
-    
+
+    // Pagination functionality
+    const [currPage, setCurrPage] = useState(1);
+    const totalPages = Math.ceil(demographicsItems.length / 10);
+    const initialIndex = (currPage - 1) * 10;
+    const lastIndex = (currPage * 10);
+
     useEffect(() => {
         setSortedItems([...demographicsItems]);
     }, [demographicsItems]);
+    
+    useEffect(() => {
+        setSortedItems([...demographicsItems]);
+        setCurrPage(1);
+    }, [demographicsItems]);
+
 
     const sortAlphabetically = () => {
         const sortedList = [...sortedItems].sort((a, b) => {
@@ -154,7 +166,8 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 </tr>
             </thead>
             <tbody className="bg-zinc-75 border-collapse border-zinc-400 font-crimson crimson-regular">
-                {sortedItems.map((row, rowIndex) => (
+                {sortedItems.slice(initialIndex, lastIndex)
+                .map((row, rowIndex) => (
                     <tr key={rowIndex} className="py-2">
                         {row.map((cell, colIndex) => (
                             <td
@@ -186,6 +199,27 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 ))}
             </tbody>
             </table>
+            { /* Pagination */}
+            {demographicsItems.length !== 0 && (
+            <div className="flex justify-center mt-6 bg-white">
+                <div className="join">
+                <button 
+                    onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currPage === 1}
+                    className={`join-item btn border rounded-l-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                    }`}
+                    >«</button>
+                <button className="join-item btn border border-gray w-[80px] font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage}</button>
+                <button  
+                    onClick={() => setCurrPage((next) => Math.min(next + 1, totalPages))}
+                    disabled={currPage === totalPages}
+                    className={`join-item btn border rounded-r-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === totalPages ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                    }`}
+                    >»</button>
+                </div>
+            </div>)}
             <Snackbar
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 open={snackbarOpen}
