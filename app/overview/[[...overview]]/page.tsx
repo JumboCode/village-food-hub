@@ -38,32 +38,45 @@ const OverviewPage: React.FC = () => {
   const [isLoading5, setIsLoading5] = useState<boolean>(false);
   const [isLoading6, setIsLoading6] = useState<boolean>(true);
 
+
+
   useEffect(() => {
     const fetchDistributionData = async () => {
       try {
         const response = await fetch("../api/inventory");
         if (!response.ok) throw new Error("Error fetching inventory");
-
-        const data: InventoryItem[] = await response.json();
+  
+        const raw = await response.json();
+        const data = raw.data; // ✅ Extract the actual array
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
         const uniqueItems = new Set<string>();
-
+  
+        // Loop through the data array
         for (const item of data) {
-          if (!item.history) continue;
-          for (const event of item.history) {
-            const eventDate = new Date(event.date);
-            const isCurrentMonth =
-              eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
-            if (isCurrentMonth && event.action === "remove") {
-              uniqueItems.add(item.name);
-              break;
+          // Ensure the item is valid and has the required properties
+          if (item && item.history && typeof item.history === "object") {
+            // Loop through each entry in 'history' and validate that it's an array
+            for (const events of Object.values(item.history)) {
+              if (Array.isArray(events)) {
+                // Loop through each event
+                for (const event of events) {
+                  const eventDate = new Date(event.date);
+                  const isCurrentMonth =
+                    eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+                  if (isCurrentMonth && event.action === "remove") {
+                    uniqueItems.add(item.name); // Add item to set if it matches conditions
+                    break; // Break once we've found a valid event for that item
+                  }
+                }
+              }
             }
           }
         }
-
+  
+        // Update the state with the count of unique items
         const count = uniqueItems.size;
-        const distributedCount = count > 0 ? `${count}+` : "0";
+        const distributedCount = count > 0 ? `${count}` : "0";
         setUniqueItems(distributedCount);
       } catch (error) {
         console.error("Error fetching inventory:", error);
@@ -72,9 +85,11 @@ const OverviewPage: React.FC = () => {
         setIsLoading6(false);
       }
     };
-
+  
     fetchDistributionData();
   }, []);
+  
+
 
   useEffect(() => {
     const fetchData = async () => {
