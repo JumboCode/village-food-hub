@@ -1,10 +1,15 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import welcomeScreenBG from '@app/images/welcome-screen-background.png';
 import welcomeBWLogo from '@app/images/welcome-bw-logo.png';
 import { useRouter } from 'next/navigation';
+
+// sign out
+import { IoMdMore } from "react-icons/io";
+import { ImExit } from "react-icons/im";
+import { useClerk } from "@clerk/nextjs";
 
 const DEFAULT_TRANSLATIONS = [
     "Welcome to Village Food Hub!",
@@ -27,6 +32,24 @@ const WelcomePage: React.FC = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [language, setLanguage] = useState<string>('en');
     const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const logoutModalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+          if (logoutModalRef.current && !logoutModalRef.current.contains(e.target as Node)) {
+            setShowLogoutModal(false);
+          }
+        };
+      
+        if (showLogoutModal) {
+          document.addEventListener("mousedown", handleClickOutside);
+        }
+      
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }, [showLogoutModal]);      
 
     // Added loading state to ensure language is set before render
     const [loading, setLoading] = useState(true); 
@@ -34,6 +57,19 @@ const WelcomePage: React.FC = () => {
     const clickDropdown = () => {
         setDropdownOpen(!dropdownOpen);
     };
+
+    const { signOut } = useClerk();
+
+    const handleSignOut = async () => {
+        try {
+            console.log("Attempting to sign out...");
+            await signOut({ redirectUrl: "/login?justSignedOut=true" });
+            console.log("Signed out successfully");
+        } catch (error) {
+            console.error("Sign-out error:", error);
+        }
+    };
+    
 
     // Define a type for the translation tuple returned by the API.
     type TranslationTuple = [string, ...unknown[]];
@@ -117,6 +153,26 @@ const WelcomePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                {/* TODO: TEMPORARY? */}
+                <div className="absolute right-0 top-5 mt-4 mr-8">
+                    <button onClick={() => setShowLogoutModal(true)}>
+                        <IoMdMore size={24} />
+                    </button>
+
+                    {showLogoutModal && (
+                        <div
+                        ref={logoutModalRef}
+                        className="absolute right-0 mt-2 mr-0 bg-white border border-gray-300 shadow-md rounded-md z-50"
+                        >
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center px-4 py-2 text-black hover:bg-gray-100 w-full"
+                        >
+                            <ImExit className="mr-2" /> Logout
+                        </button>
+                        </div>
+                    )}
+                    </div>
                 <div className="flex flex-col bg-white justify-center items-center p-10 pt-14 w-full space-y-10">
                     <div className="flex flex-row absolute top-[220px] space-x-5">
                         <div className="text-black text-4xl crimson">{translations[4]}</div>
