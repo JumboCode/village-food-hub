@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import type { UserResource } from "@clerk/types";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import HourlyVisitsChart from '@app/components/HourlyVisitsChart';
 import LoadingAnimation from "@app/components/LoadingAnimation";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -25,11 +26,13 @@ const OverviewPage: React.FC = () => {
   const isAuthorized = user && hasAccess(user);
 
   const [num_responses, setNumResponses] = useState<number | null>(null);
-  const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
+  const [houseSizeDistr, setHouseSizeDistr] = useState<number[] | null>(null);
+  const [vistsLastWeek, setVisitsLastWeek] = useState<number[]>([]);
+  const [vistsLastSixtyDays, setVisitsLastSixtyDays] = useState<number[]>([]);
 
   const [isLoading12, setIsLoading12] = useState<boolean>(true);
   const [isLoading3, setIsLoading3] = useState<boolean>(false);
-  const [isLoading4, setIsLoading4] = useState<boolean>(false);
+  const [isLoading4, setIsLoading4] = useState<boolean>(true);
   const [isLoading5, setIsLoading5] = useState<boolean>(false);
   const [isLoading6, setIsLoading6] = useState<boolean>(false);
 
@@ -60,13 +63,37 @@ const OverviewPage: React.FC = () => {
           }
         });
 
-        setVisitFrequencyData(visitCountsArray);
+        setHouseSizeDistr(visitCountsArray);
+
+        let lastWeek = new Array(24).fill(0)
+        let lastSixtyDays = new Array(24).fill(0)
+
+        let today = new Date();
+        let lastWeekDate = new Date(today);
+        lastWeekDate.setDate(today.getDate() - 7);
+
+        let lastSixtyDaysDate = new Date(today);
+        lastSixtyDaysDate.setDate(today.getDate() - 60);
+
+        data.forEach((item) => {
+            const visitDate = new Date(item.lastVisitDate);
+            const hour = visitDate.getHours();
+
+            lastWeek[hour] += visitDate >= lastWeekDate ? 1/7 : 0;
+            lastSixtyDays[hour] += visitDate >= lastSixtyDaysDate ? 1/60 : 0;
+        })
+
+        setVisitsLastWeek(lastWeek);
+        setVisitsLastSixtyDays(lastSixtyDays);
+
+
       } catch (error) {
         console.error("Error fetching data:", error);
         setNumResponses(0);
-        setVisitFrequencyData(new Array(10).fill(0));
+        setHouseSizeDistr(new Array(10).fill(0));
       } finally {
         setIsLoading12(false);
+        setIsLoading4(false);
       }
     };
 
@@ -77,7 +104,7 @@ const OverviewPage: React.FC = () => {
     labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
     datasets: [
       {
-        data: visitFrequencyData,
+        data: houseSizeDistr,
         backgroundColor: [
           "#3498DB", "#507c0c", "#24593D", "#EB2B0C", "#C31C01", "#3851BC",
           "#293b8b", "#828282", "#000000", "#ffe070"
@@ -127,7 +154,7 @@ const OverviewPage: React.FC = () => {
 
               {/* Household Size Pie Chart */}
               <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading12 || !visitFrequencyData ? (
+                {isLoading12 || !houseSizeDistr ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
                   <>
@@ -164,13 +191,16 @@ const OverviewPage: React.FC = () => {
 
               {/* TBD Placeholder */}
               <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading4 ? (
+              {isLoading4 || !vistsLastWeek || !vistsLastSixtyDays ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">TBD</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
-                  </>
+                    <>
+                        <div className="text-lg text-black font-crimson">Average Hourly Visits</div>
+                        {/* add temp border, make flex, center*/}
+                        <div className="w-full h-full flex justify-center">
+                            <HourlyVisitsChart lastWeek={vistsLastWeek} lastSixtyDays={vistsLastSixtyDays} />
+                        </div>
+                    </>
                 )}
               </div>
 
