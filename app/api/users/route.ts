@@ -70,6 +70,8 @@ export async function POST(req: NextRequest) {
     // Ensure all required fields are provided
     if (data.role == "Volunteer") {
       requiredFields = ['username', 'password', 'emailAddress', 'role'];
+    } else if (data.role == "Customer") {
+      requiredFields = ['username', 'password', 'emailAddress', 'role'];
     } else {
       requiredFields = ['username', 'password', 'firstName', 'lastName', 'pronouns', 'emailAddress', 'phoneNumber', 'role'];
     }

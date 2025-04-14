@@ -11,7 +11,9 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 import { Snackbar } from '@mui/material';
-
+import { useUser } from "@clerk/nextjs";
+import LoadingAnimation from "@app/components/LoadingAnimation";
+import { userIsAdmin, userIsStaff } from "@app/components/ProtectedUrls";
 
 interface CategoryData {
   [key: string]: [string, string][];
@@ -62,7 +64,6 @@ const Categories: React.FC = () => {
   const [snackbarCatDelete, setSnackBarCatDelete] = useState(false);
   const [snackbarMessageCatRename, setSnackbarMessageCatRename] = useState("Category Renamed");
   const [snackbarMessageCatDelete, setSnackbarMessageCatDelete] = useState("Category Deleted");
-  // const [isLoading, setIsLoading] = useState(true);
 
   // Open delete category modal.
   const openModal = (categoryName: string, itemName: string) => {
@@ -355,16 +356,14 @@ const Categories: React.FC = () => {
       console.error("Error in handleDelete:", error);
     }
   };
-  
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex justify-center items-center bg-transparent">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-      </div>
-    );
-  }
 
+  const { user } = useUser();
+  const hasAccess = userIsAdmin(user) || userIsStaff(user);
+  
   return (
+    isLoading ? (
+        <LoadingAnimation/>
+    ) : hasAccess ? (
     <div>
       <NavBar />
       <p className="font-crimson font-bold pl-20 pt-10 text-[40px]">Categories</p>
@@ -593,21 +592,26 @@ const Categories: React.FC = () => {
         </div>
       )}
        <Snackbar
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            open={snackbarCatRename}
-            autoHideDuration={4000}
-            onClose={() => setSnackBarCatRename(false)}
-            message={snackbarMessageCatRename}
-        />
-        <Snackbar
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          open={snackbarCatDelete}
-          autoHideDuration={4000}
-          onClose={() => setSnackBarCatDelete(false)}
-          message={snackbarMessageCatDelete}
-        />
-            
-    </div>
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarCatRename}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarCatRename(false)}
+                message={snackbarMessageCatRename}
+            />
+             <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarCatDelete}
+                autoHideDuration={4000}
+                onClose={() => setSnackBarCatDelete(false)}
+                message={snackbarMessageCatDelete}
+            />
+        </div>
+      ) : (
+        <div className="p-10 text-center">
+          <h1 className="text-2xl font-bold">Unauthorized Access</h1>
+          <p className="mt-4">You do not have permission to view this page.</p>
+        </div>
+    )
   );
 };
 
