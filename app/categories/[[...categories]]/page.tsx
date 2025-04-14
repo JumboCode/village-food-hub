@@ -443,7 +443,7 @@ const Categories: React.FC = () => {
              
                 
                 {selectedCategoryData.length === 0 && (
-                  <p className="flex-center py-4 font-crimson text-[20px] text-center">
+                  <p className="flex-center font-crimson text-[20px] text-center">
                     No entries for this category.
                   </p>
                 )}

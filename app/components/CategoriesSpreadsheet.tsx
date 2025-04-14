@@ -322,7 +322,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   return (
     <>
       {/* Table */}
-      <div className="min-h-[460px] flex flex-col bg-white">        
+      <div className= {`flex flex-col bg-white" ${categoryItems.length !== 0 ? "min-h-[460px]" : "min-h-[100px]"}`}>        
         <div className="relative overflow-x-auto font-arial bg-slate-50">
           <table className="table-auto w-full">
             <thead className="font-crimson crimson-regular content-start">
