@@ -65,14 +65,14 @@ const OverviewPage: React.FC = () => {
 
         setHouseSizeDistr(visitCountsArray);
 
-        let lastWeek = new Array(24).fill(0)
-        let lastSixtyDays = new Array(24).fill(0)
+        const lastWeek = new Array(24).fill(0)
+        const lastSixtyDays = new Array(24).fill(0)
 
-        let today = new Date();
-        let lastWeekDate = new Date(today);
+        const today = new Date();
+        const lastWeekDate = new Date(today);
         lastWeekDate.setDate(today.getDate() - 7);
 
-        let lastSixtyDaysDate = new Date(today);
+        const lastSixtyDaysDate = new Date(today);
         lastSixtyDaysDate.setDate(today.getDate() - 60);
 
         data.forEach((item) => {
