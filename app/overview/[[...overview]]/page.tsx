@@ -26,6 +26,7 @@ const OverviewPage: React.FC = () => {
 
   const [num_responses, setNumResponses] = useState<number | null>(null);
   const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
+  const [numCookedMealsDisplay, setNumCookedMealsDisplay] = useState<string | null>(null);
 
   const [isLoading12, setIsLoading12] = useState<boolean>(true);
   const [isLoading3, setIsLoading3] = useState<boolean>(false);
@@ -42,6 +43,8 @@ const OverviewPage: React.FC = () => {
         const data: DataItem[] = await response.json();
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
+
+        // console.log("for num responses: ", data);
 
         const filteredData = data.filter(item => {
           const visitDate = new Date(item.lastVisitDate);
@@ -71,6 +74,68 @@ const OverviewPage: React.FC = () => {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchInventoryData = async () => {
+      try {
+        const response = await fetch("../api/inventory");
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+
+        // const data: DataItem[] = await response.json();
+        const json = await response.json();
+        const data: DataItem[] = json.data;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        const filteredData = data.filter(item => {
+          if (!item.history || typeof item.history !== 'object') return false;
+
+          return Object.values(item.history).some((subActionsArray: any) => {
+            if (!Array.isArray(subActionsArray)) return false;
+
+            return subActionsArray.some(subAction => {
+              if (subAction.action !== 'remove') return false;
+
+              const actionDate = new Date(subAction.date);
+              return (
+                actionDate.getMonth() === currentMonth &&
+                actionDate.getFullYear() === currentYear
+              );
+            });
+          });
+        });
+
+        console.log("filtered data: ", filteredData);
+
+        // setNumCookedMeals(filteredData.length);
+        let totalMeals = 0;
+        filteredData.forEach(record => {
+          if (!record.history || typeof record.history !== 'object') return;
+          const history = Object.values(record.history).flat();
+          console.log("current item's history: ", history);
+          history.forEach(element => {
+            if(element.action === "remove") {
+              totalMeals += element.quantityChanged;
+            }
+          });
+        });
+        if(totalMeals > 8) {
+          setNumCookedMealsDisplay("8+");
+        } else {
+          setNumCookedMealsDisplay(String(totalMeals));
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setNumCookedMealsDisplay(String(0));
+      } 
+      //QUESTION: should another loading be put?
+      // finally {
+      //   setIsLoading12(false);
+      // }
+    };
+
+    fetchInventoryData();
   }, []);
 
   const householdSizeData = {
@@ -181,7 +246,7 @@ const OverviewPage: React.FC = () => {
                 ) : (
                   <>
                     <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">{numCookedMealsDisplay}</div>
                   </>
                 )}
               </div>
