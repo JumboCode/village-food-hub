@@ -64,11 +64,6 @@ const OverviewPage: React.FC = () => {
 
         setVisitFrequencyData(visitCountsArray);
         
-        // to determine # New Individuals served
-        // const servedThisMonth = data.filter(item => {
-        //   const visitDate = new Date(item.lastVisitDate);
-        //   return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
-        // });
         
         const newIndividuals = servedThisMonth.filter(item => {
           if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
