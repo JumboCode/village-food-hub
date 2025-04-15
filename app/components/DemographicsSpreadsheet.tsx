@@ -212,7 +212,7 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                             currPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
                             }`}
                             >«</button>
-                        <button className="join-item btn border border-gray w-[80px] font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage}</button>
+                        <button className="join-item btn border border-gray w-auto px-4 font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage} of {totalPages}</button>
                         <button  
                             onClick={() => setCurrPage((next) => Math.min(next + 1, totalPages))}
                             disabled={currPage === totalPages}

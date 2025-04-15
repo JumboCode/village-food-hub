@@ -89,9 +89,9 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
 
     // Pagination functionality
     const [currPage, setCurrPage] = useState(1);
-    const totalPages = Math.ceil(inventoryItems.length / 10);
-    const initialIndex = (currPage - 1) * 10;
-    const lastIndex = (currPage * 10);
+    const totalPages = Math.ceil(inventoryItems.length / 12);
+    const initialIndex = (currPage - 1) * 12;
+    const lastIndex = (currPage * 12);
     
     useEffect(() => {
         setSortedItems([...inventoryItems]);
@@ -386,7 +386,7 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
                     currPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
                   }`}
                   >«</button>
-                <button className="join-item btn border border-gray w-[80px] font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage}</button>
+                <button className="join-item btn border border-gray w-auto px-4 font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage} of {totalPages}</button>
                 <button  
                   onClick={() => setCurrPage((next) => Math.min(next + 1, totalPages))}
                   disabled={currPage === totalPages}
