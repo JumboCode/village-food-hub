@@ -21,18 +21,33 @@ const LoginPage: React.FC = () => {
 
   const [hasMounted, setHasMounted] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return; // SSR safety
-    const params = new URLSearchParams(window.location.search);
-    const justSignedOut = params.get("justSignedOut");
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return; // SSR safety
+  //   const params = new URLSearchParams(window.location.search);
+  //   const justSignedOut = params.get("justSignedOut");
     
+  //   if (!isLoaded) return;
+  
+  //   if (isSignedIn && !justSignedOut) {
+  //     signOut({ redirectUrl: "/login?justSignedOut=true" });
+  //     setHasLoggedOut(true);
+  //   }
+  // }, [isSignedIn, isLoaded]);  
+  const [justSignedOut, setJustSignedOut] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setJustSignedOut(params.get("justSignedOut") === "true");
+  }, []);
+  
+  useEffect(() => {
     if (!isLoaded) return;
   
-    if (isSignedIn && !justSignedOut) {
-      signOut({ redirectUrl: "/login?justSignedOut=true" });
-      setHasLoggedOut(true);
+    if (isSignedIn && !justSignedOut && loginCompleted) {
+      router.push('/overview'); // or volunteer landing, etc.
     }
-  }, [isSignedIn, isLoaded]);  
+  }, [isSignedIn, isLoaded, justSignedOut, loginCompleted]);    
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -117,16 +132,8 @@ const LoginPage: React.FC = () => {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         setLoginCompleted(true);
-        setIsLoggingIn(false);
-  
-        // Navigate based on role
-        setTimeout(() => {
-          if (username.toLocaleLowerCase() === "volunteer") {
-            router.push('/volunteer-landing');
-          } else {
-            router.push('/overview');
-          }
-        }, 1000);
+      
+        router.push(username.toLowerCase() === "volunteer" ? '/volunteer-landing' : '/overview');
       } else {
         console.warn("Unexpected sign-in status:", result.status);
         setIsLoggingIn(false);
