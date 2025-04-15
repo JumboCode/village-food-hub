@@ -7,6 +7,7 @@ import {
     LinearScale,
     BarElement,
     PointElement,
+    LineController,
     LineElement,
     Tooltip,
     Legend,
