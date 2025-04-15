@@ -8,7 +8,7 @@ import {
     BarElement,
     PointElement,
     LineController,
-    BarController
+    BarController,
     LineElement,
     Tooltip,
     Legend,
@@ -20,7 +20,7 @@ ChartJS.register(
     CategoryScale,
     LinearScale,
     BarElement,
-    BarController
+    BarController,
     PointElement,
     LineElement,
     LineController,
