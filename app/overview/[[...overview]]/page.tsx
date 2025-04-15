@@ -42,18 +42,18 @@ const OverviewPage: React.FC = () => {
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
 
         const data: DataItem[] = await response.json();
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
+        const currentMonthUTC = new Date().getUTCMonth();
+        const currentYearUTC = new Date().getUTCFullYear();
 
-        const filteredData = data.filter(item => {
+        const servedThisMonth = data.filter(item => {
           const visitDate = new Date(item.lastVisitDate);
-          return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
+          return visitDate.getUTCMonth() === currentMonthUTC && visitDate.getUTCFullYear() === currentYearUTC;
         });
 
-        setNumResponses(filteredData.length);
+        setNumResponses(servedThisMonth.length);
 
         const visitCountsArray = new Array(10).fill(0);
-        filteredData.forEach(record => {
+        servedThisMonth.forEach(record => {
           const size = record.householdSize;
           if (size >= 1 && size <= 9) {
             visitCountsArray[size - 1] += 1;
@@ -65,19 +65,20 @@ const OverviewPage: React.FC = () => {
         setVisitFrequencyData(visitCountsArray);
         
         // to determine # New Individuals served
-        const servedThisMonth = data.filter(item => {
-          const visitDate = new Date(item.lastVisitDate);
-          return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
-        });
+        // const servedThisMonth = data.filter(item => {
+        //   const visitDate = new Date(item.lastVisitDate);
+        //   return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
+        // });
         
         const newIndividuals = servedThisMonth.filter(item => {
           if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
           return item.previousVisitDates.every(dateStr => {
             const prevDate = new Date(dateStr);
-            return prevDate.getMonth() === currentMonth && prevDate.getFullYear() === currentYear;
+            return prevDate.getUTCMonth() === currentMonthUTC && prevDate.getUTCFullYear() === currentYearUTC;
           });
         });
         setNumNewIndividuals(newIndividuals.length);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
         setNumResponses(0);
