@@ -527,7 +527,6 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
             />
           </GeoapifyContext>
       </div>
-     
 
       {/* timeout modal after 15 seconds of inactivity */}
       {showTimeoutModal &&
