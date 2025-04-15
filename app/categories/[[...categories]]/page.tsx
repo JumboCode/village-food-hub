@@ -295,7 +295,8 @@ const Categories: React.FC = () => {
     const payload = { name: categoryName, itemName: itemName ? itemName : "", units: units.join(', ') };
     console.log("DELETE payload for categories:", payload);
     try {
-      if (itemName && itemName.trim() !== "") {
+      const isDeletingWholeCategory = !itemName || itemName.trim() === "";
+      if (isDeletingWholeCategory) {
         // Check inventory for record existence.
         try {
           const invResponse = await fetch("/api/inventory");
@@ -384,16 +385,13 @@ const Categories: React.FC = () => {
                 {showTable && (
                   <>
                   <div className="flex items-center pl-4 space-x-4">
-                    <MdDeleteOutline
-                        size={24}
-                        className="cursor-pointer"
-                        onClick={() =>
-                          openModal(
-                            String(selectedCategory),
-                            String(selectedCategoryData[0]?.[0] || "")
-                          )
-                        }
-                    />
+                  <MdDeleteOutline
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() =>
+                      openModal(String(selectedCategory), "")
+                    }
+                  />
                     {showModal && (
                       <DeleteCategoryModal
                         categoryName={String(selectedCategory)}

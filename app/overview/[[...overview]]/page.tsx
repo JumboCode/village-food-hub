@@ -197,7 +197,7 @@ const OverviewPage: React.FC = () => {
               {/* Placeholder Cards */}
               <StatCard title="Number of New Individuals Served" isLoading={isLoading3} value="--" />
               <StatCard title="TBD" isLoading={isLoading4} value="--" />
-              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value="--" />
+              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value="8+" /> {/* TODO: remove hardcoded 8+ */}
 
               {/* Unique Items Distributed */}
               <StatCard title="Number of Unique Items Distributed" isLoading={isLoading6} value={uniqueItems} />
