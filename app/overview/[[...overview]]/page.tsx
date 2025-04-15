@@ -246,7 +246,7 @@ const OverviewPage: React.FC = () => {
                 ) : (
                   <>
                     <div className="text-lg text-black font-crimson">Number of New Individuals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">12</div> {/* TODO: temporarily hard-coded */}
                   </>
                 )}
               </div>
@@ -297,7 +297,7 @@ const OverviewPage: React.FC = () => {
                 ) : (
                   <>
                     <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-3xl font-semibold font-crimson text-black mt-2">9</div> {/* TODO: temporarily hard-coded */}
                   </>
                 )}
               </div>

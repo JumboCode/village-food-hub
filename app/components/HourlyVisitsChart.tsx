@@ -2,6 +2,7 @@
 
 import {
     Chart as ChartJS,
+    Chart as ChartJSInstance,
     CategoryScale,
     LinearScale,
     BarElement,
@@ -65,30 +66,11 @@ const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSix
                 position: 'top' as const,
                 labels: {
                     usePointStyle: true,
-                    generateLabels: function (chart: any) {
-                      return chart.data.datasets.map((dataset: any, i: number) => {
-                        const meta = chart.getDatasetMeta(i);
-                        const isHidden = meta.hidden;
-                  
-                        return {
-                          datasetIndex: i,
-                          text: dataset.label,
-                          fillStyle: dataset.backgroundColor,
-                          hidden: isHidden,
-                          fontColor: isHidden ? 'rgba(128, 128, 128, 0.5)' : '#000000',
-                          fontStyle: isHidden ? 'normal' : 'bold',
-                          lineCap: 'butt',
-                          lineDash: [],
-                          lineDashOffset: 0,
-                          lineJoin: 'miter',
-                          strokeStyle: dataset.backgroundColor,
-                          pointStyle: 'rectRounded',
-                          rotation: 0,
-                          textDecoration: isHidden ? '' : 'none',
-                        };
-                      });
-                    }
-                  },                  
+                    color: '#000',
+                    font: {
+                      weight: 'bold' as const,
+                    }                  
+                },                  
             },
             tooltip: {
                 mode: 'index' as const,
@@ -105,7 +87,7 @@ const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSix
                 display: true,
                 text: viewMode === 'raw' ? 'Visit Count' : 'Average Visits per Day',
                 color: '#000',
-                font: { size: 12, weight: 'bold' },
+                font: { size: 12, weight: 'bold' as const },
               },
             },
             y: {
@@ -118,7 +100,7 @@ const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSix
                   display: true,
                   text: viewMode === 'raw' ? 'Visit Count' : 'Average Visits per Day',
                   color: '#000',
-                  font: { size: 12, weight: 'bold' },
+                  font: { size: 12, weight: 'bold' as const },
                 },
             },
         },          
