@@ -170,7 +170,7 @@ const OverviewPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
                   <>
-                    <div className="text-lg text-black font-crimson">Number of New Individuals Served</div>
+                    <div className="text-lg text-black font-crimson">Number of First Time Visitors Served</div>
                     <div className="text-5xl font-bold font-crimson text-black mt-2">
                       {numNewIndividuals}
                     </div>
