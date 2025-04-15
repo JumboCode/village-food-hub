@@ -47,7 +47,7 @@ const OverviewPage: React.FC = () => {
         if (!response.ok) throw new Error("Error fetching inventory");
   
         const raw = await response.json();
-        const data = raw.data; // ✅ Extract the actual array
+        const data = raw.data;
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
         const uniqueItems = new Set<string>();
@@ -65,7 +65,7 @@ const OverviewPage: React.FC = () => {
                   const isCurrentMonth =
                     eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
                   if (isCurrentMonth && event.action === "remove") {
-                    uniqueItems.add(item.name); // Add item to set if it matches conditions
+                    uniqueItems.add(event.itemName); // Add item to set if it matches conditions
                     break; // Break once we've found a valid event for that item
                   }
                 }
