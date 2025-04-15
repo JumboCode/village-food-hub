@@ -29,6 +29,9 @@ const OverviewPage: React.FC = () => {
   const [houseSizeDistr, setHouseSizeDistr] = useState<number[] | null>(null);
   const [vistsLastWeek, setVisitsLastWeek] = useState<number[]>([]);
   const [vistsLastSixtyDays, setVisitsLastSixtyDays] = useState<number[]>([]);
+  const [rawVisitsLastWeek, setRawVisitsLastWeek] = useState<number[]>([]);
+  const [rawVisitsLastSixtyDays, setRawVisitsLastSixtyDays] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<'average' | 'raw'>('raw');
 
   const [isLoading12, setIsLoading12] = useState<boolean>(true);
   const [isLoading3, setIsLoading3] = useState<boolean>(false);
@@ -65,26 +68,35 @@ const OverviewPage: React.FC = () => {
 
         setHouseSizeDistr(visitCountsArray);
 
-        const lastWeek = new Array(24).fill(0)
-        const lastSixtyDays = new Array(24).fill(0)
+        const avgLastWeek = new Array(24).fill(0);
+        const avgLastSixtyDays = new Array(24).fill(0);
+        const rawWeek = new Array(24).fill(0);
+        const rawSixty = new Array(24).fill(0);
 
         const today = new Date();
-        const lastWeekDate = new Date(today);
-        lastWeekDate.setDate(today.getDate() - 7);
-
-        const lastSixtyDaysDate = new Date(today);
-        lastSixtyDaysDate.setDate(today.getDate() - 60);
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        const sixtyAgo = new Date(today);
+        sixtyAgo.setDate(today.getDate() - 60);
 
         data.forEach((item) => {
-            const visitDate = new Date(item.lastVisitDate);
-            const hour = visitDate.getHours();
+          const visitDate = new Date(item.lastVisitDate);
+          const hour = visitDate.getHours();
 
-            lastWeek[hour] += visitDate >= lastWeekDate ? 1/7 : 0;
-            lastSixtyDays[hour] += visitDate >= lastSixtyDaysDate ? 1/60 : 0;
-        })
+          if (visitDate >= weekAgo) {
+            rawWeek[hour] += 1;
+            avgLastWeek[hour] += 1 / 7;
+          }
+          if (visitDate >= sixtyAgo) {
+            rawSixty[hour] += 1;
+            avgLastSixtyDays[hour] += 1 / 60;
+          }
+        });
 
-        setVisitsLastWeek(lastWeek);
-        setVisitsLastSixtyDays(lastSixtyDays);
+        setRawVisitsLastWeek(rawWeek);
+        setRawVisitsLastSixtyDays(rawSixty);
+        setVisitsLastWeek(avgLastWeek);
+        setVisitsLastSixtyDays(avgLastSixtyDays);
 
 
       } catch (error) {
@@ -189,18 +201,42 @@ const OverviewPage: React.FC = () => {
                 )}
               </div>
 
-              {/* TBD Placeholder */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-              {isLoading4 || !vistsLastWeek || !vistsLastSixtyDays ? (
+              {/* Average Visits per week and last 60 days */}
+              <div className="bg-white p-6 rounded-lg h-80 flex flex-col items-center justify-center shadow-md">
+                {isLoading4 || !vistsLastWeek || !vistsLastSixtyDays ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
-                    <>
-                        <div className="text-lg text-black font-crimson">Average Hourly Visits</div>
-                        {/* add temp border, make flex, center*/}
-                        <div className="w-full h-full flex justify-center">
-                            <HourlyVisitsChart lastWeek={vistsLastWeek} lastSixtyDays={vistsLastSixtyDays} />
-                        </div>
-                    </>
+                  <>
+                    <div className="text-lg text-black font-crimson">Hourly Visit Stats</div>
+
+                    {/* toggle buttons for raw visits and average visits */}
+                    <div className="flex justify-center space-x-4 mb-2 pt-4">
+                      <button
+                        className={`px-3 py-1 rounded-full font-semibold ${
+                          viewMode === 'raw' ? 'bg-dark-green text-white' : 'bg-gray-200 text-black'
+                        }`}
+                        onClick={() => setViewMode('raw')}
+                      >
+                        Raw Count
+                      </button>
+                      <button
+                        className={`px-3 py-1 rounded-full font-semibold ${
+                          viewMode === 'average' ? 'bg-dark-green text-white' : 'bg-gray-200 text-black'
+                        }`}
+                        onClick={() => setViewMode('average')}
+                      >
+                        Average
+                      </button>
+                    </div>
+
+                    <div className="w-full h-full flex justify-center">
+                      <HourlyVisitsChart
+                        lastWeek={viewMode === 'average' ? vistsLastWeek : rawVisitsLastWeek}
+                        lastSixtyDays={viewMode === 'average' ? vistsLastSixtyDays : rawVisitsLastSixtyDays}
+                        viewMode={viewMode}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 

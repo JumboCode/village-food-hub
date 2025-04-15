@@ -26,10 +26,11 @@ ChartJS.register(
 interface HourlyVisitsChartProps {
     lastWeek: number[];
     lastSixtyDays: number[];
+    viewMode: 'average' | 'raw';
 }
 
 
-const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSixtyDays }) => {
+const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSixtyDays, viewMode }) => {
     const labels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
 
     const data = {
@@ -63,28 +64,31 @@ const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSix
                 display: true,
                 position: 'top' as const,
                 labels: {
-                    boxWidth: 0,
-                    generateLabels: function(chart: any) {
-                        return chart.data.datasets.map((dataset: any, i: number) => {
-                            const meta = chart.getDatasetMeta(i);
-                            const fadedColor = 'rgba(128, 128, 128, 0.5)';
-                            const visibleColor = (i === 0)
-                            ? '#24593D'
-                            : 'rgb(137, 175, 132)';
-
-                            return {
-                                datasetIndex: i,
-                                text: (i === 0 ? dataset.label + '          ' : dataset.label),
-                                fillStyle: dataset.backgroundColor,
-                                hidden: meta.hidden,
-                                fontColor: meta.hidden ? fadedColor : visibleColor,
-                                textDecoration: 'none',
-                                fontStyle: 'normal',
-                                strokeStyle: null,
-                            };
-                        });
-                    },
-                },
+                    usePointStyle: true,
+                    generateLabels: function (chart: any) {
+                      return chart.data.datasets.map((dataset: any, i: number) => {
+                        const meta = chart.getDatasetMeta(i);
+                        const isHidden = meta.hidden;
+                  
+                        return {
+                          datasetIndex: i,
+                          text: dataset.label,
+                          fillStyle: dataset.backgroundColor,
+                          hidden: isHidden,
+                          fontColor: isHidden ? 'rgba(128, 128, 128, 0.5)' : '#000000',
+                          fontStyle: isHidden ? 'normal' : 'bold',
+                          lineCap: 'butt',
+                          lineDash: [],
+                          lineDashOffset: 0,
+                          lineJoin: 'miter',
+                          strokeStyle: dataset.backgroundColor,
+                          pointStyle: 'rectRounded',
+                          rotation: 0,
+                          textDecoration: isHidden ? '' : 'none',
+                        };
+                      });
+                    }
+                  },                  
             },
             tooltip: {
                 mode: 'index' as const,
@@ -93,23 +97,31 @@ const HourlyVisitsChart: React.FC<HourlyVisitsChartProps> = ({ lastWeek, lastSix
         },
         scales: {
             x: {
-                ticks: {
-                    color: '#000',
-                    font: {
-                        size: 8,
-                    },
-                },
+              ticks: {
+                color: '#000',
+                font: { size: 8 },
+              },
+              title: {
+                display: true,
+                text: viewMode === 'raw' ? 'Visit Count' : 'Average Visits per Day',
+                color: '#000',
+                font: { size: 12, weight: 'bold' },
+              },
             },
             y: {
                 beginAtZero: true,
                 ticks: {
-                    color: '#000',
-                    font: {
-                        size: 10,
-                    },
+                  color: '#000',
+                  font: { size: 10 },
+                },
+                title: {
+                  display: true,
+                  text: viewMode === 'raw' ? 'Visit Count' : 'Average Visits per Day',
+                  color: '#000',
+                  font: { size: 12, weight: 'bold' },
                 },
             },
-        },
+        },          
     };
     
     return <Chart type="bar" data={data} options={options} />;
