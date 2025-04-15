@@ -324,6 +324,7 @@ const handleDelete = async () => {
             {/* Render the spreadsheet using the filtered demographics */}
             <DemographicsSpreadsheet demographicsItems={filteredDemographics} />
         </div>
+        <div className="mb-5"></div> 
         </div>
     ) : (
         <div className="p-10 text-center">

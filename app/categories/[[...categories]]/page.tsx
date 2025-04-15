@@ -11,7 +11,6 @@ import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
 import addIcon from '@app/images/Vector.png';
 import DeleteCategoryModal from '@app/components/DeleteCategoryModal';
 import { Snackbar } from '@mui/material';
-
 import { useUser } from "@clerk/nextjs";
 import LoadingAnimation from "@app/components/LoadingAnimation";
 import { userIsAdmin, userIsStaff } from "@app/components/ProtectedUrls";
@@ -432,16 +431,18 @@ const Categories: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-slate-50 items-center h-full">
+          <div className="bg-white items-center h-[50%]">
             {showTable ? (
               <>
-                <CategoriesSpreadsheet 
-                  categoryName={selectedCategory}
-                  categoryItems={categoriesData?.[selectedCategory] || []}
-                  loadData={async () => { await mutateCategories(); }} 
-                />
+              <CategoriesSpreadsheet 
+                categoryName={selectedCategory}
+                categoryItems={categoriesData?.[selectedCategory] || []}
+                loadData={async () => { await mutateCategories(); }} 
+              />
+             
+                
                 {selectedCategoryData.length === 0 && (
-                  <p className="flex-center py-4 font-crimson text-[20px] text-center">
+                  <p className="flex-center font-crimson text-[20px] text-center">
                     No entries for this category.
                   </p>
                 )}
