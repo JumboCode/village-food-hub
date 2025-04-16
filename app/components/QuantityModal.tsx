@@ -13,14 +13,22 @@ interface QuantityProps {
 
 const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName, closeModal, handleUpdate, currentQuantity}) => {
     const [quantityChange, setQuantityChange] = useState(currentQuantity);
+    const [inputValue, setInputValue] = useState(currentQuantity.toString());
     const [showQuantityError, setShowQuantityError] = useState(false);
 
     const handleSave = () => {
-        if(quantityChange <= 0) {
+        const quantity = parseInt(inputValue, 10);
+        if (isNaN(quantity) || quantity <= 0) {
             setShowQuantityError(true);
         } else {
-            handleUpdate(itemName, units, quantityChange, categoryName); 
-            console.log("updating");
+            handleUpdate(itemName, units, quantity, categoryName);
+            closeModal(); // optional: close modal after save
+        }
+    };
+
+    const handleBlur = () => {
+        if (inputValue.trim() === '') {
+            setInputValue('0'); // revert to 0 on blur if empty
         }
     };
 
@@ -29,13 +37,14 @@ const QuantityModal: React.FC<QuantityProps> = ({ itemName, units, categoryName,
                     <div className="h-[230px] w-[412px] bg-[#FFFFFF] font-crimson justify-center items-center py-[20px] shadow-lg rounded-[7px] border-[2px] border-light-green">
                         <p className="text-center text-[32px] font-bold pb-[15px]">Edit Quantity</p>
                         <div className="flex w-full justify-center items-center pb-[30px]">
-                            <input
-                                type="number"
-                                min="0"
-                                value={quantityChange}
-                                onChange={(e) => setQuantityChange(parseInt(e.target.value, 10) || 0)}
-                                className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
-                            />
+                        <input
+                            type="number"
+                            min="0"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onBlur={handleBlur}
+                            className="flex w-[242px] h-[50px] bg-inherit rounded-[13px] border-[3px] border-[#E1E1E1] justify-center"
+                        />
                         </div>
                         {showQuantityError && (
                             <p className="absolute w-[412px] text-center top-1/2 pt-5 text-red">
