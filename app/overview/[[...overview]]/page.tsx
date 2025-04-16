@@ -103,25 +103,28 @@ const OverviewPage: React.FC = () => {
     fetchDistributionData();
   }, []);
   
-
-
   useEffect(() => {
     const fetchData = async () => {
+      const avgLastWeek = new Array(24).fill(0);
+      const avgLastSixtyDays = new Array(24).fill(0);
+      const rawWeek = new Array(24).fill(0);
+      const rawSixty = new Array(24).fill(0);
+  
       try {
         const response = await fetch("../api/demographics");
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-
+  
         const data: DataItem[] = await response.json();
         const currentMonthUTC = new Date().getUTCMonth();
         const currentYearUTC = new Date().getUTCFullYear();
-
+  
         const servedThisMonth = data.filter(item => {
           const visitDate = new Date(item.lastVisitDate);
           return visitDate.getUTCMonth() === currentMonthUTC && visitDate.getUTCFullYear() === currentYearUTC;
         });
-
+  
         setNumResponses(servedThisMonth.length);
-
+  
         const visitCountsArray = new Array(10).fill(0);
         servedThisMonth.forEach(record => {
           const size = record.householdSize;
@@ -131,24 +134,19 @@ const OverviewPage: React.FC = () => {
             visitCountsArray[9] += 1;
           }
         });
-
+  
         setHouseSizeDistr(visitCountsArray);
-
-        const avgLastWeek = new Array(24).fill(0);
-        const avgLastSixtyDays = new Array(24).fill(0);
-        const rawWeek = new Array(24).fill(0);
-        const rawSixty = new Array(24).fill(0);
-
+  
         const today = new Date();
         const weekAgo = new Date(today);
         weekAgo.setDate(today.getDate() - 7);
         const sixtyAgo = new Date(today);
         sixtyAgo.setDate(today.getDate() - 60);
-
+  
         data.forEach((item) => {
           const visitDate = new Date(item.lastVisitDate);
           const hour = visitDate.getHours();
-
+  
           if (visitDate >= weekAgo) {
             rawWeek[hour] += 1;
             avgLastWeek[hour] += 1 / 7;
@@ -158,10 +156,9 @@ const OverviewPage: React.FC = () => {
             avgLastSixtyDays[hour] += 1 / 60;
           }
         });
-        
+  
         setVisitFrequencyData(visitCountsArray);
-        
-        
+  
         const newIndividuals = servedThisMonth.filter(item => {
           if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
           return item.previousVisitDates.every(dateStr => {
@@ -170,25 +167,25 @@ const OverviewPage: React.FC = () => {
           });
         });
         setNumNewIndividuals(newIndividuals.length);
-        
+  
       } catch (error) {
         console.error("Error fetching data:", error);
         setNumResponses(0);
         setNumNewIndividuals(0);
         setVisitFrequencyData(new Array(10).fill(0));
+      } finally {
         setRawVisitsLastWeek(rawWeek);
         setRawVisitsLastSixtyDays(rawSixty);
         setVisitsLastWeek(avgLastWeek);
         setVisitsLastSixtyDays(avgLastSixtyDays);
-      } finally {
         setIsLoading12(false);
         setIsLoading4(false);
       }
     };
-
+  
     fetchData();
   }, []);
-
+  
   const householdSizeData = {
     labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
     datasets: [
