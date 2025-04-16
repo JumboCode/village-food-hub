@@ -446,7 +446,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                 Item
               </p>
               <div className="flex w-[60%] px-[30px]">
-                <div className={`overflow-x-auto flex text-[24px] items-center w-full pl-[5px] h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
+                <div className={`overflow-x-auto flex text-[20px] items-center w-full pl-2 h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
                   itemWarning && "border-[#EB2B0C]"
                 }`}>
                   {modalItem[0]}
@@ -539,7 +539,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
                         Units
                       </p>
                       <div className="flex w-[60%] px-[30px]">
-                        <div className={`overflow-x-auto text-[24px] items-center w-full pl-[5px] h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
+                        <div className={`overflow-x-auto text-[20px] items-center w-full pt-2 pl-2 h-[50px] font-crimson rounded-[13px] border-[3px] border-[#E1E1E1] ${
                           unitWarning === index && "border-[#EB2B0C]"
                         }`}>
                           {unitItem}
