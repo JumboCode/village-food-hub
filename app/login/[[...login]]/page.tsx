@@ -26,8 +26,9 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!isLoaded || !isUserLoaded) return;
   
-    const role = user?.publicMetadata?.role?.toLowerCase();
-  
+    const rawRole = user?.publicMetadata?.role;
+    const role = typeof rawRole === 'string' ? rawRole.toLowerCase() : undefined;
+
     // Wait until we have the user AND role before redirecting
     if (!isSignedIn || !role) return;
   
