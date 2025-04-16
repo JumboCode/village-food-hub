@@ -13,6 +13,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface DataItem {
   lastVisitDate: string;
   householdSize: number;
+  previousVisitDates: string[];
 }
 
 interface InventoryItem {
@@ -30,7 +31,8 @@ const OverviewPage: React.FC = () => {
   const isAuthorized = user && hasAccess(user);
 
   const [num_responses, setNumResponses] = useState<number | null>(null);
-  
+  const [numNewIndividuals, setNumNewIndividuals] = useState<number | null>(null);
+
   // house size
   const [houseSizeDistr, setHouseSizeDistr] = useState<number[] | null>(null);
   
@@ -101,27 +103,30 @@ const OverviewPage: React.FC = () => {
     fetchDistributionData();
   }, []);
   
-
-
   useEffect(() => {
     const fetchData = async () => {
+      const avgLastWeek = new Array(24).fill(0);
+      const avgLastSixtyDays = new Array(24).fill(0);
+      const rawWeek = new Array(24).fill(0);
+      const rawSixty = new Array(24).fill(0);
+  
       try {
         const response = await fetch("../api/demographics");
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-
+  
         const data: DataItem[] = await response.json();
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-
-        const filteredData = data.filter(item => {
+        const currentMonthUTC = new Date().getUTCMonth();
+        const currentYearUTC = new Date().getUTCFullYear();
+  
+        const servedThisMonth = data.filter(item => {
           const visitDate = new Date(item.lastVisitDate);
-          return visitDate.getMonth() === currentMonth && visitDate.getFullYear() === currentYear;
+          return visitDate.getUTCMonth() === currentMonthUTC && visitDate.getUTCFullYear() === currentYearUTC;
         });
-
-        setNumResponses(filteredData.length);
-
+  
+        setNumResponses(servedThisMonth.length);
+  
         const visitCountsArray = new Array(10).fill(0);
-        filteredData.forEach(record => {
+        servedThisMonth.forEach(record => {
           const size = record.householdSize;
           if (size >= 1 && size <= 9) {
             visitCountsArray[size - 1] += 1;
@@ -129,24 +134,19 @@ const OverviewPage: React.FC = () => {
             visitCountsArray[9] += 1;
           }
         });
-
+  
         setHouseSizeDistr(visitCountsArray);
-
-        const avgLastWeek = new Array(24).fill(0);
-        const avgLastSixtyDays = new Array(24).fill(0);
-        const rawWeek = new Array(24).fill(0);
-        const rawSixty = new Array(24).fill(0);
-
+  
         const today = new Date();
         const weekAgo = new Date(today);
         weekAgo.setDate(today.getDate() - 7);
         const sixtyAgo = new Date(today);
         sixtyAgo.setDate(today.getDate() - 60);
-
+  
         data.forEach((item) => {
           const visitDate = new Date(item.lastVisitDate);
           const hour = visitDate.getHours();
-
+  
           if (visitDate >= weekAgo) {
             rawWeek[hour] += 1;
             avgLastWeek[hour] += 1 / 7;
@@ -156,26 +156,36 @@ const OverviewPage: React.FC = () => {
             avgLastSixtyDays[hour] += 1 / 60;
           }
         });
-
+  
+        setVisitFrequencyData(visitCountsArray);
+  
+        const newIndividuals = servedThisMonth.filter(item => {
+          if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
+          return item.previousVisitDates.every(dateStr => {
+            const prevDate = new Date(dateStr);
+            return prevDate.getUTCMonth() === currentMonthUTC && prevDate.getUTCFullYear() === currentYearUTC;
+          });
+        });
+        setNumNewIndividuals(newIndividuals.length);
+  
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setNumResponses(0);
+        setNumNewIndividuals(0);
+        setVisitFrequencyData(new Array(10).fill(0));
+      } finally {
         setRawVisitsLastWeek(rawWeek);
         setRawVisitsLastSixtyDays(rawSixty);
         setVisitsLastWeek(avgLastWeek);
         setVisitsLastSixtyDays(avgLastSixtyDays);
-
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setNumResponses(0);
-        setHouseSizeDistr(new Array(10).fill(0));
-      } finally {
         setIsLoading12(false);
         setIsLoading4(false);
       }
     };
-
+  
     fetchData();
   }, []);
-
+  
   const householdSizeData = {
     labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
     datasets: [
@@ -240,16 +250,7 @@ const OverviewPage: React.FC = () => {
               </div>
 
               {/* New Individuals Served - Placeholder */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading3 ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of New Individuals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">12</div> {/* TODO: temporarily hard-coded */}
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of First Time Visitors Served" isLoading={isLoading3} value={numNewIndividuals} />
 
               {/* Average Visits per week and last 60 days */}
               <div className="bg-white p-6 rounded-lg h-80 flex flex-col items-center justify-center shadow-md">
@@ -291,16 +292,7 @@ const OverviewPage: React.FC = () => {
               </div>
 
               {/* Cooked Meals */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading5 ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">9</div> {/* TODO: temporarily hard-coded */}
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value={9} />
 
               {/* Unique Items Distributed */}
               <StatCard title="Number of Unique Items Distributed" isLoading={isLoading6} value={uniqueItems} />
@@ -320,7 +312,7 @@ const StatCard = ({ title, isLoading, value }: { title: string; isLoading: boole
     ) : (
       <>
         <div className="text-lg text-black font-crimson">{title}</div>
-        <div className="text-3xl font-semibold font-crimson text-black mt-2">{value}</div>
+        <div className="text-5xl font-semibold font-crimson text-black mt-2">{value}</div>
       </>
     )}
   </div>
