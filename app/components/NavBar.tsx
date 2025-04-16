@@ -64,7 +64,7 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
   const handleSignOut = async () => {
     try {
       console.log("Attempting to sign out...");
-      await signOut({ redirectUrl: "/login?justSignedOut=true" });
+      await signOut({ redirectUrl: "/login" });
       console.log("Signed out successfully");
     } catch (error) {
       console.error("Sign-out error:", error);
