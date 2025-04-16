@@ -47,35 +47,6 @@ const isProtectedRoute = createRouteMatcher([
   '/unsaved-thank-you(.*)'
 ]);
 
-// export default clerkMiddleware(async (auth, req) => {
-//   const { userId, user } = await auth()
-//   // If the request is for a protected route and is NOT "/login", enforce authentication
-//   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
-//     return NextResponse.redirect(new URL('/login', req.url));
-//   }
-//   // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
-//   // If an authenticated user visits "/login", redirect them to "/overview"
-//   // if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
-//   //   // if (!userId || user?.publicMetadata?.role !== 'Admin') {
-//   //   return NextResponse.redirect(new URL('/overview', req.url));
-//   // }  
-//   if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
-//     // standardize to lowercase strings for comparison
-//     const role = user?.publicMetadata?.role?.toLowerCase();
-  
-//     if (role === 'admin' || role === 'staff') {
-//       return NextResponse.redirect(new URL('/overview', req.url));
-//     } else if (role === 'customer') {
-//       return NextResponse.redirect(new URL('/welcome-page', req.url));
-//     } else if (role === 'volunteer') {
-//       return NextResponse.redirect(new URL('/volunteer-landing', req.url));
-//     } else {
-//       return NextResponse.redirect(new URL('/overview', req.url)); // fallback
-//     }
-//   }  
-//   return NextResponse.next();
-// });
-
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
@@ -85,7 +56,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Handle logged-in users visiting /login (e.g. redirect based on role)
-  if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
+  if (userId && req.nextUrl.pathname === "/login") {
     try {
       const user = await clerkClient.users.getUser(userId);
       const roleRaw = user?.publicMetadata?.role;
