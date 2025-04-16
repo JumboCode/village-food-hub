@@ -90,25 +90,23 @@ const OverviewPage: React.FC = () => {
 
         const filteredData = data.filter(item => {
           if (!item.history || typeof item.history !== 'object') return false;
-
-          return Object.values(item.history).some((subActionsArray: any) => {
-            if (!Array.isArray(subActionsArray)) return false;
-
-            return subActionsArray.some(subAction => {
-              if (subAction.action !== 'remove') return false;
-
-              const actionDate = new Date(subAction.date);
-              return (
-                actionDate.getMonth() === currentMonth &&
-                actionDate.getFullYear() === currentYear
-              );
+          if (item.categoryName == "Cooked Meals") {
+            return Object.values(item.history).some((subActionsArray: any) => {
+              if (!Array.isArray(subActionsArray)) return false;
+  
+              return subActionsArray.some(subAction => {
+                if (subAction.action !== 'remove') return false;
+  
+                const actionDate = new Date(subAction.date);
+                return (
+                  actionDate.getMonth() === currentMonth &&
+                  actionDate.getFullYear() === currentYear
+                );
+              });
             });
-          });
+          }
         });
 
-        console.log("filtered data: ", filteredData);
-
-        // setNumCookedMeals(filteredData.length);
         let totalMeals = 0;
         filteredData.forEach(record => {
           if (!record.history || typeof record.history !== 'object') return;
@@ -120,19 +118,11 @@ const OverviewPage: React.FC = () => {
             }
           });
         });
-        if(totalMeals > 8) {
-          setNumCookedMealsDisplay("8+");
-        } else {
-          setNumCookedMealsDisplay(String(totalMeals));
-        }
+        setNumCookedMealsDisplay(String(totalMeals) + "+");
       } catch (error) {
         console.error("Error fetching data:", error);
         setNumCookedMealsDisplay(String(0));
       } 
-      //QUESTION: should another loading be put?
-      // finally {
-      //   setIsLoading12(false);
-      // }
     };
 
     fetchInventoryData();
