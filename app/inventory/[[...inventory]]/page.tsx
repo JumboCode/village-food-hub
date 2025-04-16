@@ -6,7 +6,7 @@ import { SearchBar, FilterButton } from '@app/components/InternalViewButtons';
 import { NavBar } from '@app/components/NavBar';
 
 import LoadingAnimation from "@app/components/LoadingAnimation";
-import { userIsNotVolunteer } from "@app/components/ProtectedUrls";
+import { userIsAdmin, userIsStaff } from "@app/components/ProtectedUrls";
 
 import { useUser } from "@clerk/nextjs";
 
@@ -152,7 +152,7 @@ const InternalViewInventoryPage: React.FC = () => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const { user } = useUser(); // Get the current user from Clerk
-  const isNotVolunteer = userIsNotVolunteer(user); // Check if the user is not a volunteer for access control
+  const hasAccess = userIsAdmin(user) || userIsStaff(user);
 
   const filteredInventory = useMemo(() => {
     if (!inventory) return [];
@@ -172,18 +172,16 @@ const InternalViewInventoryPage: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-600 font-crimson text-[20px]">Error loading inventory. Please try again later.</p>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <p className="text-red-600 font-crimson text-[20px]">Error loading inventory. Please try again later.</p>
+  //     </div>
+  //   );
+  // }
 
   return (
-    isLoading ? (
-        <LoadingAnimation/>
-      ) : isNotVolunteer ? (
+    hasAccess ? (
         <div>
         <NavBar />
         <div className="px-10">
@@ -230,7 +228,7 @@ const InternalViewInventoryPage: React.FC = () => {
         </div>
     ) : (
         <div className="p-10 text-center">
-            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+            <h1 className="text-2xl font-bold">Unauthorized Access</h1>
             <p className="mt-4">You do not have permission to view this page.</p>
         </div>
     )

@@ -24,6 +24,7 @@
  */
 
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/clerk-sdk-node';
 import { NextResponse } from 'next/server';
 
 // Define protected routes (everything except "/login")
@@ -41,19 +42,47 @@ const isProtectedRoute = createRouteMatcher([
   '/volunteer-remove-pages(.*)',
   '/volunteer-saved(.*)',
   '/volunteer-unsaved(.*)',
+  '/welcome-page(.*)',
+  '/customer-questions(.*)',
+  '/unsaved-thank-you(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth()
-  // If the request is for a protected route and is NOT "/login", enforce authentication
+  const { userId } = await auth();
+
+  // Redirect unauthenticated users from protected routes
   if (isProtectedRoute(req) && req.nextUrl.pathname !== "/login" && !userId) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
-  // TODO: This causes a bug when the user is a volunteer. Should redirect to landing
-  // If an authenticated user visits "/login", redirect them to "/overview"
-  if (userId && req.nextUrl.pathname === "/login" && !req.nextUrl.searchParams.has("justSignedOut")) {
-    return NextResponse.redirect(new URL('/overview', req.url));
-  }  
+
+  // Handle logged-in users visiting /login (e.g. redirect based on role)
+  if (userId && req.nextUrl.pathname === "/login") {
+    try {
+      const user = await clerkClient.users.getUser(userId);
+      const roleRaw = user?.publicMetadata?.role;
+      const role = typeof roleRaw === 'string' ? roleRaw.toLowerCase() : undefined;
+
+      console.log("Middleware resolved role:", role);
+
+      switch (role) {
+        case 'customer':
+          return NextResponse.redirect(new URL("/welcome-page", req.url));
+        case 'volunteer':
+          return NextResponse.redirect(new URL("/volunteer-landing", req.url));
+        case 'admin':
+        case 'staff':
+          return NextResponse.redirect(new URL("/overview", req.url));
+        default:
+          console.warn("Unrecognized role, falling back to overview:", role);
+          return NextResponse.redirect(new URL("/overview", req.url));
+      }
+    } catch (err) {
+      console.error("Failed to fetch Clerk user in middleware:", err);
+      // Fallback route if Clerk fetch fails
+      return NextResponse.redirect(new URL("/overview", req.url));
+    }
+  }
+
   return NextResponse.next();
 });
 

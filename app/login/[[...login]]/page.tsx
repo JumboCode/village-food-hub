@@ -20,19 +20,28 @@ const LoginPage: React.FC = () => {
   const [loginCompleted, setLoginCompleted] = useState(false);
 
   const [hasMounted, setHasMounted] = useState(false);
+  
+  const { user, isLoaded: isUserLoaded } = useUser();
 
   useEffect(() => {
-    if (typeof window === "undefined") return; // SSR safety
-    const params = new URLSearchParams(window.location.search);
-    const justSignedOut = params.get("justSignedOut");
-    
-    if (!isLoaded) return;
+    if (!isLoaded || !isUserLoaded) return;
   
-    if (isSignedIn && !justSignedOut) {
-      signOut({ redirectUrl: "/login?justSignedOut=true" });
-      setHasLoggedOut(true);
+    const rawRole = user?.publicMetadata?.role;
+    const role = typeof rawRole === 'string' ? rawRole.toLowerCase() : undefined;
+
+    // Wait until we have the user AND role before redirecting
+    if (!isSignedIn || !role) return;
+  
+    console.log("Redirecting based on role:", role);
+  
+    if (role === 'volunteer') {
+      router.push('/volunteer-landing');
+    } else if (role === 'admin' || role === 'staff') {
+      router.push('/overview');
+    } else if (role === 'customer') {
+      router.push('/welcome-page');
     }
-  }, [isSignedIn, isLoaded]);  
+  }, [isSignedIn, isLoaded, isUserLoaded, user?.publicMetadata?.role]);  
 
   // state variables
   const [showWelcomeBack, setShowWelcomeBack] = useState(true);
@@ -117,16 +126,6 @@ const LoginPage: React.FC = () => {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         setLoginCompleted(true);
-        setIsLoggingIn(false);
-  
-        // Navigate based on role
-        setTimeout(() => {
-          if (username.toLocaleLowerCase() === "volunteer") {
-            router.push('/volunteer-landing');
-          } else {
-            router.push('/overview');
-          }
-        }, 1000);
       } else {
         console.warn("Unexpected sign-in status:", result.status);
         setIsLoggingIn(false);

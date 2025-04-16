@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import type { UserResource } from "@clerk/types";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import HourlyVisitsChart from '@app/components/HourlyVisitsChart';
 import LoadingAnimation from "@app/components/LoadingAnimation";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -15,7 +16,11 @@ interface DataItem {
   previousVisitDates: string[];
 }
 
-// Role-based access check
+interface InventoryItem {
+  name: string;
+  history: { date: string; action: string }[];
+}
+
 const hasAccess = (user: UserResource | null): boolean => {
   const role = user?.publicMetadata?.role;
   return role === 'Admin' || role === 'Staff';
@@ -27,13 +32,78 @@ const OverviewPage: React.FC = () => {
 
   const [num_responses, setNumResponses] = useState<number | null>(null);
   const [numNewIndividuals, setNumNewIndividuals] = useState<number | null>(null);
+
+  // house size
+  const [houseSizeDistr, setHouseSizeDistr] = useState<number[] | null>(null);
+  
+  // visits tracker
+  const [vistsLastWeek, setVisitsLastWeek] = useState<number[]>([]);
+  const [vistsLastSixtyDays, setVisitsLastSixtyDays] = useState<number[]>([]);
+  const [rawVisitsLastWeek, setRawVisitsLastWeek] = useState<number[]>([]);
+  const [rawVisitsLastSixtyDays, setRawVisitsLastSixtyDays] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<'average' | 'raw'>('raw');
   const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
 
+  // unique items distributed
+  const [uniqueItems, setUniqueItems] = useState<string | null>(null);
+  
+  // loading buffers
   const [isLoading12, setIsLoading12] = useState<boolean>(true);
   const [isLoading3, setIsLoading3] = useState<boolean>(false);
-  const [isLoading4, setIsLoading4] = useState<boolean>(false);
+  const [isLoading4, setIsLoading4] = useState<boolean>(true);
   const [isLoading5, setIsLoading5] = useState<boolean>(false);
-  const [isLoading6, setIsLoading6] = useState<boolean>(false);
+  const [isLoading6, setIsLoading6] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchDistributionData = async () => {
+      try {
+        const response = await fetch("../api/inventory");
+        if (!response.ok) throw new Error("Error fetching inventory");
+  
+        const raw = await response.json();
+        const data = raw.data;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const uniqueItems = new Set<string>();
+  
+        // Loop through the data array
+        for (const item of data) {
+          // Ensure the item is valid and has the required properties
+          if (item && item.history && typeof item.history === "object") {
+            // Loop through each entry in 'history' and validate that it's an array
+            for (const events of Object.values(item.history)) {
+              if (Array.isArray(events)) {
+                // Loop through each event
+                for (const event of events) {
+                  const eventDate = new Date(event.date);
+                  const isCurrentMonth =
+                    eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+                  if (isCurrentMonth && event.action === "remove") {
+                    uniqueItems.add(event.itemName); // Add item to set if it matches conditions
+                    break; // Break once we've found a valid event for that item
+                  }
+                }
+              }
+            }
+          }
+        }
+  
+        // Update the state with the count of unique items
+        const count = uniqueItems.size;
+        const distributedCount = count > 0 ? `${count}` : "0";
+        setUniqueItems(distributedCount);
+      } catch (error) {
+        console.error("Error fetching inventory:", error);
+        setUniqueItems("--");
+      } finally {
+        setIsLoading6(false);
+      }
+    };
+  
+    fetchDistributionData();
+  }, []);
+  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,10 +128,37 @@ const OverviewPage: React.FC = () => {
           if (size >= 1 && size <= 9) {
             visitCountsArray[size - 1] += 1;
           } else {
-            visitCountsArray[9] += 1; // 10+ category
+            visitCountsArray[9] += 1;
           }
         });
 
+        setHouseSizeDistr(visitCountsArray);
+
+        const avgLastWeek = new Array(24).fill(0);
+        const avgLastSixtyDays = new Array(24).fill(0);
+        const rawWeek = new Array(24).fill(0);
+        const rawSixty = new Array(24).fill(0);
+
+        const today = new Date();
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        const sixtyAgo = new Date(today);
+        sixtyAgo.setDate(today.getDate() - 60);
+
+        data.forEach((item) => {
+          const visitDate = new Date(item.lastVisitDate);
+          const hour = visitDate.getHours();
+
+          if (visitDate >= weekAgo) {
+            rawWeek[hour] += 1;
+            avgLastWeek[hour] += 1 / 7;
+          }
+          if (visitDate >= sixtyAgo) {
+            rawSixty[hour] += 1;
+            avgLastSixtyDays[hour] += 1 / 60;
+          }
+        });
+        
         setVisitFrequencyData(visitCountsArray);
         
         
@@ -79,8 +176,13 @@ const OverviewPage: React.FC = () => {
         setNumResponses(0);
         setNumNewIndividuals(0);
         setVisitFrequencyData(new Array(10).fill(0));
+        setRawVisitsLastWeek(rawWeek);
+        setRawVisitsLastSixtyDays(rawSixty);
+        setVisitsLastWeek(avgLastWeek);
+        setVisitsLastSixtyDays(avgLastSixtyDays);
       } finally {
         setIsLoading12(false);
+        setIsLoading4(false);
       }
     };
 
@@ -91,7 +193,7 @@ const OverviewPage: React.FC = () => {
     labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
     datasets: [
       {
-        data: visitFrequencyData,
+        data: houseSizeDistr,
         backgroundColor: [
           "#3498DB", "#507c0c", "#24593D", "#EB2B0C", "#C31C01", "#3851BC",
           "#293b8b", "#828282", "#000000", "#ffe070"
@@ -101,14 +203,11 @@ const OverviewPage: React.FC = () => {
     ],
   };
 
-  if (!isLoaded) {
-    return <LoadingAnimation />;
-  }
-
+  if (!isLoaded) return <LoadingAnimation />;
   if (!isAuthorized) {
     return (
       <div className="p-10 text-center">
-        <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+        <h1 className="text-2xl font-bold">Unauthorized Access</h1>
         <p className="mt-4">You do not have permission to view this page.</p>
       </div>
     );
@@ -128,20 +227,11 @@ const OverviewPage: React.FC = () => {
           <div className="bg-light-green bg-opacity-20 p-6 rounded-xl shadow-inner mt-6">
             <div className="grid grid-cols-3 gap-4">
               {/* Unique Individuals Served */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading12 ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of Unique Individuals Served</div>
-                    <div className="text-5xl font-bold font-crimson text-black mt-2">{num_responses}</div>
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of Unique Individuals Served" isLoading={isLoading12} value={num_responses} />
 
               {/* Household Size Pie Chart */}
               <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading12 || !visitFrequencyData ? (
+                {isLoading12 || !houseSizeDistr ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
                   <>
@@ -153,9 +243,7 @@ const OverviewPage: React.FC = () => {
                         responsive: true,
                         plugins: {
                           legend: {
-                            labels: {
-                              color: "#000000",
-                            },
+                            labels: { color: "#000000" },
                           },
                         },
                       }}
@@ -165,63 +253,76 @@ const OverviewPage: React.FC = () => {
               </div>
 
               {/* New Individuals Served - Placeholder */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading3 ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of First Time Visitors Served</div>
-                    <div className="text-5xl font-bold font-crimson text-black mt-2">
-                      {numNewIndividuals}
-                    </div>
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of First Time Visitors Served" isLoading={isLoading3} value={numNewIndividuals} />
 
-              {/* TBD Placeholder */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading4 ? (
+              {/* Average Visits per week and last 60 days */}
+              <div className="bg-white p-6 rounded-lg h-80 flex flex-col items-center justify-center shadow-md">
+                {isLoading4 || !vistsLastWeek || !vistsLastSixtyDays ? (
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
                 ) : (
                   <>
-                    <div className="text-lg text-black font-crimson">TBD</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
+                    <div className="text-lg text-black font-crimson">Hourly Visit Stats</div>
+
+                    {/* toggle buttons for raw visits and average visits */}
+                    <div className="flex justify-center space-x-4 mb-2 pt-4">
+                      <button
+                        className={`px-3 py-1 rounded-full font-semibold ${
+                          viewMode === 'raw' ? 'bg-dark-green text-white' : 'bg-gray-200 text-black'
+                        }`}
+                        onClick={() => setViewMode('raw')}
+                      >
+                        Raw Count
+                      </button>
+                      <button
+                        className={`px-3 py-1 rounded-full font-semibold ${
+                          viewMode === 'average' ? 'bg-dark-green text-white' : 'bg-gray-200 text-black'
+                        }`}
+                        onClick={() => setViewMode('average')}
+                      >
+                        Average
+                      </button>
+                    </div>
+
+                    <div className="w-full h-full flex justify-center">
+                      <HourlyVisitsChart
+                        lastWeek={viewMode === 'average' ? vistsLastWeek : rawVisitsLastWeek}
+                        lastSixtyDays={viewMode === 'average' ? vistsLastSixtyDays : rawVisitsLastSixtyDays}
+                        viewMode={viewMode}
+                      />
+                    </div>
                   </>
                 )}
               </div>
 
               {/* Cooked Meals */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading5 || numNewIndividuals === null ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of Cooked Meals Served</div>
-                    <div className="text-5xl font-bold font-crimson text-black mt-2">
-                      {numNewIndividuals}
-                    </div>
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value={9} />
 
               {/* Unique Items Distributed */}
-              <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
-                {isLoading6 ? (
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
-                ) : (
-                  <>
-                    <div className="text-lg text-black font-crimson">Number of Unique Items Distributed</div>
-                    <div className="text-3xl font-semibold font-crimson text-black mt-2">--</div>
-                  </>
-                )}
-              </div>
+              <StatCard title="Number of Unique Items Distributed" isLoading={isLoading6} value={uniqueItems} />
             </div>
           </div>
-
         </div>
       </div>
     </div>
   );
 };
+
+// Helper Components
+const StatCard = ({ title, isLoading, value }: { title: string; isLoading: boolean; value: string | number | null }) => (
+  <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
+    {isLoading ? (
+      <Spinner />
+    ) : (
+      <>
+        <div className="text-lg text-black font-crimson">{title}</div>
+        <div className="text-5xl font-semibold font-crimson text-black mt-2">{value}</div>
+      </>
+    )}
+  </div>
+);
+
+const Spinner = () => (
+  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-600"></div>
+);
 
 export default OverviewPage;

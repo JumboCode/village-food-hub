@@ -99,6 +99,16 @@ const InternalViewManageUsersPage: React.FC = () => {
         setCreateUserError("Please enter all required fields");
         return;
       }
+    } else if (trimmedData.role === "Customer") {
+      if (
+        !trimmedData.username ||
+        !trimmedData.emailAddress ||
+        !trimmedData.role ||
+        !trimmedData.password
+      ) {
+        setCreateUserError("Please enter all required fields");
+        return;
+      }
     } else {
       // For non-Volunteer roles, require all fields
       if (
@@ -237,7 +247,7 @@ const InternalViewManageUsersPage: React.FC = () => {
         </div>
     ) : (
         <div className="p-10 text-center">
-            <h1 className="text-red-600 text-2xl font-bold">Unauthorized Access</h1>
+            <h1 className="text-2xl font-bold">Unauthorized Access</h1>
             <p className="mt-4">You do not have permission to view this page.</p>
         </div>
     )

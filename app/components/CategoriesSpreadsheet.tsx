@@ -36,8 +36,18 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   const [sortedItems, setSortedItems] = useState<(string | number)[][]>(categoryItems);
   const [topSorted, setTopSorted] = useState(true);
 
+
+  // Pagination functionality
+  const [currPage, setCurrPage] = useState(1);
+  const totalPages = Math.ceil(categoryItems.length / 10);
+  const initialIndex = (currPage - 1) * 10;
+  const lastIndex = (currPage * 10);
+  
+
+
   useEffect(() => {
     setSortedItems([...categoryItems]);
+    setCurrPage(1); 
   }, [categoryItems]);
 
   const sortAlphabetically = (columnIndex: number) => {
@@ -312,69 +322,96 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
   return (
     <>
       {/* Table */}
-      <div className="relative overflow-x-auto font-arial bg-slate-50">
-        <table className="table-auto w-full">
-          <thead className="font-crimson crimson-regular content-start">
-            <tr className="bg-dark-blue text-white text-lg align-left">
-              <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
-                <div className="flex flex-row justify-between items-center">
-                  <p>Item Name</p>
-                  {/* Sorting button */}
-                  <button onClick={() => sortAlphabetically(0)}>
-                    <TiArrowUnsorted />
-                  </button>
-                </div>
-              </th>
-              <th className="border-r-2 border-slate-400 py-2 px-3">
-                <div className="flex flex-row justify-between items-center">
-                  <p>Units</p>
-                  <button onClick={() => sortAlphabetically(1)}>
-                    <TiArrowUnsorted />
-                  </button>
-                </div>
-              </th>
-              <th className="py-2 px-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-slate-50 font-crimson crimson-regular">
-            {sortedItems.map((item, index) => (
-              <tr key={index} className="py-2">
-                {item.map((data, subIndex) => (
-                  <td key={subIndex} className="border-r-2 border-slate-200 py-2 px-3">
-                    {data}
-                  </td>
-                ))}
-                <td className="flex row justify-around py-2 px-3">
-                  <MdOutlineEdit
-                    size={24}
-                    className="cursor-pointer"
-                    onClick={() =>
-                      openModal(
-                        String(categoryItems[index][0]),
-                        String(categoryItems[index][1])
-                      )
-                    }
-                  />
-                  <MdDeleteOutline 
-                    size={24}
-                    className="cursor-pointer"
-                    onClick={() => openDeleteModal(categoryName, item, index)}
-                  />
-                  {showEditModal && (
-                    <EditModal
-                      itemNameOld={currItemName}
-                      initialUnits={currUnits}
-                      closeModal={closeModal}
-                      handleSave={handleSave}
-                      selectedCategory={categoryName}
-                    />
-                  )}
-                </td>
+      <div className= {`flex flex-col bg-white" ${categoryItems.length !== 0 ? "min-h-[460px]" : "min-h-[100px]"}`}>        
+        <div className="relative overflow-x-auto font-arial bg-slate-50">
+          <table className="table-auto w-full">
+            <thead className="font-crimson crimson-regular content-start">
+              <tr className="bg-dark-blue text-white text-lg align-left">
+                <th className="border-r-2 border-slate-400 border-y-1 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Item Name</p>
+                    {/* Sorting button */}
+                    <button onClick={() => sortAlphabetically(0)}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="border-r-2 border-slate-400 py-2 px-3">
+                  <div className="flex flex-row justify-between items-center">
+                    <p>Units</p>
+                    <button onClick={() => sortAlphabetically(1)}>
+                      <TiArrowUnsorted />
+                    </button>
+                  </div>
+                </th>
+                <th className="py-2 px-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-slate-50 font-crimson crimson-regular">
+              {sortedItems.slice(initialIndex, lastIndex)
+              .map((item, index) => (
+                <tr key={index} className="py-2">
+                  {item.map((data, subIndex) => (
+                    <td key={subIndex} className="border-r-2 border-slate-200 py-2 px-3">
+                      {data}
+                    </td>
+                  ))}
+                  <td className="flex row justify-around py-2 px-3">
+                    <MdOutlineEdit
+                      size={24}
+                      className="cursor-pointer"
+                      onClick={() =>
+                        openModal(
+                          String(categoryItems[index][0]),
+                          String(categoryItems[index][1])
+                        )
+                      }
+                    />
+                    <MdDeleteOutline 
+                      size={24}
+                      className="cursor-pointer"
+                      onClick={() => openDeleteModal(categoryName, item, index)}
+                    />
+                    {showEditModal && (
+                      <EditModal
+                        itemNameOld={currItemName}
+                        initialUnits={currUnits}
+                        closeModal={closeModal}
+                        handleSave={handleSave}
+                        selectedCategory={categoryName}
+                      />
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+      { /* Pagination */}
+      {categoryItems.length !== 0 && (
+            <div className="w-full flex justify-center pb-6 pt-2">
+              <div className="join">
+                <button 
+                  onClick={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currPage === 1}
+                  className={`join-item btn border rounded-l-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === 1 ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                  }`}
+                  >«</button>
+                <button className="join-item btn border border-gray w-auto px-4 font-serif text-[20px] hover:bg-slate-200" onClick={() => setCurrPage(1)}>Page {currPage} of {totalPages}</button>
+                <button  
+                  onClick={() => setCurrPage((next) => Math.min(next + 1, totalPages))}
+                  disabled={currPage === totalPages}
+                  className={`join-item btn border rounded-r-md border-gray w-[40px] font-serif text-[20px] ${
+                    currPage === totalPages ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                  }`}
+                  >»</button>
+              </div>
+            </div>
+                )}
+      
+      {/* Category Name */}
 
       {/* Delete Modal */}
       {isDeleteModalVisible && (
@@ -608,6 +645,7 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           onClose={() => setSnackBarCatRename(false)}
           message={snackbarMessageCatRename}
         />
+
     </>
   );
 };
