@@ -140,22 +140,35 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
       ) => {
         // If the role is being changed, update isVolunteer and isCustomer state based on the selected value
         if (fieldType === "role") {
-            if (e.target.value === "Volunteer") {
-                setIsVolunteer(true);
-                
-                if (setProfileData) {
-                    setProfileData(prev => ({ ...prev, username: "volunteer" }));
-                  }
-            } else if (e.target.value === "Customer") {
-                setIsCustomer(true);
-                
-                if (setProfileData) {
-                    setProfileData(prev => ({ ...prev, username: "customer" }));
-                  }
-            }
-        }
+            const selectedRole = e.target.value;
         
-        console.log("here");
+            setIsVolunteer(selectedRole === "Volunteer");
+            setIsCustomer(selectedRole === "Customer");
+        
+            if (setProfileData) {
+                let updatedData = {
+                    ...profileData,
+                    role: selectedRole,
+                };
+        
+                if (selectedRole === "Volunteer") {
+                    updatedData.username = "volunteer";
+                    updatedData.firstName = "";
+                    updatedData.lastName = "";
+                    updatedData.phoneNumber = "";
+                    updatedData.pronouns = "";
+                } else if (selectedRole === "Customer") {
+                    updatedData.username = "customer";
+                    updatedData.firstName = "";
+                    updatedData.lastName = "";
+                    updatedData.phoneNumber = "";
+                    updatedData.pronouns = "";
+                }
+                setProfileData(updatedData);
+            }
+            return;
+        }
+
         // setChangeMade(true);
         if (setUnsavedChanges) {
             setUnsavedChanges(true);
