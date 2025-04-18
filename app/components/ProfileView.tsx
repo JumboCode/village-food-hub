@@ -146,7 +146,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
             setIsCustomer(selectedRole === "Customer");
         
             if (setProfileData) {
-                let updatedData = {
+                const updatedData = {
                     ...profileData,
                     role: selectedRole,
                 };
