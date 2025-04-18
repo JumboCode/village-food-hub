@@ -10,7 +10,7 @@ import LoadingAnimation from "@app/components/LoadingAnimation";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface DataItem {
+interface DemographicsItem {
   lastVisitDate: string;
   householdSize: number;
   previousVisitDates: string[];
@@ -18,6 +18,7 @@ interface DataItem {
 
 interface InventoryItem {
   name: string;
+  categoryName: string;
   history: { date: string; action: string }[];
 }
 
@@ -43,6 +44,7 @@ const OverviewPage: React.FC = () => {
   const [rawVisitsLastSixtyDays, setRawVisitsLastSixtyDays] = useState<number[]>([]);
   const [viewMode, setViewMode] = useState<'average' | 'raw'>('raw');
   const [visitFrequencyData, setVisitFrequencyData] = useState<number[] | null>(null);
+  const [numCookedMealsDisplay, setNumCookedMealsDisplay] = useState<string | null>(null);
 
   // unique items distributed
   const [uniqueItems, setUniqueItems] = useState<string | null>(null);
@@ -114,7 +116,7 @@ const OverviewPage: React.FC = () => {
         const response = await fetch("../api/demographics");
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
   
-        const data: DataItem[] = await response.json();
+        const data: DemographicsItem[] = await response.json();
         const currentMonthUTC = new Date().getUTCMonth();
         const currentYearUTC = new Date().getUTCFullYear();
   
@@ -159,13 +161,28 @@ const OverviewPage: React.FC = () => {
   
         setVisitFrequencyData(visitCountsArray);
   
-        const newIndividuals = servedThisMonth.filter(item => {
-          if (!item.previousVisitDates || item.previousVisitDates.length === 0) return true;
-          return item.previousVisitDates.every(dateStr => {
-            const prevDate = new Date(dateStr);
-            return prevDate.getUTCMonth() === currentMonthUTC && prevDate.getUTCFullYear() === currentYearUTC;
-          });
+        const newIndividuals = data.filter(item => {
+          const lastVisit = new Date(item.lastVisitDate);
+          const isLastVisitThisMonth =
+            lastVisit.getUTCMonth() === currentMonthUTC && lastVisit.getUTCFullYear() === currentYearUTC;
+        
+          if (!isLastVisitThisMonth) return false;
+        
+          const allVisitsThisMonth =
+            item.previousVisitDates &&
+            item.previousVisitDates.length > 0 &&
+            item.previousVisitDates.every(dateStr => {
+              const prevDate = new Date(dateStr);
+              return (
+                prevDate.getUTCMonth() === currentMonthUTC &&
+                prevDate.getUTCFullYear() === currentYearUTC
+              );
+            });
+        
+          // If no previous visits or all visits are in this month
+          return item.previousVisitDates.length === 0 || allVisitsThisMonth;
         });
+        
         setNumNewIndividuals(newIndividuals.length);
   
       } catch (error) {
@@ -185,7 +202,62 @@ const OverviewPage: React.FC = () => {
   
     fetchData();
   }, []);
-  
+
+  useEffect(() => {
+    const fetchInventoryData = async () => {
+      try {
+        const response = await fetch("../api/inventory");
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+
+        const json = await response.json();
+        const data: InventoryItem[] = json.data;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        const filteredData = data.filter(item => {
+          if (!item.history || typeof item.history !== 'object') return false;
+          if (item.categoryName == "Cooked Meals") {
+            return Object.values(item.history).some((subActionsArray) => {
+              if (!Array.isArray(subActionsArray)) return false;
+            
+              return subActionsArray.some((subAction: { action: string; date: string; quantityChanged: number }) => {
+                if (subAction.action !== 'remove') return false;
+            
+                const actionDate = new Date(subAction.date);
+                return (
+                  actionDate.getMonth() === currentMonth &&
+                  actionDate.getFullYear() === currentYear
+                );
+              });
+            });            
+          }
+        });
+
+        let totalMeals = 0;
+        filteredData.forEach(record => {
+          if (!record.history || typeof record.history !== 'object') return;
+          const history = Object.values(record.history).flat() as {
+            date: string;
+            action: string;
+            quantityChanged: number;
+          }[];
+          
+          history.forEach((element) => {
+            if (element.action === "remove") {
+              totalMeals += element.quantityChanged;
+            }
+          });              
+        });
+        setNumCookedMealsDisplay(String(totalMeals) + "+");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setNumCookedMealsDisplay(String(0));
+      } 
+    };
+
+    fetchInventoryData();
+  }, []);
+
   const householdSizeData = {
     labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
     datasets: [
@@ -292,7 +364,7 @@ const OverviewPage: React.FC = () => {
               </div>
 
               {/* Cooked Meals */}
-              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value={9} />
+              <StatCard title="Number of Cooked Meals Served" isLoading={isLoading5} value={numCookedMealsDisplay} />
 
               {/* Unique Items Distributed */}
               <StatCard title="Number of Unique Items Distributed" isLoading={isLoading6} value={uniqueItems} />

@@ -299,8 +299,11 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
               } else if (inventoryItem.quantity === itemToRemove.quantity) {
                   fetch('../api/inventory', {
                     method : 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
                     body : JSON.stringify({
-                      deleteItem : itemToRemove.itemName, 
+                      itemName : itemToRemove.itemName, 
                       units : itemToRemove.units
                     })
                   })

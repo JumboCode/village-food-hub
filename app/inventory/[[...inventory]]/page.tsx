@@ -218,12 +218,14 @@ const InternalViewInventoryPage: React.FC = () => {
         </div>
         
         {appliedFilters.length > 0 && (
-          <button
-            onClick={() => setAppliedFilters([])}
-            className="bg-purple text-white px-4 py-2 rounded-md hover:bg-dark-purple transition-all"
-          >
-            Clear Filters
-          </button>
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={() => setAppliedFilters([])}
+              className="bg-purple text-white px-6 py-2 rounded-md hover:bg-dark-purple transition-all text-lg font-crimson"
+            >
+              Clear Filters
+            </button>
+          </div>
         )}
         </div>
     ) : (
