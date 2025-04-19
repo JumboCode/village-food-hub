@@ -121,10 +121,10 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                 </button>
                             </div>
                         </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                        <div className="font-[20px] flex flex-row justify-between">
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3 min-w-[180px]">
+                            <div className="font-[20px] flex flex-row justify-between">
                                 <p>Phone Number</p>
-                                </div>
+                            </div>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
                         <div className="font-[20px] flex flex-row justify-between">
@@ -135,15 +135,15 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                 </div>
                         </th>
                         <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
-                        <div className="font-[20px] flex flex-row justify-between">
-                                <p>Address</p>
-                                </div>
-                        </th>
-                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3">
+                            <div className="font-[20px] flex flex-row justify-between">
+                                    <p>Address</p>
+                                    </div>
+                            </th>
+                        <th className="border-collapse border-zinc-50 border-2 border-y-1 py-2 px-3 min-w-[150px]">
                             <div className="font-[20px] flex flex-row justify-between">
                                 <p>House Size</p>
                                 <button onClick={() => sortQuantity(4)}>
-                                    <TiArrowUnsorted />
+                                <TiArrowUnsorted />
                                 </button>
                             </div>
                         </th>
@@ -173,7 +173,9 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                                 {row.map((cell, colIndex) => (
                                     <td
                                         key={colIndex}
-                                        className="border-collapse border-zinc-200 border-2 border-y-1 px-3"
+                                        className={`border-collapse border-zinc-200 border-2 border-y-1 px-3 ${
+                                        colIndex === 1 ? "min-w-[180px]" : colIndex === 4 ? "min-w-[150px]" : ""
+                                        }`}
                                     >
                                         {colIndex === 4 && Number(cell) >= 10 ? "10+" : String(cell)}
                                     </td>
