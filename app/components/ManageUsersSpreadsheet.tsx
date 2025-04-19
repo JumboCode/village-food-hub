@@ -260,12 +260,10 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
             ) : (
               sortedItems.slice(initialIndex, lastIndex)
               .map((row, rowIndex) => (
-                <tr key={rowIndex} className="py-2">
-                {/* // TODO: uncomment this code once approved
                 <tr
                   key={rowIndex}
-                  className={`py-2 ${["volunteer", "customer"].includes(row[3].toLowerCase()) ? "bg-light-gray" : ""}`}
-                > */}
+                  className={`py-2 ${["volunteer", "customer"].includes(row[3].toLowerCase()) ? "text-gray" : ""}`}
+                >
                   {row.map((cell, colIndex) => (
                     <td key={colIndex} className="border-collapse border-zinc-200 border-2 border-y-1 px-3">
                       {String(cell)}
