@@ -149,20 +149,34 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
   const handleSave = async (updatedRole: string, userId: string) => {
     try {
       if (!userId) throw new Error("User ID missing.");
-
+  
+      const selected = allUsers.find((user) => user[1] === username);
+      if (!selected) return;
+  
+      const currentRole = selected[2];
+      const adminCount = allUsers.filter((user) => user[2] === "Admin").length;
+  
+      // Block if last admin is being changed to non-admin
+      if (currentRole === "Admin" && updatedRole !== "Admin" && adminCount === 1) {
+        setSnackbarMessage("The system must have at least one admin. Role change not allowed.");
+        setSnackbarOpen(true);
+        closeModals();
+        return;
+      }
+  
       const payload = { userId, firstName, lastName, role: updatedRole };
-
+  
       const response = await fetch("/api/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update user");
       }
-
+  
       setSortedItems((prevItems) =>
         prevItems.map((row) =>
           row[3] === username
@@ -170,13 +184,13 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
             : row
         )
       );
-
+  
       setAllUsers((prevUsers) =>
         prevUsers.map((user) =>
           user[1] === username ? [user[0], user[1], updatedRole] : user
         )
       );
-
+  
       setSnackbarMessage("User role updated successfully.");
       setSnackbarOpen(true);
       closeModals();
@@ -185,7 +199,7 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
       alert("Failed to update user. Please try again.");
     }
   };
-
+  
   const handleDelete = async () => {
     try {
       if (!username) return;
@@ -336,18 +350,18 @@ export const ManageUsersSpreadsheet: React.FC<ManageUsersSpreadsheetProps> = ({
 
       {showAdminWarningModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
-          <div className="h-[220px] w-[450px] bg-modal-gray font-crimson fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-8 shadow-lg rounded-lg">
+          <div className="h-[250px] w-[450px] bg-modal-gray font-crimson fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-8 shadow-lg rounded-lg">
             <div className="flex flex-col">
               <p className="flex justify-center text-[28px] crimson-bold px-12">
                 The system must have at least one admin.
               </p>
-              <p className="flex justify-center text-[18px] crimson-bold text-green-100">
+              <p className="flex justify-center text-[18px] crimson-bold text-red mt-4">
                 Your action was not completed.
               </p>
             </div>
             <div className="flex flex-row justify-around">
               <button
-                className="bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 rounded-full text-[20px]"
+                className="bg-light-green hover:bg-dark-green text-white font-serif py-2 px-8 mt-4 rounded-full text-[20px]"
                 onClick={() => setShowAdminWarningModal(false)}
               >
                 OK

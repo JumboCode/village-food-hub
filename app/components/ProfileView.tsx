@@ -163,6 +163,7 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                     updatedData.lastName = "";
                     updatedData.phoneNumber = "";
                     updatedData.pronouns = "";
+                    updatedData.emailAddress = "";
                 }
                 setProfileData(updatedData);
             }
@@ -183,13 +184,36 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
       
-        // If the role is not Volunteer or Customer, require firstName, lastName, and phoneNumber.
-        if (profileData.role !== "Volunteer" && profileData.role !== "Customer") {
-          if (!profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.phoneNumber.trim()) {
-            alert("Please fill out all required fields.");
-            return;
-          }
-        }
+        if (role === "Staff" || role === "Admin") {
+            if (
+              !profileData.firstName.trim() ||
+              !profileData.lastName.trim() ||
+              !profileData.phoneNumber.trim() ||
+              !profileData.emailAddress.trim()
+            ) {
+              alert("Please fill out all required fields.");
+              return;
+            }
+        } else if (role === "Volunteer") {
+            if (
+                !profileData.firstName.trim() ||
+                !profileData.lastName.trim() ||
+                !profileData.phoneNumber.trim()
+            ) {
+                alert("Please fill out all required fields.");
+                return;
+            }
+        } else if (role === "Customer") {
+            if (
+                !profileData.firstName.trim() ||
+                !profileData.lastName.trim() ||
+                !profileData.phoneNumber.trim()
+            ) {
+                alert("Please fill out all required fields.");
+                return;
+            }
+            // Email is not required for customers, so no check
+        }        
       
         // Continue with form submission logic here
         console.log("Form submitted", profileData);
@@ -315,8 +339,12 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
                         value={profileData.emailAddress}
                         onChange={(e) => handleChangeMade(e, "emailAddress")}
                         placeholder=""
-                        className="pl-3 font-crimson text-[20px] focus:outline-none border-2 border-[#E1E1E1] rounded-xl w-[452px] h-[50px]"
-                        disabled={isView || isEdit}
+                        className={`pl-3 font-crimson text-[20px] border-2 rounded-xl w-[452px] h-[50px] focus:outline-none ${
+                        isView || isEdit || isCustomer
+                            ? 'bg-[#F5F5F5] border-[#E1E1E1] text-gray-400'
+                            : 'bg-white border-[#E1E1E1]'
+                        }`}
+                        disabled={isView || isEdit || isCustomer}
                     />
                 </div>
 
