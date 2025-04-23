@@ -1187,7 +1187,7 @@ const DemographicsSurvey: React.FC = () => {
         }
         {currentStep === 'confirmation' && <Confirmation phoneNumber={responses.phoneNumber} translations={translationArray.confirmation}/>}
       </div>
-      <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2'>
+      <div className='absolute bottom-32 left-1/2 transform -translate-x-1/2'>
         {(() => {
           if (currentStep === 'houseSize') {
             return <ButtonSubmit onClick={handleSubmit} disabled={submitDisabled} />;
