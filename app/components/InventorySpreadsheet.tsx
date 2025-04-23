@@ -143,7 +143,6 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
             itemName,
             quantity: Number(quantityChange),
             units,
-            lastUpdated: new Date(),
         };
         try {
             const response = await fetch("/../api/inventory", {

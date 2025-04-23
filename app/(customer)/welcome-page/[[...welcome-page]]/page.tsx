@@ -33,7 +33,17 @@ const WelcomePage: React.FC = () => {
     const [language, setLanguage] = useState<string>('en');
     const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const logoutModalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (showPasswordModal) {
+          setPasswordInput('');
+          setPasswordError('');
+        }
+    }, [showPasswordModal]);      
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -58,6 +68,7 @@ const WelcomePage: React.FC = () => {
         setDropdownOpen(!dropdownOpen);
     };
 
+    // Sign out logic
     const { signOut } = useClerk();
 
     const handleSignOut = async () => {
@@ -153,7 +164,6 @@ const WelcomePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                {/* TODO: TEMPORARY? */}
                 <div className="absolute right-0 top-5 mt-4 mr-8">
                     <button onClick={() => setShowLogoutModal(true)}>
                         <IoMdMore size={24} />
@@ -165,10 +175,13 @@ const WelcomePage: React.FC = () => {
                         className="absolute right-0 mt-2 mr-0 bg-white border border-gray-300 shadow-md rounded-md z-50"
                         >
                         <button
-                            onClick={handleSignOut}
-                            className="flex items-center px-4 py-2 text-black hover:bg-gray-100 w-full"
+                            onClick={() => {
+                                setShowLogoutModal(false); // hide dropdown
+                                setShowPasswordModal(true); // show password prompt
+                            }}
+                            className="flex items-center px-4 py-2 text-black hover:bg-gray-100 w-[120px]"
                         >
-                            <ImExit className="mr-2" /> Logout
+                            <ImExit className="mr-2" /> Sign Out
                         </button>
                         </div>
                     )}
@@ -206,6 +219,38 @@ const WelcomePage: React.FC = () => {
                     </div>
                 </div>
             </div>
+            {showPasswordModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white p-6 rounded-xl w-[400px] shadow-xl">
+                    <h2 className="text-xl font-bold mb-4 text-center text-black">Admin Password Required</h2>
+                    <input
+                        type="password"
+                        placeholder="Enter password"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        className="w-full border rounded px-4 py-2 mb-3 text-black"
+                    />
+                    {passwordError && <p className="text-red text-sm mb-2">{passwordError}</p>}
+                    <div className="flex justify-center gap-4 mt-4">
+                        <button onClick={() => setShowPasswordModal(false)} className="px-4 py-2 text-black border border-gray rounded">
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (passwordInput === process.env.NEXT_PUBLIC_ADMIN_SIGN_OUT_PASSWORD) {
+                                signOut({ redirectUrl: '/login' });
+                                } else {
+                                setPasswordError("Incorrect password.");
+                                }
+                            }}
+                            className="px-4 py-2 bg-light-green text-white rounded"
+                            >
+                                Confirm
+                        </button>
+                    </div>
+                    </div>
+                </div>
+                )}
         </div>
     );
 };
