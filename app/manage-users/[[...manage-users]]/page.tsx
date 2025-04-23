@@ -102,7 +102,6 @@ const InternalViewManageUsersPage: React.FC = () => {
     } else if (trimmedData.role === "Customer") {
       if (
         !trimmedData.username ||
-        !trimmedData.emailAddress ||
         !trimmedData.role ||
         !trimmedData.password
       ) {

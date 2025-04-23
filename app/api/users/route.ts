@@ -5,6 +5,19 @@ interface ClerkError {
   errors: { longMessage: string }[];
 }
 
+interface UserData {
+  username: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  emailAddress?: string[];
+  publicMetadata: {
+    role: string;
+    phoneNumber?: string;
+    pronouns?: string;
+  };
+}
+
 function isClerkError(error: unknown): error is ClerkError {
   return (
     typeof error === 'object' &&
@@ -71,7 +84,7 @@ export async function POST(req: NextRequest) {
     if (data.role == "Volunteer") {
       requiredFields = ['username', 'password', 'emailAddress', 'role'];
     } else if (data.role == "Customer") {
-      requiredFields = ['username', 'password', 'emailAddress', 'role'];
+      requiredFields = ['username', 'password', 'role'];
     } else {
       requiredFields = ['username', 'password', 'firstName', 'lastName', 'pronouns', 'emailAddress', 'phoneNumber', 'role'];
     }
@@ -96,22 +109,23 @@ export async function POST(req: NextRequest) {
     }
 
     // Create user data
-    const userData = {
+    const userData: UserData = {
       username: data.username,
       password: data.password,
-      emailAddress: [data.emailAddress],
-      firstName: data.firstName,
-      lastName: data.lastName,
       publicMetadata: {
-        pronouns: data.pronouns,
-        role: role,
-        phoneNumber: data.phoneNumber,
+        role,
       },
     };
-
-    console.log("Creating user in Clerk with:", userData);
-
+    
+    // Add conditionally based on presence
+    if (data.firstName?.trim()) userData.firstName = data.firstName.trim();
+    if (data.lastName?.trim()) userData.lastName = data.lastName.trim();
+    if (data.emailAddress?.trim()) userData.emailAddress = [data.emailAddress.trim()];
+    if (data.phoneNumber?.trim()) userData.publicMetadata.phoneNumber = data.phoneNumber.trim();
+    if (data.pronouns?.trim()) userData.publicMetadata.pronouns = data.pronouns.trim();    
+    
     // Create the user with Clerk API
+    console.log("Final Clerk Payload:", JSON.stringify(userData, null, 2));
     const user = await client.users.createUser(userData);
     return NextResponse.json({ message: 'User created successfully', user });
   } catch (error: unknown) {
