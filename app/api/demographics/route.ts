@@ -2,33 +2,22 @@ import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
-function convertTZ(date: Date) {
-    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "EST"}));   
-   
-}
-
 // CREATE
 async function createDemographic(data: {
-    phoneNumber: string,
-    takeCount: number,
-    donateCount: number,
-    name: string,
-    householdSize: number,
-    address: string,
-    lastVisitDate: Date,
-    previousVisitDates: Date[]
-}) {
+    phoneNumber: string;
+    takeCount: number;
+    donateCount: number;
+    name: string;
+    householdSize: number;
+    address: string;
+  }) {
+    const lastVisitDate = new Date();
     return await prisma.demographics.create({
-        data: {
-            phoneNumber: data.phoneNumber,
-            takeCount: data.takeCount,
-            donateCount: data.donateCount,
-            name: data.name,
-            householdSize: data.householdSize,
-            address: data.address,
-            lastVisitDate: data.lastVisitDate,
-            previousVisitDates: data.previousVisitDates
-        }
+      data: {
+        ...data,
+        lastVisitDate,
+        previousVisitDates: [lastVisitDate],
+      },
     });
 }
 
@@ -40,26 +29,31 @@ async function getDemographic() {
 
 // UPDATE
 async function updateDemographic(data: {
-    phoneNumber: string,
-    takeCount: number,
-    donateCount: number,
-    name: string,
-    householdSize: number,
-    address: string,
-    lastVisitDate: Date,
-    previousVisitDates: Date[]
-}) {
+    phoneNumber: string;
+    takeCount: number;
+    donateCount: number;
+    name: string;
+    householdSize: number;
+    address: string;
+  }) {
+    const lastVisitDate = new Date();
+  
+    const existingRecord = await prisma.demographics.findUnique({
+      where: { phoneNumber: data.phoneNumber },
+      select: { previousVisitDates: true },
+    });
+  
+    const updatedPreviousDates = Array.isArray(existingRecord?.previousVisitDates)
+      ? [...existingRecord.previousVisitDates, lastVisitDate]
+      : [lastVisitDate];
+  
     return await prisma.demographics.update({
-        where: { phoneNumber: data.phoneNumber },
-        data: {
-            takeCount: data.takeCount,
-            donateCount: data.donateCount,
-            name: data.name,
-            householdSize: data.householdSize,
-            address: data.address,
-            lastVisitDate: data.lastVisitDate,
-            previousVisitDates: data.previousVisitDates
-        },
+      where: { phoneNumber: data.phoneNumber },
+      data: {
+        ...data,
+        lastVisitDate,
+        previousVisitDates: updatedPreviousDates,
+      },
     });
 }
 
@@ -73,23 +67,16 @@ async function deleteDemographic(phoneNumber: string) {
 // POST
 export async function POST(req: NextRequest) {
     try {
-        const record = await req.json();
-        if (!validDemographic(record)) {
-            return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
-        }
-
-        record.lastVisitDate = new Date()
-        record.lastVisitDate = convertTZ(record.lastVisitDate)
-        
-        console.log("IN THE POST METHOD, date is: ", record.lastVisitDate);
-        record.previousVisitDates = [record.lastVisitDate];
-
-        const response = await createDemographic({ ...record });
-
-        return NextResponse.json(response, { status: 201 });
+      const record = await req.json();
+      if (!validDemographic(record)) {
+        return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
+      }
+  
+      const response = await createDemographic(record);
+      return NextResponse.json(response, { status: 201 });
     } catch (error) {
-        console.log(error);
-        return NextResponse.json({ response: "Failed to create record" }, { status: 500 });
+      console.log(error);
+      return NextResponse.json({ response: "Failed to create record" }, { status: 500 });
     }
 }
 
@@ -105,36 +92,18 @@ export async function GET() {
 }
 
 // PUT (Update an existing demographic record)
-export async function PUT(req: NextRequest) {    
+export async function PUT(req: NextRequest) {
     try {
-        const record = await req.json();
-        if (!validDemographic(record)) {
-            return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
-        }
-
-        record.lastVisitDate = new Date();
-        record.lastVisitDate = convertTZ(record.lastVisitDate);
-        
-        // Fetch existing record to update `previousVisitDates`
-        const existingRecord = await prisma.demographics.findUnique({
-            where: { phoneNumber: record.phoneNumber },
-            select: { previousVisitDates: true }
-        });
-
-        if (!existingRecord) {
-            return NextResponse.json({ response: "Record not found" }, { status: 404 });
-        }
-
-        record.previousVisitDates = Array.isArray(existingRecord.previousVisitDates) 
-            ? [...existingRecord.previousVisitDates, record.lastVisitDate] 
-            : [record.lastVisitDate];
-
-        const updatedRecord = await updateDemographic({ ...record });
-
-        return NextResponse.json(updatedRecord, { status: 200 });
+      const record = await req.json();
+      if (!validDemographic(record)) {
+        return NextResponse.json({ response: "Invalid data format" }, { status: 400 });
+      }
+  
+      const updatedRecord = await updateDemographic(record);
+      return NextResponse.json(updatedRecord, { status: 200 });
     } catch (error) {
-        console.log(error);
-        return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
+      console.log(error);
+      return NextResponse.json({ response: "Failed to update entry" }, { status: 500 });
     }
 }
 
@@ -170,28 +139,28 @@ interface DemographicRecord {
 function validDemographic(record: DemographicRecord): boolean {
     try {
         const { lastVisitDate, previousVisitDates, ...recordWithoutDates } = record;
-
+    
         const fields = new Set<string>([
-            "phoneNumber",
-            "takeCount",
-            "donateCount",
-            "name",
-            "householdSize",
-            "address",
+          "phoneNumber",
+          "takeCount",
+          "donateCount",
+          "name",
+          "householdSize",
+          "address",
         ]);
-
+    
         const keys = Object.keys(recordWithoutDates);
         if (keys.length !== fields.size) return false;
-
+    
         let fieldsMatch = true;
         keys.forEach((field: string) => {
-            if (!fields.has(field)) fieldsMatch = false;
-            fields.delete(field);
+          if (!fields.has(field)) fieldsMatch = false;
+          fields.delete(field);
         });
-
-        return fieldsMatch && Array.isArray(previousVisitDates);
-    } catch (error) {
+    
+        return fieldsMatch;
+      } catch (error) {
         console.log(error);
         return false;
-    }
+      }
 }

@@ -984,17 +984,13 @@ const DemographicsSurvey: React.FC = () => {
       console.error("Error: Phone number is required.");
       return;
     }
-    const currentDate = new Date();
     const recordData = {
       phoneNumber: responses.phoneNumber,
       takeCount: responses.receive ? 1 : 0,
       donateCount: responses.donate ? 1 : 0,
       name: `${responses.name.firstName} ${responses.name.lastName}`,
       address: `${responses.address.line1}`,
-
-      householdSize: responses.householdSize,
-      lastVisitDate: responses.receive ? currentDate : null,
-      previousVisitDates: [currentDate],
+      householdSize: responses.householdSize
     };
     console.log("Record data for submission:", recordData);
     try {
@@ -1006,11 +1002,7 @@ const DemographicsSurvey: React.FC = () => {
           donateCount: (prevRecord.donateCount || 0) + (responses.donate ? 1 : 0),
           name: responses.changes === "yes" ? `${responses.name.firstName} ${responses.name.lastName}` : prevRecord.name,
           address: responses.changes === "yes" ? `${responses.address.line1}` : prevRecord.address,
-          householdSize: responses.changes === "yes" ? responses.householdSize : prevRecord.householdSize,
-          lastVisitDate: responses.receive ? new Date().toISOString() : prevRecord.lastVisitDate,
-          previousVisitDates: Array.isArray(prevRecord.previousVisitDates)
-            ? [...prevRecord.previousVisitDates, currentDate]
-            : [currentDate],
+          householdSize: responses.changes === "yes" ? responses.householdSize : prevRecord.householdSize
         };
         console.log("Updated record data for PUT request:", updatedRecordData);
         const updateResponse = await fetch("/api/demographics", {
