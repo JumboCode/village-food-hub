@@ -169,13 +169,9 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
             }
             return;
         }
-
-        // setChangeMade(true);
         if (setUnsavedChanges) {
             setUnsavedChanges(true);
-            console.log('Unsaved Changes: true');
         }
-        // console.log("CHANGE HANDLED")
         if (setProfileData) {
             setProfileData(prev => ({ ...prev, [fieldType]: e.target.value }));
         }
@@ -214,9 +210,6 @@ const ProfileView : React.FC<ProfileViewProps> = ({ visible, mode, profileData, 
             }
             // Email is not required for customers, so no check
         }        
-      
-        // Continue with form submission logic here
-        console.log("Form submitted", profileData);
       };
     
     if (!visible) {

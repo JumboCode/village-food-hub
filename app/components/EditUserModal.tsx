@@ -11,12 +11,9 @@ interface EditUserModalProps {
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ userId, userData, closeModal, handleSave }) => {
-    console.log("User Data from Backend:", userData);
     const firstName = userData[0] !== "N/A" ? userData[0] : "";
     const lastName = userData[1] !== "N/A" ? userData[1] : "";
     const receivedRole = userData[3] !== "N/A" ? userData[3] : "Staff";
-
-    console.log("Received Role from Backend:", receivedRole);
     const [role, setRole] = useState<"Admin" | "Staff">(receivedRole === "Admin" ? "Admin" : "Staff");
 
     useEffect(() => {

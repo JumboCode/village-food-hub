@@ -73,8 +73,6 @@ const InternalViewManageUsersPage: React.FC = () => {
 
   async function createUser() {
     setCreateUserError("\u00A0");
-
-    console.log("Creating user with data:", profileData);
     
     const trimmedData = {
         firstName: profileData.firstName.trim(),
@@ -86,8 +84,6 @@ const InternalViewManageUsersPage: React.FC = () => {
         phoneNumber: profileData.phoneNumber.trim(),
         password: profileData.password.trim()
     };
-
-    console.log("Trimmed Data:", trimmedData);
     
     if (trimmedData.role === "Volunteer") {
       if (

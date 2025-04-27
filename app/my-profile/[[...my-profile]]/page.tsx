@@ -119,7 +119,6 @@ const MyProfilePage: React.FC = () => {
           });
       
           if (response.ok) {
-            console.log("User updated successfully");
             setSnackbarOpen(true);
             setShowEditProfileView(false);
           } else {
@@ -134,7 +133,6 @@ const MyProfilePage: React.FC = () => {
 
   
     function handleEditProfileView() {
-        console.log("edited profile")
         setShowEditProfileView(true);
     }
 
@@ -216,8 +214,6 @@ const MyProfilePage: React.FC = () => {
             const result = await response.json();
             // if success
             if (response.ok) {
-                console.log("User deleted successfully:", result);
-
                 // show success modal
                 setShowDeleteSuccess(true);
                 setShowDeleteFail(false);

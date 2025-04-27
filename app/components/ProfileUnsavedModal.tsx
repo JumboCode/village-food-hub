@@ -17,7 +17,6 @@ const ProfileUnsavedModal: React.FC<ProfileUnsavedModalProps> = ({ closeUnsavedM
     window.preventNavigation = false;
 
     if (!redirectPage) {
-      console.log("Redirect page is undefined, defaulting to home.");
       router.push("/");
     } else {
       router.push(redirectPage);

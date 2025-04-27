@@ -432,7 +432,6 @@ const Address: React.FC<AddressProps> = ({ line1, onAddressLineChange, setNextDi
   const [line, setLine] = useState<string>(line1);
 
   const handleLineChange = (value: string) => {
-    console.log(value)
     setLine(value);
     onAddressLineChange(value);
     setNextDisabled(false);
@@ -716,7 +715,6 @@ const Confirmation: React.FC<{
       const latestRecord = matchedRecords.sort((a, b) =>
         new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
       )[0];
-      console.log("Latest Record:", latestRecord);
       setNewRecord(latestRecord || null);
     } catch (error) {
       console.error("Error fetching responses:", error);
@@ -863,11 +861,9 @@ const DemographicsSurvey: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const surveyResponses: SurveyResponse[] = await response.json();
-      console.log("Fetched responses:", surveyResponses);
       const filteredRecord = surveyResponses.find(
         (response) => response.phoneNumber === responses.phoneNumber
       );
-      console.log("Filtered Record:", filteredRecord);
       setPrevRecord(filteredRecord || null);
       return filteredRecord || null;
     } catch (error) {
@@ -905,7 +901,6 @@ const DemographicsSurvey: React.FC = () => {
           return;
 
         }
-        console.log("Fetched record before transition:", record);
         if (record !== null) {
           setCurrentStep('changes');
         } else {
@@ -930,7 +925,6 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('confirmation');
         break;
       case 'confirmation':
-        console.log('Survey Completed');
         break;
       default:
         break;
@@ -962,7 +956,6 @@ const DemographicsSurvey: React.FC = () => {
         setCurrentStep('name');
         break;
       case 'name':
-        console.log("previous record", prevRecord);
         if (prevRecord !== null) {
           setCurrentStep('changes');
         } else {
@@ -978,8 +971,6 @@ const DemographicsSurvey: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    console.log('Survey Responses:', responses);
-    console.log("Previous record before submission:", prevRecord);
     if (!responses.phoneNumber) {
       console.error("Error: Phone number is required.");
       return;
@@ -992,7 +983,7 @@ const DemographicsSurvey: React.FC = () => {
       address: `${responses.address.line1}`,
       householdSize: responses.householdSize
     };
-    console.log("Record data for submission:", recordData);
+
     try {
       if (prevRecord) {
         const updatedRecordData = {
@@ -1004,7 +995,7 @@ const DemographicsSurvey: React.FC = () => {
           address: responses.changes === "yes" ? `${responses.address.line1}` : prevRecord.address,
           householdSize: responses.changes === "yes" ? responses.householdSize : prevRecord.householdSize
         };
-        console.log("Updated record data for PUT request:", updatedRecordData);
+
         const updateResponse = await fetch("/api/demographics", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1013,9 +1004,7 @@ const DemographicsSurvey: React.FC = () => {
         if (!updateResponse.ok) {
           throw new Error(`Failed to update record: ${await updateResponse.text()}`);
         }
-        console.log("Record updated successfully.");
       } else {
-        console.log("Creating a new record...");
         const createResponse = await fetch("/api/demographics", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1025,7 +1014,6 @@ const DemographicsSurvey: React.FC = () => {
           throw new Error(`Failed to create record: ${await createResponse.text()}`);
         }
         const data = createResponse.json()
-        console.log("Record created successfully.");
       }
       setCurrentStep("confirmation");
     } catch (error) {

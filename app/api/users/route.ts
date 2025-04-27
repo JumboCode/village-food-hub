@@ -76,8 +76,6 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const data = await req.json();
-    console.log('Received data:', data);
-    
     let requiredFields;
     
     // Ensure all required fields are provided
@@ -125,7 +123,6 @@ export async function POST(req: NextRequest) {
     if (data.pronouns?.trim()) userData.publicMetadata.pronouns = data.pronouns.trim();    
     
     // Create the user with Clerk API
-    console.log("Final Clerk Payload:", JSON.stringify(userData, null, 2));
     const user = await client.users.createUser(userData);
     return NextResponse.json({ message: 'User created successfully', user });
   } catch (error: unknown) {
@@ -168,7 +165,6 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log('Received data:', data);
     const id = data.id;
     
     const client = await clerkClient();

@@ -48,7 +48,6 @@ async function updateCategory(data: {
 
 async function deleteCategory(data: { itemName: string; name: string }) {
   // Basic delete for a specific category/item pair.
-  console.log("deleteCategory called with:", data);
   const { itemName, name } = data;
   return await prisma.categories.delete({
     where: {
@@ -61,8 +60,6 @@ async function deleteCategory(data: { itemName: string; name: string }) {
 }
 
 async function deleteInventoryItemsByCategoryName(name: string) {
-  console.log("Deleting all records for category:", name);
-
   // First, delete related inventory items
   await prisma.inventory.deleteMany({
     where: {
@@ -97,7 +94,6 @@ export async function POST(req: NextRequest) {
     const response = await createCategory({ ...record });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { response: "Failed to create record" },
       { status: 500 }
@@ -111,7 +107,6 @@ export async function GET() {
     const items = await readCategories();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { response: "Failed to get categories" },
       { status: 500 }
@@ -123,8 +118,6 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log("Received data in API:", data);
-
     const {
       oldCategoryName,
       newCategoryName,
@@ -142,8 +135,6 @@ export async function PUT(req: NextRequest) {
 
     // CATEGORY RENAME
     if (isRenamingCategory) {
-      console.log(`Renaming category "${oldCategoryName}" → "${newCategoryName}"`);
-
       const updated = await prisma.categories.updateMany({
         where: {
           name: oldCategoryName,
@@ -171,8 +162,6 @@ export async function PUT(req: NextRequest) {
 
     // ITEM NAME OR UNIT UPDATE
     if (isUpdatingItem || (units && Array.isArray(units))) {
-      console.log("Updating item name or units...");
-
       const updatedCategory = await updateCategory({
         oldItemName,
         itemName,
@@ -227,15 +216,10 @@ export async function DELETE(req: NextRequest) {
     const data = parsed.data ?? parsed;
 
     if (!data.name || typeof data.name !== "string") {
-      console.log("Error: Missing category name in DELETE request.");
       return NextResponse.json({ response: "Missing category name" }, { status: 400 });
     }
 
-    console.log("DELETE request received with data:", data);
-
     if (data.itemName && typeof data.itemName === "string" && data.itemName.trim() !== "") {
-
-      console.log("Branch 1")
       // Case 1: Delete a specific category/item pair
       const item = await deleteCategory({
         itemName: data.itemName,
@@ -257,8 +241,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ response: "Item deleted successfully", data: item }, { status: 200 });
     } else {
       // Case 2: Delete all records for the given category name + related inventory items
-      console.log("Branch 2");
-      
       // Step 1: Find all inventory items that belong to this category
       const inventoryItems = await prisma.inventory.findMany({
         where: { categoryName: data.name },

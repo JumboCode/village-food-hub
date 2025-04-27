@@ -33,7 +33,6 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    console.log("navBar useEffect is activated");
     if (isLoaded && user) {
       setLoggedInUser(`${user.firstName || ""} ${user.lastName || ""}`.trim());
       setIsAdmin(user.publicMetadata?.role === "Admin");
@@ -49,23 +48,17 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
     }
   }, []);
 
-  console.log("User:", user?.firstName, user?.lastName);
-
   const updateUser = async () => {
     if (savedChanges == true) {
-      console.log("user first name was " + user?.firstName);
       await user?.reload();
     }
-    console.log("user first name is now " + user?.firstName);
   }
 
   updateUser();
 
   const handleSignOut = async () => {
     try {
-      console.log("Attempting to sign out...");
       await signOut({ redirectUrl: "/login" });
-      console.log("Signed out successfully");
     } catch (error) {
       console.error("Sign-out error:", error);
     }
@@ -78,8 +71,6 @@ export const NavBar: React.FC<NavBarProps> = ({ savedChanges }) => {
     setTimeout(() => {
       if (!("preventNavigation" in window) || !window.preventNavigation) {
         router.push(path);
-      } else {
-        console.log(`Navigation to ${path} was blocked due to unsaved changes.`);
       }
     }, 100);
   };  

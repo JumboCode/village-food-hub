@@ -32,8 +32,6 @@ const LoginPage: React.FC = () => {
     // Wait until we have the user AND role before redirecting
     if (!isSignedIn || !role) return;
   
-    console.log("Redirecting based on role:", role);
-  
     if (role === 'volunteer') {
       router.push('/volunteer-landing');
     } else if (role === 'admin' || role === 'staff') {
@@ -121,7 +119,6 @@ const LoginPage: React.FC = () => {
   
     try {
       const result = await signIn.create({ identifier: username, password });
-      console.log("Sign in successful:", result);
   
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });

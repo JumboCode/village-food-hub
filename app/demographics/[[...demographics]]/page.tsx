@@ -191,7 +191,6 @@ const handleDelete = async () => {
     const mb = Number((bytes / (1024 * 1024)).toFixed(1));
     // Calculate percent as (used MB / 1000 MB) * 100
     const percent = Number(((mb / 1000) * 100).toFixed(1));
-    console.log(mb, percent);
     setStorageUsed(mb);
     setStoragePercent(percent);
   };
@@ -252,7 +251,6 @@ const handleDelete = async () => {
                                 size={24}
                                 className="cursor-pointer"
                                 onClick={() => {
-                                    console.log("in here");
                                     fetchNeonData();
                                     setShowStorageCancel(true);
                                 }}
