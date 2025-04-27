@@ -182,7 +182,6 @@ export async function POST(req: NextRequest) {
       const result = await createInventoryItem({
         ...body,
       });
-      console.log(result);
       return NextResponse.json(
         { message: 'Successfully Created', data: result }, 
         { status: 201 }
@@ -213,8 +212,6 @@ export async function PUT(req: NextRequest) {
 
     const { itemName, units } = body;
     if (!itemName || !units) {
-      console.log(itemName);
-      console.log(units);
       return NextResponse.json({ message: 'Missing itemName or units' }, { status: 400 });
     }
 
@@ -223,8 +220,6 @@ export async function PUT(req: NextRequest) {
       units,
       ...body,
     });
-
-    console.log(result);
     return NextResponse.json({ message: 'OK', data: result }, { status: 200 });
   } catch (_error) {
     console.error(_error);
@@ -254,7 +249,6 @@ export async function DELETE(req: NextRequest) {
       // Delete the inventory item
       const result = await deleteInventoryItem({ itemName, units });
 
-      console.log(`Deleted ${result.count} inventory records for "${itemName}" with unit "${units}"`);
       return NextResponse.json({ message: "Inventory item deleted successfully" }, { status: 200 });
 
   } catch (error) {

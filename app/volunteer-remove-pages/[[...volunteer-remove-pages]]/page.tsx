@@ -34,14 +34,12 @@ const VolunteerRemovePages: React.FC = () => {
   const [nextAttempted, setNextAttempted] = useState(false);
 
   const handleNext = () => {
-    console.log('Next clicked, transitioning to confirm');
     setCurrentStep('confirm');
     setNextAttempted(true);
   };
 
   const handleBack = () => {
     setNextAttempted(false);
-    console.log('Back clicked, currentStep:', currentStep);
     if (currentStep === 'confirm')
       setCurrentStep('details');
     else 
@@ -141,10 +139,8 @@ const VolunteerRemovePages: React.FC = () => {
                           setValidQuantity("The quantity you are removing is greater than the quantity in the inventory");
                         } 
                       } else {
-                        console.log(itemToRemove);
                         setItemExists("Item does not exist in inventory");
                       }
-                      console.log(items);
                     })
                     .catch((error) => {
                       console.error('Error fetching inventory:', error);
@@ -308,7 +304,6 @@ const VolunteerRemoveConfirmModule: React.FC<VolunteerRemoveConfirmModuleProps> 
                     })
                   })
               }
-              console.log(items)
               window.location.href = "../volunteer-saved";
             })
             .catch((error) => {

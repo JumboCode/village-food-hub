@@ -100,7 +100,6 @@ export const DemographicsSpreadsheet: React.FC<DemographicsSpreadsheetProps> = (
                 throw new Error("Error fetching demographics data.");
             }
             setSortedItems(sortedItems.filter((item) => (item[2] != name)))
-            console.log("Deleted successfully!");
             closeModal();
         } catch (error) {
             console.error(error);

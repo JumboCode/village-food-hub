@@ -190,7 +190,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       const invResponse = await fetch("../api/inventory");
       if (invResponse.ok) {
         inventoryData = (await invResponse.json()) as InventoryResponse;
-        console.log("Fetched inventory data:", inventoryData);
       } else {
         console.error("Failed to fetch inventory data; status:", invResponse.status);
       }
@@ -216,13 +215,11 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
           );
         }
         if (exists) {
-          console.log(`Inventory record exists for unit "${unit}"; attempting deletion.`);
           const invDeleteResponse = await fetch("../api/inventory", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ deleteItem: modalItem[0], units: unit }),
           });
-          console.log(`Inventory deletion response for unit "${unit}":`, invDeleteResponse.status);
           if (!invDeleteResponse.ok) {
             console.error(`Error deleting inventory record for unit "${unit}"; status: ${invDeleteResponse.status}`);
           }
@@ -241,7 +238,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ itemName: modalItem[0], name: modalCategory }),
       });
-      console.log("Categories deletion response status:", catDeleteResponse.status);
       if (!catDeleteResponse.ok) {
         throw new Error(`Deleting item from categories error; status: ${catDeleteResponse.status}`);
       }
@@ -285,8 +281,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
         });
       }
   
-      console.log(`Deleted ${inventoryItemsToDelete.length} inventory items using unit "${unit}"`);
-  
       // Step 3: Update the category to remove the deleted unit
       const updatedUnits = modalItem[1]
         .toString()
@@ -309,7 +303,6 @@ const CategoriesSpreadsheet: React.FC<CategoriesSpreadsheetProps> = ({
       }
   
       await categoryResponse.json();
-      console.log(`Unit "${unit}" removed from category "${modalCategory}"`);
   
       // Refresh data
       await loadData();

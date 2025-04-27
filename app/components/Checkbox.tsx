@@ -2,7 +2,6 @@ const Checkbox = ({ state, setState }: { state: boolean, setState: React.Dispatc
     
     function updateState () {
         setState(!state);
-        console.log(state);
     }
 
     return (

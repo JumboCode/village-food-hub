@@ -62,8 +62,6 @@ export default clerkMiddleware(async (auth, req) => {
       const roleRaw = user?.publicMetadata?.role;
       const role = typeof roleRaw === 'string' ? roleRaw.toLowerCase() : undefined;
 
-      console.log("Middleware resolved role:", role);
-
       switch (role) {
         case 'customer':
           return NextResponse.redirect(new URL("/welcome-page", req.url));
