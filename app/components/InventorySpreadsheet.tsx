@@ -4,6 +4,7 @@ import { MdOutlineEdit, MdDeleteOutline, MdOutlineFileDownload } from "react-ico
 import DeleteInventoryModal from "@app/components/DeleteInventoryModal";
 import QuantityModal from "@app/components/QuantityModal";
 import Snackbar from '@mui/material/Snackbar';
+import { mutate } from 'swr';
 
 interface InventorySpreadsheetProps {
     inventoryItems: (string | number)[][];
@@ -185,28 +186,29 @@ export const InventorySpreadsheet: React.FC<InventorySpreadsheetProps> = ({ inve
     const handleDelete = async () => {
       setSnackbarOpenDelete(true);
       if (!itemName || !units) return;
-  
+    
       try {
-          const response = await fetch("/api/inventory", {
-              method: "DELETE",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ itemName, units }),
-          });
-  
-          if (!response.ok) {
-              const errorMessage = await response.json();
-              throw new Error(`Error deleting inventory: ${errorMessage.message}`);
-          }
-
-          closeDeleteModal();
-          setSortedItems(sortedItems.filter((item) => (item[0] != itemName) && (item[3] != units)))
-          
+        const response = await fetch("/api/inventory", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ itemName, units }),
+        });
+    
+        if (!response.ok) {
+          const errorMessage = await response.json();
+          throw new Error(`Error deleting inventory: ${errorMessage.message}`);
+        }
+    
+        closeDeleteModal();
+        setSortedItems(prev => prev.filter((item) => item[0] !== itemName || item[3] !== units));
+        mutate('/api/inventory');
+    
       } catch (error) {
-          console.error("Inventory delete failed:", error);
+        console.error("Inventory delete failed:", error);
       }
-    };      
+    };    
 
     const downloadCSV = async (item: (string | number)[]) => { 
       const itemName = item[0];

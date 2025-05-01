@@ -172,14 +172,6 @@ const InternalViewInventoryPage: React.FC = () => {
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <p className="text-red-600 font-crimson text-[20px]">Error loading inventory. Please try again later.</p>
-  //     </div>
-  //   );
-  // }
-
   return (
     hasAccess ? (
         <div>
@@ -206,14 +198,20 @@ const InternalViewInventoryPage: React.FC = () => {
             </div>
             </div>
 
-            {filteredInventory.length > 0 ? (
-            <InventorySpreadsheet inventoryItems={filteredInventory} />
+            {(inventory && inventory.length === 0) ? (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                There are currently no items in the inventory database.
+              </div>
             ) : (
-            <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
-                {appliedFilters.length > 0 
-                ? `There are no items under ${appliedFilters.join(', ')}.`
-                : "There are currently no items in the inventory database matching the searched item."}
-            </div>
+              filteredInventory.length > 0 ? (
+                <InventorySpreadsheet inventoryItems={filteredInventory} />
+              ) : (
+                <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                  {appliedFilters.length > 0 
+                  ? `There are no items under ${appliedFilters.join(', ')}.`
+                  : "There are currently no items in the inventory database matching the searched item."}
+                </div>
+              )
             )}
         </div>
         

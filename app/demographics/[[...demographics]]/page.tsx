@@ -323,7 +323,17 @@ const handleDelete = async () => {
             </div>
             </div>
             {/* Render the spreadsheet using the filtered demographics */}
-            <DemographicsSpreadsheet demographicsItems={filteredDemographics} />
+            {transformedDemographics.length === 0 ? (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                There are currently no items in the demographics database.
+              </div>
+            ) : filteredDemographics.length === 0 && searchInput.trim() !== "" ? (
+              <div className="text-center text-gray-500 text-[20px] font-crimson py-4">
+                No demographics found matching the search.
+              </div>
+            ) : (
+              <DemographicsSpreadsheet demographicsItems={filteredDemographics} />
+            )}
         </div>
         <div className="mb-5"></div> 
         </div>
