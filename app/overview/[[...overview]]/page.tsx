@@ -31,7 +31,7 @@ const OverviewPage: React.FC = () => {
   const { user, isLoaded } = useUser();
   const isAuthorized = user && hasAccess(user);
 
-  const [num_responses, setNumResponses] = useState<number | null>(null);
+  const [numResponses, setNumResponses] = useState<number | null>(null);
   const [numNewIndividuals, setNumNewIndividuals] = useState<number | null>(null);
 
   // house size
@@ -117,12 +117,12 @@ const OverviewPage: React.FC = () => {
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
   
         const data: DemographicsItem[] = await response.json();
-        const currentMonthUTC = new Date().getUTCMonth();
-        const currentYearUTC = new Date().getUTCFullYear();
+        const currentMonthLocal = new Date().getMonth();
+        const currentYearLocal = new Date().getFullYear();
   
         const servedThisMonth = data.filter(item => {
           const visitDate = new Date(item.lastVisitDate);
-          return visitDate.getUTCMonth() === currentMonthUTC && visitDate.getUTCFullYear() === currentYearUTC;
+          return visitDate.getMonth() === currentMonthLocal && visitDate.getFullYear() === currentYearLocal;
         });
   
         setNumResponses(servedThisMonth.length);
@@ -164,7 +164,7 @@ const OverviewPage: React.FC = () => {
         const newIndividuals = data.filter(item => {
           const lastVisit = new Date(item.lastVisitDate);
           const isLastVisitThisMonth =
-            lastVisit.getUTCMonth() === currentMonthUTC && lastVisit.getUTCFullYear() === currentYearUTC;
+            lastVisit.getMonth() === currentMonthLocal && lastVisit.getFullYear() === currentYearLocal;
         
           if (!isLastVisitThisMonth) return false;
         
@@ -174,8 +174,8 @@ const OverviewPage: React.FC = () => {
             item.previousVisitDates.every(dateStr => {
               const prevDate = new Date(dateStr);
               return (
-                prevDate.getUTCMonth() === currentMonthUTC &&
-                prevDate.getUTCFullYear() === currentYearUTC
+                prevDate.getMonth() === currentMonthLocal &&
+                prevDate.getFullYear() === currentYearLocal
               );
             });
         
@@ -289,14 +289,16 @@ const OverviewPage: React.FC = () => {
         <div className="mt-10 mb-6 flex flex-col">
           {user && (
             <div className="text-[40px] relative overflow-x-auto font-crimson font-bold">
-              Welcome back, {user.firstName}! Here is an overview of this month!
+              Welcome back, {user.firstName}! Here is an overview of{" "}
+              <span className="text-light-green">this month</span> !
             </div>
+          
           )}
 
           <div className="bg-light-green bg-opacity-20 p-6 rounded-xl shadow-inner mt-6">
             <div className="grid grid-cols-3 gap-4">
               {/* Unique Individuals Served */}
-              <StatCard title="Number of Unique Individuals Served" isLoading={isLoading12} value={num_responses} />
+              <StatCard title="Number of Unique Individuals Served" isLoading={isLoading12} value={numResponses} />
 
               {/* Household Size Pie Chart */}
               <div className="bg-white p-6 rounded-lg h-48 flex flex-col items-center justify-center shadow-md">
