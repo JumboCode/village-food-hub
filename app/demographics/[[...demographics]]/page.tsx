@@ -38,11 +38,14 @@ async function fetchNeonData() {
     const response = await fetch("/api/neon");
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
-    return data.storageSize.project.written_data_bytes;
+    console.log("NEON STORAGE DATA:", data);
+
+    // FIXED: Use actual DB size instead of billing metric
+    return data?.storageSize?.project?.synthetic_storage_size ?? 0;
   } catch (error) {
     console.error("Error fetching Neon data:", error);
-  } 
-   finally {}
+    return 0;
+  }
 }
 
 const InternalViewDemographicsPage: React.FC = () => {
@@ -188,12 +191,12 @@ const handleDelete = async () => {
   // Function to get storage bytes and update state
   const getBytes = async () => {
     const bytes = await fetchNeonData();
-    const mb = Number((bytes / (1024 * 1024)).toFixed(1));
-    // Calculate percent as (used MB / 1000 MB) * 100
-    const percent = Number(((mb / 1000) * 100).toFixed(1));
+    const mb = Number((bytes / (1024 * 1024)).toFixed(1)); // Convert to MB
+    const percent = Number(((bytes / (1024 * 1024 * 1024)) * 100).toFixed(1)); // out of 1 GiB
     setStorageUsed(mb);
     setStoragePercent(percent);
   };
+  
 
   // Fetch storage info on mount and whenever raw demographics data changes
   useEffect(() => {
@@ -225,7 +228,7 @@ const handleDelete = async () => {
                     onClick={() => setShowStorageModal(true)}
                 >
                     <ProgressBar progress={storagePercent} />
-                    <p className="font-crimson crimson-semibold text-[16px] pt-2">{storageUsed} MB</p>
+                    <p className="font-crimson crimson-semibold text-[16px] pt-2">{storagePercent}% full</p>
                 </button>
                 }
                 {showModal && <DateRangeModal closeModal={closeModal} onRunReport={handleRunReport} />}
@@ -240,7 +243,7 @@ const handleDelete = async () => {
                             <ProgressBar progress={storagePercent} />
                         </div>
                         <p className="font-crimson text-[24px] text-[#828282] pb-3">
-                            {storageUsed} MB of 1GB storage used
+                            {storageUsed} MB of 1 GB storage used
                         </p>
                         <div className="flex flex-col space-y-1 font-crimson">
                             <p className="text-[16px] text-black">Want to clean up space?</p>
